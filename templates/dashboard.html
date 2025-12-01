@@ -39,6 +39,11 @@
     </div>
 </section>
 
+<section style="margin-top: 1rem; font-size: 0.8rem; color: #64748b; text-align: center;">
+    <p><em>Disclaimer: The analysis provided is for informational purposes only and does not constitute financial
+            advice. We are not responsible for any trading decisions made based on this information.</em></p>
+</section>
+
 <section style="margin-top: 3rem; margin-bottom: 3rem;">
     <h2 class="section-title"><i data-lucide="bell"></i> Subscribe to Alerts</h2>
     <div class="card">
@@ -208,7 +213,7 @@
             });
 
             const result = await response.json();
-            
+
             if (response.ok) {
                 messageDiv.textContent = result.message;
                 messageDiv.style.color = '#4ade80'; // Green

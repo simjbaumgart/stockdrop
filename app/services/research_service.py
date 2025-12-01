@@ -78,14 +78,8 @@ class ResearchService:
 
     def _create_prompt(self, symbol: str, price: float, change_percent: float) -> str:
         return (
-            f"You are a financial analyst. The stock {symbol} has dropped by {change_percent:.2f}% today "
-            f"and is currently trading at ${price:.2f}. "
-            "Analyze if this is a good buying opportunity and if further drops can be expected. "
-            "Provide a clear 'YES' or 'NO' recommendation for buying now at the start, "
-            "followed by a brief reasoning. "
-            "Format the output as:\n"
-            "Decision: [YES/NO]\n"
-            "Reasoning: [Your reasoning]"
+            f"Is {symbol} a good stock to buy, given that it dropped in the recent hours over {change_percent:.2f}%. "
+            "Please come up with a clear buy/ hold/ sell recommendation."
         )
 
     def _get_mock_analysis(self, symbol: str, price: float, change_percent: float) -> str:
