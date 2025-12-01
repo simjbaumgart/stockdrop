@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}{{ symbol }} - Stock Details{% endblock %}
+
+{% block content %}
+<header style="margin-bottom: 2rem;">
+    <a href="/" class="nav-link" style="display: inline-flex; margin-bottom: 1rem; padding-left: 0;"><i
+            data-lucide="arrow-left"></i> Back to Dashboard</a>
+    <h1 id="stock-name">{{ symbol }}</h1>
+    <div style="display: flex; align-items: baseline; gap: 1rem;">
+        <span class="price" id="stock-price">Loading...</span>
+        <span class="change" id="stock-change"></span>
+    </div>
+    <div id="pre-market-container" style="display: none; margin-top: 0.5rem; font-size: 0.9rem; color: #94a3b8;">
+        <span style="color: #cbd5e1;">Pre-market:</span> <span id="pre-market-price"></span>
+    </div>
+</header>
+
+<div class="dashboard-grid">
+    <div class="card">
+        <div class="card-header"><span class="card-title">Open</span></div>
+        <div class="price" style="font-size: 1.5rem;" id="stock-open">-</div>
+    </div>
+    <div class="card">
+        <div class="card-header"><span class="card-title">High</span></div>
+        <div class="price" style="font-size: 1.5rem;" id="stock-high">-</div>
+    </div>
+    <div class="card">
+        <div class="card-header"><span class="card-title">Low</span></div>
+        <div class="price" style="font-size: 1.5rem;" id="stock-low">-</div>
+    </div>
+    <div class="card">
+        <div class="card-header"><span class="card-title">Volume</span></div>
+        <div class="price" style="font-size: 1.5rem;" id="stock-volume">-</div>
+    </div>
+</div>
+
+<section style="margin-top: 3rem;">
+    <h2 class="section-title"><i data-lucide="layers"></i> Options Chain</h2>
+
+    <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center;">
+        <label for="expiration-select" style="color: #cbd5e1;">Expiration Date:</label>
+        <select id="expiration-select"
+            style="padding: 0.5rem; border-radius: 0.5rem; background: var(--card-bg); color: var(--text-color); border: 1px solid var(--glass-border);">
+            <option value="">Select Date</option>
+        </select>
+        <button id="load-options-btn"
+            style="padding: 0.5rem 1rem; border-radius: 0.5rem; background: var(--primary-color); color: white; border: none; cursor: pointer;">Load
+            Chain</button>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+        <div>
+            <h3 style="margin-bottom: 1rem; color: var(--success-color);">Calls</h3>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="text-align: left; border-bottom: 1px solid var(--glass-border);">
+                            <th style="padding: 0.5rem;">Strike</th>
+                            <th style="padding: 0.5rem;">Last</th>
+                            <th style="padding: 0.5rem;">Bid</th>
+                            <th style="padding: 0.5rem;">Ask</th>
+                            <th style="padding: 0.5rem;">Vol</th>
+                        </tr>
+                    </thead>
+                    <tbody id="calls-body">
+                        <tr>
+                            <td colspan="5" style="padding: 1rem; text-align: center; color: #64748b;">Select a date to
+                                load calls</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div>
+            <h3 style="margin-bottom: 1rem; color: var(--danger-color);">Puts</h3>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="text-align: left; border-bottom: 1px solid var(--glass-border);">
+                            <th style="padding: 0.5rem;">Strike</th>
+                            <th style="padding: 0.5rem;">Last</th>
+                            <th style="padding: 0.5rem;">Bid</th>
+                            <th style="padding: 0.5rem;">Ask</th>
+                            <th style="padding: 0.5rem;">Vol</th>
+                        </tr>
+                    </thead>
+                    <tbody id="puts-body">
+                        <tr>
+                            <td colspan="5" style="padding: 1rem; text-align: center; color: #64748b;">Select a date to
+                                load puts</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const symbol = "{{ symbol }}";
+
+    async function fetchDetails() {
+        try {
+            const res = await fetch(`/api/stock/${symbol}`);
+            const data = await res.json();
+
+            if (!data.symbol) return; // Error handling
+
+            document.getElementById('stock-name').textContent = `${data.name} (${data.symbol})`;
+            document.getElementById('stock-price').textContent = formatNumber(data.price);
+
+            const change = data.price - data.previous_close;
+            const changePercent = (change / data.previous_close) * 100;
+
+            const changeEl = document.getElementById('stock-change');
+            changeEl.textContent = `${formatChange(change)} (${formatChange(changePercent)}%)`;
+            changeEl.className = `change ${change >= 0 ? 'positive' : 'negative'}`;
+
+            document.getElementById('stock-open').textContent = formatNumber(data.open);
+            document.getElementById('stock-high').textContent = formatNumber(data.day_high);
+            document.getElementById('stock-low').textContent = formatNumber(data.day_low);
+            document.getElementById('stock-volume').textContent = data.volume.toLocaleString();
+
+            if (data.pre_market_price) {
+                const preContainer = document.getElementById('pre-market-container');
+                preContainer.style.display = 'block';
+                document.getElementById('pre-market-price').textContent = formatNumber(data.pre_market_price);
+            }
+        } catch (error) {
+            console.error('Error fetching details:', error);
+        }
+    }
+
+    async function fetchOptionsDates() {
+        try {
+            const res = await fetch(`/api/stock/${symbol}/options`);
+            const dates = await res.json();
+
+            const select = document.getElementById('expiration-select');
+            dates.forEach(date => {
+                const option = document.createElement('option');
+                option.value = date;
+                option.textContent = date;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error fetching options dates:', error);
+        }
+    }
+
+    async function loadOptions() {
+        const date = document.getElementById('expiration-select').value;
+        if (!date) return;
+
+        document.getElementById('calls-body').innerHTML = '<tr><td colspan="5" style="padding: 1rem; text-align: center;">Loading...</td></tr>';
+        document.getElementById('puts-body').innerHTML = '<tr><td colspan="5" style="padding: 1rem; text-align: center;">Loading...</td></tr>';
+
+        try {
+            const res = await fetch(`/api/stock/${symbol}/options/${date}`);
+            const data = await res.json();
+
+            renderTable('calls-body', data.calls);
+            renderTable('puts-body', data.puts);
+        } catch (error) {
+            console.error('Error fetching options chain:', error);
+            document.getElementById('calls-body').innerHTML = '<tr><td colspan="5" style="padding: 1rem; text-align: center; color: var(--danger-color);">Error loading data</td></tr>';
+            document.getElementById('puts-body').innerHTML = '<tr><td colspan="5" style="padding: 1rem; text-align: center; color: var(--danger-color);">Error loading data</td></tr>';
+        }
+    }
+
+    function renderTable(tbodyId, rows) {
+        const tbody = document.getElementById(tbodyId);
+        tbody.innerHTML = '';
+
+        if (rows.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="padding: 1rem; text-align: center;">No data available</td></tr>';
+            return;
+        }
+
+        // Show only near-the-money options or first 20 for performance/display
+        // For simplicity, let's show first 20 for now, or maybe filter?
+        // Let's just show all but limit height with CSS if needed. 
+        // Actually, let's just take top 10 and bottom 10 around current price? 
+        // For now, just render all, user can scroll page.
+
+        rows.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+            tr.innerHTML = `
+                <td style="padding: 0.5rem;">${row.strike}</td>
+                <td style="padding: 0.5rem;">${formatNumber(row.lastPrice)}</td>
+                <td style="padding: 0.5rem;">${formatNumber(row.bid)}</td>
+                <td style="padding: 0.5rem;">${formatNumber(row.ask)}</td>
+                <td style="padding: 0.5rem;">${row.volume}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function formatNumber(num) {
+        if (num === undefined || num === null) return '-';
+        return num.toFixed(2);
+    }
+
+    function formatChange(change) {
+        if (change === undefined || change === null) return '-';
+        const sign = change >= 0 ? '+' : '';
+        return `${sign}${change.toFixed(2)}`;
+    }
+
+    document.getElementById('load-options-btn').addEventListener('click', loadOptions);
+
+    // Initial load
+    fetchDetails();
+    fetchOptionsDates();
+</script>
+{% endblock %}

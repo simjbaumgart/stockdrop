@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block content %}
+<header>
+    <h1>Dashboard</h1>
+    <p class="subtitle"><span class="live-indicator"></span>Live Market Data</p>
+</header>
+
+<section>
+    <div class="dashboard-grid" id="indices-container">
+        <!-- Indices will be populated here -->
+        <div class="card loading">Loading Indices...</div>
+    </div>
+</section>
+
+<section>
+    <h2 class="section-title"><i data-lucide="zap"></i> Biggest Movers</h2>
+    <div class="movers-grid" id="movers-container">
+        <!-- Movers will be populated here -->
+        <div class="card loading">Loading Movers...</div>
+    </div>
+</section>
+
+<section style="margin-top: 3rem;">
+    <h2 class="section-title"><i data-lucide="building-2"></i> Large Cap Movers (> $500M)</h2>
+    <div class="movers-grid" id="large-cap-movers-container">
+        <!-- Large Cap Movers will be populated here -->
+        <div class="card loading">Loading Large Cap Movers...</div>
+    </div>
+</section>
+
+<section style="margin-top: 3rem;">
+    <h2 class="section-title"><i data-lucide="brain-circuit"></i> Analyst Insights (Gemini)</h2>
+    <div id="research-container" style="display: grid; gap: 1rem;">
+        <!-- Research reports will be populated here -->
+        <div class="card" style="grid-column: 1 / -1; text-align: center; color: #64748b;">
+            No active alerts or research reports at this time.
+        </div>
+    </div>
+</section>
+
+<section style="margin-top: 3rem; margin-bottom: 3rem;">
+    <h2 class="section-title"><i data-lucide="bell"></i> Subscribe to Alerts</h2>
+    <div class="card">
+        <p style="color: #94a3b8; margin-bottom: 1rem;">Get notified via email when a large cap stock drops more than
+            6%.</p>
+        <form id="subscription-form" style="display: flex; gap: 1rem; max-width: 500px;">
+            <input type="email" id="email-input" placeholder="Enter your email" required
+                style="flex: 1; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #334155; background: #1e293b; color: white;">
+            <button type="submit"
+                style="padding: 0.75rem 1.5rem; border-radius: 0.5rem; border: none; background: #3b82f6; color: white; font-weight: bold; cursor: pointer;">
+                Subscribe
+            </button>
+        </form>
+        <div id="subscription-message" style="margin-top: 1rem; font-weight: bold;"></div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function fetchData() {
+        try {
+            const [indicesRes, moversRes, largeCapRes, researchRes] = await Promise.all([
+                fetch('/api/indices'),
+                fetch('/api/movers'),
+                fetch('/api/large-cap-movers'),
+                fetch('/api/research-reports')
+            ]);
+
+            const indices = await indicesRes.json();
+            const movers = await moversRes.json();
+            const largeCapMovers = await largeCapRes.json();
+            const researchReports = await researchRes.json();
+
+            renderIndices(indices);
+            renderMovers(movers, 'movers-container');
+            renderMovers(largeCapMovers, 'large-cap-movers-container');
+            renderResearch(researchReports);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    }
+
+    function formatNumber(num) {
+        return num.toFixed(2);
+    }
+
+    function formatChange(change) {
+        const sign = change >= 0 ? '+' : '';
+        return `${sign}${change.toFixed(2)}`;
+    }
+
+    function renderIndices(indices) {
+        const container = document.getElementById('indices-container');
+        container.innerHTML = '';
+
+        for (const [name, data] of Object.entries(indices)) {
+            const isPositive = data.change >= 0;
+            const changeClass = isPositive ? 'positive' : 'negative';
+            const icon = isPositive ? 'trending-up' : 'trending-down';
+
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div class="card-header">
+                    <span class="card-title">${name}</span>
+                    <i data-lucide="${icon}" class="${changeClass}" style="width: 20px; height: 20px;"></i>
+                </div>
+                <div class="price">${formatNumber(data.price)}</div>
+                <div class="change ${changeClass}">
+                    ${formatChange(data.change)} (${formatChange(data.change_percent)}%)
+                </div>
+            `;
+            container.appendChild(card);
+        }
+        lucide.createIcons();
+    }
+
+    function renderMovers(movers, containerId) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+
+        movers.forEach(stock => {
+            const isPositive = stock.change >= 0;
+            const changeClass = isPositive ? 'positive' : 'negative';
+
+            const card = document.createElement('a');
+            card.href = `/stock/${stock.symbol}`;
+            card.className = 'card';
+            card.style.textDecoration = 'none';
+            card.style.color = 'inherit';
+            card.style.display = 'block';
+            card.innerHTML = `
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">${stock.symbol}</div>
+                        <div style="font-size: 0.8rem; color: #64748b;">${stock.name}</div>
+                    </div>
+                    <div class="price" style="font-size: 1.25rem;">${formatNumber(stock.price)}</div>
+                </div>
+                <div class="change ${changeClass}" style="width: 100%; justify-content: center;">
+                    ${formatChange(stock.change)} (${formatChange(stock.change_percent)}%)
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function renderResearch(reports) {
+        const container = document.getElementById('research-container');
+
+        if (Object.keys(reports).length === 0) {
+            container.innerHTML = `
+                <div class="card" style="grid-column: 1 / -1; text-align: center; color: #64748b;">
+                    No active alerts or research reports at this time.
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = '';
+        for (const [symbol, report] of Object.entries(reports)) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.style.gridColumn = '1 / -1'; // Full width
+
+            // Parse report for styling (simple heuristic)
+            const isYes = report.includes("Decision: YES");
+            const decisionClass = isYes ? 'positive' : 'negative';
+            const decisionIcon = isYes ? 'check-circle' : 'alert-circle';
+
+            card.innerHTML = `
+                <div class="card-header">
+                    <div class="card-title">${symbol} Analysis</div>
+                    <div class="${decisionClass}" style="display: flex; align-items: center; gap: 0.5rem; font-weight: bold;">
+                        <i data-lucide="${decisionIcon}" style="width: 20px; height: 20px;"></i>
+                        ${isYes ? 'BUY OPPORTUNITY' : 'CAUTION ADVISED'}
+                    </div>
+                </div>
+                <div style="white-space: pre-wrap; margin-top: 1rem; line-height: 1.6; color: #e2e8f0;">${report}</div>
+            `;
+            container.appendChild(card);
+        }
+        lucide.createIcons();
+    }
+
+    // Initial fetch
+    fetchData();
+
+    // Poll every 2 seconds
+    setInterval(fetchData, 2000);
+
+    // Subscription Form Handler
+    document.getElementById('subscription-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const emailInput = document.getElementById('email-input');
+        const messageDiv = document.getElementById('subscription-message');
+        const email = emailInput.value;
+
+        try {
+            const response = await fetch('/api/subscribe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: email }),
+            });
+
+            const result = await response.json();
+            
+            if (response.ok) {
+                messageDiv.textContent = result.message;
+                messageDiv.style.color = '#4ade80'; // Green
+                emailInput.value = '';
+            } else {
+                messageDiv.textContent = 'Subscription failed. Please try again.';
+                messageDiv.style.color = '#f87171'; // Red
+            }
+        } catch (error) {
+            console.error('Error subscribing:', error);
+            messageDiv.textContent = 'An error occurred. Please try again.';
+            messageDiv.style.color = '#f87171'; // Red
+        }
+    });
+</script>
+{% endblock %}
