@@ -1,5 +1,29 @@
+# Environment variables
 .env
+
+# Dependencies
 venv/
+
+# Python cache
 __pycache__/
 *.pyc
+
+# System
 .DS_Store
+
+# Reports
+reports/
+
+# Notebooks
+notebooks/
+.ipynb_checkpoints/
+
+# Data
+data/
+*.db
+*.sqlite3
+usage_stats.json
+tv_meta.json
+
+# Secrets
+service_account.json

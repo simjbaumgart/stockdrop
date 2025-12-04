@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">{{ decision.company_name or decision.symbol }} Analysis</h2>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <span class="badge badge-secondary">{{ decision.timestamp }}</span>
+                {% if decision.recommendation == 'BUY' %}
+                <span class="badge badge-success">BUY</span>
+                {% elif decision.recommendation == 'SELL' %}
+                <span class="badge badge-danger">SELL</span>
+                {% else %}
+                <span class="badge badge-warning">{{ decision.recommendation }}</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <p><strong>Symbol:</strong> <a href="https://finance.yahoo.com/quote/{{ decision.symbol }}"
+                            target="_blank">{{ decision.symbol }}</a></p>
+                    <p><strong>Price at Decision:</strong> ${{ "%.2f"|format(decision.price_at_decision) }}</p>
+                    <p><strong>Drop:</strong> <span class="text-danger">{{ "%.2f"|format(decision.drop_percent)
+                            }}%</span></p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Market Cap:</strong> {{ "%.2f"|format(decision.market_cap / 1000000000) }}B</p>
+                    <p><strong>P/E Ratio:</strong> {{ "%.2f"|format(decision.pe_ratio) if decision.pe_ratio else '-' }}
+                    </p>
+                    <p><strong>Sector:</strong> {{ decision.sector }}</p>
+                    <p><strong>Region:</strong> {{ decision.region }}</p>
+                </div>
+            </div>
+
+            <hr>
+
+            <h3>Gemini Analysis & Reasoning</h3>
+            <div class="reasoning-content"
+                style="white-space: pre-wrap; line-height: 1.6; background: #1e293b; padding: 1.5rem; border-radius: 0.5rem; color: #e2e8f0;">
+                {{ decision.reasoning }}
+            </div>
+
+            <div class="mt-4">
+                <a href="/" class="btn btn-secondary">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

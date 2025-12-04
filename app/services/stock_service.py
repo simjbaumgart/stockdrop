@@ -1,17 +1,37 @@
 import yfinance as yf
+import pandas as pd
+import os
 from typing import List, Dict, Set
 from datetime import datetime
 from app.services.email_service import email_service
 from app.services.research_service import research_service
+from app.services.alpaca_service import alpaca_service
+from app.services.tradingview_service import tradingview_service
+from app.services.drive_service import drive_service
+from app.services.storage_service import storage_service
 
 class StockService:
     def __init__(self):
         # Indices tickers: CSI 300 (000300.SS), S&P 500 (^GSPC), STOXX 600 (^STOXX)
         # Indices tickers: CSI 300 (000300.SS), S&P 500 (^GSPC), STOXX 600 (^STOXX)
+        # Indices tickers: S&P 500, STOXX 600, China (CSI 300), India (Nifty 50), Australia (ASX 200)
+        # Indices tickers configuration for TradingView
+        # Format: "Name": {"symbol": "...", "screener": "...", "exchange": "..."}
+        self.indices_config = {
+            "S&P 500": {"symbol": "SPX", "screener": "america", "exchange": "CBOE"},
+            # STOXX 600 removed from TradingView config due to API issues. Will be fetched via fallback.
+            "China": {"symbol": "000300", "screener": "china", "exchange": "SSE"},
+            "India": {"symbol": "NIFTY", "screener": "india", "exchange": "NSE"},
+            "Australia": {"symbol": "XJO", "screener": "australia", "exchange": "ASX"}
+        }
+        
+        # Keep old tickers for fallback or reference if needed
         self.indices_tickers = {
-            "CSI 300": "000300.SS",
             "S&P 500": "^GSPC",
-            "STOXX 600": "^STOXX"
+            "STOXX 600": "^STOXX",
+            "China": "000300.SS",
+            "India": "^NSEI",
+            "Australia": "^AXJO"
         }
 
         # Sector tickers (US ETFs as proxies)
@@ -29,26 +49,6 @@ class StockService:
             "Real Estate": "XLRE"
         }
         
-        # A curated list of major stocks to track for "Biggest Movers"
-        # Expanded list to include more large cap stocks across sectors
-        self.stock_tickers = [
-            # Tech / Communication
-            "AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "NVDA", "META", "NFLX", "ADBE", "CRM", "AMD", "INTC", "CSCO", "ORCL",
-            # Finance
-            "BRK-B", "JPM", "V", "MA", "BAC", "WFC", "MS", "GS", "AXP", "BLK",
-            # Healthcare
-            "LLY", "JNJ", "UNH", "MRK", "ABBV", "PFE", "TMO", "DHR", "ABT", "BMY",
-            # Consumer
-            "WMT", "PG", "HD", "KO", "PEP", "COST", "MCD", "NKE", "DIS", "SBUX",
-            # Energy / Industrial
-            "XOM", "CVX", "COP", "SLB", "GE", "CAT", "UPS", "HON", "LMT", "RTX",
-            # Europe
-            "ASML", "MC.PA", "NESN.SW", "NOVN.SW", "ROG.SW", "SAP", "AZN", "SHEL", "LIN", "OR.PA",
-            "SIE.DE", "TTE.PA", "HSBC", "ULVR.L", "BP.L", "DTE.DE", "AIR.PA", "EL.PA",
-            # China (Major ones available on Yahoo)
-            "600519.SS", "300750.SZ", "601318.SS", "600036.SS", "002594.SZ", "BABA", "JD", "PDD", "BIDU"
-        ]
-
         # Metadata mapping for normalization
         self.stock_metadata = {
             # US Tech / Comm
@@ -141,171 +141,190 @@ class StockService:
             "BIDU": {"region": "CN", "sector": "Communication Services"}
         }
         
+        # A curated list of major stocks to track for "Biggest Movers"
+        # Expanded list to include more large cap stocks across sectors
+        self.stock_tickers = list(self.stock_metadata.keys())
+        
         # Cache to store sent notifications: Set[(symbol, date_str)]
         self.sent_notifications: Set[tuple] = set()
         
         # Store research reports: Dict[symbol, report_text]
         self.research_reports: Dict[str, str] = {}
+        
+        # Simple data cache: Dict[key, (data, timestamp)]
+        self.cache: Dict[str, tuple] = {}
+        self.cache_ttl = 3600 # 1 hour
 
     def get_indices(self) -> Dict:
+        # Try fetching from TradingView first
+        try:
+            data = tradingview_service.get_indices_data(self.indices_config)
+            
+            # Check if we have valid data for all, or if we need fallback
+            # Also check for indices that were not in TradingView config (like STOXX 600)
+            expected_indices = ["S&P 500", "STOXX 600", "China", "India", "Australia"]
+            
+            for name in expected_indices:
+                if name not in data or data[name]["price"] == 0.0:
+                    # print(f"Fetching {name} via fallback...") # Reduce noise
+                    fallback_data = self._get_index_fallback(name)
+                    data[name] = fallback_data
+            return data
+        except Exception as e:
+            print(f"Error in get_indices (TradingView): {e}")
+            # Fallback to yfinance for all
+            return self._get_indices_fallback_all()
+
+    def _get_index_fallback(self, name: str) -> Dict:
+        ticker = self.indices_tickers.get(name)
+        if not ticker:
+            return {"price": 0.0, "change": 0.0, "change_percent": 0.0}
+            
+        try:
+            ticker_obj = yf.Ticker(ticker)
+            price = ticker_obj.fast_info.last_price
+            prev_close = ticker_obj.fast_info.previous_close
+            
+            if price and prev_close:
+                change = price - prev_close
+                change_percent = (change / prev_close) * 100
+                return {
+                    "price": price,
+                    "change": change,
+                    "change_percent": change_percent
+                }
+            else:
+                hist = ticker_obj.history(period="1d")
+                if not hist.empty:
+                    price = hist["Close"].iloc[-1]
+                    return {"price": price, "change": 0.0, "change_percent": 0.0}
+        except Exception as e:
+            print(f"Fallback error for {name}: {e}")
+            
+        return {"price": 0.0, "change": 0.0, "change_percent": 0.0}
+
+    def _get_indices_fallback_all(self) -> Dict:
         data = {}
-        for name, ticker in self.indices_tickers.items():
-            try:
-                ticker_obj = yf.Ticker(ticker)
-                price = ticker_obj.fast_info.last_price
-                prev_close = ticker_obj.fast_info.previous_close
-                
-                if price and prev_close:
-                    change = price - prev_close
-                    change_percent = (change / prev_close) * 100
-                    
-                    data[name] = {
-                        "price": price,
-                        "change": change,
-                        "change_percent": change_percent
-                    }
-                else:
-                    hist = ticker_obj.history(period="1d")
-                    if not hist.empty:
-                        price = hist["Close"].iloc[-1]
-                        data[name] = {"price": price, "change": 0.0, "change_percent": 0.0}
-            except Exception as e:
-                print(f"Error fetching {name}: {e}")
-                data[name] = {"price": 0.0, "change": 0.0, "change_percent": 0.0}
+        for name in self.indices_tickers:
+            data[name] = self._get_index_fallback(name)
         return data
 
     def get_top_movers(self) -> List[Dict]:
         return self._fetch_and_sort_stocks(limit=10)
 
-    def get_large_cap_movers(self) -> List[Dict]:
-        # Filter for Market Cap > 500 Million USD
-        # Note: 500 Million is 500,000,000
-        return self._fetch_and_sort_stocks(limit=10, min_market_cap=500_000_000)
-
-    def _fetch_and_sort_stocks(self, limit: int, min_market_cap: float = 0) -> List[Dict]:
-        stocks_data = []
-        tickers_str = " ".join(self.stock_tickers)
-        try:
-            tickers = yf.Tickers(tickers_str)
-            
-            for symbol in self.stock_tickers:
-                try:
-                    ticker = tickers.tickers[symbol]
-                    
-                    # Check market cap if filter is applied
-                    if min_market_cap > 0:
-                        market_cap = ticker.fast_info.market_cap
-                        if not market_cap or market_cap < min_market_cap:
-                            continue
-
-                    price = ticker.fast_info.last_price
-                    prev_close = ticker.fast_info.previous_close
-                    
-                    if price and prev_close:
-                        change = price - prev_close
-                        change_percent = (change / prev_close) * 100
-                        
-                        stocks_data.append({
-                            "symbol": symbol,
-                            "name": symbol, # Using symbol as name for performance
-                            "price": price,
-                            "change": change,
-                            "change_percent": change_percent
-                        })
-                except Exception:
-                    continue
-                    
-            sorted_stocks = sorted(stocks_data, key=lambda x: abs(x["change_percent"]), reverse=True)
-            return sorted_stocks[:limit]
-            
-        except Exception as e:
-            print(f"Error fetching stocks: {e}")
-            return []
+    def get_large_cap_movers(self, processed_symbols: Set[str] = None) -> List[Dict]:
+        """
+        Fetches large cap stocks that have dropped significantly using TradingView Screener.
+        """
+        # Use TradingView Screener with global markets
+        # Default filters: Market Cap > $5B (approx), Change < -5%, Volume > 50k
+        return tradingview_service.get_top_movers(
+            min_market_cap_usd=5_000_000_000, 
+            max_change_percent=-5.0,
+            min_volume=50_000,
+            processed_symbols=processed_symbols
+        )
 
     def get_stock_details(self, symbol: str) -> Dict:
         try:
-            ticker = yf.Ticker(symbol)
-            info = ticker.fast_info
+            # Use Alpaca for details
+            # We need to fetch snapshot to get price, open, high, low, volume
+            snapshots = alpaca_service.get_snapshots([symbol])
+            if symbol not in snapshots:
+                return {}
+                
+            snapshot = snapshots[symbol]
             
-            # Try to get pre-market data from 'info' dict (slower but has more data)
-            # or fallback to fast_info if possible (fast_info usually doesn't have pre-market)
-            # We will use .info for details page as speed is less critical than dashboard
-            full_info = ticker.info
+            # Extract data
+            price = snapshot.latest_trade.price if snapshot.latest_trade else 0.0
+            # Fallback to daily bar if latest trade is missing
+            if price == 0.0 and snapshot.daily_bar:
+                price = snapshot.daily_bar.close
+                
+            prev_close = snapshot.prev_daily_bar.close if snapshot.prev_daily_bar else 0.0
+            open_price = snapshot.daily_bar.open if snapshot.daily_bar else 0.0
+            day_high = snapshot.daily_bar.high if snapshot.daily_bar else 0.0
+            day_low = snapshot.daily_bar.low if snapshot.daily_bar else 0.0
+            volume = snapshot.daily_bar.volume if snapshot.daily_bar else 0
+            
+            # Static metadata
+            metadata = self.stock_metadata.get(symbol, {})
+            name = metadata.get("name", symbol) # We don't have name in metadata currently, maybe add it or use symbol
+            # Actually metadata only has region and sector. 
+            # We can't easily get longName from Alpaca snapshot.
+            # We will use symbol as name or generic.
             
             return {
                 "symbol": symbol,
-                "name": full_info.get("longName", symbol),
-                "price": info.last_price,
-                "previous_close": info.previous_close,
-                "open": info.open,
-                "day_high": info.day_high,
-                "day_low": info.day_low,
-                "volume": info.last_volume,
-                "market_cap": info.market_cap,
-                "pre_market_price": full_info.get("preMarketPrice"),
-                "currency": info.currency
+                "name": symbol, # Placeholder as we don't have longName
+                "price": price,
+                "previous_close": prev_close,
+                "open": open_price,
+                "day_high": day_high,
+                "day_low": day_low,
+                "volume": volume,
+                "market_cap": 0, # Not available
+                "pre_market_price": 0.0, # Not available
+                "currency": "USD"
             }
         except Exception as e:
             print(f"Error fetching details for {symbol}: {e}")
             return {}
 
     def get_options_dates(self, symbol: str) -> List[str]:
-        try:
-            ticker = yf.Ticker(symbol)
-            return list(ticker.options)
-        except Exception as e:
-            print(f"Error fetching options dates for {symbol}: {e}")
-            return []
+        # Alpaca doesn't provide easy option dates list like yfinance
+        # Returning empty for now
+        return []
 
     def get_option_chain(self, symbol: str, date: str) -> Dict:
-        try:
-            ticker = yf.Ticker(symbol)
-            chain = ticker.option_chain(date)
-            
-            # Convert DataFrames to list of dicts
-            calls = chain.calls.fillna(0).to_dict(orient="records")
-            puts = chain.puts.fillna(0).to_dict(orient="records")
-            
-            return {
-                "calls": calls,
-                "puts": puts
-            }
-        except Exception as e:
-            print(f"Error fetching option chain for {symbol} on {date}: {e}")
-            return {"calls": [], "puts": []}
+        return alpaca_service.get_option_chain(symbol)
+
+        return context_data
 
     def _fetch_market_context(self) -> Dict[str, float]:
         """
         Fetches the current percentage change for all tracked indices and sectors.
-        Returns a dictionary mapping ticker symbol (or name) to percentage change.
+        Uses TradingView for Indices (more reliable for global) and yfinance for Sectors.
         """
         context_data = {}
         
-        # Combine all tickers to fetch: Indices + Sectors
-        all_tickers = list(self.indices_tickers.values()) + list(self.sector_tickers.values())
-        tickers_str = " ".join(all_tickers)
-        
+        # 1. Fetch Indices from TradingView
         try:
-            tickers = yf.Tickers(tickers_str)
+            indices_data = tradingview_service.get_indices_data(self.indices_config)
+            for name, data in indices_data.items():
+                context_data[name] = data.get("change_percent", 0.0)
+        except Exception as e:
+            print(f"Error fetching indices context: {e}")
             
-            for symbol in all_tickers:
+        # 2. Fetch Sectors from yfinance (US ETFs)
+        try:
+            tickers_str = " ".join(self.sector_tickers.values())
+            tickers = yf.Tickers(tickers_str)
+            for name, symbol in self.sector_tickers.items():
                 try:
                     ticker = tickers.tickers[symbol]
-                    price = ticker.fast_info.last_price
-                    prev_close = ticker.fast_info.previous_close
-                    
-                    if price and prev_close:
-                        change = price - prev_close
-                        change_percent = (change / prev_close) * 100
-                        context_data[symbol] = change_percent
+                    # Use history for sectors as fast_info might be delayed/empty
+                    hist = ticker.history(period="1d")
+                    if not hist.empty:
+                        # Calculate change from open or prev close? 
+                        # yfinance history 'Close' is current price if market open?
+                        # Let's use fast_info if available, else history
+                        price = ticker.fast_info.last_price
+                        prev_close = ticker.fast_info.previous_close
+                        
+                        if price and prev_close:
+                            change = price - prev_close
+                            change_percent = (change / prev_close) * 100
+                            context_data[symbol] = change_percent
+                        else:
+                             context_data[symbol] = 0.0
                     else:
                         context_data[symbol] = 0.0
                 except Exception:
                     context_data[symbol] = 0.0
-                    
         except Exception as e:
-            print(f"Error fetching market context: {e}")
-            
+             print(f"Error fetching sector context: {e}")
+             
         return context_data
 
     def check_large_cap_drops(self):
@@ -319,64 +338,203 @@ class StockService:
         market_context = self._fetch_market_context()
         print(f"Market Context: {market_context}")
         
-        # 2. Fetch Large Cap Movers
-        large_cap_movers = self.get_large_cap_movers()
-        
+        # 2. Load already processed symbols to prevent duplicates and for logging
         today_str = datetime.now().strftime("%Y-%m-%d")
+        processed_symbols = set(storage_service.get_today_decisions())
+        
+        # Also check database for robust deduplication
+        from app.database import get_today_decision_symbols
+        db_processed_symbols = get_today_decision_symbols()
+        processed_symbols.update(db_processed_symbols)
+        
+        for symbol in processed_symbols:
+            self.sent_notifications.add((symbol, today_str))
+            
+        print(f"Already processed today: {processed_symbols}")
+
+        # 3. Fetch Large Cap Movers (passing processed symbols for logging)
+        large_cap_movers = self.get_large_cap_movers(processed_symbols)
+
+        # Save found list to CSV with timestamp
+        try:
+            timestamp_str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            save_dir = "data/found_stocks"
+            os.makedirs(save_dir, exist_ok=True)
+            filename = f"{save_dir}/found_stocks_{timestamp_str}.csv"
+            
+            if large_cap_movers:
+                df = pd.DataFrame(large_cap_movers)
+                df.to_csv(filename, index=False)
+                print(f"Saved found stocks to {filename}")
+            else:
+                print("No stocks found to save.")
+        except Exception as e:
+            print(f"Error saving found stocks to CSV: {e}")
+
+        # Identify and print stocks that still need processing
+        pending_processing = []
+        for stock in large_cap_movers:
+            if stock["change_percent"] <= -5.0:
+                if (stock["symbol"], today_str) not in self.sent_notifications:
+                    pending_processing.append(stock["symbol"])
+        
+        print(f"Pending processing: {pending_processing}")
         
         for stock in large_cap_movers:
             symbol = stock["symbol"]
             change_percent = stock["change_percent"]
             price = stock["price"]
             
-            # 3. Calculate Normalized Change
-            metadata = self.stock_metadata.get(symbol, {})
-            region = metadata.get("region", "US")
-            sector = metadata.get("sector")
-            
-            reference_change = 0.0
-            reference_source = "None"
-            
-            # Determine reference index/sector
-            if region == "US":
-                # Try to use Sector ETF first
-                if sector and sector in self.sector_tickers:
-                    sector_ticker = self.sector_tickers[sector]
-                    reference_change = market_context.get(sector_ticker, 0.0)
-                    reference_source = f"Sector ({sector})"
-                else:
-                    # Fallback to S&P 500
-                    reference_change = market_context.get(self.indices_tickers["S&P 500"], 0.0)
-                    reference_source = "S&P 500"
-            elif region == "EU":
-                reference_change = market_context.get(self.indices_tickers["STOXX 600"], 0.0)
-                reference_source = "STOXX 600"
-            elif region == "CN":
-                reference_change = market_context.get(self.indices_tickers["CSI 300"], 0.0)
-                reference_source = "CSI 300"
-                
-            normalized_change = change_percent - reference_change
-            
-            print(f"Stock: {symbol}, Change: {change_percent:.2f}%, Ref ({reference_source}): {reference_change:.2f}%, Norm: {normalized_change:.2f}%")
-            
-            # Check if NORMALIZED drop is more than 6% (i.e. <= -6.0)
-            # We use the normalized change to filter out market-wide drops
-            if normalized_change <= -6.0:
+            # Check if drop is more than 7% (absolute)
+            # User requested to ignore market context normalization for the trigger
+            if change_percent <= -5.0:
                 notification_key = (symbol, today_str)
                 
                 if notification_key not in self.sent_notifications:
-                    print(f"Triggering notification for {symbol} (Norm: {normalized_change:.2f}%)")
+                    print(f"Triggering notification for {symbol} ({change_percent:.2f}%)")
                     
+                    # Get company name
+                    company_name = stock.get("description", stock.get("name", symbol))
+
+                    # Check for earnings proximity
+                    is_earnings, earnings_date = self._check_earnings_proximity(symbol)
+                    
+                    # 1. Save initial "Pending" state to DB immediately
+                    from app.database import add_decision_point, update_decision_point
+                    
+                    print(f"Adding pending decision for {symbol}...")
+                    decision_id = add_decision_point(
+                        symbol, 
+                        price, 
+                        change_percent, 
+                        "ANALYZING", # Recommendation
+                        "Gemini is analyzing this stock...", # Reasoning
+                        "Pending", # Status
+                        company_name=company_name,
+                        pe_ratio=stock.get("pe_ratio", 0.0),
+                        market_cap=stock.get("market_cap", 0.0),
+                        sector=stock.get("sector", self.stock_metadata.get(symbol, {}).get("sector", "Unknown")),
+                        region=stock.get("region", self.stock_metadata.get(symbol, {}).get("region", "Unknown")),
+                        is_earnings_drop=is_earnings,
+                        earnings_date=earnings_date
+                    )
+
                     # Generate research report
                     print(f"Generating research report for {symbol}...")
-                    # Pass the normalized change context to the research service if needed, 
-                    # but for now we just pass the raw change as that's what the user sees on the ticker
-                    report = research_service.analyze_stock(symbol, price, change_percent)
-                    self.research_reports[symbol] = report
                     
-                    # We might want to mention the normalization in the email?
-                    # For now, keeping the email format simple.
-                    email_service.send_notification(symbol, change_percent, price, report)
+                    # Pass company name to research service
+                    report_data = research_service.analyze_stock(symbol, company_name, price, change_percent)
+                    
+                    recommendation = report_data.get("recommendation", "HOLD")
+                    # Use executive summary as the main reasoning text for DB/Display
+                    reasoning = report_data.get("executive_summary", report_data.get("full_text", ""))
+                    
+                    self.research_reports[symbol] = reasoning
+                    
+                    # 2. Update decision point with final result
+                    status = "Owned" if recommendation == "BUY" else "Not Owned"
+                    if decision_id:
+                        update_decision_point(decision_id, recommendation, reasoning, status)
+                        print(f"Updated decision point for {symbol}: {recommendation} -> {status}")
+                    
+                    # Save detailed decision data locally and to Cloud
+                    decision_data = {
+                        "symbol": symbol,
+                        "company_name": company_name,
+                        "price": price,
+                        "change_percent": change_percent,
+                        "recommendation": recommendation,
+                        "reasoning": reasoning,
+                        "pe_ratio": stock.get("pe_ratio", 0.0),
+                        "market_cap": stock.get("market_cap", 0.0),
+                        "sector": stock.get("sector", self.stock_metadata.get(symbol, {}).get("sector", "Unknown")),
+                        "region": stock.get("region", self.stock_metadata.get(symbol, {}).get("region", "Unknown")),
+                        "is_earnings_drop": is_earnings,
+                        "earnings_date": earnings_date
+                    }
+                    
+                    storage_service.save_decision_locally(decision_data)
+                    drive_service.save_decision(decision_data)
+                    
+                    # Prepare context for this specific stock
+                    stock_context = {}
+                    # Add Indices
+                    for name, ticker in self.indices_tickers.items():
+                        stock_context[name] = market_context.get(ticker, 0.0)
+                    
+                    # Add Sector if available
+                    metadata = self.stock_metadata.get(symbol, {})
+                    sector = metadata.get("sector")
+                    if sector and sector in self.sector_tickers:
+                        sector_ticker = self.sector_tickers[sector]
+                        stock_context[f"Sector ({sector})"] = market_context.get(sector_ticker, 0.0)
+
+                    email_service.send_notification(symbol, change_percent, price, report_data, stock_context)
                     self.sent_notifications.add(notification_key)
+
+    def _check_earnings_proximity(self, symbol: str) -> tuple[bool, str]:
+        """
+        Checks if the current date is close to an earnings date (within -2 to +1 days).
+        Returns (is_earnings_drop, earnings_date_str).
+        """
+        try:
+            ticker = yf.Ticker(symbol)
+            # Try to get earnings dates history
+            earnings_dates = ticker.earnings_dates
+            
+            if earnings_dates is None or earnings_dates.empty:
+                return False, None
+                
+            # Convert index to date objects (index is usually datetime)
+            dates = earnings_dates.index.date
+            today = datetime.now().date()
+            
+            for date in dates:
+                # Check if today is within range [earnings_date - 1 day, earnings_date + 2 days]
+                # Usually drops happen immediately after earnings (next day) or same day if after hours
+                delta = (today - date).days
+                
+                # If delta is 0 (same day), 1 (day after), or -1 (day before - anticipation?)
+                # Let's say -1 to +2 to be safe
+                if -1 <= delta <= 2:
+                    return True, date.strftime("%Y-%m-%d")
+                    
+            return False, None
+            
+        except Exception as e:
+            print(f"Error checking earnings for {symbol}: {e}")
+            return False, None
+
+    def get_daily_movers(self, threshold: float = 5.0) -> List[Dict]:
+        """
+        Fetches all stocks from the curated list that have moved more than 'threshold' percent.
+        """
+        movers = []
+        movers = []
+        try:
+            snapshots = alpaca_service.get_snapshots(self.stock_tickers)
+            
+            for symbol, snapshot in snapshots.items():
+                try:
+                    price = snapshot.latest_trade.price if snapshot.latest_trade else (snapshot.daily_bar.close if snapshot.daily_bar else 0.0)
+                    prev_close = snapshot.prev_daily_bar.close if snapshot.prev_daily_bar else 0.0
+                    
+                    if price and prev_close:
+                        change = price - prev_close
+                        change_percent = (change / prev_close) * 100
+                        
+                        if abs(change_percent) >= threshold:
+                            movers.append({
+                                "symbol": symbol,
+                                "price": price,
+                                "change_percent": change_percent,
+                                "sector": self.stock_metadata.get(symbol, {}).get("sector", "Unknown")
+                            })
+                except Exception:
+                    continue
+        except Exception as e:
+            print(f"Error fetching daily movers: {e}")
+            
+        return sorted(movers, key=lambda x: abs(x["change_percent"]), reverse=True)
 
 stock_service = StockService()

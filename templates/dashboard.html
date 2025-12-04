@@ -3,230 +3,124 @@
 {% block content %}
 <header>
     <h1>Dashboard</h1>
-    <p class="subtitle"><span class="live-indicator"></span>Live Market Data</p>
+    <p class="subtitle">Recent Stock Drops & AI Decisions</p>
 </header>
 
 <section>
-    <div class="dashboard-grid" id="indices-container">
-        <!-- Indices will be populated here -->
-        <div class="card loading">Loading Indices...</div>
-    </div>
-</section>
-
-<section>
-    <h2 class="section-title"><i data-lucide="zap"></i> Biggest Movers</h2>
-    <div class="movers-grid" id="movers-container">
-        <!-- Movers will be populated here -->
-        <div class="card loading">Loading Movers...</div>
-    </div>
-</section>
-
-<section style="margin-top: 3rem;">
-    <h2 class="section-title"><i data-lucide="building-2"></i> Large Cap Movers (> $500M)</h2>
-    <div class="movers-grid" id="large-cap-movers-container">
-        <!-- Large Cap Movers will be populated here -->
-        <div class="card loading">Loading Large Cap Movers...</div>
-    </div>
-</section>
-
-<section style="margin-top: 3rem;">
-    <h2 class="section-title"><i data-lucide="brain-circuit"></i> Analyst Insights (Gemini)</h2>
-    <div id="research-container" style="display: grid; gap: 1rem;">
-        <!-- Research reports will be populated here -->
-        <div class="card" style="grid-column: 1 / -1; text-align: center; color: #64748b;">
-            No active alerts or research reports at this time.
-        </div>
-    </div>
-</section>
-
-<section style="margin-top: 1rem; font-size: 0.8rem; color: #64748b; text-align: center;">
-    <p><em>Disclaimer: The analysis provided is for informational purposes only and does not constitute financial
-            advice. We are not responsible for any trading decisions made based on this information.</em></p>
-</section>
-
-<section style="margin-top: 3rem; margin-bottom: 3rem;">
-    <h2 class="section-title"><i data-lucide="bell"></i> Subscribe to Alerts</h2>
-    <div class="card">
-        <p style="color: #94a3b8; margin-bottom: 1rem;">Get notified via email when a large cap stock drops more than
-            6%.</p>
-        <form id="subscription-form" style="display: flex; gap: 1rem; max-width: 500px;">
-            <input type="email" id="email-input" placeholder="Enter your email" required
-                style="flex: 1; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #334155; background: #1e293b; color: white;">
-            <button type="submit"
-                style="padding: 0.75rem 1.5rem; border-radius: 0.5rem; border: none; background: #3b82f6; color: white; font-weight: bold; cursor: pointer;">
-                Subscribe
-            </button>
-        </form>
-        <div id="subscription-message" style="margin-top: 1rem; font-weight: bold;"></div>
+    <div class="card" style="overflow-x: auto;">
+        <table class="table table-striped table-hover"
+            style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead class="thead-dark">
+                <tr style="border-bottom: 1px solid #334155; color: #94a3b8;">
+                    <th style="padding: 1rem;">Timestamp</th>
+                    <th style="padding: 1rem;">Symbol</th>
+                    <th style="padding: 1rem;">Company Name</th>
+                    <th style="padding: 1rem;">Price</th>
+                    <th style="padding: 1rem;">Drop %</th>
+                    <th style="padding: 1rem;">Recommendation</th>
+                    <th style="padding: 1rem;">Reasoning</th>
+                    <th style="padding: 1rem;">Earnings</th>
+                    <th style="padding: 1rem;">P/E</th>
+                    <th style="padding: 1rem;">Market Cap</th>
+                    <th style="padding: 1rem;">Sector</th>
+                    <th style="padding: 1rem;">Region</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dp in decision_points %}
+                <tr style="border-bottom: 1px solid #1e293b;">
+                    <td style="padding: 1rem;">{{ dp.timestamp }}</td>
+                    <td style="padding: 1rem;"><a href="https://finance.yahoo.com/quote/{{ dp.symbol }}" target="_blank"
+                            style="color: #60a5fa; text-decoration: none; font-weight: bold;">{{ dp.symbol }}</a></td>
+                    <td style="padding: 1rem;">{{ dp.company_name or '-' }}</td>
+                    <td style="padding: 1rem;">${{ "%.2f"|format(dp.price_at_decision) }}</td>
+                    <td style="padding: 1rem; color: #f87171; font-weight: bold;">{{ "%.2f"|format(dp.drop_percent) }}%
+                    </td>
+                    <td style="padding: 1rem;">
+                        {% if dp.recommendation == 'ANALYZING' %}
+                        <span
+                            style="background: #1e3a8a; color: #93c5fd; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem; font-weight: bold;">ANALYZING</span>
+                        {% elif dp.recommendation == 'QUEUED' %}
+                        <span
+                            style="background: #374151; color: #9ca3af; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem; font-weight: bold;">QUEUED</span>
+                        {% else %}
+                        {# Try to parse as float for scoring #}
+                        {% set score = dp.recommendation|float(default=None) %}
+                        {% if score is not none %}
+                        {% if score >= 8.0 %}
+                        <span
+                            style="background: #052e16; color: #4ade80; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem; font-weight: bold;">{{
+                            score }}/10</span>
+                        {% elif score >= 6.0 %}
+                        <span
+                            style="background: #064e3b; color: #34d399; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem; font-weight: bold;">{{
+                            score }}/10</span>
+                        {% elif score >= 4.0 %}
+                        <span
+                            style="background: #451a03; color: #fbbf24; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem; font-weight: bold;">{{
+                            score }}/10</span>
+                        {% else %}
+                        <span
+                            style="background: #450a0a; color: #f87171; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem; font-weight: bold;">{{
+                            score }}/10</span>
+                        {% endif %}
+                        {% else %}
+                        {# Legacy Text Support #}
+                        {% if dp.recommendation == 'STRONG BUY' %}
+                        <span
+                            style="background: #052e16; color: #4ade80; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem; font-weight: bold;">STRONG
+                            BUY</span>
+                        {% elif dp.recommendation == 'BUY' %}
+                        <span
+                            style="background: #064e3b; color: #34d399; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem; font-weight: bold;">BUY</span>
+                        {% elif dp.recommendation == 'SELL' %}
+                        <span
+                            style="background: #450a0a; color: #f87171; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem; font-weight: bold;">SELL</span>
+                        {% else %}
+                        <span
+                            style="background: #451a03; color: #fbbf24; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem; font-weight: bold;">{{
+                            dp.recommendation }}</span>
+                        {% endif %}
+                        {% endif %}
+                        {% endif %}
+                    </td>
+                    <td style="padding: 1rem;">
+                        <a href="/decision/{{ dp.id }}" target="_blank"
+                            style="display: inline-block; padding: 0.25rem 0.75rem; border-radius: 0.25rem; border: 1px solid #475569; background: transparent; color: #94a3b8; text-decoration: none; font-size: 0.9rem;">
+                            View
+                        </a>
+                    </td>
+                    <td style="padding: 1rem;">
+                        {% if dp.is_earnings_drop %}
+                        <span title="{{ dp.earnings_date }}"
+                            style="background: #7c3aed; color: #e8d5ff; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem; font-weight: bold;">EARNINGS</span>
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td style="padding: 1rem;">{{ "%.2f"|format(dp.pe_ratio) if dp.pe_ratio else '-' }}</td>
+                    <td style="padding: 1rem;">
+                        {% if dp.market_cap %}
+                        {{ "%.2f"|format(dp.market_cap / 1000000000) }}B
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td style="padding: 1rem;">{{ dp.sector or '-' }}</td>
+                    <td style="padding: 1rem;">{{ dp.region or '-' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="11" style="padding: 2rem; text-align: center; color: #64748b;">No decisions recorded
+                        yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </section>
 {% endblock %}
 
 {% block scripts %}
-<script>
-    async function fetchData() {
-        try {
-            const [indicesRes, moversRes, largeCapRes, researchRes] = await Promise.all([
-                fetch('/api/indices'),
-                fetch('/api/movers'),
-                fetch('/api/large-cap-movers'),
-                fetch('/api/research-reports')
-            ]);
-
-            const indices = await indicesRes.json();
-            const movers = await moversRes.json();
-            const largeCapMovers = await largeCapRes.json();
-            const researchReports = await researchRes.json();
-
-            renderIndices(indices);
-            renderMovers(movers, 'movers-container');
-            renderMovers(largeCapMovers, 'large-cap-movers-container');
-            renderResearch(researchReports);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    }
-
-    function formatNumber(num) {
-        return num.toFixed(2);
-    }
-
-    function formatChange(change) {
-        const sign = change >= 0 ? '+' : '';
-        return `${sign}${change.toFixed(2)}`;
-    }
-
-    function renderIndices(indices) {
-        const container = document.getElementById('indices-container');
-        container.innerHTML = '';
-
-        for (const [name, data] of Object.entries(indices)) {
-            const isPositive = data.change >= 0;
-            const changeClass = isPositive ? 'positive' : 'negative';
-            const icon = isPositive ? 'trending-up' : 'trending-down';
-
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-                <div class="card-header">
-                    <span class="card-title">${name}</span>
-                    <i data-lucide="${icon}" class="${changeClass}" style="width: 20px; height: 20px;"></i>
-                </div>
-                <div class="price">${formatNumber(data.price)}</div>
-                <div class="change ${changeClass}">
-                    ${formatChange(data.change)} (${formatChange(data.change_percent)}%)
-                </div>
-            `;
-            container.appendChild(card);
-        }
-        lucide.createIcons();
-    }
-
-    function renderMovers(movers, containerId) {
-        const container = document.getElementById(containerId);
-        container.innerHTML = '';
-
-        movers.forEach(stock => {
-            const isPositive = stock.change >= 0;
-            const changeClass = isPositive ? 'positive' : 'negative';
-
-            const card = document.createElement('a');
-            card.href = `/stock/${stock.symbol}`;
-            card.className = 'card';
-            card.style.textDecoration = 'none';
-            card.style.color = 'inherit';
-            card.style.display = 'block';
-            card.innerHTML = `
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">${stock.symbol}</div>
-                        <div style="font-size: 0.8rem; color: #64748b;">${stock.name}</div>
-                    </div>
-                    <div class="price" style="font-size: 1.25rem;">${formatNumber(stock.price)}</div>
-                </div>
-                <div class="change ${changeClass}" style="width: 100%; justify-content: center;">
-                    ${formatChange(stock.change)} (${formatChange(stock.change_percent)}%)
-                </div>
-            `;
-            container.appendChild(card);
-        });
-    }
-
-    function renderResearch(reports) {
-        const container = document.getElementById('research-container');
-
-        if (Object.keys(reports).length === 0) {
-            container.innerHTML = `
-                <div class="card" style="grid-column: 1 / -1; text-align: center; color: #64748b;">
-                    No active alerts or research reports at this time.
-                </div>
-            `;
-            return;
-        }
-
-        container.innerHTML = '';
-        for (const [symbol, report] of Object.entries(reports)) {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.style.gridColumn = '1 / -1'; // Full width
-
-            // Parse report for styling (simple heuristic)
-            const isYes = report.includes("Decision: YES");
-            const decisionClass = isYes ? 'positive' : 'negative';
-            const decisionIcon = isYes ? 'check-circle' : 'alert-circle';
-
-            card.innerHTML = `
-                <div class="card-header">
-                    <div class="card-title">${symbol} Analysis</div>
-                    <div class="${decisionClass}" style="display: flex; align-items: center; gap: 0.5rem; font-weight: bold;">
-                        <i data-lucide="${decisionIcon}" style="width: 20px; height: 20px;"></i>
-                        ${isYes ? 'BUY OPPORTUNITY' : 'CAUTION ADVISED'}
-                    </div>
-                </div>
-                <div style="white-space: pre-wrap; margin-top: 1rem; line-height: 1.6; color: #e2e8f0;">${report}</div>
-            `;
-            container.appendChild(card);
-        }
-        lucide.createIcons();
-    }
-
-    // Initial fetch
-    fetchData();
-
-    // Poll every 2 seconds
-    setInterval(fetchData, 2000);
-
-    // Subscription Form Handler
-    document.getElementById('subscription-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const emailInput = document.getElementById('email-input');
-        const messageDiv = document.getElementById('subscription-message');
-        const email = emailInput.value;
-
-        try {
-            const response = await fetch('/api/subscribe', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email: email }),
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                messageDiv.textContent = result.message;
-                messageDiv.style.color = '#4ade80'; // Green
-                emailInput.value = '';
-            } else {
-                messageDiv.textContent = 'Subscription failed. Please try again.';
-                messageDiv.style.color = '#f87171'; // Red
-            }
-        } catch (error) {
-            console.error('Error subscribing:', error);
-            messageDiv.textContent = 'An error occurred. Please try again.';
-            messageDiv.style.color = '#f87171'; // Red
-        }
-    });
-</script>
+<!-- No scripts needed for static table -->
 {% endblock %}

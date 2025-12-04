@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Gemini Decision History</h2>
+    <p>A complete log of all stock decisions made by the AI.</p>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Symbol</th>
+                    <th>Company Name</th>
+                    <th>Price</th>
+                    <th>Drop %</th>
+                    <th>Recommendation</th>
+                    <th>Reasoning</th>
+                    <th>P/E</th>
+                    <th>Market Cap</th>
+                    <th>Sector</th>
+                    <th>Region</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dp in decision_points %}
+                <tr>
+                    <td>{{ dp.timestamp }}</td>
+                    <td><a href="/stock/{{ dp.symbol }}">{{ dp.symbol }}</a></td>
+                    <td>{{ dp.company_name or '-' }}</td>
+                    <td>${{ "%.2f"|format(dp.price_at_decision) }}</td>
+                    <td class="text-danger">{{ "%.2f"|format(dp.drop_percent) }}%</td>
+                    <td>
+                        {% if dp.recommendation == 'ANALYZING' %}
+                        <span class="badge badge-info">ANALYZING</span>
+                        {% elif dp.recommendation == 'QUEUED' %}
+                        <span class="badge badge-secondary">QUEUED</span>
+                        {% else %}
+                        {# Try to parse as float for scoring #}
+                        {% set score = dp.recommendation|float(default=None) %}
+                        {% if score is not none %}
+                        {% if score >= 8.0 %}
+                        <span class="badge badge-success" style="background-color: #052e16; color: #4ade80;">{{ score
+                            }}/10</span>
+                        {% elif score >= 6.0 %}
+                        <span class="badge badge-success" style="background-color: #064e3b; color: #34d399;">{{ score
+                            }}/10</span>
+                        {% elif score >= 4.0 %}
+                        <span class="badge badge-warning" style="background-color: #451a03; color: #fbbf24;">{{ score
+                            }}/10</span>
+                        {% else %}
+                        <span class="badge badge-danger" style="background-color: #450a0a; color: #f87171;">{{ score
+                            }}/10</span>
+                        {% endif %}
+                        {% else %}
+                        {# Legacy Text Support #}
+                        {% if dp.recommendation == 'STRONG BUY' %}
+                        <span class="badge badge-success">STRONG BUY</span>
+                        {% elif dp.recommendation == 'BUY' %}
+                        <span class="badge badge-success">BUY</span>
+                        {% elif dp.recommendation == 'SELL' %}
+                        <span class="badge badge-danger">SELL</span>
+                        {% else %}
+                        <span class="badge badge-warning">{{ dp.recommendation }}</span>
+                        {% endif %}
+                        {% endif %}
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-info" data-toggle="popover" title="Reasoning"
+                            data-content="{{ dp.reasoning }}">View</button>
+                    </td>
+                    <td>{{ "%.2f"|format(dp.pe_ratio) if dp.pe_ratio else '-' }}</td>
+                    <td>{{ "${:,.0f}".format(dp.market_cap) if dp.market_cap else '-' }}</td>
+                    <td>{{ dp.sector or '-' }}</td>
+                    <td>{{ dp.region or '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('[data-toggle="popover"]').popover()
+    })
+</script>
+{% endblock %}

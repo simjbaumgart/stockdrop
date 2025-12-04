@@ -12,14 +12,14 @@ from app.services.research_service import research_service
 def test_research_flow():
     print("Testing Research Flow...")
     
-    # Mock yfinance to return a stock with >6% drop
-    mock_ticker = MagicMock()
-    mock_ticker.fast_info.last_price = 100.0
-    mock_ticker.fast_info.previous_close = 110.0 # ~9% drop
-    mock_ticker.fast_info.market_cap = 1_000_000_000 # Large cap
+    # Mock Alpaca snapshot
+    mock_snapshot = MagicMock()
+    mock_snapshot.latest_trade.price = 100.0
+    mock_snapshot.daily_bar.close = 100.0
+    mock_snapshot.prev_daily_bar.close = 110.0 # ~9% drop
     
-    with patch('yfinance.Tickers') as mock_tickers:
-        mock_tickers.return_value.tickers = {"AAPL": mock_ticker}
+    with patch('app.services.stock_service.alpaca_service') as mock_alpaca_service:
+        mock_alpaca_service.get_snapshots.return_value = {"AAPL": mock_snapshot}
         
         # Mock stock_service.stock_tickers to only include AAPL for test speed
         original_tickers = stock_service.stock_tickers
