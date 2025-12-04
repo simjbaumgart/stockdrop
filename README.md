@@ -1,49 +1,32 @@
-# StockDrop 📉
+# StockDrop
 
-A real-time stock tracking dashboard with automated email alerts for significant market drops.
+**StockDrop** is an intelligent market monitoring system designed to identify "buy the dip" opportunities in large-cap global stocks. It automates the entire investment research process—from discovery to deep-dive analysis—using a multi-agent AI architecture.
 
-## Features
+## Core Workflow
 
-- **Live Dashboard**: Track major indices (S&P 500, CSI 300, STOXX 600) and top movers.
-- **Large Cap Alerts**: Automatically detects when a large-cap stock (> $500M) drops more than 6% in a day.
-- **Email Notifications**: Sends an immediate email alert with price details.
-- **User Subscriptions**: Users can subscribe to alerts directly from the dashboard.
-- **Research Reports**: (Optional) AI-generated analysis of the drop.
+### 1. Global Market Scanning
+*   **What it does:** Every 2 hours (and on startup), the system scans major global markets (US, UK, Europe, China, India, Australia).
+*   **Criteria:** It looks for "Large Cap" companies (>$5B USD) that have dropped significantly (more than **-5%**) in the last 24 hours.
+*   **Technology:** Uses `TradingView` screener for real-time data.
 
-## Setup
+### 2. The "Council of Agents" (AI Analysis)
+Once a stock is identified, it is passed to a team of 4 specialized AI agents (powered by Google Gemini) that debate the investment case:
 
-1.  **Clone the repository**:
-    ```bash
-    git clone https://github.com/simjbaumgart/stockdrop.git
-    cd stockdrop
-    ```
+*   **🕵️ The Analyst (Senior Financial Analyst):** A skeptic who provides a neutral, data-driven assessment. Scrapes news and financial data to explain *why* the drop happened (e.g., earnings miss, regulatory fine, sector rotation).
+*   **🐂 The Bull (Value Investor):** Takes the Analyst's data and constructs the strongest possible argument for *buying* the stock, focusing on overreactions and long-term catalysts.
+*   **🐻 The Bear (Forensic Accountant):** Constructs the strongest argument for *avoiding* the stock, looking for structural problems, accounting red flags, and value traps.
+*   **⚖️ The Synthesizer (Chief Investment Officer):** Reads all three reports, weighs the risks vs. rewards with a focus on capital preservation, and issues a final **Score (0-10)** along with an Executive Summary.
+    *   **0:** Do not invest
+    *   **5:** Neutral/Hold
+    *   **10:** High Conviction Buy
 
-2.  **Install dependencies**:
-    ```bash
-    python3 -m venv venv
-    source venv/bin/activate
-    pip install -r requirements.txt
-    ```
+### 3. Reporting & Storage
+*   **Database:** All decisions are logged in a local database (`decision_points`) to track performance over time.
+*   **CSV Records:** Daily summaries are saved to `data/decisions/` and raw scan results to `data/found_stocks/`.
+*   **PDF Deep Dives:** A comprehensive PDF report is generated for every analyzed stock, containing the full output from all 4 agents. These are saved in the `reports/` folder.
 
-3.  **Configure Environment**:
-    Create a `.env` file in the root directory:
-    ```env
-    SMTP_SERVER=smtp.gmail.com
-    SMTP_PORT=587
-    SENDER_EMAIL=your_email@gmail.com
-    SENDER_PASSWORD=your_app_password
-    RECIPIENT_EMAIL=your_email@example.com
-    ```
+### 4. Notifications
+*   The system can send email alerts containing the decision and the attached PDF report immediately after analysis.
 
-4.  **Run the App**:
-    ```bash
-    uvicorn main:app --reload
-    ```
-    Visit `http://localhost:8000` in your browser.
-
-## Deployment (Render)
-
-1.  Create a new **Web Service** on Render connected to this repo.
-2.  **Build Command**: `pip install -r requirements.txt`
-3.  **Start Command**: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-4.  Add the Environment Variables from your `.env` file in the Render dashboard.
+## Goal
+To filter out market noise and provide high-quality, reasoned second opinions on volatile stocks, preventing emotional trading decisions.

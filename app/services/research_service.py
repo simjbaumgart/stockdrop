@@ -9,6 +9,8 @@ import concurrent.futures
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+from typing import Dict, List, Optional
+
 class ResearchService:
     MAX_DAILY_REPORTS = 1000
     USAGE_FILE = "usage_stats.json"
@@ -22,9 +24,9 @@ class ResearchService:
             logger.warning("GEMINI_API_KEY not found. Research service will use mock data.")
             self.model = None
 
-    def analyze_stock(self, symbol: str, company_name: str, price: float, change_percent: float) -> dict:
+    def analyze_stock(self, symbol: str, company_name: str, price: float, change_percent: float, technical_analysis: Dict = {}, market_context: Dict = {}) -> dict:
         """
-        Analyzes a stock using a multi-agent approach (Analyst, Bull, Bear, Synthesizer).
+        Analyzes a stock using the Adversarial Council (Technician, Bear, Macro, Judge).
         """
         if not self._check_and_increment_usage():
             logger.warning(f"Daily research limit reached. Skipping analysis for {symbol}.")
@@ -39,32 +41,35 @@ class ResearchService:
             return self._get_mock_analysis(symbol, price, change_percent)
 
         try:
-            # 1. The Analyst (Agent A)
-            analyst_prompt = self._create_analyst_prompt(symbol, company_name, price, change_percent)
-            analyst_report = self._call_agent(analyst_prompt, "Analyst")
+            # --- The Adversarial Council Debate Protocol ---
             
-            # 2. Bull & Bear (Parallel)
-            bull_prompt = self._create_bull_prompt(symbol, company_name, analyst_report)
-            bear_prompt = self._create_bear_prompt(symbol, company_name, analyst_report)
+            # 1. Agent Beta (The Technician)
+            # Proposes the trade based on technicals.
+            technician_prompt = self._create_technician_prompt(symbol, price, change_percent, technical_analysis)
+            technician_report = self._call_agent(technician_prompt, "Technician")
             
-            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-                future_bull = executor.submit(self._call_agent, bull_prompt, "Bull")
-                future_bear = executor.submit(self._call_agent, bear_prompt, "Bear")
-                
-                bull_case = future_bull.result()
-                bear_case = future_bear.result()
+            # 2. Agent Alpha (The Bear)
+            # Attacks the proposal with a "Pre-Mortem".
+            bear_prompt = self._create_bear_prompt(symbol, company_name, change_percent, technician_report)
+            bear_report = self._call_agent(bear_prompt, "Bear")
             
-            # 3. The Synthesizer (Agent D)
-            synthesizer_prompt = self._create_synthesizer_prompt(symbol, company_name, analyst_report, bull_case, bear_case)
-            final_response_text = self._call_agent(synthesizer_prompt, "Synthesizer")
+            # 3. Agent Gamma (The Macro)
+            # Contextualizes the drop with sector/factor data.
+            macro_prompt = self._create_macro_prompt(symbol, company_name, change_percent, market_context)
+            macro_report = self._call_agent(macro_prompt, "Macro")
+            
+            # 4. Agent Omega (The Judge)
+            # Synthesizes the debate and issues a verdict.
+            judge_prompt = self._create_judge_prompt(symbol, company_name, technician_report, bear_report, macro_report)
+            final_response_text = self._call_agent(judge_prompt, "Judge")
             
             # Parse the final response
             result = self._parse_synthesizer_response(final_response_text)
             
-            # Add intermediate reports to the result
-            result["analyst_report"] = analyst_report
-            result["bull_case"] = bull_case
-            result["bear_case"] = bear_case
+            # Add debate transcript to the result
+            result["technician_report"] = technician_report
+            result["bear_report"] = bear_report
+            result["macro_report"] = macro_report
             
             return result
 
@@ -89,7 +94,7 @@ class ResearchService:
             return f"[Error generating {agent_name} report: {e}]"
 
     def _parse_synthesizer_response(self, text: str) -> dict:
-        """Parses the final output from the Synthesizer agent."""
+        """Parses the final output from the Judge agent."""
         recommendation = "HOLD"
         executive_summary = "No summary provided."
         detailed_report = text
@@ -161,58 +166,72 @@ class ResearchService:
         except Exception as e:
             logger.error(f"Error saving usage stats: {e}")
 
-    def _create_analyst_prompt(self, symbol: str, company_name: str, price: float, change_percent: float) -> str:
+    def _create_technician_prompt(self, symbol: str, price: float, change_percent: float, technical_analysis: Dict) -> str:
+        ta_summary = technical_analysis.get("summary", {})
+        ta_indicators = technical_analysis.get("indicators", {})
+        
+        rsi = ta_indicators.get("RSI", "Unknown")
+        recommendation = ta_summary.get("RECOMMENDATION", "Unknown")
+        
         return (
-            f"You are a Senior Financial Analyst known for your skepticism. Your task is to provide a neutral, data-driven assessment of {company_name} ({symbol}).\n"
-            f"The stock has dropped {change_percent:.2f}% recently. Current Price: {price}\n\n"
-            "Analyze the following:\n"
-            "1. What triggered this drop? (News, Earnings, Macro)\n"
-            "2. Key Fundamentals (P/E, Revenue Growth, Margins)\n"
-            "3. Technical Status (Support levels, RSI, Volume)\n\n"
-            "Provide a factual report. Do not sugarcoat anything. Focus on the risks."
+            f"You are Agent Beta (The Technician), a disciplined momentum trader. You do not care about fundamentals. You only care about price action and support zones.\n"
+            f"Stock: {symbol}\n"
+            f"Price: {price}\n"
+            f"Change: {change_percent:.2f}%\n"
+            f"Technical Summary: {recommendation}\n"
+            f"RSI: {rsi}\n\n"
+            "Analyze the chart (based on the data provided). If the price breaks the current level, where is the floor?\n"
+            "Identify 'air pockets' where price could freefall.\n"
+            "Define precise Entry and Stop-Loss levels.\n"
+            "Output your analysis clearly."
         )
 
-    def _create_bull_prompt(self, symbol: str, company_name: str, analyst_report: str) -> str:
+    def _create_bear_prompt(self, symbol: str, company_name: str, change_percent: float, technician_report: str) -> str:
         return (
-            f"You are a Value Investor. Your goal is to find the hidden value in {company_name} ({symbol}), but ONLY if it is truly there.\n"
-            "Review the Analyst Report below and construct a BULL CASE.\n\n"
-            f"--- ANALYST REPORT ---\n{analyst_report}\n----------------------\n\n"
-            "Focus on:\n"
-            "- Is this an overreaction?\n"
-            "- What are the tangible long-term growth catalysts?\n"
-            "- Is the valuation actually compelling?\n\n"
-            "Be persuasive but realistic. Do not invent positives."
+            f"You are Agent Alpha (The Bear), a forensic short-seller. Your goal is to find ONE fatal flaw in {company_name} ({symbol}).\n"
+            "You must counteract the natural optimism of the market.\n\n"
+            f"--- TECHNICIAN'S REPORT ---\n{technician_report}\n---------------------------\n\n"
+            "PERFORM A PRE-MORTEM:\n"
+            f"Assume it is one month from now, and this stock has dropped another 50% (total drop > {abs(change_percent) + 50}%).\n"
+            "Write a retrospective news article explaining exactly what went wrong.\n"
+            "- Did an investigation expand?\n"
+            "- Did competitors steal market share?\n"
+            "- Is there accounting fraud?\n"
+            "- Is there a liquidity crisis?\n\n"
+            "Be specific, pessimistic, and ruthless. Ignore all growth narratives."
         )
 
-    def _create_bear_prompt(self, symbol: str, company_name: str, analyst_report: str) -> str:
+    def _create_macro_prompt(self, symbol: str, company_name: str, change_percent: float, market_context: Dict) -> str:
+        context_str = "\n".join([f"{k}: {v:.2f}%" for k, v in market_context.items()])
         return (
-            f"You are a Forensic Accountant and Short Seller. Your goal is to expose the flaws in {company_name} ({symbol}).\n"
-            "Review the Analyst Report below and construct the strongest possible BEAR CASE.\n\n"
-            f"--- ANALYST REPORT ---\n{analyst_report}\n----------------------\n\n"
-            "Focus on:\n"
-            "- Why is the drop justified?\n"
-            "- What are the structural problems or accounting red flags?\n"
-            "- Why is this a value trap?\n\n"
-            "Be ruthless. Highlight every danger."
+            f"You are Agent Gamma (The Macro), a global macro strategist. You analyze SECTOR and FACTOR exposure.\n"
+            f"Stock: {company_name} ({symbol})\n"
+            f"Drop: {change_percent:.2f}%\n\n"
+            f"--- MARKET CONTEXT ---\n{context_str}\n----------------------\n\n"
+            "Is this stock dropping because of a sector rotation (e.g., Tech to Value) or systematic risk?\n"
+            "If the entire sector is down, the drop might be justified and not an opportunity.\n"
+            "Analyze the correlation. Is this idiosyncratic risk (company specific) or systematic risk?"
         )
 
-    def _create_synthesizer_prompt(self, symbol: str, company_name: str, analyst_report: str, bull_case: str, bear_case: str) -> str:
+    def _create_judge_prompt(self, symbol: str, company_name: str, technician_report: str, bear_report: str, macro_report: str) -> str:
         return (
-            f"You are the Chief Investment Officer. You have received reports from your team regarding {company_name} ({symbol}).\n"
-            "Your task is to make the final decision and write the investment memo.\n\n"
-            f"--- ANALYST REPORT ---\n{analyst_report}\n\n"
-            f"--- BULL CASE ---\n{bull_case}\n\n"
-            f"--- BEAR CASE ---\n{bear_case}\n\n"
-            "----------------------\n"
-            "Decide: Is this stock a conviction buy? Be extremely conservative. Prioritize capital preservation.\n"
+            f"You are Agent Omega (The Judge), a skeptical Chief Investment Officer. You only approve a trade if The Bear fails to find a fatal flaw AND The Technician identifies clear support.\n"
+            "Prefer inaction over loss.\n\n"
+            f"--- DEBATE TRANSCRIPT ---\n\n"
+            f"1. TECHNICIAN:\n{technician_report}\n\n"
+            f"2. BEAR (Pre-Mortem):\n{bear_report}\n\n"
+            f"3. MACRO:\n{macro_report}\n\n"
+            "-------------------------\n"
+            "Synthesize the debate. Requires 'Clear and Convincing Evidence' to Buy.\n"
+            "If the Bear's argument contains 'Existential Threats' (Fraud, Bankruptcy, Delisting), the trade is VETOED immediately.\n\n"
             f"IMPORTANT: Explicitly state the company name '{company_name}' in your report.\n"
             "IMPORTANT: Format your response EXACTLY as follows:\n"
             "SCORE: [0-10]\n"
             "(0 = Do not invest, 5 = Neutral/Hold, 10 = High Conviction Buy)\n"
             "EXECUTIVE SUMMARY:\n"
-            "[Provide a concise 3-5 sentence summary of the situation and your decision for the email body]\n"
+            "[Provide a concise 3-5 sentence summary of the verdict and the key reasons]\n"
             "DETAILED REPORT:\n"
-            "[Provide a comprehensive deep-dive analysis. Incorporate insights from all reports. Structure it logically.]"
+            "[Provide a comprehensive synthesis of the debate. Address the Bear's points directly. Explain your final score.]"
         )
 
     def _get_mock_analysis(self, symbol: str, price: float, change_percent: float) -> dict:
@@ -220,7 +239,10 @@ class ResearchService:
             "recommendation": "BUY",
             "executive_summary": f"This is a mock summary for {symbol}. The drop of {change_percent:.2f}% seems excessive.",
             "detailed_report": f"This is a mock detailed report for {symbol}. Fundamentals are strong...",
-            "full_text": "Mock full text"
+            "full_text": "Mock full text",
+            "technician_report": "Mock Technician Report: Support at $95.",
+            "bear_report": "Mock Bear Report: Pre-mortem shows no fatal flaws.",
+            "macro_report": "Mock Macro Report: Sector rotation is the main driver."
         }
 
 research_service = ResearchService()

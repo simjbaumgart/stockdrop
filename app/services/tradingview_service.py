@@ -298,5 +298,60 @@ class TradingViewService:
             
         return 0.0
 
+    def get_technical_analysis(self, symbol: str, region: str = "US") -> Dict:
+        """
+        Fetches technical analysis summary for a symbol.
+        """
+        # Map region to markets/exchanges if needed
+        # For TA_Handler, we need screener and exchange
+        # This is a best-effort mapping.
+        
+        screener_map = {
+            "US": "america",
+            "EU": "germany", # Default to germany for EU if unknown
+            "CN": "china",
+            "IN": "india",
+            "AU": "australia"
+        }
+        
+        exchange_map = {
+            "US": "NASDAQ", # Default, might need to try NYSE if fails or use generic
+            "EU": "XETR",
+            "CN": "SSE",
+            "IN": "NSE",
+            "AU": "ASX"
+        }
+        
+        screener = screener_map.get(region, "america")
+        exchange = exchange_map.get(region, "NASDAQ")
+        
+        try:
+            # First try with default exchange
+            handler = TA_Handler(
+                symbol=symbol,
+                screener=screener,
+                exchange=exchange,
+                interval=Interval.INTERVAL_1_DAY
+            )
+            analysis = handler.get_analysis()
+            
+            # If successful, extract key indicators
+            if analysis:
+                return {
+                    "summary": analysis.summary,
+                    "oscillators": analysis.oscillators,
+                    "moving_averages": analysis.moving_averages,
+                    "indicators": analysis.indicators
+                }
+                
+        except Exception as e:
+            print(f"Error fetching TA for {symbol} ({region}): {e}")
+            
+            # Fallback: Try without specific exchange if possible or different exchange?
+            # TradingView TA requires exchange.
+            pass
+            
+        return {}
+
 tradingview_service = TradingViewService()
 

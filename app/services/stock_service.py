@@ -422,8 +422,19 @@ class StockService:
                     # Generate research report
                     print(f"Generating research report for {symbol}...")
                     
-                    # Pass company name to research service
-                    report_data = research_service.analyze_stock(symbol, company_name, price, change_percent)
+                    # Fetch Technical Analysis for the Technician Agent
+                    print(f"Fetching technical analysis for {symbol}...")
+                    technical_analysis = tradingview_service.get_technical_analysis(symbol, region=stock.get("region", "US"))
+
+                    # Pass company name, technicals, and market context to research service
+                    report_data = research_service.analyze_stock(
+                        symbol, 
+                        company_name, 
+                        price, 
+                        change_percent, 
+                        technical_analysis=technical_analysis,
+                        market_context=market_context
+                    )
                     
                     recommendation = report_data.get("recommendation", "HOLD")
                     # Use executive summary as the main reasoning text for DB/Display
