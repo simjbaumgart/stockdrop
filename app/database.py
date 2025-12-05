@@ -31,7 +31,8 @@ def init_db():
             sector TEXT,
             region TEXT,
             is_earnings_drop BOOLEAN DEFAULT 0,
-            earnings_date TEXT
+            earnings_date TEXT,
+            ai_score REAL
         )
     ''')
     
@@ -47,7 +48,8 @@ def init_db():
             "sector": "TEXT",
             "region": "TEXT",
             "is_earnings_drop": "BOOLEAN DEFAULT 0",
-            "earnings_date": "TEXT"
+            "earnings_date": "TEXT",
+            "ai_score": "REAL"
         }
         
         for col_name, col_type in new_columns.items():
@@ -101,15 +103,15 @@ def get_all_subscribers() -> List[str]:
 
 def add_decision_point(symbol: str, price: float, drop_percent: float, recommendation: str, reasoning: str, status: str = "Ignored", 
                       company_name: str = None, pe_ratio: float = None, market_cap: float = None, sector: str = None, region: str = None,
-                      is_earnings_drop: bool = False, earnings_date: str = None) -> int:
+                      is_earnings_drop: bool = False, earnings_date: str = None, ai_score: float = None) -> int:
     """Add a new decision point."""
     try:
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO decision_points (symbol, price_at_decision, drop_percent, recommendation, reasoning, status, company_name, pe_ratio, market_cap, sector, region, is_earnings_drop, earnings_date)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (symbol, price, drop_percent, recommendation, reasoning, status, company_name, pe_ratio, market_cap, sector, region, is_earnings_drop, earnings_date))
+            INSERT INTO decision_points (symbol, price_at_decision, drop_percent, recommendation, reasoning, status, company_name, pe_ratio, market_cap, sector, region, is_earnings_drop, earnings_date, ai_score)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (symbol, price, drop_percent, recommendation, reasoning, status, company_name, pe_ratio, market_cap, sector, region, is_earnings_drop, earnings_date, ai_score))
         conn.commit()
         last_id = cursor.lastrowid
         conn.close()
@@ -118,16 +120,24 @@ def add_decision_point(symbol: str, price: float, drop_percent: float, recommend
         print(f"Error adding decision point: {e}")
         return None
 
-def update_decision_point(decision_id: int, recommendation: str, reasoning: str, status: str) -> bool:
+def update_decision_point(decision_id: int, recommendation: str, reasoning: str, status: str, ai_score: float = None) -> bool:
     """Update an existing decision point."""
     try:
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
-        cursor.execute('''
-            UPDATE decision_points 
-            SET recommendation = ?, reasoning = ?, status = ?
-            WHERE id = ?
-        ''', (recommendation, reasoning, status, decision_id))
+        
+        if ai_score is not None:
+            cursor.execute('''
+                UPDATE decision_points 
+                SET recommendation = ?, reasoning = ?, status = ?, ai_score = ?
+                WHERE id = ?
+            ''', (recommendation, reasoning, status, ai_score, decision_id))
+        else:
+            cursor.execute('''
+                UPDATE decision_points 
+                SET recommendation = ?, reasoning = ?, status = ?
+                WHERE id = ?
+            ''', (recommendation, reasoning, status, decision_id))
         conn.commit()
         conn.close()
         return True

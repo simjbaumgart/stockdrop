@@ -485,8 +485,8 @@ class StockService:
                             status = "Not Owned"
 
                     if decision_id:
-                        update_decision_point(decision_id, recommendation, reasoning, status)
-                        print(f"Updated decision point for {symbol}: {recommendation} -> {status}")
+                        update_decision_point(decision_id, recommendation, reasoning, status, ai_score=float(score) if isinstance(score, (int, float)) else None)
+                        print(f"Updated decision point for {symbol}: {recommendation} -> {status} (Score: {score})")
                     
                     # Save detailed decision data locally and to Cloud
                     decision_data = {
