@@ -178,38 +178,40 @@ class EmailService:
         
         # --- Append Intermediate Reports ---
         
-        # Analyst Report
-        if "analyst_report" in report_data:
+        # Technician's Report
+        if "technician_report" in report_data:
             pdf.add_page()
             pdf.set_font("Arial", 'B', 14)
-            pdf.cell(0, 10, "Analyst Report (Facts & Data)", 0, 1)
-            pdf.ln(5)
-            pdf.set_font("Arial", '', 10)
-            text = report_data["analyst_report"].encode('latin-1', 'replace').decode('latin-1')
-            pdf.multi_cell(0, 6, text)
-
-        # Bull Case
-        if "bull_case" in report_data:
-            pdf.add_page()
-            pdf.set_font("Arial", 'B', 14)
-            pdf.set_text_color(0, 100, 0) # Dark Green
-            pdf.cell(0, 10, "The Bull Case (Upside)", 0, 1)
+            pdf.set_text_color(0, 0, 150) # Dark Blue
+            pdf.cell(0, 10, "Technician's Report (Momentum & Levels)", 0, 1)
             pdf.set_text_color(0, 0, 0) # Reset
             pdf.ln(5)
             pdf.set_font("Arial", '', 10)
-            text = report_data["bull_case"].encode('latin-1', 'replace').decode('latin-1')
+            text = report_data["technician_report"].encode('latin-1', 'replace').decode('latin-1')
             pdf.multi_cell(0, 6, text)
 
-        # Bear Case
-        if "bear_case" in report_data:
+        # Macro Context
+        if "macro_report" in report_data:
+            pdf.add_page()
+            pdf.set_font("Arial", 'B', 14)
+            pdf.set_text_color(100, 100, 0) # Dark Yellow/Gold
+            pdf.cell(0, 10, "Macro Context (Sector & Factors)", 0, 1)
+            pdf.set_text_color(0, 0, 0) # Reset
+            pdf.ln(5)
+            pdf.set_font("Arial", '', 10)
+            text = report_data["macro_report"].encode('latin-1', 'replace').decode('latin-1')
+            pdf.multi_cell(0, 6, text)
+
+        # Bear's Pre-Mortem
+        if "bear_report" in report_data:
             pdf.add_page()
             pdf.set_font("Arial", 'B', 14)
             pdf.set_text_color(150, 0, 0) # Dark Red
-            pdf.cell(0, 10, "The Bear Case (Downside)", 0, 1)
+            pdf.cell(0, 10, "The Bear's Pre-Mortem (Downside Risks)", 0, 1)
             pdf.set_text_color(0, 0, 0) # Reset
             pdf.ln(5)
             pdf.set_font("Arial", '', 10)
-            text = report_data["bear_case"].encode('latin-1', 'replace').decode('latin-1')
+            text = report_data["bear_report"].encode('latin-1', 'replace').decode('latin-1')
             pdf.multi_cell(0, 6, text)
         
         # Save to reports folder
