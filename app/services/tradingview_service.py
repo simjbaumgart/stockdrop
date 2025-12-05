@@ -127,8 +127,11 @@ class TradingViewService:
         
         # Market Configuration with approximate exchange rates (as of late 2024/2025)
         # We use a safe buffer or direct conversion.
-        # USD Base: 5,000,000,000
+        # USD Base: 5,000,000,000 (Default)
         
+        # User requested specific lower threshold for Europe (500M)
+        eu_min_cap_usd = 500_000_000
+
         market_configs = [
             {
                 "region": "America",
@@ -138,18 +141,57 @@ class TradingViewService:
             {
                 "region": "Europe (Germany)",
                 "markets": ["germany"],
-                "currency_threshold": min_market_cap_usd * 0.95 # EUR ~0.95 USD (approx, let's say 1 EUR = 1.05 USD -> 5B USD = 4.76B EUR)
-                                                                # Let's use 4.5B EUR to be safe
+                "currency_threshold": eu_min_cap_usd * 0.95 # EUR ~0.95 USD
             },
              {
                 "region": "Europe (UK)",
                 "markets": ["uk"],
-                "currency_threshold": min_market_cap_usd * 0.80 # GBP ~0.80 USD (approx, 1 GBP = 1.25 USD -> 5B USD = 4B GBP)
+                "currency_threshold": eu_min_cap_usd * 0.80 # GBP ~0.80 USD
             },
             {
-                "region": "Europe (Others)",
-                "markets": ["france", "spain", "italy", "netherlands"],
-                "currency_threshold": min_market_cap_usd * 0.95 # EUR
+                "region": "Europe (Eurozone)",
+                "markets": ["france", "spain", "italy", "netherlands", "belgium", "portugal", "finland", "ireland", "austria"],
+                "currency_threshold": eu_min_cap_usd * 0.95 # EUR
+            },
+            {
+                "region": "Europe (Switzerland)",
+                "markets": ["switzerland"],
+                "currency_threshold": eu_min_cap_usd * 0.88 # CHF ~0.88 USD
+            },
+            {
+                "region": "Europe (Sweden)",
+                "markets": ["sweden"],
+                "currency_threshold": eu_min_cap_usd * 10.5 # SEK ~10.5 USD
+            },
+            {
+                "region": "Europe (Denmark)",
+                "markets": ["denmark"],
+                "currency_threshold": eu_min_cap_usd * 7.0 # DKK ~7.0 USD
+            },
+            {
+                "region": "Japan",
+                "markets": ["japan"],
+                "currency_threshold": min_market_cap_usd * 150 # JPY ~150 USD
+            },
+            {
+                "region": "Canada",
+                "markets": ["canada"],
+                "currency_threshold": min_market_cap_usd * 1.40 # CAD ~1.40 USD
+            },
+            {
+                "region": "South Korea",
+                "markets": ["korea"],
+                "currency_threshold": min_market_cap_usd * 1400 # KRW ~1400 USD
+            },
+            {
+                "region": "Taiwan",
+                "markets": ["taiwan"],
+                "currency_threshold": min_market_cap_usd * 32 # TWD ~32 USD
+            },
+            {
+                "region": "Brazil",
+                "markets": ["brazil"],
+                "currency_threshold": min_market_cap_usd * 6.0 # BRL ~6.0 USD
             },
             {
                 "region": "China",
@@ -276,10 +318,15 @@ class TradingViewService:
         # Map region to markets
         region_map = {
             "US": ["america"],
-            "EU": ["germany", "uk", "france", "spain", "italy", "netherlands", "europe"],
+            "EU": ["germany", "uk", "france", "spain", "italy", "netherlands", "europe", "switzerland", "sweden", "denmark"],
             "CN": ["china"],
             "IN": ["india"],
-            "AU": ["australia"]
+            "AU": ["australia"],
+            "JP": ["japan"],
+            "CA": ["canada"],
+            "KR": ["korea"],
+            "TW": ["taiwan"],
+            "BR": ["brazil"]
         }
         
         markets = region_map.get(region, ["america"]) # Default to US
@@ -311,7 +358,12 @@ class TradingViewService:
             "EU": "germany", # Default to germany for EU if unknown
             "CN": "china",
             "IN": "india",
-            "AU": "australia"
+            "AU": "australia",
+            "JP": "japan",
+            "CA": "canada",
+            "KR": "korea",
+            "TW": "taiwan",
+            "BR": "brazil"
         }
         
         exchange_map = {
@@ -319,7 +371,12 @@ class TradingViewService:
             "EU": "XETR",
             "CN": "SSE",
             "IN": "NSE",
-            "AU": "ASX"
+            "AU": "ASX",
+            "JP": "TSE",
+            "CA": "TSX",
+            "KR": "KRX",
+            "TW": "TWSE",
+            "BR": "BMFBOVESPA"
         }
         
         screener = screener_map.get(region, "america")

@@ -14,3 +14,4 @@ fpdf
 alpaca-py
 tradingview-ta
 tradingview-screener
+scipy

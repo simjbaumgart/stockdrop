@@ -9,6 +9,7 @@ from app.services.alpaca_service import alpaca_service
 from app.services.tradingview_service import tradingview_service
 from app.services.drive_service import drive_service
 from app.services.storage_service import storage_service
+from app.services.gatekeeper_service import gatekeeper_service
 
 class StockService:
     def __init__(self):
@@ -334,6 +335,14 @@ class StockService:
         """
         print("Checking for large cap drops...")
         
+        # --- GATEKEEPER PHASE 1: Global Market Regime ---
+        regime_info = gatekeeper_service.check_market_regime()
+        # print(f"Market Regime: {regime_info['regime']} ({regime_info['details']})") # Suppress global noise
+        
+        if regime_info['regime'] == 'BEAR':
+            print("GATEKEEPER: Market is in BEAR regime. Halting long-biased dip buying.")
+            return
+
         # 1. Fetch Market Context
         market_context = self._fetch_market_context()
         print(f"Market Context: {market_context}")
@@ -391,6 +400,34 @@ class StockService:
                 notification_key = (symbol, today_str)
                 
                 if notification_key not in self.sent_notifications:
+                    print(f"Processing candidate {symbol} ({change_percent:.2f}%)")
+                    
+                    # --- GATEKEEPER PHASE 2: Technical Filters ---
+                    print(f"GATEKEEPER: Checking technical filters for {symbol}...")
+                    is_valid, reasons = gatekeeper_service.check_technical_filters(symbol)
+                    
+                    if not is_valid:
+                        print(f"GATEKEEPER: {symbol} REJECTED.")
+                        
+                        # Primary Reason
+                        if 'bb_status' in reasons:
+                            print(f"  [PRIMARY REASON] {reasons['bb_status']}")
+                            
+                        # Context Data
+                        print("  [CONTEXT]")
+                        for key, value in reasons.items():
+                            if key == 'bb_status': continue
+                            try:
+                                val_to_print = f"{float(value):.2f}"
+                            except (ValueError, TypeError):
+                                val_to_print = value
+                            print(f"    {key}: {val_to_print}")
+                            
+                        # Optionally log this rejection to DB or file?
+                        continue
+                        
+                    print(f"GATEKEEPER: {symbol} APPROVED. Reasons: {reasons}")
+                    
                     print(f"Triggering notification for {symbol} ({change_percent:.2f}%)")
                     
                     # Get company name
@@ -425,6 +462,9 @@ class StockService:
                     # Fetch Technical Analysis for the Technician Agent
                     print(f"Fetching technical analysis for {symbol}...")
                     technical_analysis = tradingview_service.get_technical_analysis(symbol, region=stock.get("region", "US"))
+                    
+                    # Add Gatekeeper findings to technical analysis passed to agents
+                    technical_analysis["gatekeeper_findings"] = reasons
 
                     # Pass company name, technicals, and market context to research service
                     report_data = research_service.analyze_stock(
@@ -437,6 +477,9 @@ class StockService:
                     )
                     
                     recommendation = report_data.get("recommendation", "HOLD")
+                    print(f"\n{'='*40}")
+                    print(f"*** DECISION FOR {symbol}: {recommendation} ***")
+                    print(f"{'='*40}\n")
                     # Use executive summary as the main reasoning text for DB/Display
                     reasoning = report_data.get("executive_summary", report_data.get("full_text", ""))
                     
@@ -444,6 +487,21 @@ class StockService:
                     
                     # 2. Update decision point with final result
                     status = "Owned" if recommendation == "BUY" else "Not Owned"
+                    # If recommendation is a score (e.g. "8.5"), treat high scores as Owned/Buy?
+                    # The user moved to a scoring system.
+                    # Let's assume > 7 is a Buy/Owned for now, or just keep status as "Tracked"
+                    try:
+                        score = float(recommendation)
+                        if score >= 7.0:
+                            status = "Owned"
+                        else:
+                            status = "Not Owned"
+                    except:
+                        if recommendation == "BUY":
+                            status = "Owned"
+                        else:
+                            status = "Not Owned"
+
                     if decision_id:
                         update_decision_point(decision_id, recommendation, reasoning, status)
                         print(f"Updated decision point for {symbol}: {recommendation} -> {status}")
