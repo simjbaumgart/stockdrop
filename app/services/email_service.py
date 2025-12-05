@@ -215,7 +215,7 @@ class EmailService:
             pdf.multi_cell(0, 6, text)
         
         # Save to reports folder
-        reports_dir = "reports"
+        reports_dir = "data/reports"
         if not os.path.exists(reports_dir):
             os.makedirs(reports_dir)
             
