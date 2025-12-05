@@ -1,6 +1,7 @@
-import yfinance as yf
 import pandas as pd
 import os
+import json
+import yfinance as yf
 from typing import List, Dict, Set
 from datetime import datetime
 from app.services.email_service import email_service
@@ -173,42 +174,17 @@ class StockService:
             return data
         except Exception as e:
             print(f"Error in get_indices (TradingView): {e}")
-            # Fallback to yfinance for all
+            # Fallback mechanism removed
             return self._get_indices_fallback_all()
 
     def _get_index_fallback(self, name: str) -> Dict:
-        ticker = self.indices_tickers.get(name)
-        if not ticker:
-            return {"price": 0.0, "change": 0.0, "change_percent": 0.0}
-            
-        try:
-            ticker_obj = yf.Ticker(ticker)
-            price = ticker_obj.fast_info.last_price
-            prev_close = ticker_obj.fast_info.previous_close
-            
-            if price and prev_close:
-                change = price - prev_close
-                change_percent = (change / prev_close) * 100
-                return {
-                    "price": price,
-                    "change": change,
-                    "change_percent": change_percent
-                }
-            else:
-                hist = ticker_obj.history(period="1d")
-                if not hist.empty:
-                    price = hist["Close"].iloc[-1]
-                    return {"price": price, "change": 0.0, "change_percent": 0.0}
-        except Exception as e:
-            print(f"Fallback error for {name}: {e}")
-            
+        # Fallback mechanism using yfinance is removed.
+        # Returning empty data if TradingView fails.
         return {"price": 0.0, "change": 0.0, "change_percent": 0.0}
 
     def _get_indices_fallback_all(self) -> Dict:
-        data = {}
-        for name in self.indices_tickers:
-            data[name] = self._get_index_fallback(name)
-        return data
+        # Fallback mechanism using yfinance is removed.
+        return {}
 
     def get_top_movers(self) -> List[Dict]:
         return self._fetch_and_sort_stocks(limit=10)
@@ -273,8 +249,7 @@ class StockService:
             return {}
 
     def get_options_dates(self, symbol: str) -> List[str]:
-        # Alpaca doesn't provide easy option dates list like yfinance
-        # Returning empty for now
+        # Alpaca / TradingView doesn't easily provide option dates list like yfinance
         return []
 
     def get_option_chain(self, symbol: str, date: str) -> Dict:
@@ -285,7 +260,7 @@ class StockService:
     def _fetch_market_context(self) -> Dict[str, float]:
         """
         Fetches the current percentage change for all tracked indices and sectors.
-        Uses TradingView for Indices (more reliable for global) and yfinance for Sectors.
+        Uses TradingView for both.
         """
         context_data = {}
         
@@ -297,32 +272,10 @@ class StockService:
         except Exception as e:
             print(f"Error fetching indices context: {e}")
             
-        # 2. Fetch Sectors from yfinance (US ETFs)
+        # 2. Fetch Sectors via TradingViewService
         try:
-            tickers_str = " ".join(self.sector_tickers.values())
-            tickers = yf.Tickers(tickers_str)
-            for name, symbol in self.sector_tickers.items():
-                try:
-                    ticker = tickers.tickers[symbol]
-                    # Use history for sectors as fast_info might be delayed/empty
-                    hist = ticker.history(period="1d")
-                    if not hist.empty:
-                        # Calculate change from open or prev close? 
-                        # yfinance history 'Close' is current price if market open?
-                        # Let's use fast_info if available, else history
-                        price = ticker.fast_info.last_price
-                        prev_close = ticker.fast_info.previous_close
-                        
-                        if price and prev_close:
-                            change = price - prev_close
-                            change_percent = (change / prev_close) * 100
-                            context_data[symbol] = change_percent
-                        else:
-                             context_data[symbol] = 0.0
-                    else:
-                        context_data[symbol] = 0.0
-                except Exception:
-                    context_data[symbol] = 0.0
+            sector_data = tradingview_service.get_sector_performance(self.sector_tickers)
+            context_data.update(sector_data)
         except Exception as e:
              print(f"Error fetching sector context: {e}")
              
@@ -404,7 +357,18 @@ class StockService:
                     
                     # --- GATEKEEPER PHASE 2: Technical Filters ---
                     print(f"GATEKEEPER: Checking technical filters for {symbol}...")
-                    is_valid, reasons = gatekeeper_service.check_technical_filters(symbol)
+                    region = stock.get("region", "US") 
+                    exchange = stock.get("exchange")
+                    screener = stock.get("screener")
+                    cached_indicators = stock.get("cached_indicators")
+                    
+                    is_valid, reasons = gatekeeper_service.check_technical_filters(
+                        symbol, 
+                        region=region, 
+                        exchange=exchange, 
+                        screener=screener,
+                        cached_indicators=cached_indicators
+                    )
                     
                     if not is_valid:
                         print(f"GATEKEEPER: {symbol} REJECTED.")
@@ -466,27 +430,37 @@ class StockService:
                     # Add Gatekeeper findings to technical analysis passed to agents
                     technical_analysis["gatekeeper_findings"] = reasons
 
+                    # Fetch News Headlines (Agent 2 Input)
+                    print(f"Fetching news for {symbol}...")
+                    news_headlines = self._fetch_news_headlines(symbol)
+                    
+                    # Prepare Technical Sheet (Agent 1 Input)
+                    technical_sheet = json.dumps(cached_indicators, indent=2) if cached_indicators else "No cached technical data available."
+
                     # Pass company name, technicals, and market context to research service
                     report_data = research_service.analyze_stock(
                         symbol, 
                         company_name, 
                         price, 
                         change_percent, 
-                        technical_analysis=technical_analysis,
+                        technical_sheet=technical_sheet,
+                        news_headlines=news_headlines,
                         market_context=market_context
                     )
                     
                     recommendation = report_data.get("recommendation", "HOLD")
+                    score = report_data.get("score", "N/A")
                     print(f"\n{'='*40}")
-                    print(f"*** DECISION FOR {symbol}: {recommendation} ***")
+                    print(f"*** DECISION FOR {symbol}: {recommendation} (Score: {score}/100) ***")
                     print(f"{'='*40}\n")
                     # Use executive summary as the main reasoning text for DB/Display
                     # Concatenate full report details as requested
                     reasoning_parts = [
                         f"*** EXECUTIVE SUMMARY ***\n{report_data.get('executive_summary', 'N/A')}\n",
                         f"*** TECHNICIAN'S REPORT ***\n{report_data.get('technician_report', 'N/A')}\n",
+                        f"*** RATIONAL BULL CASE ***\n{report_data.get('bull_report', 'N/A')}\n",
                         f"*** BEAR'S PRE-MORTEM ***\n{report_data.get('bear_report', 'N/A')}\n",
-                        f"*** MACRO CONTEXT ***\n{report_data.get('macro_report', 'N/A')}\n",
+                        f"*** CONTEXTUAL ANALYSIS ***\n{report_data.get('macro_report', 'N/A')}\n",
                         f"*** JUDGE'S SYNTHESIS ***\n{report_data.get('detailed_report', 'N/A')}"
                     ]
                     reasoning = "\n".join(reasoning_parts)
@@ -546,35 +520,44 @@ class StockService:
                         sector_ticker = self.sector_tickers[sector]
                         stock_context[f"Sector ({sector})"] = market_context.get(sector_ticker, 0.0)
 
-                    email_service.send_notification(symbol, change_percent, price, report_data, stock_context)
+                    # Conditional Email Notification
+                    # User requested email ONLY if verdict is 'STRONG BUY'
+                    # We check for "STRONG BUY" in the recommendation string (case-insensitive)
+                    if "STRONG BUY" in recommendation.upper():
+                        print(f"Verdict is {recommendation}. Sending email notification.")
+                        email_service.send_notification(symbol, change_percent, price, report_data, stock_context)
+                    else:
+                        print(f"Verdict is {recommendation}. Skipping email notification (Logic: Strong Buy only).")
+                        
                     self.sent_notifications.add(notification_key)
 
     def _check_earnings_proximity(self, symbol: str) -> tuple[bool, str]:
         """
-        Checks if the current date is close to an earnings date (within -2 to +1 days).
+        Checks if the current date is close to an earnings date using TradingView.
         Returns (is_earnings_drop, earnings_date_str).
         """
         try:
-            ticker = yf.Ticker(symbol)
-            # Try to get earnings dates history
-            earnings_dates = ticker.earnings_dates
+            # We don't have region easily available here, assuming US or using helper
+            # If we want accuracy, we should store region in stock object passed around.
+            # But currently we only have symbol.
+            # We can try to use 'US' or iterate. But let's try 'US' first.
+            # The symbol is usually unique enough or we found it in a specific region earlier.
             
-            if earnings_dates is None or earnings_dates.empty:
+            # Use TradingView service
+            earnings_ts = tradingview_service.get_earnings_date(symbol, region="US")
+            
+            if earnings_ts is None:
                 return False, None
                 
-            # Convert index to date objects (index is usually datetime)
-            dates = earnings_dates.index.date
+            # Convert timestamp to date
+            earnings_date = datetime.fromtimestamp(earnings_ts).date()
             today = datetime.now().date()
             
-            for date in dates:
-                # Check if today is within range [earnings_date - 1 day, earnings_date + 2 days]
-                # Usually drops happen immediately after earnings (next day) or same day if after hours
-                delta = (today - date).days
-                
-                # If delta is 0 (same day), 1 (day after), or -1 (day before - anticipation?)
-                # Let's say -1 to +2 to be safe
-                if -1 <= delta <= 2:
-                    return True, date.strftime("%Y-%m-%d")
+            # Check range [-1, +2] days
+            delta = (today - earnings_date).days
+            
+            if -1 <= delta <= 2:
+                return True, earnings_date.strftime("%Y-%m-%d")
                     
             return False, None
             
@@ -613,5 +596,28 @@ class StockService:
             print(f"Error fetching daily movers: {e}")
             
         return sorted(movers, key=lambda x: abs(x["change_percent"]), reverse=True)
+
+    def _fetch_news_headlines(self, symbol: str) -> str:
+        """Fetches top 5 news headlines for the symbol using yfinance."""
+        try:
+            # Handle special tickers if needed, but usually passed symbol matches yfinance format
+            # or is close enough.
+            ticker = yf.Ticker(symbol)
+            news = ticker.news
+            if not news:
+                return "No specific news headlines found."
+            
+            headlines = []
+            for n in news[:5]:
+                title = n.get('title', 'No Title')
+                # providerPublishTime is unix timestamp
+                pub_time = n.get('providerPublishTime', 0)
+                pub_date = datetime.fromtimestamp(pub_time).strftime('%Y-%m-%d')
+                headlines.append(f"- {pub_date}: {title}")
+                
+            return "\n".join(headlines)
+        except Exception as e:
+            print(f"Error fetching news for {symbol}: {e}")
+            return "Error fetching news (API issue)."
 
 stock_service = StockService()

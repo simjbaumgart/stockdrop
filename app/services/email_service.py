@@ -222,6 +222,7 @@ class EmailService:
         filename = f"report_{symbol}_{datetime.now().strftime('%Y%m%d')}.pdf"
         filepath = os.path.join(reports_dir, filename)
         pdf.output(filepath)
+        print(f"Reports aggregated and saved to {filepath}")
         return filepath
 
 email_service = EmailService()

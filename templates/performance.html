@@ -1,0 +1,326 @@
+{% extends "base.html" %}
+
+{% block title %}Performance Tracking - StockDrop{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>Performance Tracking</h1>
+    <p class="text-muted">Simulate historical trades and analyze performance over time.</p>
+</div>
+
+<div class="performance-container">
+    <!-- Input Section -->
+    <div class="card">
+        <div class="card-header">
+            <h3>New Simulation</h3>
+        </div>
+        <div class="card-body">
+            <form id="simulationForm" class="simulation-form">
+                <div class="form-group">
+                    <label for="symbol">Stock Symbol</label>
+                    <input type="text" id="symbol" name="symbol" placeholder="e.g. AAPL" required>
+                </div>
+                <div class="form-group">
+                    <label for="buy_date">Buy Date</label>
+                    <input type="date" id="buy_date" name="buy_date" required>
+                </div>
+                <div class="form-group">
+                    <label for="investment">Investment Amount ($)</label>
+                    <input type="number" id="investment" name="investment" value="1000" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Simulate Trade</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results Section (Hidden initially) -->
+    <div id="resultsSection" style="display: none;">
+
+        <!-- Summary Cards -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <span class="label">Initial Investment</span>
+                <span class="value" id="resInvestment">-</span>
+            </div>
+            <div class="metric-card">
+                <span class="label">Shares Bought</span>
+                <span class="value" id="resShares">-</span>
+            </div>
+            <div class="metric-card">
+                <span class="label">Buy Price</span>
+                <span class="value" id="resBuyPrice">-</span>
+            </div>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="card chart-card">
+            <div class="card-header">
+                <h3>Performance Graph</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="performanceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Hold Period Metrics Table -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Hold Period Analysis</h3>
+            </div>
+            <div class="card-body">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Hold Duration</th>
+                            <th>Date</th>
+                            <th>Value ($)</th>
+                            <th>ROI (%)</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="metricsTableBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Daily Data Table -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Daily History</h3>
+            </div>
+            <div class="card-body scrollable-table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Price ($)</th>
+                            <th>Value ($)</th>
+                            <th>Growth (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dailyTableBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .performance-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .simulation-form {
+        display: flex;
+        gap: 15px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .form-group label {
+        font-weight: 500;
+        font-size: 0.9em;
+        color: var(--text-muted);
+    }
+
+    .form-group input {
+        padding: 8px 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .metric-card {
+        background: var(--bg-card);
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chart-card {
+        margin-bottom: 20px;
+    }
+
+    .scrollable-table-container {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('simulationForm');
+        let chartInstance = null;
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const symbol = document.getElementById('symbol').value;
+            const buyDate = document.getElementById('buy_date').value;
+            const investment = document.getElementById('investment').value;
+
+            // Show loading state?
+
+            try {
+                const response = await fetch('/api/performance/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        symbol: symbol,
+                        buy_date: buyDate,
+                        investment_amount: parseFloat(investment)
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                displayResults(data);
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to fetch data.');
+            }
+        });
+
+        function displayResults(data) {
+            document.getElementById('resultsSection').style.display = 'block';
+
+            // Update Summary Metrics
+            document.getElementById('resInvestment').textContent = `$${data.investment.toFixed(2)}`;
+            document.getElementById('resShares').textContent = data.shares.toFixed(4);
+            document.getElementById('resBuyPrice').textContent = `$${data.initial_price.toFixed(2)}`;
+
+            // Update Metrics Table
+            const metricsBody = document.getElementById('metricsTableBody');
+            metricsBody.innerHTML = '';
+
+            data.metrics.forEach(m => {
+                const row = document.createElement('tr');
+
+                let roiClass = '';
+                let roiText = m.roi;
+                if (m.roi !== '-') {
+                    const roiVal = parseFloat(m.roi);
+                    roiClass = roiVal >= 0 ? 'text-green' : 'text-red';
+                    roiText = `${roiVal > 0 ? '+' : ''}${roiVal}%`;
+                }
+
+                row.innerHTML = `
+                <td>${m.days}</td>
+                <td>${m.date}</td>
+                <td>${m.value !== '-' ? '$' + m.value : '-'}</td>
+                <td class="${roiClass}">${roiText}</td>
+                <td>${m.status}</td>
+            `;
+                metricsBody.appendChild(row);
+            });
+
+            // Update Daily Table
+            const dailyBody = document.getElementById('dailyTableBody');
+            dailyBody.innerHTML = '';
+            // Show reverse chronological
+            [...data.daily_data].reverse().forEach(d => {
+                const row = document.createElement('tr');
+                const roiVal = parseFloat(d.roi);
+                const roiClass = roiVal >= 0 ? 'text-green' : 'text-red';
+
+                row.innerHTML = `
+                <td>${d.date}</td>
+                <td>$${d.price}</td>
+                <td>$${d.value}</td>
+                <td class="${roiClass}">${roiVal > 0 ? '+' : ''}${roiVal}%</td>
+            `;
+                dailyBody.appendChild(row);
+            });
+
+            // Render Chart
+            renderChart(data.daily_data);
+        }
+
+        function renderChart(dailyData) {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            const labels = dailyData.map(d => d.date);
+            const values = dailyData.map(d => d.value);
+            const investment = dailyData.length > 0 ? dailyData[0].value : 0; // Or passed investment?
+            // Actually initial value is investment amount
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Portfolio Value ($)',
+                        data: values,
+                        borderColor: '#3b82f6', // Blue-500
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

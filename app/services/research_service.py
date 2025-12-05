@@ -24,9 +24,9 @@ class ResearchService:
             logger.warning("GEMINI_API_KEY not found. Research service will use mock data.")
             self.model = None
 
-    def analyze_stock(self, symbol: str, company_name: str, price: float, change_percent: float, technical_analysis: Dict = {}, market_context: Dict = {}) -> dict:
+    def analyze_stock(self, symbol: str, company_name: str, price: float, change_percent: float, technical_sheet: str, news_headlines: str, market_context: Dict = {}) -> dict:
         """
-        Analyzes a stock using the Adversarial Council (Technician, Bear, Macro, Judge).
+        Analyzes a stock using the new 5-Agent Council.
         """
         if not self._check_and_increment_usage():
             logger.warning(f"Daily research limit reached. Skipping analysis for {symbol}.")
@@ -37,39 +37,61 @@ class ResearchService:
                 "reasoning": "Daily research limit reached. Please try again tomorrow."
             }
 
+        # --- Input Validation & Logging ---
+        print(f"\n[ResearchService] Analyzing {symbol}...")
+        
+        # Validate technical sheet integrity
+        try:
+            tech_data = json.loads(technical_sheet)
+            required_keys = ["rsi", "sma200", "volume", "close"] # Critical keys for Sentinel
+            missing_keys = [k for k in required_keys if k not in tech_data]
+            
+            if missing_keys:
+                logger.warning(f"⚠️ Technical Sheet for {symbol} is missing keys: {missing_keys}")
+                print(f"⚠️ WARNING: Technical Sheet is missing critical data: {missing_keys}")
+            else:
+                print(f"✅ Technical Sheet validated. Contains: {list(tech_data.keys())}")
+        except Exception as e:
+            # json.JSONDecodeError or other
+            logger.warning(f"⚠️ Technical Sheet for {symbol} is valid JSON string: {e}")
+            print(f"⚠️ WARNING: Technical Sheet is not valid JSON.")
+
         if not self.model:
             return self._get_mock_analysis(symbol, price, change_percent)
 
         try:
-            # --- The Adversarial Council Debate Protocol ---
+            # --- 5-Agent Sequential Pipeline ---
             
-            # 1. Agent Beta (The Technician)
-            # Proposes the trade based on technicals.
-            technician_prompt = self._create_technician_prompt(symbol, price, change_percent, technical_analysis)
-            technician_report = self._call_agent(technician_prompt, "Technician")
+            # Agent 1: The Technical Sentinel (The Logic Generator)
+            sentinel_prompt = self._create_sentinel_prompt(technical_sheet)
+            sentinel_output = self._call_agent(sentinel_prompt, "Sentinel")
+            sentinel_json = self._extract_json(sentinel_output)
+            sentinel_text = self._extract_text_part(sentinel_output) # For the report
             
-            # 2. Agent Alpha (The Bear)
-            # Attacks the proposal with a "Pre-Mortem".
-            bear_prompt = self._create_bear_prompt(symbol, company_name, change_percent, technician_report)
-            bear_report = self._call_agent(bear_prompt, "Bear")
+            # Agent 2: The Contextual Analyst (The Environment Scanner)
+            contextual_prompt = self._create_contextual_prompt(sentinel_json, news_headlines)
+            contextual_output = self._call_agent(contextual_prompt, "Contextual Analyst")
             
-            # 3. Agent Gamma (The Macro)
-            # Contextualizes the drop with sector/factor data.
-            macro_prompt = self._create_macro_prompt(symbol, company_name, change_percent, market_context)
-            macro_report = self._call_agent(macro_prompt, "Macro")
+            # Agent 3: The Rational Bull (Value Recognition)
+            bull_prompt = self._create_bull_prompt(sentinel_json, contextual_output)
+            bull_output = self._call_agent(bull_prompt, "Rational Bull")
             
-            # 4. Agent Omega (The Judge)
-            # Synthesizes the debate and issues a verdict.
-            judge_prompt = self._create_judge_prompt(symbol, company_name, technician_report, bear_report, macro_report)
-            final_response_text = self._call_agent(judge_prompt, "Judge")
+            # Agent 4: The Rational Bear (Risk Identification)
+            bear_prompt = self._create_bear_prompt(sentinel_json, contextual_output)
+            bear_output = self._call_agent(bear_prompt, "Rational Bear")
             
-            # Parse the final response
-            result = self._parse_synthesizer_response(final_response_text)
+            # Agent 5: The Judge (Weighted Probabilistic Synthesis)
+            judge_prompt = self._create_judge_prompt(sentinel_json, contextual_output, bull_output, bear_output)
+            judge_output = self._call_agent(judge_prompt, "Judge")
             
-            # Add debate transcript to the result
-            result["technician_report"] = technician_report
-            result["bear_report"] = bear_report
-            result["macro_report"] = macro_report
+            # Parse the final judge response
+            result = self._parse_judge_response(judge_output)
+            
+            # Attach transcript
+            result["technician_report"] = f"ANALYSIS:\n{sentinel_text}\n\nSENTINEL DATA:\n{json.dumps(sentinel_json, indent=2)}"
+            result["macro_report"] = contextual_output # Mapping Contextual to Macro slot for compatibility
+            result["bear_report"] = bear_output
+            result["bull_report"] = bull_output # New field
             
             return result
 
@@ -86,48 +108,95 @@ class ResearchService:
         """Helper to call Gemini with error handling and logging."""
         try:
             logger.info(f"Calling Agent: {agent_name}")
-            # Standard generation
             response = self.model.generate_content(prompt)
             return response.text
         except Exception as e:
             logger.error(f"Error in {agent_name} agent: {e}")
             return f"[Error generating {agent_name} report: {e}]"
+            
+    def _extract_json(self, text: str) -> dict:
+        """Extracts JSON object from text (handling markdown code blocks)."""
+        try:
+            # simplistic extraction: look for { and }
+            start = text.find('{')
+            end = text.rfind('}') + 1
+            if start != -1 and end != -1:
+                json_str = text[start:end]
+                return json.loads(json_str)
+        except Exception as e:
+            logger.error(f"Error extracting JSON: {e}")
+        return {}
 
-    def _parse_synthesizer_response(self, text: str) -> dict:
-        """Parses the final output from the Judge agent."""
+    def _extract_text_part(self, text: str) -> str:
+        """Attempts to extract the text part (Part 1) from Sentinel output."""
+        # Assuming Part 1 is before the JSON or explicitly labeled
+        # If unable to split cleanly, return the whole text (minus JSON if possible, but whole is fine for report)
+        return text
+
+    def _parse_judge_response(self, text: str) -> dict:
+        """Parses the final output from the Judge agent (Agent 5)."""
         recommendation = "HOLD"
+        score = 50.0 # Default neutral
         executive_summary = "No summary provided."
         detailed_report = text
 
         lines = text.split('\n')
         
-        # Extract Score
+        # 1. Final Verdict and Score
         for line in lines:
-            if line.upper().startswith("SCORE:"):
+            # Verdict
+            if "Final Verdict:" in line or "FINAL VERDICT:" in line:
                 try:
-                    score_val = line.split(":", 1)[1].strip()
-                    # Handle potential "/10" suffix
-                    if "/" in score_val:
-                        score_val = score_val.split("/")[0]
-                    recommendation = str(float(score_val))
+                    parts = line.split(":", 1)[1].strip()
+                    # Map to Buy/Hold/Avoid/Strong Buy/Speculative Buy
+                    # clean up
+                    clean_verdict = parts.upper().replace("[", "").replace("]", "").strip()
+                    logger.info(f"Judge Verdict: {clean_verdict}")
+                    recommendation = clean_verdict
                 except Exception:
-                    recommendation = "5.0" # Default to neutral if parsing fails
-                break
+                    pass
+            
+            # Score
+            if "Investment Score:" in line or "INVESTMENT SCORE:" in line or "Score:" in line:
+                 try:
+                    parts = line.split(":", 1)[1].strip()
+                    # Extract number
+                    import re
+                    match = re.search(r"(\d+(\.\d+)?)", parts)
+                    if match:
+                        score = float(match.group(1))
+                        logger.info(f"Judge Score: {score}")
+                 except Exception:
+                    pass
         
-        # Extract Executive Summary and Detailed Report
-        try:
-            if "EXECUTIVE SUMMARY:" in text and "DETAILED REPORT:" in text:
-                parts = text.split("DETAILED REPORT:")
-                summary_part = parts[0].split("EXECUTIVE SUMMARY:")[1]
-                detailed_report = parts[1].strip()
-                executive_summary = summary_part.strip()
-        except Exception as parse_err:
-            logger.warning(f"Failed to parse structured output: {parse_err}")
+        # 2. Extract Synthesis (Paragraph)
+        
+        # 3. Create Executive Summary
+        # Try to find "Primary Driver" or "Synthesis"
+        summary_buf = []
+        capture = False
+        for line in lines:
+            if "Primary Driver:" in line:
+                summary_buf.append(line)
+            if "Synthesis:" in line:
+                capture = True
+                summary_buf.append(line)
+                continue
+            if capture and line.strip() == "":
+                # Stop at empty line after synthesis?
+                pass
+        
+        if summary_buf:
+            executive_summary = "\n".join(summary_buf)
+        else:
+            executive_summary = text[:500] + "..."
 
+        # Append score to summary for visibility if needed, or just return it
         return {
             "recommendation": recommendation,
+            "score": score,
             "executive_summary": executive_summary,
-            "detailed_report": detailed_report,
+            "detailed_report": text,
             "full_text": text
         }
 
@@ -166,77 +235,155 @@ class ResearchService:
         except Exception as e:
             logger.error(f"Error saving usage stats: {e}")
 
-    def _create_technician_prompt(self, symbol: str, price: float, change_percent: float, technical_analysis: Dict) -> str:
-        ta_summary = technical_analysis.get("summary", {})
-        ta_indicators = technical_analysis.get("indicators", {})
-        
-        rsi = ta_indicators.get("RSI", "Unknown")
-        recommendation = ta_summary.get("RECOMMENDATION", "Unknown")
-        
-        return (
-            f"You are Agent Beta (The Technician), a disciplined momentum trader. You do not care about fundamentals. You only care about price action and support zones.\n"
-            f"Stock: {symbol}\n"
-            f"Price: {price}\n"
-            f"Change: {change_percent:.2f}%\n"
-            f"Technical Summary: {recommendation}\n"
-            f"RSI: {rsi}\n\n"
-            "Analyze the chart (based on the data provided). If the price breaks the current level, where is the floor?\n"
-            "Identify 'air pockets' where price could freefall.\n"
-            "Define precise Entry and Stop-Loss levels.\n"
-            "Output your analysis clearly."
-        )
+    # --- AGENT PROMPTS ---
 
-    def _create_bear_prompt(self, symbol: str, company_name: str, change_percent: float, technician_report: str) -> str:
-        return (
-            f"You are Agent Alpha (The Bear), a forensic short-seller. Your goal is to find ONE fatal flaw in {company_name} ({symbol}).\n"
-            "You must counteract the natural optimism of the market.\n\n"
-            f"--- TECHNICIAN'S REPORT ---\n{technician_report}\n---------------------------\n\n"
-            "PERFORM A PRE-MORTEM:\n"
-            f"Assume it is one month from now, and this stock has dropped another 50% (total drop > {abs(change_percent) + 50}%).\n"
-            "Write a retrospective news article explaining exactly what went wrong.\n"
-            "- Did an investigation expand?\n"
-            "- Did competitors steal market share?\n"
-            "- Is there accounting fraud?\n"
-            "- Is there a liquidity crisis?\n\n"
-            "Be specific, pessimistic, and ruthless. Ignore all growth narratives."
-        )
+    def _create_sentinel_prompt(self, technical_sheet: str) -> str:
+        return f"""
+You are the **Technical Sentinel**, the logic anchor for a financial analysis system. 
+You will receive a raw "Technical Data Sheet."
 
-    def _create_macro_prompt(self, symbol: str, company_name: str, change_percent: float, market_context: Dict) -> str:
-        context_str = "\n".join([f"{k}: {v:.2f}%" for k, v in market_context.items()])
-        return (
-            f"You are Agent Gamma (The Macro), a global macro strategist. You analyze SECTOR and FACTOR exposure.\n"
-            f"Stock: {company_name} ({symbol})\n"
-            f"Drop: {change_percent:.2f}%\n\n"
-            f"--- MARKET CONTEXT ---\n{context_str}\n----------------------\n\n"
-            "Is this stock dropping because of a sector rotation (e.g., Tech to Value) or systematic risk?\n"
-            "If the entire sector is down, the drop might be justified and not an opportunity.\n"
-            "Analyze the correlation. Is this idiosyncratic risk (company specific) or systematic risk?"
-        )
+**YOUR OBJECTIVE:**
+1. Analyze the provided data. While you must extract specific metrics for the JSON, you have the **freedom to interpret the chart's story creatively** in your text summary (e.g., identifying psychology, hidden patterns, or market traps).
+2. Generate a "Technical Analysis" summary text.
+3. Output a structured JSON "Fact Sheet."
 
-    def _create_judge_prompt(self, symbol: str, company_name: str, technician_report: str, bear_report: str, macro_report: str) -> str:
-        return (
-            f"You are Agent Omega (The Judge), a skeptical Chief Investment Officer. You only approve a trade if The Bear fails to find a fatal flaw AND The Technician identifies clear support.\n"
-            "Prefer inaction over loss.\n\n"
-            f"--- DEBATE TRANSCRIPT ---\n\n"
-            f"1. TECHNICIAN:\n{technician_report}\n\n"
-            f"2. BEAR (Pre-Mortem):\n{bear_report}\n\n"
-            f"3. MACRO:\n{macro_report}\n\n"
-            "-------------------------\n"
-            "Synthesize the debate. Requires 'Clear and Convincing Evidence' to Buy.\n"
-            "If the Bear's argument contains 'Existential Threats' (Fraud, Bankruptcy, Delisting), the trade is VETOED immediately.\n\n"
-            f"IMPORTANT: Explicitly state the company name '{company_name}' in your report.\n"
-            "IMPORTANT: Format your response EXACTLY as follows:\n"
-            "SCORE: [0-10]\n"
-            "(0 = Do not invest, 5 = Neutral/Hold, 10 = High Conviction Buy)\n"
-            "EXECUTIVE SUMMARY:\n"
-            "[Provide a concise 3-5 sentence summary of the verdict and the key reasons]\n"
-            "DETAILED REPORT:\n"
-            "[Provide a comprehensive synthesis of the debate. Address the Bear's points directly. Explain your final score.]"
-        )
+**LOGIC FRAMEWORK (Use as a guide, but interpret strictly for the JSON):**
+- **Trend Logic:** Compare Current Price vs 200-day SMA.
+- **Drop Severity:** Check 5-day price drop.
+- **Volume Logic:** Analyze Volume spikes relative to average. Label as "Capitulation" or "Weak."
+- **RSI Logic:** Check RSI levels and potential divergences.
+- **Valuation Logic:** Compare ForwardPE vs TrailingPE.
+- **Solvency Check:** Check DebtToEquity levels.
+
+**INPUT DATA:**
+{technical_sheet}
+
+**OUTPUT REQUIREMENTS:**
+Part 1: A creative technical analysis paragraph (max 100 words) summarizing the chart structure and market psychology.
+Part 2: A strictly formatted JSON object.
+
+**JSON FORMAT:**
+{{
+  "ticker": "String",
+  "current_price": Number,
+  "technical_logic": {{
+    "trend_status": "Uptrend" | "Downtrend",
+    "rsi_status": "Oversold" | "Neutral" | "Overbought",
+    "volume_status": "Capitulation" | "Normal" | "Weak",
+    "support_level_breached": Boolean
+  }},
+  "fundamental_logic": {{
+    "valuation_gap": "Undervalued" | "Fair" | "Overvalued",
+    "solvency_risk": "High" | "Low",
+    "earnings_quality": "Stable" | "Deteriorating"
+  }},
+  "news_logic": {{
+    "catalyst_type": "Systemic" | "Operational" | "Existential"
+  }}
+}}
+"""
+
+    def _create_contextual_prompt(self, sentinel_json: dict, headlines: str) -> str:
+        return f"""
+You are the **Contextual Analyst**. Your role is to determine if the market movement is a "Market Error" or a "Company Failure."
+
+**INPUTS:**
+1. The "Fact Sheet" JSON generated by the Technical Sentinel:
+{json.dumps(sentinel_json, indent=2)}
+
+2. The recent News Headlines:
+{headlines}
+
+**YOUR TASKS:**
+1. **News Classification:** Scan the headlines. Classify the primary driver.
+2. **Creative Contextualization:** You are free to **infer broader implications**. Connect the headlines to potential industry shifts, macro trends, or competitor reactions that aren't explicitly stated but are likely relevant.
+
+**OUTPUT:**
+Provide a "Context Brief" (max 150 words). 
+- Explicitly state the "Catalyst Type" (Systemic | Operational | Existential).
+- Defend your classification using the headlines and your own creative deductions about the market environment.
+"""
+
+    def _create_bull_prompt(self, sentinel_json: dict, context_brief: str) -> str:
+        return f"""
+You are the **Rational Bull**. Your objective is to construct the strongest case for *Asymmetric Upside*.
+
+**GUIDELINES:**
+- **Freedom of Thought:** Use the metrics from the "Fact Sheet" as your evidence base, but you are free to **propose new strategic ideas**. You can speculate on potential turnarounds, hidden assets, or market overreactions that the data hints at but doesn't explicitly prove.
+- **Tone:** Convincing, visionary, yet grounded in the numbers provided.
+
+**INPUTS:**
+Fact Sheet: {json.dumps(sentinel_json, indent=2)}
+Context: {context_brief}
+
+**REASONING FRAMEWORK:**
+1. **Technical Opportunity:** How does the volume/RSI suggest a reversal?
+2. **Valuation Dislocation:** Why is the market wrong about the current price?
+3. **Fundamental Defense:** What is the "hidden gem" aspect of this company?
+
+**OUTPUT:**
+A thesis titled "**The Rational Case for Mean Reversion**."
+- List 3 distinct arguments (Technical, Fundamental, Contextual).
+- Cite specific numbers from the Fact Sheet to back up your creative theories.
+"""
+
+    def _create_bear_prompt(self, sentinel_json: dict, context_brief: str) -> str:
+        return f"""
+You are the **Rational Bear**. Your objective is to uncover **Structural Risks** that could lead to capital loss.
+
+**GUIDELINES:**
+- **Freedom of Thought:** Use the metrics from the "Fact Sheet" as your evidence base, but you are free to **identify "Second-Order" risks**. Look beyond the immediate numbers—what could go wrong in the future? (e.g., brand damage, regulatory crackdowns, obsolescence).
+- **Tone:** Forensic, skeptical, and prudent.
+
+**INPUTS:**
+Fact Sheet: {json.dumps(sentinel_json, indent=2)}
+Context: {context_brief}
+
+**REASONING FRAMEWORK:**
+1. **Trend Fragility:** Why might the support fail?
+2. **Valuation Trap:** Why are the current earnings misleading?
+3. **Liquidity & Solvency:** What is the worst-case scenario for their balance sheet?
+4. **Catalyst Danger:** How could the current news spiral into something worse?
+
+**OUTPUT:**
+A thesis titled "**Structural Risk Assessment**."
+- List 3 distinct failure modes.
+- Cite specific numbers from the Fact Sheet to back up your risk warnings.
+"""
+
+    def _create_judge_prompt(self, sentinel_json: dict, context_brief: str, bull_thesis: str, bear_thesis: str) -> str:
+        return f"""
+You are the **Chief Investment Officer**. Your goal is to render a final decision based on the Probability of Recovery vs. Risk of Further Decline.
+
+**INPUTS:**
+- Fact Sheet: {json.dumps(sentinel_json, indent=2)}
+- Context Brief: {context_brief}
+- Bull Case: {bull_thesis}
+- Bear Case: {bear_thesis}
+
+**DECISION LOGIC:**
+1. **The Kill Switch:** If Agent 2 (Context) identified "Existential Risk" (Fraud/Bankruptcy/Lawsuit), your verdict must be **AVOID**, regardless of how cheap the stock is. (Note: Solvency Risk alone does not trigger the kill switch).
+2. **Evaluate the Evidence:** Weigh the arguments presented by the Bull and Bear. You are free to agree with the "new ideas" they proposed if they seem logical.
+   - **Technicals:** Did the volume and price action confirm capitulation?
+   - **Fundamentals:** Is the company historically strong?
+   - **Context:** Is the news temporary or permanent?
+
+**OUTPUT:**
+1. **Final Verdict:** Choose ONE [Strong Buy | Speculative Buy | Hold | Avoid | Short Sell].
+2. **Investment Score:** A score between 0-100 reflecting your conviction in the long trade.
+   - 0-20: Strong Sell / Bankruptcy Risk
+   - 21-40: Sell / Avoid
+   - 41-60: Hold / Neutral
+   - 61-80: Speculative Buy / Accumulate
+   - 81-100: Strong Buy / High Conviction
+3. **Primary Driver:** One sentence explaining the single most important factor in this decision.
+4. **Synthesis:** A paragraph reconciling the Bull and Bear arguments. Explain why one side is strictly more logical than the other based on the data and arguments provided.
+"""
 
     def _get_mock_analysis(self, symbol: str, price: float, change_percent: float) -> dict:
         return {
             "recommendation": "BUY",
+            "score": 85.0,
             "executive_summary": f"This is a mock summary for {symbol}. The drop of {change_percent:.2f}% seems excessive.",
             "detailed_report": f"This is a mock detailed report for {symbol}. Fundamentals are strong...",
             "full_text": "Mock full text",
@@ -244,5 +391,6 @@ class ResearchService:
             "bear_report": "Mock Bear Report: Pre-mortem shows no fatal flaws.",
             "macro_report": "Mock Macro Report: Sector rotation is the main driver."
         }
+# End of Class
 
 research_service = ResearchService()

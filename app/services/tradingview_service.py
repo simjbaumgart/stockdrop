@@ -261,14 +261,45 @@ class TradingViewService:
             # We pass the list of markets to set_markets
             q = Query().set_markets(*config["markets"]).select(
                 'name', 
-                'description',
-                'close',  
+                'description', 
                 'change', 
+                'close', 
+                'change_abs', 
                 'market_cap_basic', 
                 'volume', 
-                'price_earnings_ttm', 
-                'debt_to_equity_fq',
-                'currency'
+                'currency',
+                'exchange',
+                # Price Action
+                'open', 'high', 'low',
+                # Technicals
+                'RSI',
+                'SMA50', 
+                'SMA200',
+                'BB.lower',
+                'BB.upper',
+                'MACD.macd',
+                'MACD.signal',
+                'MACD.hist',
+                'Mom',
+                'Stoch.K',
+                'ATR',
+                'relative_volume_10d_calc',
+                'beta_1_year',
+                'price_52_week_high', 
+                'price_52_week_low',
+                'Recommend.All',
+                'Recommend.MA',
+                # Performance
+                'Perf.W',
+                'Perf.YTD',
+                # Financials - Valuation
+                'price_book_fq', 'price_earnings_ttm', 'enterprise_value_ebitda_ttm', 'price_free_cash_flow_ttm', 'dividend_yield_recent',
+                # Financials - Income
+                'total_revenue_ttm', 'total_revenue_yoy_growth_ttm', 'gross_margin_ttm', 'operating_margin_ttm', 'net_income_ttm', 'earnings_per_share_basic_ttm',
+                # Financials - Balance Sheet
+                'total_assets_fq', 'total_liabilities_fq', 'total_debt_fq', 'cash_n_equivalents_fq', 'current_ratio_fq', 'debt_to_equity_fq',
+                # Financials - Cash Flow
+                'free_cash_flow_ttm'
             )
 
             # Apply Filters
@@ -303,8 +334,56 @@ class TradingViewService:
                         "pe_ratio": row['price_earnings_ttm'],
                         "debt_to_equity": row['debt_to_equity_fq'],
                         "currency": row['currency'],
-                        "region": config["region"]
-                    })
+                    "currency": row['currency'],
+                    "region": config["region"],
+                    "exchange": row['exchange'],
+                    "screener": config["markets"][0],
+                    "cached_indicators": {
+                        "rsi": row['RSI'],
+                        "sma200": row['SMA200'],
+                        "bb_lower": row['BB.lower'],
+                        "bb_upper": row['BB.upper'],
+                        "close": row['close'],
+                        "open": row['open'],
+                        "high": row['high'],
+                        "low": row['low'],
+                        "volume": row['volume'],
+                        "perf_w": row['Perf.W'],
+                        "perf_ytd": row['Perf.YTD'],
+                        "recommend_all": row['Recommend.All'],
+                        "recommend_ma": row['Recommend.MA'],
+                        "macd": row['MACD.macd'],
+                        "macd_signal": row['MACD.signal'],
+                        "macd_hist": row['MACD.hist'],
+                        "mom": row['Mom'],
+                        "stoch_k": row['Stoch.K'],
+                        "atr": row['ATR'],
+                        "sma50": row['SMA50'],
+                        "rvol": row['relative_volume_10d_calc'],
+                        "beta": row['beta_1_year'],
+                        "high52": row['price_52_week_high'],
+                        "low52": row['price_52_week_low'],
+                        # Financials
+                        "pe_ratio": row['price_earnings_ttm'],
+                        "pb_ratio": row['price_book_fq'],
+                        "ev_ebitda": row['enterprise_value_ebitda_ttm'],
+                        "p_fcf": row['price_free_cash_flow_ttm'],
+                        "div_yield": row['dividend_yield_recent'],
+                        "revenue": row['total_revenue_ttm'],
+                        "rev_growth": row['total_revenue_yoy_growth_ttm'],
+                        "gross_margin": row['gross_margin_ttm'],
+                        "op_margin": row['operating_margin_ttm'],
+                        "net_income": row['net_income_ttm'],
+                        "eps": row['earnings_per_share_basic_ttm'],
+                        "total_assets": row['total_assets_fq'],
+                        "total_liabilities": row['total_liabilities_fq'],
+                        "total_debt": row['total_debt_fq'],
+                        "cash": row['cash_n_equivalents_fq'],
+                        "current_ratio": row['current_ratio_fq'],
+                        "debt_to_equity": row['debt_to_equity_fq'],
+                        "fcf": row['free_cash_flow_ttm']
+                    }
+                })
         except Exception as e:
             print(f"Error fetching movers for {config['region']}: {e}")
             
@@ -409,6 +488,164 @@ class TradingViewService:
             pass
             
         return {}
+
+    def get_technical_indicators(self, symbol: str, region: str = "US", exchange: str = None, screener: str = None) -> Dict:
+        """
+        Fetches specific technical indicators (SMA200, RSI, BB, Volume) for Gatekeeper.
+        If exchange/screener are provided, they are used directly. Otherwise, inferred from region.
+        """
+        # Map region to markets/exchanges if explict ones not provided
+        screener_map = {
+            "US": "america", "America": "america",
+            "EU": "germany", "Europe (Germany)": "germany", "Europe (UK)": "uk", 
+            "CN": "china", "China": "china",
+            "IN": "india", "India": "india",
+            "AU": "australia", "Australia": "australia",
+            "JP": "japan", "Japan": "japan",
+            "CA": "canada", "Canada": "canada",
+            "KR": "korea", "South Korea": "korea",
+            "TW": "taiwan", "Taiwan": "taiwan",
+            "BR": "brazil", "Brazil": "brazil",
+            # Fallbacks for other EU
+            "Europe (France)": "france",
+            "Europe (Eurozone)": "europe", # Or specific
+        }
+        
+        # Default exchange map (best guess)
+        exchange_map = {
+            "US": "NASDAQ", "America": "NASDAQ",
+            "EU": "XETR", "Europe (Germany)": "XETR",
+            "CN": "SSE", "China": "SSE",
+            "IN": "NSE", "India": "NSE",
+            "AU": "ASX", "Australia": "ASX",
+            "JP": "TSE", "Japan": "TSE",
+            "CA": "TSX", "Canada": "TSX",
+            "KR": "KRX", "South Korea": "KRX", # or similar
+            "TW": "TWSE", "Taiwan": "TWSE",
+            "BR": "BMFBOVESPA", "Brazil": "BMFBOVESPA"
+        }
+        
+        if not screener:
+            screener = screener_map.get(region, "america")
+            # Try to start lower case config region match or substring
+            if not screener and "Europe" in region: screener = "germany" # Fallback
+            
+        if not exchange:
+            exchange = exchange_map.get(region, "NASDAQ")
+
+
+        # Overrides for specific known tickers (like Indices/ETFs on AMEX/ARCA)
+        # SPY, XLK, etc are often on AMEX
+        if symbol in ["SPY", "XLK", "XLF", "XLV", "XLY", "XLP", "XLE", "XLI", "XLC", "XLU", "XLB", "XLRE"]:
+            exchange = "AMEX"
+        
+        try:
+            handler = TA_Handler(
+                symbol=symbol,
+                screener=screener,
+                exchange=exchange,
+                interval=Interval.INTERVAL_1_DAY
+            )
+            
+            # Simple retry logic for 429
+            import time
+            max_retries = 3
+            for i in range(max_retries):
+                try:
+                    analysis = handler.get_analysis()
+                    break
+                except Exception as e:
+                    if "429" in str(e):
+                        if i < max_retries - 1:
+                            wait_time = (i + 1) * 2 # 2s, 4s, 6s...
+                            print(f"429 Limit hit for {symbol}. Retrying in {wait_time}s...")
+                            time.sleep(wait_time)
+                            continue
+                    raise e
+            
+            if analysis:
+                inds = analysis.indicators
+                return {
+                    "close": inds.get("close", 0.0),
+                    "sma200": inds.get("SMA200", 0.0),
+                    "rsi": inds.get("RSI", 50.0), 
+                    "bb_lower": inds.get("BB.lower", 0.0),
+                    "bb_upper": inds.get("BB.upper", 0.0),
+                    "volume": inds.get("volume", 0),
+                }
+        except Exception as e:
+            print(f"Error fetching indicators for {symbol}: {e}")
+            
+        return {}
+
+    def get_earnings_date(self, symbol: str, region: str = "US") -> Optional[int]:
+        """
+        Fetches the next earnings release date timestamp.
+        """
+        region_map = {
+            "US": ["america"],
+            "EU": ["germany", "europe"],
+            "CN": ["china"],
+        }
+        markets = region_map.get(region, ["america"])
+        
+        try:
+            q = Query().set_markets(*markets).select('earnings_release_date').where(
+                Column('name') == symbol
+            )
+            count, df = q.get_scanner_data()
+            
+            if not df.empty:
+                val = df.iloc[0]['earnings_release_date']
+                if val:
+                    return int(val)
+        except Exception as e:
+            print(f"Error fetching earnings date for {symbol}: {e}")
+            
+        return None
+
+    def get_sector_performance(self, sector_tickers: Dict[str, str]) -> Dict[str, float]:
+        """
+        Fetches performance (change %) for a map of Sector Name -> Ticker.
+        Iterates through tickers using Screener to avoid Exchange guessing issues
+        or limitations of 'is_in'.
+        """
+        results = {}
+        
+        # We can run in parallel
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future_to_name = {
+                executor.submit(self._fetch_single_sector, name, ticker): name
+                for name, ticker in sector_tickers.items()
+            }
+            
+            for future in concurrent.futures.as_completed(future_to_name):
+                name = future_to_name[future]
+                try:
+                    change = future.result()
+                    results[name] = change
+                except Exception as e:
+                    print(f"Error processing sector {name}: {e}")
+                    results[name] = 0.0
+                    
+        return results
+
+    def _fetch_single_sector(self, name: str, ticker: str) -> float:
+        """
+        Helper to fetch change % for a single sector ticker using valid Screener query.
+        """
+        try:
+            # Assumes America/US for sectors (ETFs)
+            q = Query().set_markets('america').select('change').where(
+                Column('name') == ticker
+            )
+            count, df = q.get_scanner_data()
+            
+            if not df.empty:
+                return float(df.iloc[0]['change'])
+        except Exception:
+            pass
+        return 0.0
 
 tradingview_service = TradingViewService()
 

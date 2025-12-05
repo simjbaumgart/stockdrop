@@ -20,6 +20,8 @@ app = FastAPI(title="StockDrop")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.include_router(views.router)
+from app.routers import performance
+app.include_router(performance.router)
 app.include_router(api.router, prefix="/api")
 app.include_router(subscriptions.router, prefix="/api")
 

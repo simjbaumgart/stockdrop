@@ -1,5 +1,8 @@
 import logging
 from typing import List, Dict, Any
+from datetime import datetime, timedelta
+import yfinance as yf
+import pandas as pd
 from app.database import get_decision_points
 from app.services.tradingview_service import tradingview_service
 
@@ -107,6 +110,122 @@ class PerformanceService:
                 
         logger.info(f"Recorded performance for {count} decisions.")
         return count
+
+    def analyze_historical_trade(self, symbol: str, buy_date: str, investment_amount: float = 1000.0) -> Dict[str, Any]:
+        """
+        Simulates a trade from a past date and calculates performance metrics.
+        
+        Args:
+            symbol: Stock symbol (e.g., AAPL)
+            buy_date: Date string in YYYY-MM-DD format
+            investment_amount: Initial investment amount (default 1000)
+            
+        Returns:
+            Dictionary containing performance metrics, history data for graph, and hold point metrics.
+        """
+        try:
+            # 1. Validation
+            start_date = datetime.strptime(buy_date, "%Y-%m-%d")
+            if start_date > datetime.now():
+                return {"error": "Buy date cannot be in the future."}
+                
+            # 2. Fetch History using yfinance
+            # Fetch from buy_date to now
+            ticker = yf.Ticker(symbol)
+            history = ticker.history(start=buy_date, interval="1d")
+            
+            if history.empty:
+                 return {"error": f"No data found for {symbol} starting from {buy_date}."}
+                 
+            # 3. Calculate Daily Values
+            initial_price = history.iloc[0]['Close']
+            shares_bought = investment_amount / initial_price
+            
+            daily_data = []
+            for date, row in history.iterrows():
+                close_price = row['Close']
+                current_value = shares_bought * close_price
+                roi_percent = ((current_value - investment_amount) / investment_amount) * 100
+                
+                daily_data.append({
+                    "date": date.strftime("%Y-%m-%d"),
+                    "price": round(close_price, 2),
+                    "value": round(current_value, 2),
+                    "roi": round(roi_percent, 2)
+                })
+                
+            # 4. Calculate Specific Hold Point Metrics
+            hold_periods = [7, 14, 31, 365]
+            metrics = []
+            
+            # Helper to find closest available date if exact date is non-trading
+            def get_data_at_offset(days_offset):
+                # Target date
+                target_date = start_date + timedelta(days=days_offset)
+                
+                # Check if target date is in the future
+                if target_date > datetime.now():
+                    return None
+                    
+                # Find the row in history closely matching this date
+                # We can filter history index
+                # Converting history index to dates for comparison
+                # Note: history.index is usually DatetimeIndex
+                
+                # Simple approach: look for date >= target_date in our processed daily_data
+                # equivalent to "next trading day"
+                target_str = target_date.strftime("%Y-%m-%d")
+                
+                for entry in daily_data:
+                    if entry["date"] >= target_str:
+                        return entry
+                
+                # If we are here, maybe the data ends before the target (shouldn't happen if we check future)
+                return daily_data[-1]
+
+            for days in hold_periods:
+                data_point = get_data_at_offset(days)
+                if data_point:
+                    metrics.append({
+                        "days": days,
+                        "date": data_point["date"],
+                        "value": data_point["value"],
+                        "roi": data_point["roi"],
+                        "status": "Completed"
+                    })
+                else:
+                    metrics.append({
+                        "days": days,
+                        "date": (start_date + timedelta(days=days)).strftime("%Y-%m-%d"),
+                        "value": "-",
+                        "roi": "-",
+                        "status": "Pending"
+                    })
+            
+            # Add "Current/Today" metric
+            current = daily_data[-1]
+            days_held = (datetime.strptime(current["date"], "%Y-%m-%d") - start_date).days
+            metrics.append({
+                "days": f"Today ({days_held}d)",
+                "date": current["date"],
+                "value": current["value"],
+                "roi": current["roi"],
+                "status": "Current"
+            })
+            
+            return {
+                "symbol": symbol.upper(),
+                "buy_date": buy_date,
+                "initial_price": round(initial_price, 2),
+                "shares": round(shares_bought, 4),
+                "investment": investment_amount,
+                "daily_data": daily_data,
+                "metrics": metrics
+            }
+            
+        except Exception as e:
+            logger.error(f"Error evaluating historical trade: {e}")
+            return {"error": str(e)}
 
 performance_service = PerformanceService()
 
