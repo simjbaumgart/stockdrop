@@ -481,7 +481,15 @@ class StockService:
                     print(f"*** DECISION FOR {symbol}: {recommendation} ***")
                     print(f"{'='*40}\n")
                     # Use executive summary as the main reasoning text for DB/Display
-                    reasoning = report_data.get("executive_summary", report_data.get("full_text", ""))
+                    # Concatenate full report details as requested
+                    reasoning_parts = [
+                        f"*** EXECUTIVE SUMMARY ***\n{report_data.get('executive_summary', 'N/A')}\n",
+                        f"*** TECHNICIAN'S REPORT ***\n{report_data.get('technician_report', 'N/A')}\n",
+                        f"*** BEAR'S PRE-MORTEM ***\n{report_data.get('bear_report', 'N/A')}\n",
+                        f"*** MACRO CONTEXT ***\n{report_data.get('macro_report', 'N/A')}\n",
+                        f"*** JUDGE'S SYNTHESIS ***\n{report_data.get('detailed_report', 'N/A')}"
+                    ]
+                    reasoning = "\n".join(reasoning_parts)
                     
                     self.research_reports[symbol] = reasoning
                     
