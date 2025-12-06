@@ -4,6 +4,7 @@ import json
 import yfinance as yf
 from typing import List, Dict, Set
 from datetime import datetime, timedelta
+import pytz
 from app.services.email_service import email_service
 from app.services.research_service import research_service
 from app.services.alpaca_service import alpaca_service
@@ -343,6 +344,54 @@ class StockService:
                     pending_processing.append(stock["symbol"])
         
         print(f"Pending processing: {pending_processing}")
+        
+        # --- Market Priority Sorting ---
+        # 1. US (Open)
+        # 2. EU (Open)
+        # 3. China (Open)
+        # 4. Rest (or Closed)
+        
+        # Map region names to simple keys
+        # Regions: America (US), Europe, China, India, Australia, etc.
+        
+        def get_priority_score(stock):
+            region = stock.get("region", "Other")
+            is_open = self._is_market_open(region)
+            
+            # Priority Logic:
+            # Score 100: US Open
+            # Score 80: EU Open
+            # Score 60: China Open
+            # Score 40: Any other Open
+            # Score 20: Closed US/EU/China
+            # Score 0: Closed Other
+            
+            if is_open:
+                if region in ["America", "US"]: return 100
+                if region == "Europe": return 80
+                if region == "China": return 60
+                return 40
+            else:
+                # If closed, still prioritize by hierarchy? User said "If US and EU market closed do China. The rest is by alphabetic order"
+                # This implies closed markets also follow some hierarchy or alphabetic.
+                # Let's group closed markets together and alphabetize.
+                # But typically we want to process active markets first. 
+                # Let's just return 0 to put them at the end, and the sort by symbol will handle alphabet.
+                return 0
+
+        # Sort by Priority Score (Desc), then Symbol (Asc)
+        # Python sort is stable.
+        
+        # First sort by symbol alphabetic
+        large_cap_movers.sort(key=lambda x: x["symbol"])
+        
+        # Then sort by priority score descending
+        large_cap_movers.sort(key=get_priority_score, reverse=True)
+        
+        print("Processing Queue (Top 5):")
+        for s in large_cap_movers[:5]:
+            p_score = get_priority_score(s)
+            print(f"  - {s['symbol']} ({s.get('region')}) [Score: {p_score}]")
         
         for stock in large_cap_movers:
             symbol = stock["symbol"]
@@ -845,5 +894,29 @@ class StockService:
             # print(f"Error fetching transcript for {symbol}: {e}") 
             # Silently fail or log debug
             return ""
+
+    def _is_market_open(self, region: str) -> bool:
+        """
+        Heuristic to check if a market region is currently open.
+        Uses approximate UTC hours.
+        """
+        now_utc = datetime.now(pytz.utc)
+        # Weekday check (0=Mon, 6=Sun)
+        if now_utc.weekday() >= 5:
+            return False
+            
+        hour = now_utc.hour + now_utc.minute / 60.0
+        
+        if region == "America" or region == "US":
+            # NYSE/NASDAQ: 14:30 - 21:00 UTC (approx)
+            return 14.5 <= hour <= 21.0
+        elif region == "Europe":
+            # London/Frankfurt: 08:00 - 16:30 UTC (approx)
+            return 8.0 <= hour <= 16.5
+        elif region == "China":
+            # Shanghai: 01:30 - 07:00 UTC (approx, ignoring lunch break)
+            return 1.5 <= hour <= 7.0
+        
+        return False
 
 stock_service = StockService()
