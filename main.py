@@ -15,8 +15,17 @@ from app.database import init_db
 
 from app.services.performance_service import performance_service
 
+import subprocess
+
+def get_git_version():
+    try:
+        return subprocess.check_output(["git", "describe", "--tags", "--always"], stderr=subprocess.STDOUT).decode("utf-8").strip()
+    except Exception as e:
+        print(f"Error fetching git version: {e}")
+        return "unknown"
+
 app = FastAPI(title="StockDrop")
-VERSION = "1.1.0"
+VERSION = get_git_version()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -25,6 +34,10 @@ from app.routers import performance
 app.include_router(performance.router)
 app.include_router(api.router, prefix="/api")
 app.include_router(subscriptions.router, prefix="/api")
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok", "version": VERSION}
 
 @app.on_event("startup")
 async def startup_event():

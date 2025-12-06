@@ -142,7 +142,7 @@ class GoogleStorageService:
                 writer = csv.writer(f)
                 
                 if not file_exists:
-                    headers = ["Timestamp", "Symbol", "Company Name", "Price", "Change Percent", "Recommendation", "Reasoning", "P/E Ratio", "Market Cap", "Sector", "Region"]
+                    headers = ["Timestamp", "Symbol", "Company Name", "Price", "Change Percent", "Recommendation", "Reasoning", "P/E Ratio", "Market Cap", "Sector", "Region", "Version"]
                     writer.writerow(headers)
                 
                 row = [
@@ -156,7 +156,8 @@ class GoogleStorageService:
                     decision_data.get("pe_ratio", 0.0),
                     decision_data.get("market_cap", 0.0),
                     decision_data.get("sector", ""),
-                    decision_data.get("region", "")
+                    decision_data.get("region", ""),
+                    decision_data.get("git_version", "unknown")
                 ]
                 
                 writer.writerow(row)

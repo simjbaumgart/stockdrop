@@ -249,7 +249,7 @@ class TradingViewService:
         # Sort by change percent (ascending, biggest drop first)
         sorted_movers = sorted(unique_movers, key=lambda x: x['change_percent'])
         
-        return sorted_movers[:50] # Return top 50 global losers
+        return sorted_movers # Return all global losers matching criteria
 
     def _fetch_market_movers(self, config: Dict, max_change_percent: float, min_volume: int) -> List[Dict]:
         """
@@ -282,6 +282,10 @@ class TradingViewService:
                 'MACD.hist',
                 'Mom',
                 'Stoch.K',
+                'Stoch.D',
+                'ADX',
+                'CCI20',
+                'VWMA',
                 'ATR',
                 'relative_volume_10d_calc',
                 'beta_1_year',
@@ -334,7 +338,6 @@ class TradingViewService:
                         "pe_ratio": row['price_earnings_ttm'],
                         "debt_to_equity": row['debt_to_equity_fq'],
                         "currency": row['currency'],
-                    "currency": row['currency'],
                     "region": config["region"],
                     "exchange": row['exchange'],
                     "screener": config["markets"][0],
@@ -357,6 +360,10 @@ class TradingViewService:
                         "macd_hist": row['MACD.hist'],
                         "mom": row['Mom'],
                         "stoch_k": row['Stoch.K'],
+                        "stoch_d": row['Stoch.D'],
+                        "adx": row['ADX'],
+                        "cci": row['CCI20'],
+                        "vwma": row['VWMA'],
                         "atr": row['ATR'],
                         "sma50": row['SMA50'],
                         "rvol": row['relative_volume_10d_calc'],

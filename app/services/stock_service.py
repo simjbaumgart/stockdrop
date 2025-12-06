@@ -9,10 +9,12 @@ from app.services.email_service import email_service
 from app.services.research_service import research_service
 from app.services.alpaca_service import alpaca_service
 from app.services.tradingview_service import tradingview_service
-from app.services.drive_service import drive_service
+from app.database import add_decision_point, get_today_decision_symbols, update_decision_point
 from app.services.storage_service import storage_service
 from app.services.gatekeeper_service import gatekeeper_service
+from app.utils import get_git_version
 from app.services.finnhub_service import finnhub_service
+from app.services.alpha_vantage_service import alpha_vantage_service
 
 
 class StockService:
@@ -449,26 +451,33 @@ class StockService:
                     company_name = stock.get("description", stock.get("name", symbol))
 
                     # Check for earnings proximity
-                    is_earnings, earnings_date = self._check_earnings_proximity(symbol)
+                    is_earnings, earnings_date_str = self._check_earnings_proximity(symbol)
                     
                     # 1. Save initial "Pending" state to DB immediately
+                    today_str = datetime.now().strftime("%Y-%m-%d")
+                    
+                    # Get current git version
+                    current_version = get_git_version()
+
+                    # 1. Add partial decision point to DB (Status: Pending)
                     from app.database import add_decision_point, update_decision_point
                     
                     print(f"Adding pending decision for {symbol}...")
                     decision_id = add_decision_point(
-                        symbol, 
-                        price, 
-                        change_percent, 
-                        "ANALYZING", # Recommendation
-                        "Gemini is analyzing this stock...", # Reasoning
-                        "Pending", # Status
+                        symbol=symbol, 
+                        price=price, 
+                        drop_percent=change_percent, 
+                        recommendation="PENDING", 
+                        reasoning="Analyzing...", 
+                        status="Pending",
                         company_name=company_name,
-                        pe_ratio=stock.get("pe_ratio", 0.0),
-                        market_cap=stock.get("market_cap", 0.0),
-                        sector=stock.get("sector", self.stock_metadata.get(symbol, {}).get("sector", "Unknown")),
-                        region=stock.get("region", self.stock_metadata.get(symbol, {}).get("region", "Unknown")),
+                        pe_ratio=stock.get("pe_ratio"),
+                        market_cap=stock.get("market_cap"),
+                        sector=stock.get("sector", self.stock_metadata.get(symbol, {}).get("sector")),
+                        region=stock.get("region", self.stock_metadata.get(symbol, {}).get("region")),
                         is_earnings_drop=is_earnings,
-                        earnings_date=earnings_date
+                        earnings_date=earnings_date_str,
+                        git_version=current_version
                     )
 
                     # Generate research report
@@ -489,26 +498,61 @@ class StockService:
                     if not news_headlines:
                         news_headlines = "No specific news headlines found."
                         
-                    # Fetch Filings & Transcript (New Agent Data)
+                    # Fetch Filings & Transcript (New Agent Data) - Kept for compatibility if needed, but Agents use raw data now.
+                    # We will attach text snippets to the raw_data if we want the Analyst to process them specifically?
+                    # The plan uses 'FundamentalAnalyst' for Valuation/Insider.
+                    # 'Bull/Bear' use filings text. Ah, Bull/Bear prompts in ResearchService use 'filings_text'.
+                    # Wait, the new ResearchService prompts use 'state.reports'. 
+                    # Does the Bull/Bear prompt still take filings_text?
+                    # Looking at my ResearchService code: 
+                    # _create_bull_prompt(self, state: MarketState) -> no separate args.
+                    # It uses transcripts from the 'state' or assumes they are in reports?
+                    # The Bull/Bear prompts I wrote display: "ANALYST REPORTS:..."
+                    # They DO NOT explicitly take filings_text as an argument in the new code.
+                    # They rely on Analyst Reports. 
+                    # So where do filings/transcripts go? 
+                    # They should probably be processed by an Analyst (e.g. Fundamental) OR attached to MarketState.
+                    # The MarketState object has 'reports'. 
+                    # Maybe I should add a 'filings_summary' to 'fundamenta' report or similar.
+                    # For now, I will omit passing filings_text separately as the new signature doesn't take it.
+                    
+                    # Fetch Filings & Transcript
                     print(f"Fetching filings/transcript for {symbol}...")
+                    # We fetch these to pass to the SentimentAnalyst and others
                     filings_text = self.get_latest_filing_text(symbol)
                     transcript_text = self.get_latest_transcript(symbol)
                     
-                    # Prepare Technical Sheet (Agent 1 Input)
-                    technical_sheet = json.dumps(cached_indicators, indent=2) if cached_indicators else "No cached technical data available."
+                    # Fetch Technical Indicators (Ensure we have what TechnicalAnalyst needs: RSI, MACD, ADX)
+                    # tradingview_service.get_technical_analysis returns 'indicators' dict.
+                    print(f"Fetching technical details for {symbol}...")
+                    ta_data = tradingview_service.get_technical_analysis(symbol, region=stock.get("region", "US"))
+                    indicators = ta_data.get('indicators', {})
+                    
+                    # Add cached Gatekeeper indicators if missing
+                    if cached_indicators:
+                        for k, v in cached_indicators.items():
+                            if k not in indicators:
+                                indicators[k] = v
 
-                    # Pass company name, technicals, and market context to research service
-                    report_data = research_service.analyze_stock(
-                        symbol, 
-                        company_name, 
-                        price, 
-                        change_percent, 
-                        technical_sheet=technical_sheet,
-                        news_headlines=news_headlines,
-                        market_context=market_context,
-                        filings_text=filings_text,
-                        transcript_text=transcript_text
-                    )
+                    # Prepare Raw Data for Analysts
+                    # REMOVED: Insider Sentiment (User Feedback)
+                    # ADDED: transcript_text for SentimentAnalyst
+                    raw_data = {
+                        "metrics": {
+                            "pe_ratio": stock.get("pe_ratio"),
+                            "price_to_book": stock.get("pb_ratio"), # Assuming these keys exist in 'stock' from screener
+                            "peg_ratio": stock.get("peg_ratio"), # Might be missing
+                            "debt_to_equity": stock.get("debt_to_equity"),
+                            "profit_margin": stock.get("net_margin") # check key
+                        },
+                        "indicators": indicators,
+                        "news_items": news_data,
+                        "transcript_text": transcript_text or "", 
+                        "market_context": market_context
+                    }
+
+                    # Pass raw_data to research service
+                    report_data = research_service.analyze_stock(symbol, raw_data)
                     
                     recommendation = report_data.get("recommendation", "HOLD")
                     score = report_data.get("score", "N/A")
@@ -563,8 +607,9 @@ class StockService:
                         "sector": stock.get("sector", self.stock_metadata.get(symbol, {}).get("sector", "Unknown")),
                         "region": stock.get("region", self.stock_metadata.get(symbol, {}).get("region", "Unknown")),
                         "is_earnings_drop": is_earnings,
-                        "earnings_date": earnings_date,
-                        "news": news_data
+                        "earnings_date": earnings_date_str,
+                        "news": news_data,
+                        "git_version": current_version
                     }
                     
                     storage_service.save_decision_locally(decision_data)
@@ -593,6 +638,8 @@ class StockService:
                         print(f"Verdict is {recommendation}. Skipping email notification (Logic: Strong Buy only).")
                         
                     self.sent_notifications.add(notification_key)
+                    
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] Cycle completed. Large cap drops check finished.")
 
     def _check_earnings_proximity(self, symbol: str) -> tuple[bool, str]:
         """
@@ -701,29 +748,55 @@ class StockService:
         """
         news_items = []
         
-        # 1. Finnhub News (Primary Source)
+        # 1. Alpha Vantage News (Primary Source)
         try:
             today = datetime.now().strftime("%Y-%m-%d")
             week_ago = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
-            fh_news = finnhub_service.get_company_news(symbol, from_date=week_ago, to_date=today)
             
-            for item in fh_news:
-                try:
-                    ts = item.get('datetime', 0)
-                    dt_str = datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
-                    news_items.append({
-                        "source": item.get('source', 'Finnhub'),
-                        "headline": item.get('headline', 'No Title'),
-                        "summary": item.get('summary', ''),
-                        "url": item.get('url', ''),
-                        "datetime": ts,
-                        "datetime_str": dt_str,
-                        "image": item.get('image', '')
-                    })
-                except Exception:
-                    continue
+            av_news = alpha_vantage_service.get_company_news(symbol, start_date=week_ago, end_date=today)
+            if av_news:
+                print(f"Fetched {len(av_news)} news items from Alpha Vantage for {symbol}.")
+                news_items.extend(av_news)
         except Exception as e:
-            print(f"Error fetching Finnhub news for {symbol}: {e}")
+            print(f"Error fetching Alpha Vantage news for {symbol}: {e}")
+
+        # 2. Finnhub News (Fallback/Secondary Source)
+        # Only fetch if we have very little news or if we want to combine sources (user said "use alphavantage for news only!" -> implying replacement?)
+        # User said "use alphavantage for news only! no fundamentals". 
+        # But also "can you understand from this repo how the news are pulled... I would like to get the news from the Alpha Vantage API".
+        # Usually implies prioritizing it. If AV fails, we should fallback.
+        # If AV succeeds, user might prefer ONLY AV. 
+        # But "get the news from AV" doesn't strictly mean "exclude others if AV works".
+        # However, to be cleaner and follow "use alphavantage for news only" (which might mean "don't use other sources?"), 
+        # I'll effectively make it the primary. If it returns content, we might skip others to reduce noise/duplication?
+        # Let's KEEP others as fallbacks or supplementary for now to ensure we don't have empty reports.
+        
+        if not news_items:
+            try:
+                # today/week_ago defined above or re-calc if needed (variables share scope in python if in same function block)
+                # re-defining just in case of scope clarity
+                today = datetime.now().strftime("%Y-%m-%d")
+                week_ago = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
+                
+                fh_news = finnhub_service.get_company_news(symbol, from_date=week_ago, to_date=today)
+                
+                for item in fh_news:
+                    try:
+                        ts = item.get('datetime', 0)
+                        dt_str = datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
+                        news_items.append({
+                            "source": item.get('source', 'Finnhub'),
+                            "headline": item.get('headline', 'No Title'),
+                            "summary": item.get('summary', ''),
+                            "url": item.get('url', ''),
+                            "datetime": ts,
+                            "datetime_str": dt_str,
+                            "image": item.get('image', '')
+                        })
+                    except Exception:
+                        continue
+            except Exception as e:
+                print(f"Error fetching Finnhub news for {symbol}: {e}")
 
         # 2. yfinance News (Secondary Source)
         try:

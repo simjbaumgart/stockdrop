@@ -133,5 +133,16 @@ class FinnhubService:
             print(f"Error extracting filing text from {url}: {e}")
             return ""
 
+    def get_insider_sentiment(self, symbol: str, from_date: str, to_date: str):
+        """
+        Get insider sentiment data for a specific symbol.
+        """
+        if not self.client:
+            return {}
+        try:
+            return self.client.stock_insider_sentiment(symbol, _from=from_date, to=to_date)
+        except Exception as e:
+            print(f"Error fetching insider sentiment for {symbol}: {e}")
+            return {}
 
 finnhub_service = FinnhubService()

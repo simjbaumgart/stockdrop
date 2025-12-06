@@ -49,7 +49,8 @@ def init_db():
             "region": "TEXT",
             "is_earnings_drop": "BOOLEAN DEFAULT 0",
             "earnings_date": "TEXT",
-            "ai_score": "REAL"
+            "ai_score": "REAL",
+            "git_version": "TEXT"
         }
         
         for col_name, col_type in new_columns.items():
@@ -103,15 +104,15 @@ def get_all_subscribers() -> List[str]:
 
 def add_decision_point(symbol: str, price: float, drop_percent: float, recommendation: str, reasoning: str, status: str = "Ignored", 
                       company_name: str = None, pe_ratio: float = None, market_cap: float = None, sector: str = None, region: str = None,
-                      is_earnings_drop: bool = False, earnings_date: str = None, ai_score: float = None) -> int:
+                      is_earnings_drop: bool = False, earnings_date: str = None, ai_score: float = None, git_version: str = None) -> int:
     """Add a new decision point."""
     try:
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO decision_points (symbol, price_at_decision, drop_percent, recommendation, reasoning, status, company_name, pe_ratio, market_cap, sector, region, is_earnings_drop, earnings_date, ai_score)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (symbol, price, drop_percent, recommendation, reasoning, status, company_name, pe_ratio, market_cap, sector, region, is_earnings_drop, earnings_date, ai_score))
+            INSERT INTO decision_points (symbol, price_at_decision, drop_percent, recommendation, reasoning, status, company_name, pe_ratio, market_cap, sector, region, is_earnings_drop, earnings_date, ai_score, git_version)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (symbol, price, drop_percent, recommendation, reasoning, status, company_name, pe_ratio, market_cap, sector, region, is_earnings_drop, earnings_date, ai_score, git_version))
         conn.commit()
         last_id = cursor.lastrowid
         conn.close()
