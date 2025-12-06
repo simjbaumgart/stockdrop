@@ -24,7 +24,7 @@ class ResearchService:
             logger.warning("GEMINI_API_KEY not found. Research service will use mock data.")
             self.model = None
 
-    def analyze_stock(self, symbol: str, company_name: str, price: float, change_percent: float, technical_sheet: str, news_headlines: str, market_context: Dict = {}) -> dict:
+    def analyze_stock(self, symbol: str, company_name: str, price: float, change_percent: float, technical_sheet: str, news_headlines: str, market_context: Dict = {}, filings_text: str = "", transcript_text: str = "") -> dict:
         """
         Analyzes a stock using the new 5-Agent Council.
         """
@@ -73,11 +73,11 @@ class ResearchService:
             contextual_output = self._call_agent(contextual_prompt, "Contextual Analyst")
             
             # Agent 3: The Rational Bull (Value Recognition)
-            bull_prompt = self._create_bull_prompt(sentinel_json, contextual_output)
+            bull_prompt = self._create_bull_prompt(sentinel_json, contextual_output, filings_text, transcript_text)
             bull_output = self._call_agent(bull_prompt, "Rational Bull")
             
             # Agent 4: The Rational Bear (Risk Identification)
-            bear_prompt = self._create_bear_prompt(sentinel_json, contextual_output)
+            bear_prompt = self._create_bear_prompt(sentinel_json, contextual_output, filings_text, transcript_text)
             bear_output = self._call_agent(bear_prompt, "Rational Bear")
             
             # Agent 5: The Judge (Weighted Probabilistic Synthesis)
@@ -296,15 +296,16 @@ You are the **Contextual Analyst**. Your role is to determine if the market move
 
 **YOUR TASKS:**
 1. **News Classification:** Scan the headlines. Classify the primary driver.
-2. **Creative Contextualization:** You are free to **infer broader implications**. Connect the headlines to potential industry shifts, macro trends, or competitor reactions that aren't explicitly stated but are likely relevant.
+2. **Creative Contextualization:** You might consider the reason for the drop of the stock in your analysis. You are free to **infer broader implications**. Connect the headlines to potential industry shifts, macro trends, or competitor reactions.
 
 **OUTPUT:**
 Provide a "Context Brief" (max 150 words). 
-- Explicitly state the "Catalyst Type" (Systemic | Operational | Existential).
-- Defend your classification using the headlines and your own creative deductions about the market environment.
+- **Reason for Drop:** One clear sentence showing specific cause (e.g. "Missed earnings by 5%", "CEO resigned", "Sector rotation").
+- **Catalyst Type:** (Systemic | Operational | Existential).
+- **Assessment:** Defend your classification using the headlines and your own creative deductions about the market environment.
 """
 
-    def _create_bull_prompt(self, sentinel_json: dict, context_brief: str) -> str:
+    def _create_bull_prompt(self, sentinel_json: dict, context_brief: str, filings_text: str = "", transcript_text: str = "") -> str:
         return f"""
 You are the **Rational Bull**. Your objective is to construct the strongest case for *Asymmetric Upside*.
 
@@ -316,10 +317,22 @@ You are the **Rational Bull**. Your objective is to construct the strongest case
 Fact Sheet: {json.dumps(sentinel_json, indent=2)}
 Context: {context_brief}
 
+**ADDITIONAL DATA (Recent Filings/Transcripts):**
+Use these snippets to find hidden growth drivers, product announcements, or positive guidance.
+---
+FILINGS SNIPPETS:
+{filings_text[:5000] if filings_text else "No recent filings data."}
+
+TRANSCRIPT SNIPPETS:
+{transcript_text[:5000] if transcript_text else "No recent transcript data."}
+---
+
 **REASONING FRAMEWORK:**
-1. **Technical Opportunity:** How does the volume/RSI suggest a reversal?
-2. **Valuation Dislocation:** Why is the market wrong about the current price?
-3. **Fundamental Defense:** What is the "hidden gem" aspect of this company?
+1. **Context:** You might consider the reason for the drop of the stock in your analysis. Why might this be temporary?
+2. **Technical Opportunity:** How does the volume/RSI suggest a reversal?
+3. **Valuation Dislocation:** Why is the market wrong about the current price?
+4. **Fundamental Defense:** What is the "hidden gem" aspect of this company?
+5. **Data Insights:** specifically cite something positive from the Filings/Transcript if available.
 
 **OUTPUT:**
 A thesis titled "**The Rational Case for Mean Reversion**."
@@ -327,7 +340,7 @@ A thesis titled "**The Rational Case for Mean Reversion**."
 - Cite specific numbers from the Fact Sheet to back up your creative theories.
 """
 
-    def _create_bear_prompt(self, sentinel_json: dict, context_brief: str) -> str:
+    def _create_bear_prompt(self, sentinel_json: dict, context_brief: str, filings_text: str = "", transcript_text: str = "") -> str:
         return f"""
 You are the **Rational Bear**. Your objective is to uncover **Structural Risks** that could lead to capital loss.
 
@@ -339,11 +352,23 @@ You are the **Rational Bear**. Your objective is to uncover **Structural Risks**
 Fact Sheet: {json.dumps(sentinel_json, indent=2)}
 Context: {context_brief}
 
+**ADDITIONAL DATA (Recent Filings/Transcripts):**
+Use these snippets to find omissions, risks, litigation warnings, or cash burn concerns.
+---
+FILINGS SNIPPETS:
+{filings_text[:5000] if filings_text else "No recent filings data."}
+
+TRANSCRIPT SNIPPETS:
+{transcript_text[:5000] if transcript_text else "No recent transcript data."}
+---
+
 **REASONING FRAMEWORK:**
-1. **Trend Fragility:** Why might the support fail?
-2. **Valuation Trap:** Why are the current earnings misleading?
-3. **Liquidity & Solvency:** What is the worst-case scenario for their balance sheet?
-4. **Catalyst Danger:** How could the current news spiral into something worse?
+1. **Context:** You might consider the reason for the drop of the stock in your analysis. Why does this confirm a structural issue?
+2. **Trend Fragility:** Why might the support fail?
+3. **Valuation Trap:** Why are the current earnings misleading?
+4. **Liquidity & Solvency:** What is the worst-case scenario for their balance sheet?
+5. **Catalyst Danger:** How could the current news spiral into something worse?
+6. **Data Red Flags:** specifically cite a risk from the Filings/Transcript if available.
 
 **OUTPUT:**
 A thesis titled "**Structural Risk Assessment**."
@@ -367,6 +392,7 @@ You are the **Chief Investment Officer**. Your goal is to render a final decisio
    - **Technicals:** Did the volume and price action confirm capitulation?
    - **Fundamentals:** Is the company historically strong?
    - **Context:** Is the news temporary or permanent?
+3. **Event Analysis:** In your final verdict you should incorporate the recent event that led to the stock drop.
 
 **OUTPUT:**
 1. **Final Verdict:** Choose ONE [Strong Buy | Speculative Buy | Hold | Avoid | Short Sell].
@@ -377,7 +403,8 @@ You are the **Chief Investment Officer**. Your goal is to render a final decisio
    - 61-80: Speculative Buy / Accumulate
    - 81-100: Strong Buy / High Conviction
 3. **Primary Driver:** One sentence explaining the single most important factor in this decision.
-4. **Synthesis:** A paragraph reconciling the Bull and Bear arguments. Explain why one side is strictly more logical than the other based on the data and arguments provided.
+4. **Reason for Drop:** State the specific reason for the price drop clearly (citing the Context agent).
+5. **Synthesis:** A paragraph reconciling the Bull and Bear arguments. Explain why one side is strictly more logical than the other based on the data and arguments provided.
 """
 
     def _get_mock_analysis(self, symbol: str, price: float, change_percent: float) -> dict:
