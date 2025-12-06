@@ -16,6 +16,7 @@ from app.database import init_db
 from app.services.performance_service import performance_service
 
 app = FastAPI(title="StockDrop")
+VERSION = "1.1.0"
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -27,6 +28,7 @@ app.include_router(subscriptions.router, prefix="/api")
 
 @app.on_event("startup")
 async def startup_event():
+    print(f"Starting StockDrop v{VERSION}")
     init_db()
     asyncio.create_task(run_periodic_check())
     asyncio.create_task(run_storage_upload())

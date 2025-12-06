@@ -93,6 +93,11 @@ class ResearchService:
             result["bear_report"] = bear_output
             result["bull_report"] = bull_output # New field
             
+            # Add data source footer
+            footer = "\n\n*Analysis includes data from recent SEC Filings & Earnings Transcripts.*"
+            result["detailed_report"] += footer
+            result["executive_summary"] += footer
+            
             return result
 
         except Exception as e:

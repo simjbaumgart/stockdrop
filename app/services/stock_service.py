@@ -3,7 +3,7 @@ import os
 import json
 import yfinance as yf
 from typing import List, Dict, Set
-from datetime import datetime
+from datetime import datetime, timedelta
 from app.services.email_service import email_service
 from app.services.research_service import research_service
 from app.services.alpaca_service import alpaca_service
@@ -11,6 +11,8 @@ from app.services.tradingview_service import tradingview_service
 from app.services.drive_service import drive_service
 from app.services.storage_service import storage_service
 from app.services.gatekeeper_service import gatekeeper_service
+from app.services.finnhub_service import finnhub_service
+
 
 class StockService:
     def __init__(self):
@@ -431,8 +433,17 @@ class StockService:
                     technical_analysis["gatekeeper_findings"] = reasons
 
                     # Fetch News Headlines (Agent 2 Input)
+                    # Fetch News Headlines (Agent 2 Input)
                     print(f"Fetching news for {symbol}...")
-                    news_headlines = self._fetch_news_headlines(symbol)
+                    news_data = self.get_aggregated_news(symbol)
+                    news_headlines = "\n".join([f"- {n['datetime_str']}: {n['headline']} ({n['source']})" for n in news_data[:7]])
+                    if not news_headlines:
+                        news_headlines = "No specific news headlines found."
+                        
+                    # Fetch Filings & Transcript (New Agent Data)
+                    print(f"Fetching filings/transcript for {symbol}...")
+                    filings_text = self.get_latest_filing_text(symbol)
+                    transcript_text = self.get_latest_transcript(symbol)
                     
                     # Prepare Technical Sheet (Agent 1 Input)
                     technical_sheet = json.dumps(cached_indicators, indent=2) if cached_indicators else "No cached technical data available."
@@ -445,7 +456,9 @@ class StockService:
                         change_percent, 
                         technical_sheet=technical_sheet,
                         news_headlines=news_headlines,
-                        market_context=market_context
+                        market_context=market_context,
+                        filings_text=filings_text,
+                        transcript_text=transcript_text
                     )
                     
                     recommendation = report_data.get("recommendation", "HOLD")
@@ -501,7 +514,8 @@ class StockService:
                         "sector": stock.get("sector", self.stock_metadata.get(symbol, {}).get("sector", "Unknown")),
                         "region": stock.get("region", self.stock_metadata.get(symbol, {}).get("region", "Unknown")),
                         "is_earnings_drop": is_earnings,
-                        "earnings_date": earnings_date
+                        "earnings_date": earnings_date,
+                        "news": news_data
                     }
                     
                     storage_service.save_decision_locally(decision_data)
@@ -619,5 +633,217 @@ class StockService:
         except Exception as e:
             print(f"Error fetching news for {symbol}: {e}")
             return "Error fetching news (API issue)."
+
+    def get_aggregated_news(self, symbol: str) -> List[Dict]:
+        """
+        Fetches and aggregates news from Finnhub and yfinance.
+        Returns a standardised list of news items.
+        
+        Standard Object:
+        {
+            "source": str,
+            "headline": str,
+            "summary": str,
+            "url": str,
+            "datetime": int, # Unix timestamp
+            "datetime_str": str, # YYYY-MM-DD
+            "image": str
+        }
+        """
+        news_items = []
+        
+        # 1. Finnhub News (Primary Source)
+        try:
+            today = datetime.now().strftime("%Y-%m-%d")
+            week_ago = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
+            fh_news = finnhub_service.get_company_news(symbol, from_date=week_ago, to_date=today)
+            
+            for item in fh_news:
+                try:
+                    ts = item.get('datetime', 0)
+                    dt_str = datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
+                    news_items.append({
+                        "source": item.get('source', 'Finnhub'),
+                        "headline": item.get('headline', 'No Title'),
+                        "summary": item.get('summary', ''),
+                        "url": item.get('url', ''),
+                        "datetime": ts,
+                        "datetime_str": dt_str,
+                        "image": item.get('image', '')
+                    })
+                except Exception:
+                    continue
+        except Exception as e:
+            print(f"Error fetching Finnhub news for {symbol}: {e}")
+
+        # 2. yfinance News (Secondary Source)
+        try:
+            ticker = yf.Ticker(symbol)
+            yf_news = ticker.news
+            for item in yf_news:
+                try:
+                    # yfinance structure varies, usually has 'title', 'link', 'providerPublishTime'
+                    title = item.get('title', 'No Title')
+                    # Avoid duplicates from Finnhub (check headline similarity or URL)
+                    # Simple duplicate check by headline
+                    if any(n['headline'] == title for n in news_items):
+                        continue
+                        
+                    ts = item.get('providerPublishTime', 0)
+                    dt_str = datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
+                    
+                    # Extract thumbnail if available
+                    image = ""
+                    if 'thumbnail' in item and 'resolutions' in item['thumbnail']:
+                         res = item['thumbnail']['resolutions']
+                         if res:
+                             image = res[0].get('url', '')
+                    
+                    news_items.append({
+                        "source": item.get('provider', {}).get('displayName', 'Yahoo Finance'),
+                        "headline": title,
+                        "summary": item.get('summary', ''), # Often empty in simple list
+                        "url": item.get('link', ''),
+                        "datetime": ts,
+                        "datetime_str": dt_str,
+                        "image": image
+                    })
+                except Exception:
+                    continue
+        except Exception as e:
+            print(f"Error fetching yfinance news for {symbol}: {e}")
+
+        # 3. TradingView Scraper (Tertiary Source)
+        try:
+             # Lazy import to avoid circular dependencies or issues if not installed
+            from tradingview_scraper.symbols.news import NewsScraper
+            scraper = NewsScraper()
+            
+            # Determine exchange (defaults to NASDAQ if not found, or use a map)
+            # We can try to infer from stock_metadata or just try common ones.
+            # Ideally we pass region to get_aggregated_news, but for now we'll default or guess.
+            exchange = "NASDAQ" # Default
+            if symbol in self.stock_metadata:
+                region = self.stock_metadata[symbol].get("region", "US")
+                if region == "EU": exchange = "XETR" # Germany
+                elif region == "CN": exchange = "SSE"
+                elif region == "IN": exchange = "NSE"
+                elif region == "AU": exchange = "ASX"
+                
+            # PSN is Parsons (NYSE), DOCS is Doximity (NYSE), XP (NASDAQ)
+            # Maybe try checking if we can get exchange from TradingViewService?
+            # For now, let's use a try/except block or generic 'NASDAQ' which covers many.
+            # Or use 'NYSE' if known.
+            
+            # Optimization: Try to get exchange from existing methods if possible, or iterate a few common ones?
+            # No, keep it simple. Most user requested stocks are US.
+            
+            headers = scraper.scrape_headlines(symbol=symbol, exchange=exchange)
+            
+            for item in headers:
+                try:
+                    title = item.get('title', 'No Title')
+                    # Deduplicate
+                    if any(n['headline'] == title for n in news_items):
+                        continue
+                        
+                    ts = item.get('published', 0)
+                    dt_str = datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
+                    
+                    news_items.append({
+                        "source": item.get('source', 'TradingView'),
+                        "headline": title,
+                        "summary": item.get('description', ''), # Description often empty in headlines, checks details?
+                        "url": f"https://www.tradingview.com{item.get('storyPath', '')}",
+                        "datetime": ts,
+                        "datetime_str": dt_str,
+                        "image": "" # No image in headlines usually
+                    })
+                except Exception:
+                    continue
+                    
+        except ImportError:
+            print("tradingview-scraper not installed.")
+        except Exception as e:
+            print(f"Error fetching TradingView news for {symbol}: {e}")
+            
+        # Sort by datetime (newest first)
+        news_items.sort(key=lambda x: x['datetime'], reverse=True)
+        
+        # Limit to top 20
+        return news_items[:20]
+
+    def get_latest_filing_text(self, symbol: str) -> str:
+        """
+        Fetches the text of the most recent significant filing (8-K, 10-Q, 10-K).
+        """
+        try:
+            # Look back 30 days for 8-K, or 90 days for 10-Q/10-K
+            # Simplification: Look back 3 months (90 days)
+            from_date = (datetime.now() - timedelta(days=90)).strftime("%Y-%m-%d")
+            to_date = datetime.now().strftime("%Y-%m-%d")
+            
+            filings = finnhub_service.get_filings(symbol, from_date=from_date, to_date=to_date)
+            
+            target_filing = None
+            # Prioritize 8-K (breaking news) then 10-Q/10-K
+            for f in filings:
+                if f['form'] == '8-K':
+                    target_filing = f
+                    break
+            
+            if not target_filing:
+                 for f in filings:
+                    if f['form'] in ['10-Q', '10-K']:
+                        target_filing = f
+                        break
+            
+            if target_filing and 'reportUrl' in target_filing:
+                url = target_filing['reportUrl']
+                print(f"Fetching filing text from: {url}")
+                text = finnhub_service.extract_filing_text(url)
+                # Truncate to avoid exploding context window (e.g. 20k chars)
+                if len(text) > 20000:
+                    text = text[:20000] + "\n[TRUNCATED...]"
+                return text
+                
+            return ""
+            
+        except Exception as e:
+            print(f"Error fetching filing for {symbol}: {e}")
+            return ""
+
+    def get_latest_transcript(self, symbol: str) -> str:
+        """
+        Fetches the text of the most recent earnings call transcript.
+        """
+        try:
+            transcripts = finnhub_service.get_transcript_list(symbol)
+            if not transcripts:
+                return ""
+                
+            latest_id = transcripts[0]['id']
+            content = finnhub_service.get_transcript_content(latest_id)
+            
+            # Parse content (list of speech objects)
+            full_text = []
+            if 'transcript' in content:
+                for chunk in content['transcript']:
+                    speaker = chunk.get('name', 'Unknown')
+                    speech = chunk.get('speech', [])
+                    # Join list of speech strings
+                    speech_text = " ".join(speech) if isinstance(speech, list) else str(speech)
+                    full_text.append(f"{speaker}: {speech_text}")
+            
+            text = "\n".join(full_text)
+            if len(text) > 20000:
+                 text = text[:20000] + "\n[TRUNCATED...]"
+            return text
+            
+        except Exception as e:
+            # Likely 403 Forbidden for free tier
+            # print(f"Error fetching transcript for {symbol}: {e}") 
+            # Silently fail or log debug
+            return ""
 
 stock_service = StockService()

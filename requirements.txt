@@ -15,3 +15,5 @@ alpaca-py
 tradingview-ta
 tradingview-screener
 scipy
+beautifulsoup4
+requests

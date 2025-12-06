@@ -42,6 +42,28 @@
                 {{ decision.reasoning }}
             </div>
 
+            <hr>
+
+            <h3>Recent News</h3>
+            <div class="list-group mb-4">
+                {% if decision.news %}
+                {% for item in decision.news %}
+                <a href="{{ item.url }}" target="_blank"
+                    class="list-group-item list-group-item-action flex-column align-items-start"
+                    style="background: #0f172a; border-color: #334155; color: #fff;">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1" style="color: #60a5fa;">{{ item.headline }}</h5>
+                        <small class="text-muted">{{ item.datetime_str }}</small>
+                    </div>
+                    <p class="mb-1" style="color: #cbd5e1;">{{ item.summary }}</p>
+                    <small style="color: #94a3b8;">Source: {{ item.source }}</small>
+                </a>
+                {% endfor %}
+                {% else %}
+                <p class="text-muted">No specific news found.</p>
+                {% endif %}
+            </div>
+
             <div class="mt-4">
                 <a href="/" class="btn btn-secondary">Back to Dashboard</a>
             </div>
