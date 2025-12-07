@@ -490,6 +490,8 @@ class StockService:
                     
                     # Fetch Technical Analysis for the Technician Agent
                     print(f"Fetching technical analysis for {symbol}...")
+                    import time
+                    time.sleep(2) # Avoid 429 from Gatekeeper call
                     technical_analysis = tradingview_service.get_technical_analysis(symbol, region=stock.get("region", "US"))
                     
                     # Add Gatekeeper findings to technical analysis passed to agents
@@ -499,6 +501,7 @@ class StockService:
                     # Fetch News Headlines (Agent 2 Input)
                     print(f"Fetching news for {symbol}...")
                     news_data = self.get_aggregated_news(symbol)
+                    print(f"  > Fetched {len(news_data)} news articles.")
                     news_headlines = "\n".join([f"- {n['datetime_str']}: {n['headline']} ({n['source']})" for n in news_data[:7]])
                     if not news_headlines:
                         news_headlines = "No specific news headlines found."
@@ -529,8 +532,10 @@ class StockService:
                     
                     # Fetch Technical Indicators (Ensure we have what TechnicalAnalyst needs: RSI, MACD, ADX)
                     # tradingview_service.get_technical_analysis returns 'indicators' dict.
-                    print(f"Fetching technical details for {symbol}...")
-                    ta_data = tradingview_service.get_technical_analysis(symbol, region=stock.get("region", "US"))
+                    # print(f"Fetching technical details for {symbol}...")
+                    # ta_data = tradingview_service.get_technical_analysis(symbol, region=stock.get("region", "US"))
+                    # REUSE PREVIOUSLY FETCHED DATA TO AVOID 429
+                    ta_data = technical_analysis 
                     indicators = ta_data.get('indicators', {})
                     
                     # Add cached Gatekeeper indicators if missing
@@ -738,7 +743,7 @@ class StockService:
 
     def get_aggregated_news(self, symbol: str) -> List[Dict]:
         """
-        Fetches and aggregates news from Finnhub and yfinance.
+        Fetches and aggregates news from Alpha Vantage (Primary), Finnhub, and yfinance.
         Returns a standardised list of news items.
         
         Standard Object:
@@ -761,35 +766,27 @@ class StockService:
             
             av_news = alpha_vantage_service.get_company_news(symbol, start_date=week_ago, end_date=today)
             if av_news:
-                print(f"Fetched {len(av_news)} news items from Alpha Vantage for {symbol}.")
+                print(f"  > Alpha Vantage: {len(av_news)} articles")
                 news_items.extend(av_news)
+            else:
+                print(f"  > Alpha Vantage: 0 articles")
         except Exception as e:
             print(f"Error fetching Alpha Vantage news for {symbol}: {e}")
-
-        # 2. Finnhub News (Fallback/Secondary Source)
-        # Only fetch if we have very little news or if we want to combine sources (user said "use alphavantage for news only!" -> implying replacement?)
-        # User said "use alphavantage for news only! no fundamentals". 
-        # But also "can you understand from this repo how the news are pulled... I would like to get the news from the Alpha Vantage API".
-        # Usually implies prioritizing it. If AV fails, we should fallback.
-        # If AV succeeds, user might prefer ONLY AV. 
-        # But "get the news from AV" doesn't strictly mean "exclude others if AV works".
-        # However, to be cleaner and follow "use alphavantage for news only" (which might mean "don't use other sources?"), 
-        # I'll effectively make it the primary. If it returns content, we might skip others to reduce noise/duplication?
-        # Let's KEEP others as fallbacks or supplementary for now to ensure we don't have empty reports.
-        
-        if not news_items:
-            try:
-                # today/week_ago defined above or re-calc if needed (variables share scope in python if in same function block)
-                # re-defining just in case of scope clarity
-                today = datetime.now().strftime("%Y-%m-%d")
-                week_ago = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
-                
-                fh_news = finnhub_service.get_company_news(symbol, from_date=week_ago, to_date=today)
-                
-                for item in fh_news:
+            
+        # 2. Finnhub News (Secondary Source) - ALWAYS RUN
+        try:
+             fh_news = finnhub_service.get_company_news(symbol, from_date=week_ago, to_date=today)
+             if fh_news:
+                 print(f"  > Finnhub: {len(fh_news)} articles")
+                 
+                 for item in fh_news:
                     try:
                         ts = item.get('datetime', 0)
                         dt_str = datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
+                        # Simple duplicate check by headline
+                        if any(n['headline'] == item.get('headline') for n in news_items):
+                            continue
+                            
                         news_items.append({
                             "source": item.get('source', 'Finnhub'),
                             "headline": item.get('headline', 'No Title'),
@@ -801,13 +798,20 @@ class StockService:
                         })
                     except Exception:
                         continue
-            except Exception as e:
-                print(f"Error fetching Finnhub news for {symbol}: {e}")
+             else:
+                 print(f"  > Finnhub: 0 articles")
+        except Exception as e:
+            print(f"Error fetching Finnhub news for {symbol}: {e}")
 
-        # 2. yfinance News (Secondary Source)
+        # 3. yfinance News (Secondary Source) - ALWAYS RUN
         try:
             ticker = yf.Ticker(symbol)
             yf_news = ticker.news
+            if yf_news:
+                print(f"  > yfinance: {len(yf_news)} articles")
+            else:
+                print(f"  > yfinance: 0 articles")
+                
             for item in yf_news:
                 try:
                     # yfinance structure varies, usually has 'title', 'link', 'providerPublishTime'

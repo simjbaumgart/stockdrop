@@ -30,3 +30,6 @@ Once a stock is identified, it is passed to a team of 4 specialized AI agents (p
 
 ## Goal
 To filter out market noise and provide high-quality, reasoned second opinions on volatile stocks, preventing emotional trading decisions.
+
+## Disclaimer
+For research only. Not financial advice.

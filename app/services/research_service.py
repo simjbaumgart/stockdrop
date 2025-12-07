@@ -236,7 +236,10 @@ TASK:
 
 OUTPUT:
 A sentiment analysis report (max 300 words).
-Use headers: "Sentiment Overview", "Reason for Drop", "Key Drivers", "Narrative Check".
+Use headers: "Sentiment Overview", "Reason for Drop", "Key Drivers", "Narrative Check", "Top 5 Sources".
+
+CITATION REQUIREMENT:
+You MUST explicitly list the Top 5 News Headlines/Sources that most influenced your analysis in the "Top 5 Sources" section.
 """
 
     def _create_bull_prompt(self, state: MarketState, drop_str: str) -> str:
