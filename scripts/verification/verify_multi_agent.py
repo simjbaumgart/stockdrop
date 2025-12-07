@@ -4,7 +4,7 @@ import sys
 import os
 
 # Add app to path
-sys.path.append(os.getcwd())
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
 from app.services.research_service import ResearchService
 

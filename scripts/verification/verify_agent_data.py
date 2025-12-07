@@ -5,7 +5,7 @@ import json
 from unittest.mock import MagicMock
 
 # Add project root to sys.path
-sys.path.append(os.getcwd())
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
 from app.services.stock_service import stock_service
 from app.services.research_service import research_service

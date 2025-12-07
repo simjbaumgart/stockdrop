@@ -8,7 +8,7 @@ import os
 
 # Project root setup to allow imports if needed (though this script is mostly standalone)
 current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(current_dir)
+project_root = os.path.dirname(os.path.dirname(current_dir))
 sys.path.append(project_root)
 
 def simulate_portfolio():

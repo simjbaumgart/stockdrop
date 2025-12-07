@@ -1,6 +1,6 @@
 import sys
 import os
-sys.path.append(os.getcwd())
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
 from app.services.gatekeeper_service import gatekeeper_service
 from unittest.mock import MagicMock

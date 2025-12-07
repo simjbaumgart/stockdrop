@@ -5,7 +5,7 @@ from datetime import datetime
 
 # Add project root to path (one level up from scripts)
 current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(current_dir)
+project_root = os.path.dirname(os.path.dirname(current_dir))
 sys.path.append(project_root)
 
 from app.services.stock_service import stock_service

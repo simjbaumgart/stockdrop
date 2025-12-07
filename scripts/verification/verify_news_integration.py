@@ -3,7 +3,7 @@ import sys
 import os
 
 # Add project root to sys.path
-sys.path.append(os.getcwd())
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
 from app.services.stock_service import stock_service
 import json

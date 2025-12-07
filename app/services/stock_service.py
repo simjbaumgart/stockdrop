@@ -15,6 +15,7 @@ from app.services.gatekeeper_service import gatekeeper_service
 from app.utils import get_git_version
 from app.services.finnhub_service import finnhub_service
 from app.services.alpha_vantage_service import alpha_vantage_service
+from app.services.drive_service import drive_service
 
 
 class StockService:
@@ -352,35 +353,39 @@ class StockService:
         # 2. EU (Open)
         # 3. China (Open)
         # 4. Rest (or Closed)
-        
         # Map region names to simple keys
         # Regions: America (US), Europe, China, India, Australia, etc.
         
         def get_priority_score(stock):
-            region = stock.get("region", "Other")
-            is_open = self._is_market_open(region)
+            region_str = stock.get("region", "Other")
+            is_open = self._is_market_open(region_str)
             
-            # Priority Logic:
-            # Score 100: US Open
-            # Score 80: EU Open
-            # Score 60: China Open
-            # Score 40: Any other Open
-            # Score 20: Closed US/EU/China
-            # Score 0: Closed Other
+            # Priority Hierarchy:
+            # 1. US (Open) -> 100
+            # 2. EU (Open) -> 90
+            # 3. China (Open) -> 80
+            # 4. Rest (Open) -> 70
+            # 5. US (Closed) -> 60
+            # 6. EU (Closed) -> 50
+            # 7. China (Closed) -> 40
+            # 8. Rest (Closed) -> 30
             
+            # Base Score
+            score = 0
             if is_open:
-                if region in ["America", "US"]: return 100
-                if region == "Europe": return 80
-                if region == "China": return 60
-                return 40
+                score += 40  # Open base
+            
+            # Region Score
+            if region_str in ["America", "US"] or "America" in region_str:
+                score += 60
+            elif "Europe" in region_str or region_str == "EU":
+                score += 50
+            elif "China" in region_str or region_str == "CN":
+                score += 40
             else:
-                # If closed, still prioritize by hierarchy? User said "If US and EU market closed do China. The rest is by alphabetic order"
-                # This implies closed markets also follow some hierarchy or alphabetic.
-                # Let's group closed markets together and alphabetize.
-                # But typically we want to process active markets first. 
-                # Let's just return 0 to put them at the end, and the sort by symbol will handle alphabet.
-                return 0
-
+                score += 30
+                
+            return score
         # Sort by Priority Score (Desc), then Symbol (Asc)
         # Python sort is stable.
         
@@ -548,7 +553,8 @@ class StockService:
                         "indicators": indicators,
                         "news_items": news_data,
                         "transcript_text": transcript_text or "", 
-                        "market_context": market_context
+                        "market_context": market_context,
+                        "change_percent": stock.get("change_percent", 0.0)
                     }
 
                     # Pass raw_data to research service
@@ -980,13 +986,13 @@ class StockService:
             
         hour = now_utc.hour + now_utc.minute / 60.0
         
-        if region == "America" or region == "US":
+        if "America" in region or region == "US":
             # NYSE/NASDAQ: 14:30 - 21:00 UTC (approx)
             return 14.5 <= hour <= 21.0
-        elif region == "Europe":
+        elif "Europe" in region or region == "EU":
             # London/Frankfurt: 08:00 - 16:30 UTC (approx)
             return 8.0 <= hour <= 16.5
-        elif region == "China":
+        elif "China" in region or region == "CN":
             # Shanghai: 01:30 - 07:00 UTC (approx, ignoring lunch break)
             return 1.5 <= hour <= 7.0
         

@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Add app to path
-sys.path.append(os.getcwd())
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
 # Reset usage stats to allow simulation
 if os.path.exists("usage_stats.json"):

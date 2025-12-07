@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 
 # Add the parent directory to sys.path to allow importing app modules
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
 def main():
     # Example URL from previous run (NVDA 10-Q)
