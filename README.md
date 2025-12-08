@@ -33,3 +33,75 @@ To filter out market noise and provide high-quality, reasoned second opinions on
 
 ## Disclaimer
 For research only. Not financial advice.
+
+## 🚀 Getting Started
+
+Follow these instructions to set up the project on your local machine.
+
+### Prerequisites
+
+- **Python 3.9+** installed.
+- **Git** installed.
+
+### Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone <repository_url>
+    cd Stock-Tracker
+    ```
+
+2.  **Create and activate a virtual environment:**
+    ```bash
+    # MacOS/Linux
+    python3 -m venv venv
+    source venv/bin/activate
+    
+    # Windows
+    # python -m venv venv
+    # .\venv\Scripts\activate
+    ```
+
+3.  **Install dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+### Configuration
+
+1.  Create a `.env` file in the root directory.
+2.  Add the following environment variables (get API keys from their respective providers):
+
+    ```env
+    # --- Required ---
+    GEMINI_API_KEY=your_google_gemini_api_key
+    
+    # --- Optional (for full functionality) ---
+    ALPACA_API_KEY=your_alpaca_api_key
+    ALPACA_SECRET_KEY=your_alpaca_secret_key
+    FINNHUB_API_KEY=your_finnhub_api_key
+    ALPHA_VANTAGE_API_KEY=your_alpha_vantage_api_key
+    
+    # --- Email Alerts (Optional) ---
+    SENDER_EMAIL=your_email@gmail.com
+    SENDER_PASSWORD=your_app_password
+    RECIPIENT_EMAIL=target_email@example.com
+    SMTP_SERVER=smtp.gmail.com
+    SMTP_PORT=587
+    ```
+
+### Running the Application
+
+1.  **Start the server:**
+    ```bash
+    uvicorn main:app --reload
+    ```
+    
+2.  **Access the Dashboard:**
+    Open your browser and navigate to `http://localhost:8000`.
+
+3.  **Enable Email Notifications (Optional):**
+    To run with email alerts enabled:
+    ```bash
+    python main.py --enable-email
+    ```

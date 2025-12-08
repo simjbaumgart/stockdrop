@@ -424,7 +424,7 @@ class StockService:
                     print(f"Processing candidate {symbol} ({change_percent:.2f}%)")
                     
                     # --- Active Trading Check ---
-                    if not self._is_actively_traded(symbol):
+                    if not self._is_actively_traded(symbol, region=stock.get("region", "US")):
                         continue
 
                     # --- GATEKEEPER PHASE 2: Technical Filters ---
@@ -517,9 +517,9 @@ class StockService:
                     news_data = self.get_aggregated_news(symbol)
                     print(f"  > Fetched {len(news_data)} news articles.")
                     
+                    # 0-article skip Removed as per user request
                     if len(news_data) == 0:
-                        print(f"  > Skipping {symbol}: No news found.")
-                        continue
+                        print(f"  > Warning: No news found for {symbol}. Proceeding with analysis anyway.")
                         
                     news_headlines = "\n".join([f"- {n['datetime_str']}: {n['headline']} ({n['source']})" for n in news_data[:7]])
                     if not news_headlines:
@@ -671,23 +671,44 @@ class StockService:
                     
         print(f"[{datetime.now().strftime('%H:%M:%S')}] Cycle completed. Large cap drops check finished.")
 
-    def _is_actively_traded(self, symbol: str) -> bool:
+    def _is_actively_traded(self, symbol: str, region: str = "US") -> bool:
         """
         Checks if the stock is actively traded to avoid illiquid tickers.
         Criteria: Avg volume > 50k over last 5 days.
         """
         try:
+            # Suffix mapping for yfinance
+            yf_symbol = symbol
+            if "UK" in region or "London" in region or region == "Europe": 
+                # Basic heuristic, TradingView 'Europe (UK)' usually implies London
+                if not "." in symbol:
+                    yf_symbol = f"{symbol}.L"
+            elif "Germany" in region:
+                if not "." in symbol:
+                    yf_symbol = f"{symbol}.DE"
+            elif "Paris" in region or "France" in region:
+                if not "." in symbol:
+                    yf_symbol = f"{symbol}.PA"
+            # Add more maps as regions are added (Canada: .TO, etc.)
+            
             # Use yfinance for quick volume check
-            ticker = yf.Ticker(symbol)
+            ticker = yf.Ticker(yf_symbol)
             hist = ticker.history(period="5d")
             
             if hist.empty:
-                print(f"  > [Active Check] No history found for {symbol}. Assuming inactive.")
-                return False
+                print(f"  > [Active Check] No history found for {yf_symbol}. Assuming inactive (or suffix mismatch).")
+                # If mapped symbol failed, maybe try original?
+                if yf_symbol != symbol:
+                     print(f"  > [Active Check] Retrying with original symbol {symbol}...")
+                     hist = yf.Ticker(symbol).history(period="5d")
+                     if hist.empty:
+                         return False
+                else:
+                    return False
                 
             avg_vol = hist['Volume'].mean()
             if avg_vol < 50000:
-                print(f"  > [Active Check] {symbol} Volume Low ({int(avg_vol)} < 50k). Skipping.")
+                print(f"  > [Active Check] {yf_symbol} Volume Low ({int(avg_vol)} < 50k). Skipping.")
                 return False
                 
             return True
