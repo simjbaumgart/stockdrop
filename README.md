@@ -31,8 +31,18 @@ Once a stock is identified, it is passed to a team of 4 specialized AI agents (p
 ## Goal
 To filter out market noise and provide high-quality, reasoned second opinions on volatile stocks, preventing emotional trading decisions.
 
+## Inspiration & References
+
+This project draws inspiration from:
+*   **Tauric Research**: For agentic research methodologies.
+*   **BA2TradePlatform**: For platform architecture concepts.
+*   **Academic Research**: Concepts aligned with recent advancements in multi-agent financial analysis (e.g., [arXiv:2412.20138](https://arxiv.org/pdf/2412.20138)).
+
 ## Disclaimer
-For research only. Not financial advice.
+
+**THIS SOFTWARE IS FOR EDUCATIONAL AND RESEARCH PURPOSES ONLY.**
+
+It is NOT financial advice, and should not be used as such. The "decisions" made by the AI agents are simulations based on historical and real-time data analysis. Trading stocks, especially attempting to "buy the dip," involves significant risk of capital loss.
 
 ## 🚀 Getting Started
 
