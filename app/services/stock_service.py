@@ -386,9 +386,19 @@ class StockService:
                 score += 30
                 
             return score
-        # Sort by Priority Score (Desc), then Symbol (Asc)
-        # Python sort is stable.
+        # Deduplicate stocks by symbol, keeping the one with the largest drop
+        unique_stocks = {}
+        for s in large_cap_movers:
+            sym = s["symbol"]
+            if sym not in unique_stocks:
+                unique_stocks[sym] = s
+            else:
+                # Keep the one with more negative change (larger drop)
+                if s["change_percent"] < unique_stocks[sym]["change_percent"]:
+                    unique_stocks[sym] = s
         
+        large_cap_movers = list(unique_stocks.values())
+
         # First sort by symbol alphabetic
         large_cap_movers.sort(key=lambda x: x["symbol"])
         
@@ -413,6 +423,10 @@ class StockService:
                 if notification_key not in self.sent_notifications:
                     print(f"Processing candidate {symbol} ({change_percent:.2f}%)")
                     
+                    # --- Active Trading Check ---
+                    if not self._is_actively_traded(symbol):
+                        continue
+
                     # --- GATEKEEPER PHASE 2: Technical Filters ---
                     print(f"GATEKEEPER: Checking technical filters for {symbol}...")
                     region = stock.get("region", "US") 
@@ -502,6 +516,11 @@ class StockService:
                     print(f"Fetching news for {symbol}...")
                     news_data = self.get_aggregated_news(symbol)
                     print(f"  > Fetched {len(news_data)} news articles.")
+                    
+                    if len(news_data) == 0:
+                        print(f"  > Skipping {symbol}: No news found.")
+                        continue
+                        
                     news_headlines = "\n".join([f"- {n['datetime_str']}: {n['headline']} ({n['source']})" for n in news_data[:7]])
                     if not news_headlines:
                         news_headlines = "No specific news headlines found."
@@ -651,6 +670,30 @@ class StockService:
                     self.sent_notifications.add(notification_key)
                     
         print(f"[{datetime.now().strftime('%H:%M:%S')}] Cycle completed. Large cap drops check finished.")
+
+    def _is_actively_traded(self, symbol: str) -> bool:
+        """
+        Checks if the stock is actively traded to avoid illiquid tickers.
+        Criteria: Avg volume > 50k over last 5 days.
+        """
+        try:
+            # Use yfinance for quick volume check
+            ticker = yf.Ticker(symbol)
+            hist = ticker.history(period="5d")
+            
+            if hist.empty:
+                print(f"  > [Active Check] No history found for {symbol}. Assuming inactive.")
+                return False
+                
+            avg_vol = hist['Volume'].mean()
+            if avg_vol < 50000:
+                print(f"  > [Active Check] {symbol} Volume Low ({int(avg_vol)} < 50k). Skipping.")
+                return False
+                
+            return True
+        except Exception as e:
+            print(f"  > [Active Check] Error checking {symbol}: {e}. Skipping to be safe.")
+            return False
 
     def _check_earnings_proximity(self, symbol: str) -> tuple[bool, str]:
         """

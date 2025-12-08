@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Dict, List, Optional
 from app.models.market_state import MarketState
 from app.services.analyst_service import analyst_service
+from app.services.fred_service import fred_service
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -58,9 +59,22 @@ class ResearchService:
         news_prompt = self._create_news_agent_prompt(state, raw_data, drop_str)
         news_report = self._call_agent(news_prompt, "News Agent", state)
         
+        # Check for Economics Trigger
+        economics_report = ""
+        if "NEEDS_ECONOMICS: TRUE" in news_report:
+            print("  > [Economics Agent] Triggered by News Agent (US Exposure detected).")
+            print("  > Fetching US Macro Data from FRED...")
+            macro_data = fred_service.get_macro_data()
+            if macro_data:
+                econ_prompt = self._create_economics_agent_prompt(state, macro_data)
+                economics_report = self._call_agent(econ_prompt, "Economics Agent", state)
+            else:
+                economics_report = "Economics Agent triggered but failed to fetch FRED data."
+        
         state.reports = {
             "technical": tech_report,
-            "news": news_report
+            "news": news_report,
+            "economics": economics_report
         }
         
         # --- Phase 2: The Researcher Debate (Brain) ---
@@ -240,6 +254,30 @@ Use headers: "Sentiment Overview", "Reason for Drop", "Key Drivers", "Narrative 
 
 CITATION REQUIREMENT:
 You MUST explicitly list the Top 5 News Headlines/Sources that most influenced your analysis in the "Top 5 Sources" section.
+
+MACRO CHECK:
+At the very end of your response, on a new line, explicitly state "NEEDS_ECONOMICS: TRUE" if:
+1. The company has significant business exposure to the US Economy.
+2. The stock drop might be related to macro factors (Interest Rates, Inflation, Recession fears).
+Otherwise, state "NEEDS_ECONOMICS: FALSE".
+"""
+
+    def _create_economics_agent_prompt(self, state: MarketState, macro_data: Dict) -> str:
+        return f"""
+You are the **Macro Economics Agent**.
+Your goal is to analyze the US Macroeconomic environment and its potential impact on {state.ticker}.
+
+INPUT DATA (FRED API):
+{json.dumps(macro_data, indent=2)}
+
+TASK:
+- Analyze the provided macro indicators (Unemployment, CPI, Rates, GDP, Yields).
+- Determine if the current macro environment is a Headwind or Tailwind for this specific company/sector.
+- specifically look for "Recession Signals" (Yield Curve Inversion, rising Unemployment) if relevant.
+
+OUTPUT:
+A concise Macro Assessment (max 200 words).
+Headers: "Macro Environment", "Impact on {state.ticker}", "Risk Level".
 """
 
     def _create_bull_prompt(self, state: MarketState, drop_str: str) -> str:
