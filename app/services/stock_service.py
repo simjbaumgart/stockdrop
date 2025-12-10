@@ -16,6 +16,8 @@ from app.utils import get_git_version
 from app.services.finnhub_service import finnhub_service
 from app.services.alpha_vantage_service import alpha_vantage_service
 from app.services.drive_service import drive_service
+from app.services.benzinga_service import benzinga_service
+from app.services.yahoo_ticker_resolver import YahooTickerResolver
 
 
 class StockService:
@@ -162,6 +164,9 @@ class StockService:
         # Simple data cache: Dict[key, (data, timestamp)]
         self.cache: Dict[str, tuple] = {}
         self.cache_ttl = 3600 # 1 hour
+
+        # Initialize Yahoo Ticker Resolver
+        self.resolver = YahooTickerResolver()
 
     def get_indices(self) -> Dict:
         # Try fetching from TradingView first
@@ -358,17 +363,19 @@ class StockService:
         
         def get_priority_score(stock):
             region_str = stock.get("region", "Other")
+            # Ensure "Germany" is detected if it comes as "Europe (Germany)" or similar
+            is_germany = "Germany" in region_str
             is_open = self._is_market_open(region_str)
             
             # Priority Hierarchy:
             # 1. US (Open) -> 100
-            # 2. EU (Open) -> 90
-            # 3. China (Open) -> 80
-            # 4. Rest (Open) -> 70
-            # 5. US (Closed) -> 60
-            # 6. EU (Closed) -> 50
-            # 7. China (Closed) -> 40
-            # 8. Rest (Closed) -> 30
+            # 2. Germany (Open) -> 95
+            # 3. EU (Open) -> 90
+            # 4. China (Open) -> 80
+            # 5. Rest (Open) -> 70
+            # 6. US (Closed) -> 60
+            # 7. EU (Closed) -> 50
+            # ...
             
             # Base Score
             score = 0
@@ -378,6 +385,8 @@ class StockService:
             # Region Score
             if region_str in ["America", "US"] or "America" in region_str:
                 score += 60
+            elif is_germany:
+                 score += 55 # Higher than standard EU
             elif "Europe" in region_str or region_str == "EU":
                 score += 50
             elif "China" in region_str or region_str == "CN":
@@ -421,16 +430,25 @@ class StockService:
                 notification_key = (symbol, today_str)
                 
                 if notification_key not in self.sent_notifications:
-                    print(f"Processing candidate {symbol} ({change_percent:.2f}%)")
+                    # Get company name EARLY for logging
+                    company_name = stock.get("description", stock.get("name", symbol))
+                    exchange = stock.get("exchange")
+                    
+                    print(f"Processing candidate {symbol} ({company_name}) [{change_percent:.2f}%]")
                     
                     # --- Active Trading Check ---
-                    if not self._is_actively_traded(symbol, region=stock.get("region", "US")):
+                    if not self._is_actively_traded(
+                        symbol, 
+                        region=stock.get("region", "US"), 
+                        volume=stock.get("volume", 0),
+                        exchange=exchange,
+                        name=company_name
+                    ):
                         continue
 
                     # --- GATEKEEPER PHASE 2: Technical Filters ---
                     print(f"GATEKEEPER: Checking technical filters for {symbol}...")
                     region = stock.get("region", "US") 
-                    exchange = stock.get("exchange")
                     screener = stock.get("screener")
                     cached_indicators = stock.get("cached_indicators")
                     
@@ -466,9 +484,6 @@ class StockService:
                     
                     print(f"Triggering notification for {symbol} ({change_percent:.2f}%)")
                     
-                    # Get company name
-                    company_name = stock.get("description", stock.get("name", symbol))
-
                     # Check for earnings proximity
                     is_earnings, earnings_date_str = self._check_earnings_proximity(symbol)
                     
@@ -512,9 +527,14 @@ class StockService:
                     technical_analysis["gatekeeper_findings"] = reasons
 
                     # Fetch News Headlines (Agent 2 Input)
-                    # Fetch News Headlines (Agent 2 Input)
                     print(f"Fetching news for {symbol}...")
-                    news_data = self.get_aggregated_news(symbol)
+                    # Pass region to correctly resolve news ticker (e.g. EVT -> EVT.DE)
+                    news_data = self.get_aggregated_news(
+                        symbol, 
+                        region=stock.get("region", "US"),
+                        exchange=exchange,
+                        company_name=company_name
+                    )
                     print(f"  > Fetched {len(news_data)} news articles.")
                     
                     # 0-article skip Removed as per user request
@@ -586,9 +606,32 @@ class StockService:
                     
                     recommendation = report_data.get("recommendation", "HOLD")
                     score = report_data.get("score", "N/A")
+                    
+                    # --- EVIDENCE CHECKLIST ---
+                    checklist = report_data.get("checklist", {})
+                    news_count = len(news_data)
+                    latest_news_date = news_data[0]['datetime_str'] if news_count > 0 else "N/A"
+                    has_transcript = "Yes" if transcript_text and len(transcript_text) > 100 else "No"
+                    drop_reason_found = "Yes" if checklist.get("drop_reason_identified", False) else "No"
+                    fed_considered = "Yes" if checklist.get("economics_run", False) else "No"
+                    
                     print(f"\n{'='*40}")
+                    print(f"*** EVIDENCE CHECKLIST FOR {symbol} ***")
+                    print(f"  - News Articles: {news_count}")
+                    print(f"  - Latest News: {latest_news_date}")
+                    print(f"  - Earnings Call Transcript: {has_transcript}")
+                    print(f"  - Reason for Drop Identified: {drop_reason_found}")
+                    print(f"  - FED Report Considered: {fed_considered}")
+                    print(f"{'='*40}\n")
+                    
                     print(f"*** DECISION FOR {symbol}: {recommendation} (Score: {score}/100) ***")
                     print(f"{'='*40}\n")
+                    
+                    # Print News Agent Summary as requested
+                    print(f"--- NEWS AGENT SUMMARY for {symbol} ---")
+                    print(report_data.get('macro_report', 'No News Agent Report available.'))
+                    print(f"---------------------------------------\n")
+
                     # Use executive summary as the main reasoning text for DB/Display
                     # Concatenate full report details as requested
                     reasoning_parts = [
@@ -671,25 +714,19 @@ class StockService:
                     
         print(f"[{datetime.now().strftime('%H:%M:%S')}] Cycle completed. Large cap drops check finished.")
 
-    def _is_actively_traded(self, symbol: str, region: str = "US") -> bool:
+    def _is_actively_traded(self, symbol: str, region: str = "US", volume: float = 0, exchange: str = "", name: str = "") -> bool:
         """
         Checks if the stock is actively traded to avoid illiquid tickers.
         Criteria: Avg volume > 50k over last 5 days.
         """
+        # 1. Faster Check: Use volume from Screener if available
+        if volume > 50000:
+            return True
+
+        # 2. Fallback: Check yfinance (historical volume)
         try:
             # Suffix mapping for yfinance
-            yf_symbol = symbol
-            if "UK" in region or "London" in region or region == "Europe": 
-                # Basic heuristic, TradingView 'Europe (UK)' usually implies London
-                if not "." in symbol:
-                    yf_symbol = f"{symbol}.L"
-            elif "Germany" in region:
-                if not "." in symbol:
-                    yf_symbol = f"{symbol}.DE"
-            elif "Paris" in region or "France" in region:
-                if not "." in symbol:
-                    yf_symbol = f"{symbol}.PA"
-            # Add more maps as regions are added (Canada: .TO, etc.)
+            yf_symbol = self._resolve_yfinance_ticker(symbol, region, exchange, name)
             
             # Use yfinance for quick volume check
             ticker = yf.Ticker(yf_symbol)
@@ -805,9 +842,22 @@ class StockService:
             print(f"Error fetching news for {symbol}: {e}")
             return "Error fetching news (API issue)."
 
-    def get_aggregated_news(self, symbol: str) -> List[Dict]:
+    def _resolve_yfinance_ticker(self, symbol: str, region: str, exchange: str = "", name: str = "") -> str:
         """
-        Fetches and aggregates news from Alpha Vantage (Primary), Finnhub, and yfinance.
+        Resolves the correct yfinance ticker using YahooTickerResolver.
+        """
+        # Use simple region fallback if exchange not provided, to mimic old behavior if needed.
+        # But resolver is robust.
+        # We can pass what we have.
+        try:
+            return self.resolver.resolve(symbol, exchange, name)
+        except Exception as e:
+            print(f"Resolver Error: {e}. Falling back to symbol {symbol}")
+            return symbol
+
+    def get_aggregated_news(self, symbol: str, region: str = "US", exchange: str = "", company_name: str = "") -> List[Dict]:
+        """
+        Fetches and aggregates news from Benzinga (Primary), Alpha Vantage, Finnhub, and yfinance.
         Returns a standardised list of news items.
         
         Standard Object:
@@ -815,6 +865,7 @@ class StockService:
             "source": str,
             "headline": str,
             "summary": str,
+            "content": str, # Full article body (optional)
             "url": str,
             "datetime": int, # Unix timestamp
             "datetime_str": str, # YYYY-MM-DD
@@ -823,10 +874,57 @@ class StockService:
         """
         news_items = []
         
+        # 1. Benzinga News (Primary - Full Content)
+        try:
+            # Calculate 1 week ago
+            one_week_ago = int((datetime.now() - timedelta(days=7)).timestamp())
+            
+            bz_news = benzinga_service.get_company_news(symbol)
+            
+            # Filter: Max 1 week old
+            bz_filtered = [n for n in bz_news if n.get('datetime', 0) >= one_week_ago]
+            
+            # Sort by date desc
+            bz_filtered.sort(key=lambda x: x.get('datetime', 0), reverse=True)
+            
+            # Take Top 10
+            bz_final = bz_filtered[:10]
+            
+            for item in bz_final:
+                news_items.append({
+                    "source": "Benzinga",
+                    "headline": item.get('headline'),
+                    "summary": item.get('summary'),
+                    "content": item.get('content'), # Full HTML body
+                    "url": item.get('url'),
+                    "datetime": item.get('datetime'),
+                    "datetime_str": item.get('datetime_str'),
+                    "image": item.get('image')
+                })
+                
+            print(f"  > Fetched {len(bz_final)} Benzinga articles (Top 10, <7 days).")
+            
+        except Exception as e:
+            print(f"Error fetching Benzinga news: {e}")
+
+        # Resolve yfinance ticker for news ensuring we don't pick up colliding US stocks
+        # ... (rest of function)
+        # Resolve yfinance ticker for news ensuring we don't pick up colliding US stocks
+        # ... (rest of function)
+        yf_symbol = self._resolve_yfinance_ticker(symbol, region, exchange, company_name)
+        
         # 1. Alpha Vantage News (Primary Source)
         try:
             today = datetime.now().strftime("%Y-%m-%d")
             week_ago = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
+            
+            # Alpha Vantage uses the raw symbol mostly, or might need suffix?
+            # Usually Alpha Vantage matches the query flexibility. 
+            # If we pass EVT.DE to AV? Let's assume symbol is fine or we should pass yf_symbol?
+            # The stock_service uses 'symbol' everywhere else. 
+            # Let's stick to 'symbol' for AV unless we see issues. 
+            # AV often needs ticker translation for non-US? 
+            # For now, keeping 'symbol' for AV as tested before (presumably).
             
             av_news = alpha_vantage_service.get_company_news(symbol, start_date=week_ago, end_date=today)
             if av_news:
@@ -869,37 +967,56 @@ class StockService:
 
         # 3. yfinance News (Secondary Source) - ALWAYS RUN
         try:
-            ticker = yf.Ticker(symbol)
+            # Use resolved symbol (e.g. EVT.DE) to avoid US collision for German stocks
+            ticker = yf.Ticker(yf_symbol)
             yf_news = ticker.news
             if yf_news:
-                print(f"  > yfinance: {len(yf_news)} articles")
+                print(f"  > yfinance: {len(yf_news)} articles ({yf_symbol})")
             else:
-                print(f"  > yfinance: 0 articles")
+                print(f"  > yfinance: 0 articles ({yf_symbol})")
                 
             for item in yf_news:
                 try:
-                    # yfinance structure varies, usually has 'title', 'link', 'providerPublishTime'
-                    title = item.get('title', 'No Title')
+                    # Handle new YF structure (nested content)
+                    content = item.get('content', item) # Fallback to item if flat
+                    
+                    # Try to find date
+                    ts = 0
+                    if 'providerPublishTime' in content:
+                        ts = content['providerPublishTime']
+                    elif 'pubDate' in content:
+                        # Parse ISO string "2025-12-09T16:00:00Z"
+                        try:
+                            dt = datetime.fromisoformat(content['pubDate'].replace('Z', '+00:00'))
+                            ts = int(dt.timestamp())
+                        except:
+                            pass
+                    
+                    if ts == 0:
+                        continue
+                        
+                    dt_str = datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
+                    
+                    title = content.get('title', 'No Title')
                     # Avoid duplicates from Finnhub (check headline similarity or URL)
                     # Simple duplicate check by headline
                     if any(n['headline'] == title for n in news_items):
                         continue
-                        
-                    ts = item.get('providerPublishTime', 0)
-                    dt_str = datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
                     
                     # Extract thumbnail if available
                     image = ""
-                    if 'thumbnail' in item and 'resolutions' in item['thumbnail']:
-                         res = item['thumbnail']['resolutions']
+                    if 'thumbnail' in content and 'resolutions' in content['thumbnail']:
+                         res = content['thumbnail']['resolutions']
                          if res:
                              image = res[0].get('url', '')
+                             
+                    url = (content.get('clickThroughUrl') or {}).get('url', '') if content.get('clickThroughUrl') else (content.get('link', '') or '')
                     
                     news_items.append({
-                        "source": item.get('provider', {}).get('displayName', 'Yahoo Finance'),
+                        "source": content.get('provider', {}).get('displayName', 'Yahoo Finance'),
                         "headline": title,
-                        "summary": item.get('summary', ''), # Often empty in simple list
-                        "url": item.get('link', ''),
+                        "summary": content.get('summary', ''), # Often empty in simple list
+                        "url": url,
                         "datetime": ts,
                         "datetime_str": dt_str,
                         "image": image
@@ -907,9 +1024,9 @@ class StockService:
                 except Exception:
                     continue
         except Exception as e:
-            print(f"Error fetching yfinance news for {symbol}: {e}")
+            print(f"Error fetching yfinance news for {symbol} ({yf_symbol}): {e}")
 
-        # 3. TradingView Scraper (Tertiary Source)
+        # 4. TradingView Scraper (Tertiary Source)
         try:
              # Lazy import to avoid circular dependencies or issues if not installed
             from tradingview_scraper.symbols.news import NewsScraper
@@ -957,17 +1074,20 @@ class StockService:
                     })
                 except Exception:
                     continue
+            
+            print(f"  > TradingView: {len(headers)} articles")
                     
         except ImportError:
-            print("tradingview-scraper not installed.")
+            # print("tradingview-scraper not installed.") # Silencing noise
+            pass
         except Exception as e:
             print(f"Error fetching TradingView news for {symbol}: {e}")
             
         # Sort by datetime (newest first)
         news_items.sort(key=lambda x: x['datetime'], reverse=True)
         
-        # Limit to top 20
-        return news_items[:20]
+        # Limit to top 30 to ensure good mix of sources
+        return news_items[:30]
 
     def get_latest_filing_text(self, symbol: str) -> str:
         """

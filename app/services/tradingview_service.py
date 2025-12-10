@@ -129,84 +129,92 @@ class TradingViewService:
         # We use a safe buffer or direct conversion.
         # USD Base: 5,000,000,000 (Default)
         
+        
         # User requested specific lower threshold for Europe (500M)
         eu_min_cap_usd = 500_000_000
+        
+        # Market Cap Adjustments: Increase non-US thresholds by 10%
+        # min_market_cap_usd is the base user input (e.g. 5B)
+        
+        # Adjust base for Non-US 
+        non_us_min_cap_usd = min_market_cap_usd * 1.10
+        non_us_eu_min_cap_usd = eu_min_cap_usd * 1.10
 
         market_configs = [
             {
                 "region": "America",
                 "markets": ["america"],
-                "currency_threshold": min_market_cap_usd # USD
+                "currency_threshold": min_market_cap_usd # USD (No increase for US)
             },
             {
                 "region": "Europe (Germany)",
                 "markets": ["germany"],
-                "currency_threshold": eu_min_cap_usd * 0.95 # EUR ~0.95 USD
+                "currency_threshold": non_us_eu_min_cap_usd * 0.95 # EUR ~0.95 USD
             },
              {
                 "region": "Europe (UK)",
                 "markets": ["uk"],
-                "currency_threshold": eu_min_cap_usd * 0.80 # GBP ~0.80 USD
+                "currency_threshold": non_us_eu_min_cap_usd * 0.80 # GBP ~0.80 USD
             },
             {
                 "region": "Europe (Eurozone)",
                 "markets": ["france", "spain", "italy", "netherlands", "belgium", "portugal", "finland", "ireland", "austria"],
-                "currency_threshold": eu_min_cap_usd * 0.95 # EUR
+                "currency_threshold": non_us_eu_min_cap_usd * 0.95 # EUR
             },
             {
                 "region": "Europe (Switzerland)",
                 "markets": ["switzerland"],
-                "currency_threshold": eu_min_cap_usd * 0.88 # CHF ~0.88 USD
+                "currency_threshold": non_us_eu_min_cap_usd * 0.88 # CHF ~0.88 USD
             },
             {
                 "region": "Europe (Sweden)",
                 "markets": ["sweden"],
-                "currency_threshold": eu_min_cap_usd * 10.5 # SEK ~10.5 USD
+                "currency_threshold": non_us_eu_min_cap_usd * 10.5 # SEK ~10.5 USD
             },
             {
                 "region": "Europe (Denmark)",
                 "markets": ["denmark"],
-                "currency_threshold": eu_min_cap_usd * 7.0 # DKK ~7.0 USD
+                "currency_threshold": non_us_eu_min_cap_usd * 7.0 # DKK ~7.0 USD
             },
             {
                 "region": "Japan",
                 "markets": ["japan"],
-                "currency_threshold": min_market_cap_usd * 150 # JPY ~150 USD
+                "currency_threshold": non_us_min_cap_usd * 150 # JPY ~150 USD
             },
             {
                 "region": "Canada",
                 "markets": ["canada"],
-                "currency_threshold": min_market_cap_usd * 1.40 # CAD ~1.40 USD
+                "currency_threshold": non_us_min_cap_usd * 1.40 # CAD ~1.40 USD
             },
             {
                 "region": "South Korea",
                 "markets": ["korea"],
-                "currency_threshold": min_market_cap_usd * 1400 # KRW ~1400 USD
+                "currency_threshold": non_us_min_cap_usd * 1400 # KRW ~1400 USD
             },
             {
                 "region": "Taiwan",
                 "markets": ["taiwan"],
-                "currency_threshold": min_market_cap_usd * 32 # TWD ~32 USD
+                "currency_threshold": non_us_min_cap_usd * 32 # TWD ~32 USD
             },
             {
                 "region": "Brazil",
                 "markets": ["brazil"],
-                "currency_threshold": min_market_cap_usd * 6.0 # BRL ~6.0 USD
+                "currency_threshold": non_us_min_cap_usd * 6.0 # BRL ~6.0 USD
             },
             {
                 "region": "China",
                 "markets": ["china"],
-                "currency_threshold": min_market_cap_usd * 7.2 # CNY ~7.2 USD
+                "currency_threshold": non_us_min_cap_usd * 7.2 # CNY ~7.2 USD
             },
             {
                 "region": "India",
                 "markets": ["india"],
-                "currency_threshold": min_market_cap_usd * 84.0 # INR ~84 USD
+                "currency_threshold": non_us_min_cap_usd * 84.0 # INR ~84 USD
             },
             {
                 "region": "Australia",
                 "markets": ["australia"],
-                "currency_threshold": min_market_cap_usd * 1.55 # AUD ~1.55 USD
+                "currency_threshold": non_us_min_cap_usd * 1.55 # AUD ~1.55 USD
             }
         ]
         

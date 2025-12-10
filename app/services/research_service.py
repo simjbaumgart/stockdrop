@@ -1,4 +1,5 @@
 import google.generativeai as genai
+from google.generativeai.types import RequestOptions
 import os
 import logging
 import json
@@ -7,6 +8,8 @@ from typing import Dict, List, Optional
 from app.models.market_state import MarketState
 from app.services.analyst_service import analyst_service
 from app.services.fred_service import fred_service
+import time
+import requests
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -24,6 +27,9 @@ class ResearchService:
         else:
             logger.warning("GEMINI_API_KEY not found. Research service will use mock data.")
             self.model = None
+            
+        # OpenAI API Key for Deep Reasoning
+        self.openai_key = os.getenv("OPENAI_API_KEY")
 
     def analyze_stock(self, ticker: str, raw_data: Dict) -> dict:
         """
@@ -97,22 +103,51 @@ class ResearchService:
         print(f"  Total Agent Calls: {state.agent_calls}")
         print("="*50 + "\n")
         
+        # --- Phase 4: deep reasoning check for STRONG BUY ---
+        deep_reasoning_report = ""
+        action = final_decision.get('action', 'HOLD').upper()
+        
+        # Trigger if Strong Buy, or plain Buy with high confidence (e.g. > 80)
+        # PAUSED by User Request
+        is_strong_buy = False # action == "STRONG BUY" or (action == "BUY" and final_decision.get('score', 0) >= 80)
+        
+        if is_strong_buy:
+             print("  > [Deep Reasoning] 'Strong Buy' signal detected. Validating with OpenAI (o3-mini)...")
+             deep_reasoning_report = self._run_deep_reasoning_check(state, drop_str)
+             
+             # If the Deep Reasoning model explicitly downgrades, we should reflect that in the final output
+             # Simple heuristic: if it says "DOWNGRADE" in the first line or verdict.
+             if "DOWNGRADE TO" in deep_reasoning_report.upper():
+                 print("  > [Deep Reasoning] VERDICT: Recommendation Downgraded.")
+                 # We won't overwrite the Fund Manager's decision object to preserve history,
+                 # but we will append a major warning to the executive summary.
+                 final_decision['reason'] += " [WARNING: Deep Reasoning Model suggests caution/downgrade - see report]"
+        
         # Construct Final Output compatible with existing app expectations
         recommendation = final_decision.get("action", "HOLD").upper()
         # Map "BUY" with size to "STRONG BUY" if needed, or keep generic
         
+        # Extract checklist metadata
+        economics_run = "NEEDS_ECONOMICS: TRUE" in news_report and economics_report != "" and "failed to fetch" not in economics_report
+        drop_reason_identified = "REASON_FOR_DROP_IDENTIFIED: YES" in news_report
+
         return {
             "recommendation": recommendation,
             "score": final_decision.get("score", 50),
             "executive_summary": final_decision.get("reason", "No reason provided."),
-            "detailed_report": self._format_full_report(state),
+            "deep_reasoning_report": deep_reasoning_report,
+            "detailed_report": self._format_full_report(state, deep_reasoning_report),
             # Legacy compatibility fields
             "technician_report": state.reports.get('technical', ''),
             "bull_report": self._extract_debate_side(state, "Bull"),
             "bear_report": self._extract_debate_side(state, "Bear"),
             "macro_report": state.reports.get('news', ''),
             "reasoning": final_decision.get("reason", ""),
-            "agent_calls": state.agent_calls
+            "agent_calls": state.agent_calls,
+            "checklist": {
+                "economics_run": economics_run,
+                "drop_reason_identified": drop_reason_identified
+            }
         }
 
     def _run_debate(self, state: MarketState, drop_str: str):
@@ -177,6 +212,77 @@ class ResearchService:
             
         return decision
 
+    def _run_deep_reasoning_check(self, state: MarketState, drop_str: str) -> str:
+        """
+        Uses OpenAI o3-mini (Reasoning Model) as a 'Stock Investor' validation step.
+        """
+        if not self.openai_key:
+            return "Skipped: No OpenAI API Key."
+            
+        reports_text = json.dumps(state.reports, indent=2)
+        debate_text = "\\n\\n".join(state.debate_transcript)
+        fund_decision = json.dumps(state.final_decision, indent=2)
+        
+        prompt = f"""
+You are a **Senior Stock Investor** at a hedge fund.
+Your specialty is evaluating "Buying the Dip" opportunities.
+A proposal has landed on your desk from your team (Fund Manager + Analysts).
+
+THE PROPOSAL:
+They want to BUY {state.ticker} after a {drop_str} drop.
+Current Decision:
+{fund_decision}
+
+THE RESEARCH:
+--- Analyst Reports ---
+{reports_text}
+
+--- Internal Debate ---
+{debate_text}
+
+YOUR TASK:
+Act as the FINAL DECISION MAKER.
+Scrutinize their reasoning. Are they catching a falling knife? Are they ignoring a fatal flaw?
+You have the power to veto or confirm.
+
+OUTPUT:
+Write a memo to the team (max 200 words).
+Start with one of the following Verdicts:
+- "CONFIRM STRONG BUY"
+- "DOWNGRADE TO BUY" (If good but risky)
+- "DOWNGRADE TO HOLD" (If too dangerous)
+
+Then explain your reasoning.
+"""
+        
+        try:
+            url = "https://api.openai.com/v1/chat/completions"
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.openai_key}"
+            }
+            data = {
+                "model": "o3-mini", # Fallback from o3-deep-research
+                "messages": [
+                    {"role": "user", "content": prompt}
+                ],
+                "reasoning_effort": "medium"
+            }
+            
+            response = requests.post(url, headers=headers, json=data)
+            
+            if response.status_code == 200:
+                content = response.json()['choices'][0]['message']['content']
+                print(f"\n  [DEEP REASONING VERDICT]:\n{content}\n")
+                return content
+            else:
+                logger.error(f"OpenAI API Error: {response.text}")
+                return f"Error calling Deep Reasoning model: {response.status_code}"
+                
+        except Exception as e:
+            logger.error(f"Deep Reasoning Check Failed: {e}")
+            return f"Exception during Deep Reasoning check: {e}"
+
     # --- Prompts ---
 
     def _create_technical_agent_prompt(self, state: MarketState, raw_data: Dict, drop_str: str) -> str:
@@ -223,10 +329,72 @@ Use headers: "Technical Signal", "Oversold Status", "Context from Report", "Verd
         # Safest to sort by datetime if available, else trust order but reverse or check.
         # Our get_aggregated_news returns dict with 'datetime' (int timestamp).
         news_items.sort(key=lambda x: x.get('datetime', 0), reverse=True)
-        
         news_summary = ""
-        for n in news_items[:10]:
-            news_summary += f"- {n.get('datetime_str', 'N/A')}: {n.get('headline')}\n"
+        # Limit to top 30 and format
+        for n in news_items[:30]:
+            date_str = n.get('datetime_str', 'N/A')
+            headline = n.get('headline', 'No Headline')
+            source = n.get('source', 'Unknown')
+            content = n.get('content', '') # Full body text if available
+            
+            news_summary += f"- {date_str}: {headline} ({source})\n"
+            
+            if content:
+                 # Truncate slightly if massive to prevent context window explosion
+                 # 5000 chars is generous for full article usually.
+                 truncated_content = content[:5000] + "..." if len(content) > 5000 else content
+                 news_summary += f"  CONTENT: {truncated_content}\n  ---\n"
+
+        # --- LOGGING NEWS CONTEXT ---
+        try:
+            log_dir = "data/news"
+            os.makedirs(log_dir, exist_ok=True)
+            log_file = f"{log_dir}/{state.ticker}_{state.date}_news_context.txt"
+            
+            with open(log_file, "w") as f:
+                f.write(f"NEWS CONTEXT FOR {state.ticker} ({state.date})\n")
+                f.write("==================================================\n\n")
+                f.write(news_summary)
+                
+            print(f"  > [News Agent] Logged news context to {log_file}")
+        except Exception as e:
+            print(f"  > [News Agent] Error logging news context: {e}")
+
+        # Try to load DefeatBeta data
+        defeatbeta_path = f"data/DefeatBeta_data/{state.ticker}"
+        db_news = []
+        db_transcript = ""
+        
+        try:
+            if os.path.exists(defeatbeta_path):
+                # Load Transcript
+                t_path = os.path.join(defeatbeta_path, "transcript.txt")
+                if os.path.exists(t_path):
+                    with open(t_path, "r") as f:
+                        db_transcript = f.read()
+                        
+                # Load News
+                n_path = os.path.join(defeatbeta_path, "news.json")
+                if os.path.exists(n_path):
+                    with open(n_path, "r") as f:
+                        db_json = json.load(f)
+                        for item in db_json:
+                             # Format roughly to match expected structure or just stringify
+                             db_news.append(f"{item.get('report_date','')} - {item.get('publisher','')}: {item.get('title','')} ({item.get('link','')})")
+        except Exception as e:
+            print(f"Error loading DefeatBeta data: {e}")
+
+        # Mix DefeatBeta transcript if available and original is empty or short
+        if db_transcript and len(transcript) < 100:
+             transcript = db_transcript
+        elif db_transcript:
+             transcript += f"\n\n--- ADDITIONAL TRANSCRIPT DATA (DefeatBeta) ---\n{db_transcript[:2000]}..." # Append snippet
+
+        # Mix DefeatBeta news
+        if db_news:
+            news_summary += "\n--- ADDITIONAL NEWS SOURCES (DefeatBeta) ---\n"
+            for line in db_news[:5]:
+                news_summary += f"- {line}\n"
 
         return f"""
 You are the **News & Sentiment Agent**.
@@ -242,24 +410,44 @@ INPUT DATA:
 2. QUARTERLY REPORT SNIPPET (Transcript/Filing):
 {transcript}
 
+NOTE ON DATA:
+You have been provided with additional data files (JSON/PDF-derived content) in the input.
+Treat this as **additional information** which can be **considered or dropped if outdated**.
+Verify dates where possible. If the DefeatBeta data seems older or less relevant than the primary source, prioritize the primary source.
+
 TASK:
 - Determine if the drop is due to temporary panic/overreaction or a fundamental structural change. Is this a short-term negative event?
 - Identify the dominant narrative (Fear vs Greed? Growth vs Stagnation?).
 - Highlight specific events from news or the report that are driving sentiment.
 - Check for consistency: Do the headlines match the company's internal tone in the report?
+- **CRITICAL ASSESSMENT**: Assess the validity of the news. Is it "Hype" or "Fluff"? Be skeptical of clickbait or promotional content. If a source looks unreliable or the headline is sensationalist, note it. Distinguish between hard facts (earnings miss, lawsuit) and opinion pieces.
 
 OUTPUT:
-A sentiment analysis report (max 300 words).
-Use headers: "Sentiment Overview", "Reason for Drop", "Key Drivers", "Narrative Check", "Top 5 Sources".
+A sentiment analysis report.
+Use headers: "Sentiment Overview", "Reason for Drop", "Extended Transcript Summary", "Key Drivers", "Narrative Check", "Top 5 Sources".
+
+SECTION: "Extended Transcript Summary":
+If transcript data is provided, you MUST provide a detailed summary (bullet points).
+Focus on:
+- Guidance & Outlook (most important)
+- Management Tone (Confident vs Defessive)
+- Key Operational Updates or Strategic Shifts
+If no transcript is available, state "No Transcript Available".
 
 CITATION REQUIREMENT:
-You MUST explicitly list the Top 5 News Headlines/Sources that most influenced your analysis in the "Top 5 Sources" section.
+If valid news items are provided, you MUST list the Top 5 Sources that influenced your analysis.
+If NO news items are provided in the input, explicitly state "No Sources Available" in this section.
+DO NOT simulate or hallucinate sources if real data is missing.
 
 MACRO CHECK:
 At the very end of your response, on a new line, explicitly state "NEEDS_ECONOMICS: TRUE" if:
 1. The company has significant business exposure to the US Economy.
 2. The stock drop might be related to macro factors (Interest Rates, Inflation, Recession fears).
 Otherwise, state "NEEDS_ECONOMICS: FALSE".
+
+DROP REASON CHECK:
+Also, explicitly state on a new line: "REASON_FOR_DROP_IDENTIFIED: YES" if you have found a specific news event or report detail explaining the drop (e.g. "missed earnings", "CEO resignation", "lawsuit").
+If the drop is a mystery or just general market noise with no specific catalyst found, state "REASON_FOR_DROP_IDENTIFIED: NO".
 """
 
     def _create_economics_agent_prompt(self, state: MarketState, macro_data: Dict) -> str:
@@ -284,29 +472,45 @@ Headers: "Macro Environment", "Impact on {state.ticker}", "Risk Level".
         return f"""
 You are the **Bullish Researcher**. Your goal is to maximize the firm's exposure to this asset.
 CONTEXT: We are looking for a swing trade / short-term recovery opportunity on this {drop_str} drop.
-Review the Agent Reports below.
-Construct a persuasive argument for a LONG position.
+Review the Agent Reports below, ESPECIALLY the "Extended Transcript Summary" in the News Report.
 
 AGENT REPORTS:
 {json.dumps(state.reports, indent=2)}
 
+TASK:
+Construct a persuasive argument for a LONG position.
+1. If available, you SHOULD cite specific positive drivers from the **News Headlines** and **Earnings Transcript** to support your thesis.
+2. Do not rely solely on technicals; explain the FUNDAMENTAL/NARRATIVE reason for a reversal.
+3. If the transcript mentions a temporary issue (e.g., supply chain) that is resolving, highlight it.
+
+SAFETY:
+DO NOT HALLUCINATE: If no news/transcript is provided or relevant, rely on the technicals/fundamentals present. State "No specific news drivers found" if applicable. Do not invent events.
+
 OUTPUT:
 A concise, high-conviction thesis (max 200 words).
-Argue why this specific drop is an overreaction and a buying opportunity for a bounce. Focus on short-term recovery mechanics.
+Argue why this specific drop is an overreaction and a buying opportunity.
 """
 
     def _create_bear_prompt(self, state: MarketState, bull_thesis: str, drop_str: str) -> str:
         return f"""
 You are the **Bearish Researcher**. Your goal is to protect the firm's capital from risk.
 CONTEXT: The stock dropped {drop_str}.
-Review the Agent Reports and the Bull's argument.
-Deconstruct the Bull's argument ruthlessly.
+Review the Agent Reports (especially the "Extended Transcript Summary") and the Bull's argument.
 
 AGENT REPORTS:
 {json.dumps(state.reports, indent=2)}
 
 BULL'S ARGUMENT:
 {bull_thesis}
+
+TASK:
+Deconstruct the Bull's argument ruthlessly.
+1. If available, you SHOULD cite specific negative risks from the **News and Transcript** (e.g., guidance cut, macro headwinds, management hesitation).
+2. Use the fundamental data to show why the drop is justified.
+3. Point out if the Bull is ignoring a "fatal flaw" mentioned in the News.
+
+SAFETY:
+DO NOT HALLUCINATE: If data is missing/limited, stick to what is known. Do not invent negative news.
 
 OUTPUT:
 A brutal rebuttal (max 200 words).
@@ -372,7 +576,11 @@ A strictly formatted JSON object:
             # logger.info(f"Calling Agent: {agent_name}")
             if state:
                 state.agent_calls += 1
-            response = self.model.generate_content(prompt)
+            
+            # Rate limit buffer
+            time.sleep(2)
+            
+            response = self.model.generate_content(prompt, request_options=RequestOptions(timeout=600))
             return response.text
         except Exception as e:
             logger.error(f"Error in {agent_name}: {e}")
@@ -388,13 +596,18 @@ A strictly formatted JSON object:
             pass
         return {}
 
-    def _format_full_report(self, state: MarketState) -> str:
+    def _format_full_report(self, state: MarketState, deep_report: str = "") -> str:
         debate_section = ''.join([f"\n{entry}\n" for entry in state.debate_transcript])
+        
+        deep_section = ""
+        if deep_report:
+            deep_section = f"\n## 0. DEEP REASONING VERDICT (Verification)\n{deep_report}\n"
         
         return f"""
 # STOCKDROP INVESTMENT MEMO: {state.ticker}
 Date: {state.date}
 
+{deep_section}
 ## 1. Risk Council & Decision
 **Action:** {state.final_decision.get('action')}
 **Score:** {state.final_decision.get('score')}/100
