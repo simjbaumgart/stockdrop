@@ -1,6 +1,7 @@
 import requests
 import os
 from dotenv import load_dotenv, find_dotenv
+from datetime import datetime
 
 load_dotenv(find_dotenv())
 
@@ -39,12 +40,20 @@ class BenzingaService:
             params = {
                 "ticker": symbol,
                 "limit": 20,
-                "apiKey": self.api_key,
+                # "apiKey": self.api_key, # Moved to Header
                 "sort": "published_utc",
                 "order": "desc"
             }
             
-            response = requests.get(self.base_url, params=params, timeout=10)
+            headers = {
+                "Authorization": f"Bearer {self.api_key}"
+            }
+            
+            # DEEP DEBUG
+            print(f"DEBUG: Using Key Repr: {repr(self.api_key)}")
+            print(f"DEBUG: Request Headers: Auth present? {'Authorization' in headers}")
+            
+            response = requests.get(self.base_url, params=params, headers=headers, timeout=10)
             
             if response.status_code == 200:
                 data = response.json()
@@ -52,6 +61,27 @@ class BenzingaService:
                 return self._process_news(results)
             else:
                 print(f"Polygon/Massive API Error: {response.status_code} - {response.text}")
+                if response.status_code == 401:
+                    print("DEBUG: Try running this CURL command to verify access:")
+                    print(f"curl -v -H 'Authorization: Bearer {self.api_key}' '{response.url}'")
+                    
+                    # FALLBACK: Try urllib directly to bypass requests/SSL weirdness
+                    print("DEBUGGING: Attempting Fallback via urllib...")
+                    try:
+                        import urllib.request
+                        import json
+                        
+                        req = urllib.request.Request(response.url)
+                        req.add_header("Authorization", f"Bearer {self.api_key}")
+                        with urllib.request.urlopen(req) as f:
+                            resp_body = f.read().decode('utf-8')
+                            data = json.loads(resp_body)
+                            print("DEBUGGING: urllib SUCCESS! processing results...")
+                            results = data.get("results", [])
+                            return self._process_news(results)
+                    except Exception as fallback_err:
+                        print(f"Fallback Failed: {fallback_err}")
+                        
                 return []
         except Exception as e:
             print(f"Error fetching Benzinga news: {e}")
