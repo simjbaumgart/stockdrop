@@ -495,6 +495,9 @@ class StockService:
                     technical_analysis = tradingview_service.get_technical_analysis(symbol, region=stock.get("region", "US"))
                     technical_analysis["gatekeeper_findings"] = reasons # Add early
 
+                    # Check for earnings proximity (Restored)
+                    is_earnings, earnings_date_str = self._check_earnings_proximity(symbol)
+
                     # Fetch News Headlines (Moved Up for Deferral Check)
                     print(f"Fetching news for {symbol}...")
                     news_data = self.get_aggregated_news(
