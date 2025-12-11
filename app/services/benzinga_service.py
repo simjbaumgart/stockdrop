@@ -1,39 +1,38 @@
 import requests
 import os
-from dotenv import load_dotenv
-from datetime import datetime
+from dotenv import load_dotenv, find_dotenv
 
-load_dotenv()
+load_dotenv(find_dotenv())
 
 class BenzingaService:
     """
     Service to fetch Benzinga news via the Massive Data API (powered by Polygon.io).
-    
-    NOTE: Massive.com functionality is provided via Polygon.io endpoints.
-    This service connects to Polygon's standardized news endpoint to retrieve
-    content originating from Benzinga and other premium publishers provided by Massive.
     """
     def __init__(self):
+        # We try to load here, but we will also check in the method call for robustness
         self.api_key = os.getenv("BENZINGA_API_KEY")
-        # Massive / Polygon endpoint
+        self.base_url = "https://api.polygon.io/v2/reference/news"
+        
         if self.api_key:
              masked = f"{self.api_key[:4]}...{self.api_key[-4:]}"
-             print(f"DEBUG: BenzingaService initialized with Key: {masked}")
+             print(f"DEBUG (Init): BenzingaService initialized with Key: {masked}")
         else:
-             print("DEBUG: BenzingaService initialized with NO KEY found in env.")
-             
-        self.base_url = "https://api.polygon.io/v2/reference/news"
+             print("DEBUG (Init): BenzingaService initialized with NO KEY.")
 
     def get_company_news(self, symbol: str):
         """
         Fetches news from the Massive Data stream (Polygon.io).
-        
-        This call routes through Polygon's infrastructure but targets the data 
-        streams that include Massive's content partners (like Benzinga).
         """
-        # Use BENZINGA_API_KEY env var, which should now hold the Polygon/Massive Key.
+        # LAZY LOAD / RELOAD if missing
         if not self.api_key:
-            print("Warning: BENZINGA_API_KEY not found.")
+            print("DEBUG: Key missing in instance. Attempting re-load from env...")
+            load_dotenv(find_dotenv())
+            self.api_key = os.getenv("BENZINGA_API_KEY")
+            
+        if not self.api_key:
+            print("CRITICAL WARNING: BENZINGA_API_KEY not found in env even after reload.")
+            print(f"Current Directory: {os.getcwd()}")
+            # Attempt to fallback to known locations? No, just fail gracefully.
             return []
 
         try:
