@@ -705,15 +705,15 @@ class StockService:
         """
         news_items = []
         
-        # 1. Benzinga News (Primary - Full Content)
+        # 1. Massive/Benzinga News (Primary - Full Content)
         try:
-            # Calculate 1 week ago
-            one_week_ago = int((datetime.now() - timedelta(days=7)).timestamp())
+            # Calculate 3 months ago (approx 90 days)
+            three_months_ago = int((datetime.now() - timedelta(days=90)).timestamp())
             
             bz_news = benzinga_service.get_company_news(symbol)
             
-            # Filter: Max 1 week old
-            bz_filtered = [n for n in bz_news if n.get('datetime', 0) >= one_week_ago]
+            # Filter: Max 3 months old
+            bz_filtered = [n for n in bz_news if n.get('datetime', 0) >= three_months_ago]
             
             # Sort by date desc
             bz_filtered.sort(key=lambda x: x.get('datetime', 0), reverse=True)
@@ -723,7 +723,7 @@ class StockService:
             
             for item in bz_final:
                 news_items.append({
-                    "source": "Benzinga",
+                    "source": "Massive (Benzinga)",
                     "headline": item.get('headline'),
                     "summary": item.get('summary'),
                     "content": item.get('content'), # Full HTML body
@@ -733,7 +733,7 @@ class StockService:
                     "image": item.get('image')
                 })
                 
-            print(f"  > Fetched {len(bz_final)} Benzinga articles (Top 10, <7 days).")
+            print(f"  > Fetched {len(bz_final)} Massive/Benzinga articles (Top 10, <90 days).")
             
         except Exception as e:
             print(f"Error fetching Benzinga news: {e}")
