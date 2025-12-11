@@ -28,7 +28,37 @@ class GoogleStorageService:
             except Exception as e:
                 print(f"Error authenticating via GOOGLE_CREDENTIALS_JSON: {e}")
 
-        # Priority 2: File path
+        # Priority 2: Individual Environment Variables
+        project_id = os.getenv('GOOGLE_PROJECT_ID')
+        private_key = os.getenv('GOOGLE_PRIVATE_KEY')
+        client_email = os.getenv('GOOGLE_CLIENT_EMAIL')
+        
+        if project_id and private_key and client_email:
+            try:
+                # Handle potential escaped newlines in private key from env vars
+                if "\\n" in private_key:
+                    private_key = private_key.replace("\\n", "\n")
+                
+                info = {
+                    "type": "service_account",
+                    "project_id": project_id,
+                    "private_key_id": os.getenv('GOOGLE_PRIVATE_KEY_ID'),
+                    "private_key": private_key,
+                    "client_email": client_email,
+                    "client_id": os.getenv('GOOGLE_CLIENT_ID'),
+                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                    "token_uri": "https://oauth2.googleapis.com/token",
+                    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+                    "client_x509_cert_url": os.getenv('GOOGLE_CLIENT_X509_CERT_URL')
+                }
+                self.creds = service_account.Credentials.from_service_account_info(info)
+                self.client = storage.Client(credentials=self.creds, project=self.creds.project_id)
+                print("Authenticated with Google Cloud Storage via individual environment variables.")
+                return
+            except Exception as e:
+                print(f"Error authenticating via individual environment variables: {e}")
+
+        # Priority 3: File path
         if self.service_account_file and os.path.exists(self.service_account_file):
             try:
                 self.creds = service_account.Credentials.from_service_account_file(

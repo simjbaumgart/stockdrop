@@ -17,6 +17,18 @@ services:
         value: /var/lib/data
       - key: GOOGLE_CREDENTIALS_JSON
         sync: false
+      - key: GOOGLE_PROJECT_ID
+        sync: false
+      - key: GOOGLE_PRIVATE_KEY_ID
+        sync: false
+      - key: GOOGLE_PRIVATE_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_EMAIL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_X509_CERT_URL
+        sync: false
       - key: GOOGLE_STORAGE_BUCKET
         sync: false
       - key: FINNHUB_API_KEY
