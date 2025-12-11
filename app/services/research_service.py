@@ -320,30 +320,38 @@ Use headers: "Technical Signal", "Oversold Status", "Context from Report", "Verd
 """
 
     def _create_news_agent_prompt(self, state: MarketState, raw_data: Dict, drop_str: str) -> str:
-        # Extract inputs
         news_items = raw_data.get('news_items', [])
         transcript = raw_data.get('transcript_text', "No transcript available.")
         
-        # Format news - Sort by new to old
-        # Assuming news_items have 'datetime' (timestamp) or 'datetime_str'. 
-        # Safest to sort by datetime if available, else trust order but reverse or check.
-        # Our get_aggregated_news returns dict with 'datetime' (int timestamp).
-        news_items.sort(key=lambda x: x.get('datetime', 0), reverse=True)
-        news_summary = ""
-        # Limit to top 30 and format
-        for n in news_items[:30]:
+        # Split into Massive and Others to enforce user priority in the PROMPT display
+        massive_news = [n for n in news_items if "Massive" in n.get('source', '')]
+        other_news = [n for n in news_items if "Massive" not in n.get('source', '')]
+        
+        # Sort each group by date desc
+        massive_news.sort(key=lambda x: x.get('datetime', 0), reverse=True)
+        other_news.sort(key=lambda x: x.get('datetime', 0), reverse=True)
+        
+        news_summary = "--- PRIMARY SOURCE (Massive/Benzinga) ---\n"
+        for n in massive_news:
             date_str = n.get('datetime_str', 'N/A')
             headline = n.get('headline', 'No Headline')
             source = n.get('source', 'Unknown')
-            content = n.get('content', '') # Full body text if available
+            content = n.get('content', '')  # Full body text if available
             
             news_summary += f"- {date_str}: {headline} ({source})\n"
-            
             if content:
                  # Truncate slightly if massive to prevent context window explosion
-                 # 5000 chars is generous for full article usually.
                  truncated_content = content[:5000] + "..." if len(content) > 5000 else content
                  news_summary += f"  CONTENT: {truncated_content}\n  ---\n"
+                 
+        news_summary += "\n--- OTHER SOURCES ---\n"
+        # Remaining slots? We already limited total to 30 in stock_service, but let's be safe.
+        for n in other_news:
+            date_str = n.get('datetime_str', 'N/A')
+            headline = n.get('headline', 'No Headline')
+            source = n.get('source', 'Unknown')
+            
+            news_summary += f"- {date_str}: {headline} ({source})\n"
 
         # --- LOGGING NEWS CONTEXT ---
         try:
