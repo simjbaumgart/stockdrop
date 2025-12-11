@@ -345,6 +345,7 @@ class StockService:
             print(f"Error saving found stocks to CSV: {e}")
 
         # Identify and print stocks that still need processing
+        deferred_tasks = [] # Initialize queue
         pending_processing = []
         for stock in large_cap_movers:
             if stock["change_percent"] <= -5.0:
@@ -446,7 +447,10 @@ class StockService:
                     ):
                         continue
 
-                    # --- GATEKEEPER PHASE 2: Technical Filters ---
+                    # --- WORKFLOW: 1. Technical Qualification ---
+                    # First, we analyze the stock on the technical side (Gatekeeper).
+                    # If it qualifies (passes filters), we proceed.
+                    # --------------------------------------------
                     print(f"GATEKEEPER: Checking technical filters for {symbol}...")
                     region = stock.get("region", "US") 
                     screener = stock.get("screener")
@@ -484,51 +488,15 @@ class StockService:
                     
                     print(f"Triggering notification for {symbol} ({change_percent:.2f}%)")
                     
-                    # Check for earnings proximity
-                    is_earnings, earnings_date_str = self._check_earnings_proximity(symbol)
-                    
-                    # 1. Save initial "Pending" state to DB immediately
-                    today_str = datetime.now().strftime("%Y-%m-%d")
-                    
-                    # Get current git version
-                    current_version = get_git_version()
-
-                    # 1. Add partial decision point to DB (Status: Pending)
-                    from app.database import add_decision_point, update_decision_point
-                    
-                    print(f"Adding pending decision for {symbol}...")
-                    decision_id = add_decision_point(
-                        symbol=symbol, 
-                        price=price, 
-                        drop_percent=change_percent, 
-                        recommendation="PENDING", 
-                        reasoning="Analyzing...", 
-                        status="Pending",
-                        company_name=company_name,
-                        pe_ratio=stock.get("pe_ratio"),
-                        market_cap=stock.get("market_cap"),
-                        sector=stock.get("sector", self.stock_metadata.get(symbol, {}).get("sector")),
-                        region=stock.get("region", self.stock_metadata.get(symbol, {}).get("region")),
-                        is_earnings_drop=is_earnings,
-                        earnings_date=earnings_date_str,
-                        git_version=current_version
-                    )
-
-                    # Generate research report
-                    print(f"Generating research report for {symbol}...")
-                    
-                    # Fetch Technical Analysis for the Technician Agent
+                    # Fetch Technical Analysis (MOVED UP)
                     print(f"Fetching technical analysis for {symbol}...")
                     import time
                     time.sleep(2) # Avoid 429 from Gatekeeper call
                     technical_analysis = tradingview_service.get_technical_analysis(symbol, region=stock.get("region", "US"))
-                    
-                    # Add Gatekeeper findings to technical analysis passed to agents
-                    technical_analysis["gatekeeper_findings"] = reasons
+                    technical_analysis["gatekeeper_findings"] = reasons # Add early
 
-                    # Fetch News Headlines (Agent 2 Input)
+                    # Fetch News Headlines (Moved Up for Deferral Check)
                     print(f"Fetching news for {symbol}...")
-                    # Pass region to correctly resolve news ticker (e.g. EVT -> EVT.DE)
                     news_data = self.get_aggregated_news(
                         symbol, 
                         region=stock.get("region", "US"),
@@ -536,181 +504,41 @@ class StockService:
                         company_name=company_name
                     )
                     print(f"  > Fetched {len(news_data)} news articles.")
-                    
-                    # 0-article skip Removed as per user request
+
+                    current_version = get_git_version()
+
+                    # Check Deferral
                     if len(news_data) == 0:
-                        print(f"  > Warning: No news found for {symbol}. Proceeding with analysis anyway.")
-                        
-                    news_headlines = "\n".join([f"- {n['datetime_str']}: {n['headline']} ({n['source']})" for n in news_data[:7]])
-                    if not news_headlines:
-                        news_headlines = "No specific news headlines found."
-                        
-                    # Fetch Filings & Transcript (New Agent Data) - Kept for compatibility if needed, but Agents use raw data now.
-                    # We will attach text snippets to the raw_data if we want the Analyst to process them specifically?
-                    # The plan uses 'FundamentalAnalyst' for Valuation/Insider.
-                    # 'Bull/Bear' use filings text. Ah, Bull/Bear prompts in ResearchService use 'filings_text'.
-                    # Wait, the new ResearchService prompts use 'state.reports'. 
-                    # Does the Bull/Bear prompt still take filings_text?
-                    # Looking at my ResearchService code: 
-                    # _create_bull_prompt(self, state: MarketState) -> no separate args.
-                    # It uses transcripts from the 'state' or assumes they are in reports?
-                    # The Bull/Bear prompts I wrote display: "ANALYST REPORTS:..."
-                    # They DO NOT explicitly take filings_text as an argument in the new code.
-                    # They rely on Analyst Reports. 
-                    # So where do filings/transcripts go? 
-                    # They should probably be processed by an Analyst (e.g. Fundamental) OR attached to MarketState.
-                    # The MarketState object has 'reports'. 
-                    # Maybe I should add a 'filings_summary' to 'fundamenta' report or similar.
-                    # For now, I will omit passing filings_text separately as the new signature doesn't take it.
-                    
-                    # Fetch Filings & Transcript
-                    print(f"Fetching filings/transcript for {symbol}...")
-                    # We fetch these to pass to the SentimentAnalyst and others
-                    filings_text = self.get_latest_filing_text(symbol)
-                    transcript_text = self.get_latest_transcript(symbol)
-                    
-                    # Fetch Technical Indicators (Ensure we have what TechnicalAnalyst needs: RSI, MACD, ADX)
-                    # tradingview_service.get_technical_analysis returns 'indicators' dict.
-                    # print(f"Fetching technical details for {symbol}...")
-                    # ta_data = tradingview_service.get_technical_analysis(symbol, region=stock.get("region", "US"))
-                    # REUSE PREVIOUSLY FETCHED DATA TO AVOID 429
-                    ta_data = technical_analysis 
-                    indicators = ta_data.get('indicators', {})
-                    
-                    # Add cached Gatekeeper indicators if missing
-                    if cached_indicators:
-                        for k, v in cached_indicators.items():
-                            if k not in indicators:
-                                indicators[k] = v
+                        print(f"  > [DEFERRED] {symbol} has 0 news items. Adding to deferred queue.")
+                        deferred_tasks.append({
+                            "symbol": symbol, "price": price, "change_percent": change_percent, 
+                            "stock": stock, "company_name": company_name, "exchange": exchange, 
+                            "reasons": reasons, "market_context": market_context, 
+                            "news_data": news_data, "is_earnings": is_earnings, 
+                            "earnings_date_str": earnings_date_str, "current_version": current_version,
+                            "technical_analysis": technical_analysis 
+                        })
+                        continue
 
-                    # Prepare Raw Data for Analysts
-                    # REMOVED: Insider Sentiment (User Feedback)
-                    # ADDED: transcript_text for SentimentAnalyst
-                    raw_data = {
-                        "metrics": {
-                            "pe_ratio": stock.get("pe_ratio"),
-                            "price_to_book": stock.get("pb_ratio"), # Assuming these keys exist in 'stock' from screener
-                            "peg_ratio": stock.get("peg_ratio"), # Might be missing
-                            "debt_to_equity": stock.get("debt_to_equity"),
-                            "profit_margin": stock.get("net_margin") # check key
-                        },
-                        "indicators": indicators,
-                        "news_items": news_data,
-                        "transcript_text": transcript_text or "", 
-                        "market_context": market_context,
-                        "change_percent": stock.get("change_percent", 0.0)
-                    }
-
-                    # Pass raw_data to research service
-                    report_data = research_service.analyze_stock(symbol, raw_data)
+                    # Run Deep Analysis Immediately
+                    self._run_deep_analysis(
+                        symbol, price, change_percent, stock, company_name, exchange, 
+                        reasons, market_context, news_data, is_earnings, earnings_date_str, current_version,
+                        technical_analysis
+                    )
                     
-                    recommendation = report_data.get("recommendation", "HOLD")
-                    score = report_data.get("score", "N/A")
-                    
-                    # --- EVIDENCE CHECKLIST ---
-                    checklist = report_data.get("checklist", {})
-                    news_count = len(news_data)
-                    latest_news_date = news_data[0]['datetime_str'] if news_count > 0 else "N/A"
-                    has_transcript = "Yes" if transcript_text and len(transcript_text) > 100 else "No"
-                    drop_reason_found = "Yes" if checklist.get("drop_reason_identified", False) else "No"
-                    fed_considered = "Yes" if checklist.get("economics_run", False) else "No"
-                    
-                    print(f"\n{'='*40}")
-                    print(f"*** EVIDENCE CHECKLIST FOR {symbol} ***")
-                    print(f"  - News Articles: {news_count}")
-                    print(f"  - Latest News: {latest_news_date}")
-                    print(f"  - Earnings Call Transcript: {has_transcript}")
-                    print(f"  - Reason for Drop Identified: {drop_reason_found}")
-                    print(f"  - FED Report Considered: {fed_considered}")
-                    print(f"{'='*40}\n")
-                    
-                    print(f"*** DECISION FOR {symbol}: {recommendation} (Score: {score}/100) ***")
-                    print(f"{'='*40}\n")
-                    
-                    # Print News Agent Summary as requested
-                    print(f"--- NEWS AGENT SUMMARY for {symbol} ---")
-                    print(report_data.get('macro_report', 'No News Agent Report available.'))
-                    print(f"---------------------------------------\n")
-
-                    # Use executive summary as the main reasoning text for DB/Display
-                    # Concatenate full report details as requested
-                    reasoning_parts = [
-                        f"*** EXECUTIVE SUMMARY ***\n{report_data.get('executive_summary', 'N/A')}\n",
-                        f"*** TECHNICIAN'S REPORT ***\n{report_data.get('technician_report', 'N/A')}\n",
-                        f"*** RATIONAL BULL CASE ***\n{report_data.get('bull_report', 'N/A')}\n",
-                        f"*** BEAR'S PRE-MORTEM ***\n{report_data.get('bear_report', 'N/A')}\n",
-                        f"*** CONTEXTUAL ANALYSIS ***\n{report_data.get('macro_report', 'N/A')}\n",
-                        f"*** JUDGE'S SYNTHESIS ***\n{report_data.get('detailed_report', 'N/A')}"
-                    ]
-                    reasoning = "\n".join(reasoning_parts)
-                    
-                    self.research_reports[symbol] = reasoning
-                    
-                    # 2. Update decision point with final result
-                    status = "Owned" if recommendation == "BUY" else "Not Owned"
-                    # If recommendation is a score (e.g. "8.5"), treat high scores as Owned/Buy?
-                    # The user moved to a scoring system.
-                    # Let's assume > 7 is a Buy/Owned for now, or just keep status as "Tracked"
-                    try:
-                        score = float(recommendation)
-                        if score >= 7.0:
-                            status = "Owned"
-                        else:
-                            status = "Not Owned"
-                    except:
-                        if recommendation == "BUY":
-                            status = "Owned"
-                        else:
-                            status = "Not Owned"
-
-                    if decision_id:
-                        update_decision_point(decision_id, recommendation, reasoning, status, ai_score=float(score) if isinstance(score, (int, float)) else None)
-                        print(f"Updated decision point for {symbol}: {recommendation} -> {status} (Score: {score})")
-                    
-                    # Save detailed decision data locally and to Cloud
-                    decision_data = {
-                        "symbol": symbol,
-                        "company_name": company_name,
-                        "price": price,
-                        "change_percent": change_percent,
-                        "recommendation": recommendation,
-                        "reasoning": reasoning,
-                        "pe_ratio": stock.get("pe_ratio", 0.0),
-                        "market_cap": stock.get("market_cap", 0.0),
-                        "sector": stock.get("sector", self.stock_metadata.get(symbol, {}).get("sector", "Unknown")),
-                        "region": stock.get("region", self.stock_metadata.get(symbol, {}).get("region", "Unknown")),
-                        "is_earnings_drop": is_earnings,
-                        "earnings_date": earnings_date_str,
-                        "news": news_data,
-                        "git_version": current_version
-                    }
-                    
-                    storage_service.save_decision_locally(decision_data)
-                    drive_service.save_decision(decision_data)
-                    
-                    # Prepare context for this specific stock
-                    stock_context = {}
-                    # Add Indices
-                    for name, ticker in self.indices_tickers.items():
-                        stock_context[name] = market_context.get(ticker, 0.0)
-                    
-                    # Add Sector if available
-                    metadata = self.stock_metadata.get(symbol, {})
-                    sector = metadata.get("sector")
-                    if sector and sector in self.sector_tickers:
-                        sector_ticker = self.sector_tickers[sector]
-                        stock_context[f"Sector ({sector})"] = market_context.get(sector_ticker, 0.0)
-
-                    # Conditional Email Notification
-                    # User requested email ONLY if verdict is 'STRONG BUY'
-                    # We check for "STRONG BUY" in the recommendation string (case-insensitive)
-                    if "STRONG BUY" in recommendation.upper():
-                        print(f"Verdict is {recommendation}. Sending email notification.")
-                        email_service.send_notification(symbol, change_percent, price, report_data, stock_context)
-                    else:
-                        print(f"Verdict is {recommendation}. Skipping email notification (Logic: Strong Buy only).")
-                        
-                    self.sent_notifications.add(notification_key)
+        # Process Deferred Tasks
+        if deferred_tasks:
+            print(f"\nProcessing {len(deferred_tasks)} deferred stocks (0 news)...")
+            for task in deferred_tasks:
+                print(f"Processing deferred: {task['symbol']}...")
+                self._run_deep_analysis(
+                     task['symbol'], task['price'], task['change_percent'], task['stock'], 
+                     task['company_name'], task['exchange'], task['reasons'], 
+                     task['market_context'], task['news_data'], task['is_earnings'], 
+                     task['earnings_date_str'], task['current_version'],
+                     task['technical_analysis']
+                )
                     
         print(f"[{datetime.now().strftime('%H:%M:%S')}] Cycle completed. Large cap drops check finished.")
 
@@ -1185,5 +1013,182 @@ class StockService:
             return 1.5 <= hour <= 7.0
         
         return False
+
+    def _run_deep_analysis(self, symbol, price, change_percent, stock, company_name, exchange, reasons, market_context, news_data, is_earnings, earnings_date_str, current_version, technical_analysis):
+        """
+        Runs the deep analysis pipeline for a stock:
+        1. DB Pending
+        2. Technical Analysis (TradingView) - Now passed in
+        3. Filings/Transcripts
+        4. Research Agents
+        5. DB Final Update
+        6. Notifications
+        """
+        # 1. Add partial decision point to DB (Status: Pending)
+        from app.database import add_decision_point, update_decision_point
+        
+        print(f"Adding pending decision for {symbol}...")
+        decision_id = add_decision_point(
+            symbol=symbol, 
+            price=price, 
+            drop_percent=change_percent, 
+            recommendation="PENDING", 
+            reasoning="Analyzing...", 
+            status="Pending",
+            company_name=company_name,
+            pe_ratio=stock.get("pe_ratio"),
+            market_cap=stock.get("market_cap"),
+            sector=stock.get("sector", self.stock_metadata.get(symbol, {}).get("sector")),
+            region=stock.get("region", self.stock_metadata.get(symbol, {}).get("region")),
+            is_earnings_drop=is_earnings,
+            earnings_date=earnings_date_str,
+            git_version=current_version
+        )
+
+        # Generate research report
+        print(f"Generating research report for {symbol}...")
+        
+        # Technical Analysis is already fetched and passed in
+        # Add Gatekeeper findings to technical analysis passed to agents (if not already done)
+        if "gatekeeper_findings" not in technical_analysis:
+             technical_analysis["gatekeeper_findings"] = reasons
+
+        # Fetch Filings & Transcript
+        print(f"Fetching filings/transcript for {symbol}...")
+        filings_text = self.get_latest_filing_text(symbol)
+        transcript_text = self.get_latest_transcript(symbol)
+        
+        # Use technical analysis data for indicators
+        ta_data = technical_analysis 
+        indicators = ta_data.get('indicators', {})
+        
+        # Add cached Gatekeeper indicators if missing
+        cached_indicators = stock.get("cached_indicators")
+        if cached_indicators:
+            for k, v in cached_indicators.items():
+                if k not in indicators:
+                    indicators[k] = v
+
+        # Prepare Raw Data dictionary
+        raw_data = {
+            "metrics": {
+                "pe_ratio": stock.get("pe_ratio"),
+                "price_to_book": stock.get("pb_ratio"),
+                "peg_ratio": stock.get("peg_ratio"),
+                "debt_to_equity": stock.get("debt_to_equity"),
+                "profit_margin": stock.get("net_margin")
+            },
+            "indicators": indicators,
+            "news_items": news_data,
+            "transcript_text": transcript_text or "", 
+            "market_context": market_context,
+            "change_percent": stock.get("change_percent", 0.0)
+        }
+
+        # Pass raw_data to research service
+        report_data = research_service.analyze_stock(symbol, raw_data)
+        
+        recommendation = report_data.get("recommendation", "HOLD")
+        score = report_data.get("score", "N/A")
+        
+        # --- EVIDENCE CHECKLIST ---
+        checklist = report_data.get("checklist", {})
+        news_count = len(news_data)
+        latest_news_date = news_data[0]['datetime_str'] if news_count > 0 else "N/A"
+        has_transcript = "Yes" if transcript_text and len(transcript_text) > 100 else "No"
+        drop_reason_found = "Yes" if checklist.get("drop_reason_identified", False) else "No"
+        fed_considered = "Yes" if checklist.get("economics_run", False) else "No"
+        
+        print(f"\n{'='*40}")
+        print(f"*** EVIDENCE CHECKLIST FOR {symbol} ***")
+        print(f"  - News Articles: {news_count}")
+        print(f"  - Latest News: {latest_news_date}")
+        print(f"  - Earnings Call Transcript: {has_transcript}")
+        print(f"  - Reason for Drop Identified: {drop_reason_found}")
+        print(f"  - FED Report Considered: {fed_considered}")
+        print(f"{'='*40}\n")
+        
+        print(f"*** DECISION FOR {symbol}: {recommendation} (Score: {score}/100) ***")
+        print(f"{'='*40}\n")
+        
+        print(f"--- NEWS AGENT SUMMARY for {symbol} ---")
+        print(report_data.get('macro_report', 'No News Agent Report available.'))
+        print(f"---------------------------------------\n")
+
+        # Construct Reasoning
+        reasoning_parts = [
+            f"*** EXECUTIVE SUMMARY ***\n{report_data.get('executive_summary', 'N/A')}\n",
+            f"*** TECHNICIAN'S REPORT ***\n{report_data.get('technician_report', 'N/A')}\n",
+            f"*** RATIONAL BULL CASE ***\n{report_data.get('bull_report', 'N/A')}\n",
+            f"*** BEAR'S PRE-MORTEM ***\n{report_data.get('bear_report', 'N/A')}\n",
+            f"*** CONTEXTUAL ANALYSIS ***\n{report_data.get('macro_report', 'N/A')}\n",
+            f"*** JUDGE'S SYNTHESIS ***\n{report_data.get('detailed_report', 'N/A')}"
+        ]
+        reasoning = "\n".join(reasoning_parts)
+        
+        self.research_reports[symbol] = reasoning
+        
+        # Update Status
+        status = "Owned" if recommendation == "BUY" else "Not Owned"
+        try:
+            float_score = float(score)
+            if float_score >= 7.0:
+                status = "Owned"
+            else:
+                status = "Not Owned"
+        except:
+            if recommendation == "BUY":
+                status = "Owned"
+            else:
+                status = "Not Owned"
+
+        if decision_id:
+            update_decision_point(decision_id, recommendation, reasoning, status, ai_score=float(score) if isinstance(score, (int, float)) else None)
+            print(f"Updated decision point for {symbol}: {recommendation} -> {status} (Score: {score})")
+        
+        # Save detailed decision data locally and to Cloud
+        decision_data = {
+            "symbol": symbol,
+            "company_name": company_name,
+            "price": price,
+            "change_percent": change_percent,
+            "recommendation": recommendation,
+            "reasoning": reasoning,
+            "pe_ratio": stock.get("pe_ratio", 0.0),
+            "market_cap": stock.get("market_cap", 0.0),
+            "sector": stock.get("sector", self.stock_metadata.get(symbol, {}).get("sector", "Unknown")),
+            "region": stock.get("region", self.stock_metadata.get(symbol, {}).get("region", "Unknown")),
+            "is_earnings_drop": is_earnings,
+            "earnings_date": earnings_date_str,
+            "news": news_data,
+            "git_version": current_version
+        }
+        
+        storage_service.save_decision_locally(decision_data)
+        drive_service.save_decision(decision_data)
+        
+        # Prepare context for this specific stock
+        stock_context = {}
+        # Add Indices
+        for name, ticker in self.indices_tickers.items():
+            stock_context[name] = market_context.get(ticker, 0.0)
+        
+        # Add Sector if available
+        metadata = self.stock_metadata.get(symbol, {})
+        sector = metadata.get("sector")
+        if sector and sector in self.sector_tickers:
+            sector_ticker = self.sector_tickers[sector]
+            stock_context[f"Sector ({sector})"] = market_context.get(sector_ticker, 0.0)
+
+        # Conditional Email Notification
+        if "STRONG BUY" in recommendation.upper():
+            print(f"Verdict is {recommendation}. Sending email notification.")
+            email_service.send_notification(symbol, change_percent, price, report_data, stock_context)
+        else:
+            print(f"Verdict is {recommendation}. Skipping email notification (Logic: Strong Buy only).")
+            
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        self.sent_notifications.add((symbol, today_str))
+
 
 stock_service = StockService()
