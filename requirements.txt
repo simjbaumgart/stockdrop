@@ -17,3 +17,4 @@ tradingview-screener
 scipy
 beautifulsoup4
 requests
+finnhub-python
