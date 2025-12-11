@@ -1,7 +1,9 @@
 import sqlite3
 from typing import List
 
-DB_NAME = "subscribers.db"
+import os
+
+DB_NAME = os.getenv("DB_PATH", "subscribers.db")
 
 def init_db():
     """Initialize the database with the subscribers and decision_points tables."""

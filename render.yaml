@@ -1,0 +1,47 @@
+services:
+  - type: web
+    name: stock-tracker
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    disk:
+      name: stock-data
+      mountPath: /var/lib/data
+      sizeGB: 1
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.6
+      - key: DB_PATH
+        value: /var/lib/data/subscribers.db
+      - key: DATA_DIR
+        value: /var/lib/data
+      - key: GOOGLE_CREDENTIALS_JSON
+        sync: false
+      - key: GOOGLE_STORAGE_BUCKET
+        sync: false
+      - key: FINNHUB_API_KEY
+        sync: false
+      - key: POLYGON_API_KEY
+        sync: false
+      - key: ALPHA_VANTAGE_API_KEY
+        sync: false
+      - key: ALPACA_API_KEY
+        sync: false
+      - key: ALPACA_SECRET_KEY
+        sync: false
+      - key: FRED_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: SENDER_EMAIL
+        sync: false
+      - key: SENDER_PASSWORD
+        sync: false
+      - key: RECIPIENT_EMAIL
+        sync: false
+      - key: SMTP_SERVER
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: 587

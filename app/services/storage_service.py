@@ -9,22 +9,36 @@ from google.oauth2 import service_account
 class GoogleStorageService:
     def __init__(self):
         self.service_account_file = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', 'service_account.json')
+        self.google_credentials_json = os.getenv('GOOGLE_CREDENTIALS_JSON')
         self.bucket_name = os.getenv('GOOGLE_STORAGE_BUCKET')
         self.client = None
         self.bucket = None
         self._authenticate()
 
     def _authenticate(self):
+        # Priority 1: GOOGLE_CREDENTIALS_JSON (Env Var String)
+        if self.google_credentials_json:
+            try:
+                import json
+                info = json.loads(self.google_credentials_json)
+                self.creds = service_account.Credentials.from_service_account_info(info)
+                self.client = storage.Client(credentials=self.creds, project=self.creds.project_id)
+                print("Authenticated with Google Cloud Storage via GOOGLE_CREDENTIALS_JSON.")
+                return
+            except Exception as e:
+                print(f"Error authenticating via GOOGLE_CREDENTIALS_JSON: {e}")
+
+        # Priority 2: File path
         if self.service_account_file and os.path.exists(self.service_account_file):
             try:
                 self.creds = service_account.Credentials.from_service_account_file(
                     self.service_account_file)
                 self.client = storage.Client(credentials=self.creds, project=self.creds.project_id)
-                print("Authenticated with Google Cloud Storage.")
+                print(f"Authenticated with Google Cloud Storage via file {self.service_account_file}.")
             except Exception as e:
-                print(f"Error authenticating with Google Cloud Storage: {e}")
+                print(f"Error authenticating with Google Cloud Storage file: {e}")
         else:
-            print(f"Service account file {self.service_account_file} not found. Storage upload disabled.")
+            print(f"Service account file {self.service_account_file} not found and GOOGLE_CREDENTIALS_JSON not set. Storage upload disabled.")
 
     def upload_data(self, data_dict):
         """
@@ -93,7 +107,8 @@ class GoogleStorageService:
         """
         try:
             # Create directory if it doesn't exist
-            backup_dir = pathlib.Path("data/backups")
+            base_dir = pathlib.Path(os.getenv("DATA_DIR", "data"))
+            backup_dir = base_dir / "backups"
             backup_dir.mkdir(parents=True, exist_ok=True)
             
             date_str = datetime.datetime.now().strftime("%Y-%m-%d")
@@ -129,7 +144,8 @@ class GoogleStorageService:
         """
         try:
             # Create directory if it doesn't exist
-            backup_dir = pathlib.Path("data/decisions")
+            base_dir = pathlib.Path(os.getenv("DATA_DIR", "data"))
+            backup_dir = base_dir / "decisions"
             backup_dir.mkdir(parents=True, exist_ok=True)
             
             date_str = datetime.datetime.now().strftime("%Y-%m-%d")
@@ -172,7 +188,8 @@ class GoogleStorageService:
         Returns a list of symbols that have been processed today.
         """
         try:
-            backup_dir = pathlib.Path("data/decisions")
+            base_dir = pathlib.Path(os.getenv("DATA_DIR", "data"))
+            backup_dir = base_dir / "decisions"
             date_str = datetime.datetime.now().strftime("%Y-%m-%d")
             file_path = backup_dir / f"decisions_{date_str}.csv"
             
