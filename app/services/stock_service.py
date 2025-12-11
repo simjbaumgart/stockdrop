@@ -708,37 +708,44 @@ class StockService:
         other_items = []
         
         # 1. Massive/Benzinga News (Primary - Full Content)
-        try:
-            # Calculate 3 months ago (approx 90 days)
-            three_months_ago = int((datetime.now() - timedelta(days=90)).timestamp())
-            
-            bz_news = benzinga_service.get_company_news(symbol)
-            
-            # Filter: Max 3 months old
-            bz_filtered = [n for n in bz_news if n.get('datetime', 0) >= three_months_ago]
-            
-            # Sort by date desc
-            bz_filtered.sort(key=lambda x: x.get('datetime', 0), reverse=True)
-            
-            # Take Top 10
-            bz_final = bz_filtered[:10]
-            
-            for item in bz_final:
-                massive_items.append({
-                    "source": "Massive (Benzinga)",
-                    "headline": item.get('headline'),
-                    "summary": item.get('summary'),
-                    "content": item.get('content'), # Full HTML body
-                    "url": item.get('url'),
-                    "datetime": item.get('datetime'),
-                    "datetime_str": item.get('datetime_str'),
-                    "image": item.get('image')
-                })
+        # ONLY for US Region stocks, as Polygon/Massive auth is region-constrained.
+        if region == "US":
+            try:
+                # Calculate 3 months ago (approx 90 days)
+                three_months_ago = int((datetime.now() - timedelta(days=90)).timestamp())
                 
-            print(f"  > Fetched {len(bz_final)} Massive/Benzinga articles (Top 10, <90 days).")
-            
-        except Exception as e:
-            print(f"Error fetching Benzinga news: {e}")
+                bz_news = benzinga_service.get_company_news(symbol)
+                
+                # Filter: Max 3 months old
+                bz_filtered = [n for n in bz_news if n.get('datetime', 0) >= three_months_ago]
+                
+                # Sort by date desc
+                bz_filtered.sort(key=lambda x: x.get('datetime', 0), reverse=True)
+                
+                # Take Top 10
+                bz_final = bz_filtered[:10]
+                
+                for item in bz_final:
+                    # User requested Massive priority. We tag it as Massive but keep the original publisher info.
+                    original_source = item.get('source', 'Benzinga')
+                    massive_items.append({
+                        "source": f"Massive ({original_source})",
+                        "headline": item.get('headline'),
+                        "summary": item.get('summary'),
+                        "content": item.get('content'), # Full HTML body
+                        "url": item.get('url'),
+                        "datetime": item.get('datetime'),
+                        "datetime_str": item.get('datetime_str'),
+                        "image": item.get('image')
+                    })
+                    
+                print(f"  > Fetched {len(bz_final)} Massive/Benzinga articles (Top 10, <90 days).")
+                
+            except Exception as e:
+                print(f"Error fetching Benzinga news: {e}")
+        else:
+             print(f"  > Skipping Massive/Benzinga for non-US region: {region}")
+
 
         # Resolve yfinance ticker for news ensuring we don't pick up colliding US stocks
         # ... (rest of function)
