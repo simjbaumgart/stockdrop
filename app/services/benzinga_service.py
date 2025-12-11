@@ -16,6 +16,12 @@ class BenzingaService:
     def __init__(self):
         self.api_key = os.getenv("BENZINGA_API_KEY")
         # Massive / Polygon endpoint
+        if self.api_key:
+             masked = f"{self.api_key[:4]}...{self.api_key[-4:]}"
+             print(f"DEBUG: BenzingaService initialized with Key: {masked}")
+        else:
+             print("DEBUG: BenzingaService initialized with NO KEY found in env.")
+             
         self.base_url = "https://api.polygon.io/v2/reference/news"
 
     def get_company_news(self, symbol: str):

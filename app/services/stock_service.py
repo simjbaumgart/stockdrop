@@ -704,6 +704,8 @@ class StockService:
         }
         """
         news_items = []
+        massive_items = []
+        other_items = []
         
         # 1. Massive/Benzinga News (Primary - Full Content)
         try:
@@ -722,7 +724,7 @@ class StockService:
             bz_final = bz_filtered[:10]
             
             for item in bz_final:
-                news_items.append({
+                massive_items.append({
                     "source": "Massive (Benzinga)",
                     "headline": item.get('headline'),
                     "summary": item.get('summary'),
@@ -760,7 +762,7 @@ class StockService:
             av_news = alpha_vantage_service.get_company_news(symbol, start_date=week_ago, end_date=today)
             if av_news:
                 print(f"  > Alpha Vantage: {len(av_news)} articles")
-                news_items.extend(av_news)
+                other_items.extend(av_news)
             else:
                 print(f"  > Alpha Vantage: 0 articles")
         except Exception as e:
@@ -776,15 +778,15 @@ class StockService:
                     try:
                         ts = item.get('datetime', 0)
                         dt_str = datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
-                        # Simple duplicate check by headline
-                        if any(n['headline'] == item.get('headline') for n in news_items):
+                        # Simple duplicate check by headline (against both massive and others)
+                        if any(n['headline'] == item.get('headline') for n in massive_items + other_items):
                             continue
                             
-                        news_items.append({
+                        other_items.append({
                             "source": item.get('source', 'Finnhub'),
                             "headline": item.get('headline', 'No Title'),
-                            "summary": item.get('summary', ''),
-                            "url": item.get('url', ''),
+                            "summary": item.get('summary'),
+                            "url": item.get('url'),
                             "datetime": ts,
                             "datetime_str": dt_str,
                             "image": item.get('image', '')
@@ -829,9 +831,8 @@ class StockService:
                     dt_str = datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
                     
                     title = content.get('title', 'No Title')
-                    # Avoid duplicates from Finnhub (check headline similarity or URL)
-                    # Simple duplicate check by headline
-                    if any(n['headline'] == title for n in news_items):
+                    # Avoid duplicates from Finnhub or Massive
+                    if any(n['headline'] == title for n in massive_items + other_items):
                         continue
                     
                     # Extract thumbnail if available
@@ -843,7 +844,7 @@ class StockService:
                              
                     url = (content.get('clickThroughUrl') or {}).get('url', '') if content.get('clickThroughUrl') else (content.get('link', '') or '')
                     
-                    news_items.append({
+                    other_items.append({
                         "source": content.get('provider', {}).get('displayName', 'Yahoo Finance'),
                         "headline": title,
                         "summary": content.get('summary', ''), # Often empty in simple list
@@ -864,8 +865,6 @@ class StockService:
             scraper = NewsScraper()
             
             # Determine exchange (defaults to NASDAQ if not found, or use a map)
-            # We can try to infer from stock_metadata or just try common ones.
-            # Ideally we pass region to get_aggregated_news, but for now we'll default or guess.
             exchange = "NASDAQ" # Default
             if symbol in self.stock_metadata:
                 region = self.stock_metadata[symbol].get("region", "US")
@@ -874,27 +873,19 @@ class StockService:
                 elif region == "IN": exchange = "NSE"
                 elif region == "AU": exchange = "ASX"
                 
-            # PSN is Parsons (NYSE), DOCS is Doximity (NYSE), XP (NASDAQ)
-            # Maybe try checking if we can get exchange from TradingViewService?
-            # For now, let's use a try/except block or generic 'NASDAQ' which covers many.
-            # Or use 'NYSE' if known.
-            
-            # Optimization: Try to get exchange from existing methods if possible, or iterate a few common ones?
-            # No, keep it simple. Most user requested stocks are US.
-            
             headers = scraper.scrape_headlines(symbol=symbol, exchange=exchange)
             
             for item in headers:
                 try:
                     title = item.get('title', 'No Title')
                     # Deduplicate
-                    if any(n['headline'] == title for n in news_items):
+                    if any(n['headline'] == title for n in massive_items + other_items):
                         continue
                         
                     ts = item.get('published', 0)
                     dt_str = datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
                     
-                    news_items.append({
+                    other_items.append({
                         "source": item.get('source', 'TradingView'),
                         "headline": title,
                         "summary": item.get('description', ''), # Description often empty in headlines, checks details?
@@ -914,11 +905,26 @@ class StockService:
         except Exception as e:
             print(f"Error fetching TradingView news for {symbol}: {e}")
             
-        # Sort by datetime (newest first)
-        news_items.sort(key=lambda x: x['datetime'], reverse=True)
+        # PRIORITY MERGE:
+        # 1. Massive items take precedence (all of them).
+        # 2. Others fill the remainder up to 30.
         
-        # Limit to top 30 to ensure good mix of sources
-        return news_items[:30]
+        limit = 30
+        remaining = limit - len(massive_items)
+        if remaining < 0: remaining = 0
+        
+        # Sort others by newest first
+        other_items.sort(key=lambda x: x['datetime'], reverse=True)
+        
+        # Merge
+        final_list = massive_items + other_items[:remaining]
+        
+        # Final Sort for Agent Context (Chronological)
+        # Note: We prioritized INCLUSION of Massive. 
+        # Now we sort by time so the timeline makes sense to the AI.
+        final_list.sort(key=lambda x: x['datetime'], reverse=True)
+        
+        return final_list
 
     def get_latest_filing_text(self, symbol: str) -> str:
         """
