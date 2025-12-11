@@ -1,0 +1,58 @@
+{
+  "indicators": {
+    "close": 314.45,
+    "sma200": 207.15600000000003,
+    "rsi": 62.53267722694028,
+    "bb_lower": 270.87724836425224,
+    "bb_upper": 335.94675163574794,
+    "volume": 22006840
+  },
+  "analysis": {
+    "RECOMMENDATION": "BUY",
+    "BUY": 12,
+    "SELL": 4,
+    "NEUTRAL": 10
+  },
+  "moving_averages": {
+    "RECOMMENDATION": "STRONG_BUY",
+    "BUY": 12,
+    "SELL": 2,
+    "NEUTRAL": 1,
+    "COMPUTE": {
+      "EMA10": "BUY",
+      "SMA10": "SELL",
+      "EMA20": "BUY",
+      "SMA20": "BUY",
+      "EMA30": "BUY",
+      "SMA30": "BUY",
+      "EMA50": "BUY",
+      "SMA50": "BUY",
+      "EMA100": "BUY",
+      "SMA100": "BUY",
+      "EMA200": "BUY",
+      "SMA200": "BUY",
+      "Ichimoku": "NEUTRAL",
+      "VWMA": "BUY",
+      "HullMA": "SELL"
+    }
+  },
+  "oscillators": {
+    "RECOMMENDATION": "SELL",
+    "BUY": 0,
+    "SELL": 2,
+    "NEUTRAL": 9,
+    "COMPUTE": {
+      "RSI": "NEUTRAL",
+      "STOCH.K": "NEUTRAL",
+      "CCI": "NEUTRAL",
+      "ADX": "NEUTRAL",
+      "AO": "NEUTRAL",
+      "Mom": "SELL",
+      "MACD": "SELL",
+      "Stoch.RSI": "NEUTRAL",
+      "W%R": "NEUTRAL",
+      "BBP": "NEUTRAL",
+      "UO": "NEUTRAL"
+    }
+  }
+}
