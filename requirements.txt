@@ -18,3 +18,5 @@ scipy
 beautifulsoup4
 requests
 finnhub-python
+pandas
+numpy
