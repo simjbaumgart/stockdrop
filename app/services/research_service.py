@@ -1,5 +1,8 @@
-import google.generativeai as genai
+from google import genai as genai_v1 # Old SDK (aliasing just in case, or keep as genai and alias new one)
+import google.generativeai as genai # Existing SDK
 from google.generativeai.types import RequestOptions
+from google import genai as new_genai # New SDK
+from google.genai import types as new_types
 import os
 import logging
 import json
@@ -30,6 +33,15 @@ class ResearchService:
             
         # OpenAI API Key for Deep Reasoning
         self.openai_key = os.getenv("OPENAI_API_KEY")
+
+        # Initialize New SDK Client for Grounding (News Agent)
+        self.grounding_client = None
+        if self.api_key:
+             try:
+                 self.grounding_client = new_genai.Client(api_key=self.api_key)
+                 logger.info("Initialized Google GenAI V2 Client for Grounding.")
+             except Exception as e:
+                 logger.error(f"Failed to initialize Google GenAI V2 Client: {e}")
 
     def analyze_stock(self, ticker: str, raw_data: Dict) -> dict:
         """
@@ -614,6 +626,10 @@ A strictly formatted JSON object:
             if state:
                 state.agent_calls += 1
             
+            # Special handling for News Agent with Grounding
+            if agent_name == "News Agent" and self.grounding_client:
+                 return self._call_news_agent_with_grounding(prompt)
+
             # Rate limit buffer
             time.sleep(2)
             
@@ -622,6 +638,102 @@ A strictly formatted JSON object:
         except Exception as e:
             logger.error(f"Error in {agent_name}: {e}")
             return f"[Error: {e}]"
+
+    def _call_news_agent_with_grounding(self, prompt: str) -> str:
+        """
+        Calls the Google GenAI V2 SDK with Google Search Grounding enabled using Gemini 3.
+        """
+        try:
+            logger.info("Calling News Agent with Google Search Grounding (Gemini 3)...")
+            
+            # Use dictionary config as requested for Gemini 3
+            config = {
+                "tools": [
+                    {"google_search": {}}
+                ],
+                "temperature": 0.7
+            }
+
+            model_name = "gemini-3-pro-preview" 
+
+            response = self.grounding_client.models.generate_content(
+                model=model_name,
+                contents=prompt,
+                config=config
+            )
+
+            # Process Grounding Metadata and Add Citations
+            grounded_text = self._format_citations(response)
+            
+            # Append a footer about grounding
+            grounded_text += f"\n\n(Generated with {model_name} & Google Search Grounding)"
+            return grounded_text
+
+        except Exception as e:
+            logger.error(f"Grounding Call Failed: {e}")
+            return f"[Grounding Error: {e}] - Falling back to standard model..."
+            # Fallback logic could be implemented here to call the old _call_agent recursively 
+            # but avoiding infinite loop by changing agent_name.
+            # For now, just return error to be visible.
+
+    def _format_citations(self, response) -> str:
+        """
+        Adds inline citations to the response text based on grounding metadata.
+        Adapted from Google GenAI docs.
+        """
+        try:
+            if not response.candidates:
+                return "No response generated."
+            
+            candidate = response.candidates[0]
+            if not candidate.content or not candidate.content.parts:
+                return "Empty response content."
+                
+            text = candidate.content.parts[0].text
+            if not text:
+                return ""
+
+            # Check for grounding metadata
+            if not candidate.grounding_metadata:
+                return text
+
+            metadata = candidate.grounding_metadata
+            supports = metadata.grounding_supports
+            chunks = metadata.grounding_chunks
+
+            if not supports or not chunks:
+                return text
+
+            # Sort supports by end_index in descending order to avoid shifting issues
+            sorted_supports = sorted(supports, key=lambda s: s.segment.end_index, reverse=True)
+
+            for support in sorted_supports:
+                end_index = support.segment.end_index
+                if support.grounding_chunk_indices:
+                    citation_links = []
+                    for i in support.grounding_chunk_indices:
+                        if i < len(chunks):
+                            web = chunks[i].web
+                            if web and web.uri:
+                                citation_links.append(f"[{i + 1}]({web.uri})")
+                    
+                    if citation_links:
+                        citation_string = " " + "".join(citation_links)
+                        text = text[:end_index] + citation_string + text[end_index:]
+            
+            # Add a Source List at the bottom
+            text += "\n\n### Grounding Sources:\n"
+            for i, chunk in enumerate(chunks):
+                web = chunk.web
+                title = web.title if web.title else "Source"
+                uri = web.uri if web.uri else "#"
+                text += f"{i + 1}. [{title}]({uri})\n"
+
+            return text
+            
+        except Exception as e:
+            logger.error(f"Error formatting citations: {e}")
+            return response.text if response.text else str(e)
 
     def _extract_json(self, text: str) -> dict:
         try:

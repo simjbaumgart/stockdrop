@@ -20,3 +20,5 @@ requests
 finnhub-python
 pandas
 numpy
+
+google-genai
