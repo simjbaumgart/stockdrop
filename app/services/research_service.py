@@ -323,35 +323,63 @@ Use headers: "Technical Signal", "Oversold Status", "Context from Report", "Verd
         news_items = raw_data.get('news_items', [])
         transcript = raw_data.get('transcript_text', "No transcript available.")
         
-        # Split into Massive and Others to enforce user priority in the PROMPT display
-        massive_news = [n for n in news_items if "Massive" in n.get('source', '')]
-        other_news = [n for n in news_items if "Massive" not in n.get('source', '')]
+        # Group items by Provider (e.g. Benzinga/Massive, Alpha Vantage, Finnhub)
+        # Sort entire list by date desc first
+        news_items.sort(key=lambda x: x.get('datetime', 0), reverse=True)
         
-        # Sort each group by date desc
-        massive_news.sort(key=lambda x: x.get('datetime', 0), reverse=True)
-        other_news.sort(key=lambda x: x.get('datetime', 0), reverse=True)
+        # Organize by provider
+        by_provider = {}
+        for n in news_items:
+            # Normalize provider name if needed or fallback
+            prov = n.get('provider', 'Other Sources')
+            if prov not in by_provider:
+                by_provider[prov] = []
+            by_provider[prov].append(n)
+            
+        # Build Summary String
+        news_summary = ""
         
-        news_summary = "--- PRIMARY SOURCE (Massive/Benzinga) ---\n"
-        for n in massive_news:
-            date_str = n.get('datetime_str', 'N/A')
-            headline = n.get('headline', 'No Headline')
-            source = n.get('source', 'Unknown')
-            content = n.get('content', '')  # Full body text if available
-            
-            news_summary += f"- {date_str}: {headline} ({source})\n"
-            if content:
-                 # Truncate slightly if massive to prevent context window explosion
-                 truncated_content = content[:5000] + "..." if len(content) > 5000 else content
-                 news_summary += f"  CONTENT: {truncated_content}\n  ---\n"
-                 
-        news_summary += "\n--- OTHER SOURCES ---\n"
-        # Remaining slots? We already limited total to 30 in stock_service, but let's be safe.
-        for n in other_news:
-            date_str = n.get('datetime_str', 'N/A')
-            headline = n.get('headline', 'No Headline')
-            source = n.get('source', 'Unknown')
-            
-            news_summary += f"- {date_str}: {headline} ({source})\n"
+        # We might want a specific order (e.g. Benzinga first)
+        preferred_order = ["Benzinga/Massive", "Alpha Vantage", "Finnhub", "Yahoo Finance", "TradingView"]
+        
+        # Process known providers first
+        for prov in preferred_order:
+            if prov in by_provider:
+                items = by_provider[prov]
+                news_summary += f"--- SOURCE: {prov} ---\n"
+                for n in items:
+                    date_str = n.get('datetime_str', 'N/A')
+                    headline = n.get('headline', 'No Headline')
+                    source = n.get('source', 'Unknown')
+                    content = n.get('content', '') # Full body/Insights
+                    summary = n.get('summary', '') # Summary/Description
+                    
+                    news_summary += f"- {date_str}: {headline} ({source})\n"
+                    
+                    # Display Content if available (Rich Data), else Summary
+                    if content:
+                        text_to_show = content
+                        if len(text_to_show) > 8000:
+                            text_to_show = text_to_show[:8000] + "..."
+                        news_summary += f"  CONTENT:\n{text_to_show}\n\n"
+                    elif summary:
+                        news_summary += f"  SUMMARY: {summary}\n\n"
+                    else:
+                        news_summary += "\n"
+                        
+        # Process any remaining "Other" providers
+        for prov, items in by_provider.items():
+            if prov not in preferred_order:
+                news_summary += f"--- SOURCE: {prov} ---\n"
+                for n in items:
+                    date_str = n.get('datetime_str', 'N/A')
+                    headline = n.get('headline', 'No Headline')
+                    source = n.get('source', 'Unknown')
+                    summary = n.get('summary', '')
+                    
+                    news_summary += f"- {date_str}: {headline} ({source})\n"
+                    if summary:
+                         news_summary += f"  SUMMARY: {summary}\n\n"
 
         # --- LOGGING NEWS CONTEXT ---
         try:
@@ -407,12 +435,12 @@ Use headers: "Technical Signal", "Oversold Status", "Context from Report", "Verd
         return f"""
 You are the **News & Sentiment Agent**.
 Your goal is to gauge the market sentiment and identifying key narrative drivers for {state.ticker}.
-You have access to recent News Headlines and the latest Quarterly Report.
+You have access to recent News Headlines and Summaries, and the latest Quarterly Report.
 
 CONTEXT: The stock has dropped {drop_str}. We need to know WHY.
 
 INPUT DATA:
-1. RECENT NEWS HEADLINES:
+1. RECENT NEWS HEADLINES AND SUMMARIES:
 {news_summary}
 
 2. QUARTERLY REPORT SNIPPET (Transcript/Filing):
@@ -421,7 +449,8 @@ INPUT DATA:
 NOTE ON DATA:
 You have been provided with additional data files (JSON/PDF-derived content) in the input.
 Treat this as **additional information** which can be **considered or dropped if outdated**.
-Verify dates where possible. If the DefeatBeta data seems older or less relevant than the primary source, prioritize the primary source.
+Take good care about duplications; do not add them up, but rather treat them with caution. Be rational.
+Verify dates where possible. If any source data seems older or less relevant than the primary source, prioritize the primary source.
 
 TASK:
 - Determine if the drop is due to temporary panic/overreaction or a fundamental structural change. Is this a short-term negative event?

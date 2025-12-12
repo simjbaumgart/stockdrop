@@ -27,7 +27,7 @@ class BenzingaService:
         # LAZY LOAD / RELOAD if missing
         if not self.api_key:
             print("DEBUG: Key missing in instance. Attempting re-load from env...")
-            load_dotenv(find_dotenv())
+            load_dotenv(find_dotenv(), override=True)
             self.api_key = os.getenv("BENZINGA_API_KEY")
             
         if not self.api_key:
@@ -82,10 +82,40 @@ class BenzingaService:
                     except Exception as fallback_err:
                         print(f"Fallback Failed: {fallback_err}")
                         
+                    # NUCLEAR OPTION: Subprocess CURL (Bypasses Python SSL/Network Stack)
+                    print("DEBUGGING: Attempting Nuclear Fallback via system CURL...")
+                    try:
+                        import subprocess
+                        import json
+                        
+                        cmd = [
+                            "curl", "-s",
+                            "-H", f"Authorization: Bearer {self.api_key}",
+                            response.url
+                        ]
+                        
+                        result = subprocess.run(cmd, capture_output=True, text=True)
+                        
+                        if result.returncode == 0:
+                            data = json.loads(result.stdout)
+                            if "results" in data:
+                                print("DEBUGGING: CURL SUCCESS! processing results...")
+                                results = data.get("results", [])
+                                return self._process_news(results)
+                            else:
+                                print(f"CURL JSON Error: {data}")
+                        else:
+                            print(f"CURL Execution Failed: {result.stderr}")
+                            
+                    except Exception as curl_err:
+                        print(f"Nuclear Fallback Failed: {curl_err}")
+                        
                 return []
         except Exception as e:
             print(f"Error fetching Benzinga news: {e}")
             return []
+
+        return processed
 
     def _process_news(self, articles):
         """
@@ -116,11 +146,35 @@ class BenzingaService:
                 # "image_url" is directly available in Polygon response
                 image_url = item.get("image_url", "")
 
+                # Extract Insights and Keywords to augment content
+                insights = item.get("insights", [])
+                keywords = item.get("keywords", [])
+                
+                content_parts = []
+                
+                # Add Description/Summary if available as intro
+                description = item.get("description", "")
+                if description:
+                    content_parts.append(f"Summary: {description}")
+
+                if insights:
+                    content_parts.append("\nInsight Analysis:")
+                    for insight in insights:
+                        ticker = insight.get("ticker", "N/A")
+                        sentiment = insight.get("sentiment", "unknown")
+                        reasoning = insight.get("sentiment_reasoning", "")
+                        content_parts.append(f"- [{ticker}] {sentiment.upper()}: {reasoning}")
+                
+                if keywords:
+                    content_parts.append(f"\nKeywords: {', '.join(keywords)}")
+
+                full_content = "\n".join(content_parts)
+
                 processed.append({
                     "source": publisher, # e.g. "Benzinga", "The Motley Fool"
                     "headline": item.get("title", ""),
-                    "summary": item.get("description", ""), 
-                    "content": "",   # Polygon news usually doesn't give full body in this endpoint
+                    "summary": description, 
+                    "content": full_content,   # Augmented with insights and keywords
                     "url": item.get("article_url", ""),
                     "datetime": ts,
                     "datetime_str": date_str,

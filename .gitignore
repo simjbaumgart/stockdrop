@@ -15,7 +15,7 @@ __pycache__/
 reports/
 
 # Notebooks
-notebooks/
+# notebooks/
 .ipynb_checkpoints/
 
 # Data

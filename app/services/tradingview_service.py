@@ -181,11 +181,11 @@ class TradingViewService:
                 "markets": ["japan"],
                 "currency_threshold": non_us_min_cap_usd * 150 # JPY ~150 USD
             },
-            {
-                "region": "Canada",
-                "markets": ["canada"],
-                "currency_threshold": non_us_min_cap_usd * 1.40 # CAD ~1.40 USD
-            },
+            # {
+            #     "region": "Canada",
+            #     "markets": ["canada"],
+            #     "currency_threshold": non_us_min_cap_usd * 1.40 # CAD ~1.40 USD
+            # },
             {
                 "region": "South Korea",
                 "markets": ["korea"],
@@ -415,12 +415,6 @@ class TradingViewService:
             "EU": ["germany", "uk", "france", "spain", "italy", "netherlands", "europe", "switzerland", "sweden", "denmark"],
             "CN": ["china"],
             "IN": ["india"],
-            "AU": ["australia"],
-            "JP": ["japan"],
-            "CA": ["canada"],
-            "KR": ["korea"],
-            "TW": ["taiwan"],
-            "BR": ["brazil"]
         }
         
         markets = region_map.get(region, ["america"]) # Default to US
@@ -452,25 +446,11 @@ class TradingViewService:
             "EU": "germany", # Default to germany for EU if unknown
             "CN": "china",
             "IN": "india",
-            "AU": "australia",
-            "JP": "japan",
-            "CA": "canada",
-            "KR": "korea",
-            "TW": "taiwan",
-            "BR": "brazil"
         }
         
         exchange_map = {
             "US": "NASDAQ", # Default, might need to try NYSE if fails or use generic
             "EU": "XETR",
-            "CN": "SSE",
-            "IN": "NSE",
-            "AU": "ASX",
-            "JP": "TSE",
-            "CA": "TSX",
-            "KR": "KRX",
-            "TW": "TWSE",
-            "BR": "BMFBOVESPA"
         }
         
         screener = screener_map.get(region, "america")
@@ -515,15 +495,6 @@ class TradingViewService:
             "EU": "germany", "Europe (Germany)": "germany", "Europe (UK)": "uk", 
             "CN": "china", "China": "china",
             "IN": "india", "India": "india",
-            "AU": "australia", "Australia": "australia",
-            "JP": "japan", "Japan": "japan",
-            "CA": "canada", "Canada": "canada",
-            "KR": "korea", "South Korea": "korea",
-            "TW": "taiwan", "Taiwan": "taiwan",
-            "BR": "brazil", "Brazil": "brazil",
-            # Fallbacks for other EU
-            "Europe (France)": "france",
-            "Europe (Eurozone)": "europe", # Or specific
         }
         
         # Default exchange map (best guess)
@@ -532,12 +503,6 @@ class TradingViewService:
             "EU": "XETR", "Europe (Germany)": "XETR",
             "CN": "SSE", "China": "SSE",
             "IN": "NSE", "India": "NSE",
-            "AU": "ASX", "Australia": "ASX",
-            "JP": "TSE", "Japan": "TSE",
-            "CA": "TSX", "Canada": "TSX",
-            "KR": "KRX", "South Korea": "KRX", # or similar
-            "TW": "TWSE", "Taiwan": "TWSE",
-            "BR": "BMFBOVESPA", "Brazil": "BMFBOVESPA"
         }
         
         if not screener:

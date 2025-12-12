@@ -24,24 +24,20 @@ class StockService:
     def __init__(self):
         # Indices tickers: CSI 300 (000300.SS), S&P 500 (^GSPC), STOXX 600 (^STOXX)
         # Indices tickers: CSI 300 (000300.SS), S&P 500 (^GSPC), STOXX 600 (^STOXX)
-        # Indices tickers: S&P 500, STOXX 600, China (CSI 300), India (Nifty 50), Australia (ASX 200)
+        # Indices tickers: S&P 500, STOXX 600, China (CSI 300), India (Nifty 50)
         # Indices tickers configuration for TradingView
         # Format: "Name": {"symbol": "...", "screener": "...", "exchange": "..."}
         self.indices_config = {
             "S&P 500": {"symbol": "SPX", "screener": "america", "exchange": "CBOE"},
             # STOXX 600 removed from TradingView config due to API issues. Will be fetched via fallback.
-            "China": {"symbol": "000300", "screener": "china", "exchange": "SSE"},
-            "India": {"symbol": "NIFTY", "screener": "india", "exchange": "NSE"},
-            "Australia": {"symbol": "XJO", "screener": "australia", "exchange": "ASX"}
+            "India": {"symbol": "^NSEI", "screener": "india", "exchange": "NSE"}
         }
         
         # Keep old tickers for fallback or reference if needed
         self.indices_tickers = {
             "S&P 500": "^GSPC",
             "STOXX 600": "^STOXX",
-            "China": "000300.SS",
-            "India": "^NSEI",
-            "Australia": "^AXJO"
+            "India": "^NSEI"
         }
 
         # Sector tickers (US ETFs as proxies)
@@ -175,7 +171,7 @@ class StockService:
             
             # Check if we have valid data for all, or if we need fallback
             # Also check for indices that were not in TradingView config (like STOXX 600)
-            expected_indices = ["S&P 500", "STOXX 600", "China", "India", "Australia"]
+            expected_indices = ["S&P 500", "STOXX 600", "China", "India"]
             
             for name in expected_indices:
                 if name not in data or data[name]["price"] == 0.0:
@@ -708,8 +704,8 @@ class StockService:
         other_items = []
         
         # 1. Massive/Benzinga News (Primary - Full Content)
-        # ONLY for US Region stocks, as Polygon/Massive auth is region-constrained.
-        if region == "US":
+        # User requested to try for ALL executing, removing region lock.
+        if True:
             try:
                 # Calculate 3 months ago (approx 90 days)
                 three_months_ago = int((datetime.now() - timedelta(days=90)).timestamp())
@@ -730,6 +726,7 @@ class StockService:
                     original_source = item.get('source', 'Benzinga')
                     massive_items.append({
                         "source": f"Massive ({original_source})",
+                        "provider": "Benzinga/Massive",
                         "headline": item.get('headline'),
                         "summary": item.get('summary'),
                         "content": item.get('content'), # Full HTML body
@@ -769,6 +766,8 @@ class StockService:
             av_news = alpha_vantage_service.get_company_news(symbol, start_date=week_ago, end_date=today)
             if av_news:
                 print(f"  > Alpha Vantage: {len(av_news)} articles")
+                for item in av_news:
+                    item['provider'] = 'Alpha Vantage'
                 other_items.extend(av_news)
             else:
                 print(f"  > Alpha Vantage: 0 articles")
@@ -791,6 +790,7 @@ class StockService:
                             
                         other_items.append({
                             "source": item.get('source', 'Finnhub'),
+                            "provider": "Finnhub",
                             "headline": item.get('headline', 'No Title'),
                             "summary": item.get('summary'),
                             "url": item.get('url'),
@@ -853,6 +853,7 @@ class StockService:
                     
                     other_items.append({
                         "source": content.get('provider', {}).get('displayName', 'Yahoo Finance'),
+                        "provider": "Yahoo Finance",
                         "headline": title,
                         "summary": content.get('summary', ''), # Often empty in simple list
                         "url": url,
@@ -894,6 +895,7 @@ class StockService:
                     
                     other_items.append({
                         "source": item.get('source', 'TradingView'),
+                        "provider": "TradingView",
                         "headline": title,
                         "summary": item.get('description', ''), # Description often empty in headlines, checks details?
                         "url": f"https://www.tradingview.com{item.get('storyPath', '')}",
