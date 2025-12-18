@@ -14,6 +14,9 @@
                     <th>Company Name</th>
                     <th>Price</th>
                     <th>Drop %</th>
+                    <th>Deep Research</th>
+                    <th>Risk</th>
+                    <th>Catalyst</th>
                     <th>Recommendation</th>
                     <th>Reasoning</th>
                     <th>P/E</th>
@@ -30,6 +33,47 @@
                     <td>{{ dp.company_name or '-' }}</td>
                     <td>${{ "%.2f"|format(dp.price_at_decision) }}</td>
                     <td class="text-danger">{{ "%.2f"|format(dp.drop_percent) }}%</td>
+                    <td>
+                        {% if dp.deep_research_verdict %}
+                        {% if dp.deep_research_verdict == 'STRONG_BUY' %}
+                        <span class="badge badge-success" style="background-color: #052e16; color: #4ade80;">STRONG
+                            BUY</span>
+                        {% elif dp.deep_research_verdict == 'SPECULATIVE_BUY' %}
+                        <span class="badge badge-success"
+                            style="background-color: #064e3b; color: #34d399;">SPECULATIVE</span>
+                        {% elif dp.deep_research_verdict == 'WAIT_FOR_STABILIZATION' %}
+                        <span class="badge badge-warning" style="background-color: #451a03; color: #fbbf24;">WAIT</span>
+                        {% elif dp.deep_research_verdict == 'HARD_AVOID' %}
+                        <span class="badge badge-danger" style="background-color: #450a0a; color: #f87171;">AVOID</span>
+                        {% else %}
+                        <span class="badge badge-secondary">{{ dp.deep_research_verdict }}</span>
+                        {% endif %}
+
+                        {% if dp.deep_research_score %}
+                        <br><small class="text-muted">Score: {{ dp.deep_research_score }}</small>
+                        {% endif %}
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if dp.deep_research_risk %}
+                        {% if dp.deep_research_risk == 'High' or dp.deep_research_risk == 'Extreme' %}
+                        <span class="text-danger font-weight-bold">{{ dp.deep_research_risk }}</span>
+                        {% elif dp.deep_research_risk == 'Medium' %}
+                        <span class="text-warning">{{ dp.deep_research_risk }}</span>
+                        {% else %}
+                        <span class="text-success">{{ dp.deep_research_risk }}</span>
+                        {% endif %}
+
+                        {% if dp.deep_research_knife_catch == 'True' %}
+                        <br><span class="badge badge-danger">KNIFE CATCH</span>
+                        {% endif %}
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ dp.deep_research_catalyst or '-' }}</td>
                     <td>
                         {% if dp.recommendation == 'ANALYZING' %}
                         <span class="badge badge-info">ANALYZING</span>

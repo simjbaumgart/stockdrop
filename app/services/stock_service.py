@@ -2,7 +2,7 @@ import pandas as pd
 import os
 import json
 import yfinance as yf
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Any, Optional
 from datetime import datetime, timedelta
 import pytz
 from app.services.email_service import email_service
@@ -18,6 +18,7 @@ from app.services.alpha_vantage_service import alpha_vantage_service
 from app.services.drive_service import drive_service
 from app.services.benzinga_service import benzinga_service
 from app.services.yahoo_ticker_resolver import YahooTickerResolver
+from app.services.deep_research_service import deep_research_service
 
 
 class StockService:
@@ -163,6 +164,9 @@ class StockService:
 
         # Initialize Yahoo Ticker Resolver
         self.resolver = YahooTickerResolver()
+        
+        # Batch Candidates for Deep Research (Deprecated)
+        # self.deep_research_candidates = []
 
     def get_indices(self) -> Dict:
         # Try fetching from TradingView first
@@ -294,6 +298,7 @@ class StockService:
         and sends an email notification if not already sent today.
         """
         print("Checking for large cap drops...")
+        # self.deep_research_candidates = [] # Removed batch queue
         
         # --- GATEKEEPER PHASE 1: Global Market Regime ---
         regime_info = gatekeeper_service.check_market_regime()
@@ -307,19 +312,31 @@ class StockService:
         market_context = self._fetch_market_context()
         print(f"Market Context: {market_context}")
         
-        # 2. Load already processed symbols to prevent duplicates and for logging
-        today_str = datetime.now().strftime("%Y-%m-%d")
-        processed_symbols = set(storage_service.get_today_decisions())
+        # 2. Load already processed symbols/companies to prevent duplicates
+        today_date = datetime.now().date()
+        today_str = today_date.strftime("%Y-%m-%d")
         
-        # Also check database for robust deduplication
-        from app.database import get_today_decision_symbols
+        # Calculate Previous Trading Day
+        prev_trading_day = self._get_previous_trading_day(today_date)
+        prev_date_str = prev_trading_day.strftime("%Y-%m-%d")
+        
+        print(f"Deduplication Window: Since {prev_date_str} (Previous Trading Day)")
+        
+        # Fetch symbols processed TODAY (absolute duplicate check)
+        processed_symbols = set(storage_service.get_today_decisions())
+        from app.database import get_today_decision_symbols, get_analyzed_companies_since
         db_processed_symbols = get_today_decision_symbols()
         processed_symbols.update(db_processed_symbols)
         
         for symbol in processed_symbols:
             self.sent_notifications.add((symbol, today_str))
             
-        print(f"Already processed today: {processed_symbols}")
+        # Fetch Companies analyzed since Previous Trading Day
+        # This prevents re-analyzing "Nvidia" on Monday if it was done on Friday.
+        recent_companies = set(get_analyzed_companies_since(prev_date_str))
+        print(f"Recently analyzed companies (Blacklist): {len(recent_companies)}")
+
+        print(f"Already processed symbols today: {processed_symbols}")
 
         # 3. Fetch Large Cap Movers (passing processed symbols for logging)
         large_cap_movers = self.get_large_cap_movers(processed_symbols)
@@ -427,8 +444,16 @@ class StockService:
                 notification_key = (symbol, today_str)
                 
                 if notification_key not in self.sent_notifications:
-                    # Get company name EARLY for logging
+                    # Get company name EARLY for deduplication
                     company_name = stock.get("description", stock.get("name", symbol))
+                    
+                    # --- DEDUPLICATION CHECK ---
+                    # Check if company name is in the recent blacklist (case-insensitive)
+                    # We expect company_name to be set.
+                    if company_name and company_name.upper() in recent_companies:
+                         print(f"Skipping {symbol} ({company_name}): Company analyzed recently (since {prev_date_str}).")
+                         continue
+                         
                     exchange = stock.get("exchange")
                     
                     print(f"Processing candidate {symbol} ({company_name}) [{change_percent:.2f}%]")
@@ -980,6 +1005,56 @@ class StockService:
         Fetches the text of the most recent earnings call transcript.
         """
         try:
+
+            # 1. Try DefeatBeta First
+            print(f"[StockService] Fetching transcript for {symbol} from DefeatBeta...")
+            try:
+                from defeatbeta_api.data.ticker import Ticker
+                db_ticker = Ticker(symbol)
+                transcripts = db_ticker.earning_call_transcripts()
+                df = transcripts.get_transcripts_list()
+                
+                # df is a pandas DataFrame with columns like 'transcripts', 'report_date', etc.
+                if not df.empty:
+                    # Sort by date descending if possible, or take first
+                    if 'report_date' in df.columns:
+                        df = df.sort_values('report_date', ascending=False)
+                    
+                    latest_row = df.iloc[0]
+                    
+                    # Get date from DefeatBeta
+                    db_date_str = str(latest_row.get('report_date', '')).split(' ')[0]
+                    
+                    # 'transcripts' column contains the data (numpy array of dicts)
+                    transcripts_data = latest_row.get('transcripts', None)
+                    
+                    # Handle numpy array if needed
+                    import numpy as np
+                    if isinstance(transcripts_data, np.ndarray):
+                        transcripts_data = transcripts_data.tolist()
+                        
+                    content = ""
+                    if isinstance(transcripts_data, list):
+                         for part in transcripts_data: 
+                             if isinstance(part, dict) and 'content' in part:
+                                 content += part['content'] + "\n"
+                    
+                    if content:
+                        print(f"[StockService] Successfully fetched transcript from DefeatBeta for {symbol} (Len: {len(content)}).")
+                        
+                        recency_check_db = self._check_transcript_recency(symbol, db_date_str)
+                        return {
+                            "text": content,
+                            "date": db_date_str,
+                            "is_outdated": recency_check_db["is_outdated"],
+                            "warning": recency_check_db["message"]
+                        }
+            except Exception as e:
+                print(f"[StockService] DefeatBeta failed: {e}")
+
+            # 2. Fallback to Finnhub
+            print(f"[StockService] DefeatBeta transcript empty or failed for {symbol}. Trying Finnhub...")
+            
             transcripts = finnhub_service.get_transcript_list(symbol)
             if not transcripts:
                 return ""
@@ -998,9 +1073,92 @@ class StockService:
                     full_text.append(f"{speaker}: {speech_text}")
             
             text = "\n".join(full_text)
-            if len(text) > 20000:
-                 text = text[:20000] + "\n[TRUNCATED...]"
-            return text
+            
+            # Extract date from Finnhub metadata if available
+            transcript_date_str = None
+            if transcripts and len(transcripts) > 0:
+                 # Finnhub usually provides 'time' as "2024-10-25 10:00:00" or similar
+                 transcript_date_str = transcripts[0].get('time', '').split(' ')[0]
+
+            # Check recency
+            recency_check = self._check_transcript_recency(symbol, transcript_date_str)
+            
+            if text:
+                 return {
+                     "text": text,
+                     "date": transcript_date_str,
+                     "is_outdated": recency_check["is_outdated"],
+                     "warning": recency_check["message"]
+                 }
+                 
+            return {"text": "", "date": None, "is_outdated": False, "warning": ""}
+
+        except Exception as e:
+            print(f"[StockService] Error in get_latest_transcript for {symbol}: {e}")
+            return {"text": "", "date": None, "is_outdated": False, "warning": ""}
+
+    def _check_transcript_recency(self, symbol: str, transcript_date_str: str) -> Dict[str, Any]:
+        """
+        Checks if the provided transcript date is reasonably close to the most recent earnings date provided by Yahoo Finance.
+        Returns a dict with 'is_outdated' (bool) and 'message' (str).
+        """
+        result = {"is_outdated": False, "message": ""}
+        if not transcript_date_str:
+            return result
+        
+        try:
+            # Parse transcript date
+            # Try a few formats or just isoformat
+            try:
+                transcript_date = datetime.strptime(transcript_date_str, "%Y-%m-%d").date()
+            except ValueError:
+                return result # Cannot parse, assume fine
+
+            ticker = yf.Ticker(symbol)
+            # earnings_dates index is datetime (tz-aware usually)
+            earnings = ticker.earnings_dates
+            
+            if earnings is None or earnings.empty:
+                return result
+
+            # Filter for Past earnings only (handle timezones safely by converting to date)
+            now_date = datetime.now().date()
+            
+            # Sort descending just in case
+            earnings = earnings.sort_index(ascending=False)
+            
+            past_earnings = []
+            for dt in earnings.index:
+                # Convert to simple date
+                e_date = dt.date()
+                if e_date <= now_date:
+                    past_earnings.append(e_date)
+            
+            if not past_earnings:
+                return result
+                
+            last_earnings_date = past_earnings[0]
+            
+            # Check difference
+            # Allow 10 days buffer? Sometimes transcripts are delayed or date mismatch
+            delta = abs((last_earnings_date - transcript_date).days)
+            
+            # If the last confirmed earnings date is significantly newer (e.g. > 14 days) than our transcript 
+            # OR if our transcript is significantly OLDER than the last earnings date.
+            
+            # Case: Transcript is from May, Last Earnings was August -> Outdated.
+            days_since_last_earnings = (last_earnings_date - transcript_date).days
+            
+            if days_since_last_earnings > 15: # More than 2 weeks lag
+                result["is_outdated"] = True
+                result["message"] = f"WARNING: The available earnings transcript is dated {transcript_date_str}, but Yahoo Finance indicates a more recent earnings call occurred on {last_earnings_date}. The transcript may be outdated."
+                print(f"[StockService] Recency Warning for {symbol}: {result['message']}")
+            
+            return result
+
+        except Exception as e:
+            print(f"[StockService] Error checking recency for {symbol}: {e}")
+            return result
             
         except Exception as e:
             # Likely 403 Forbidden for free tier
@@ -1074,7 +1232,18 @@ class StockService:
         # Fetch Filings & Transcript
         print(f"Fetching filings/transcript for {symbol}...")
         filings_text = self.get_latest_filing_text(symbol)
-        transcript_text = self.get_latest_transcript(symbol)
+        transcript_data = self.get_latest_transcript(symbol)
+        transcript_text = ""
+        transcript_date = None
+        transcript_warning = ""
+
+        if isinstance(transcript_data, dict):
+             transcript_text = transcript_data.get("text", "")
+             transcript_date = transcript_data.get("date")
+             transcript_warning = transcript_data.get("warning")
+        else:
+             transcript_text = transcript_data or ""
+
         
         # Use technical analysis data for indicators
         ta_data = technical_analysis 
@@ -1099,6 +1268,8 @@ class StockService:
             "indicators": indicators,
             "news_items": news_data,
             "transcript_text": transcript_text or "", 
+            "transcript_date": transcript_date,
+            "transcript_warning": transcript_warning,
             "market_context": market_context,
             "change_percent": stock.get("change_percent", 0.0)
         }
@@ -1150,6 +1321,7 @@ class StockService:
         status = "Owned" if recommendation == "BUY" else "Not Owned"
         try:
             float_score = float(score)
+            
             if float_score >= 7.0:
                 status = "Owned"
             else:
@@ -1163,6 +1335,54 @@ class StockService:
         if decision_id:
             update_decision_point(decision_id, recommendation, reasoning, status, ai_score=float(score) if isinstance(score, (int, float)) else None)
             print(f"Updated decision point for {symbol}: {recommendation} -> {status} (Score: {score})")
+            
+            # Print Fund Manager Rationale
+            key_points = report_data.get("key_decision_points", [])
+            if key_points:
+                print("Fund Manager Rationale:")
+                for point in key_points:
+                     print(f" - {point}")
+            print("") # Newline for spacing
+
+        try:
+            float_score = float(score)
+            
+            # --- DEEP RESEARCH TRIGGER ---
+            # Criteria: 
+            # 1. Recommendation is BUY with Score >= 70
+            # 2. OR Recommendation is STRONG BUY (No score cutoff)
+            
+            is_buy = "BUY" == recommendation.upper()
+            is_strong_buy = "STRONG BUY" in recommendation.upper() # Covers STRONG BUY
+            
+            should_trigger = False
+            
+            if is_strong_buy:
+                should_trigger = True
+                print(f"[StockService] Deep Research Triggered: STRONG BUY detected.")
+            elif is_buy and float_score >= 70.0:
+                should_trigger = True
+                print(f"[StockService] Deep Research Triggered: BUY with Score {float_score} >= 70.")
+            
+            if should_trigger:
+                print(f"[StockService] Queuing Deep Research for {symbol}...")
+                
+                deep_research_service.queue_research_task(
+                    symbol=symbol,
+                    raw_news=news_data,
+                    technical_data=technical_analysis,
+                    drop_percent=change_percent,
+                    decision_id=decision_id,
+                    transcript_text=transcript_text or "",
+                    transcript_date=transcript_date,
+                    transcript_warning=transcript_warning
+                )
+                
+        except Exception as e:
+            print(f"Error checking Deep Research trigger: {e}")
+                        
+        except Exception as e:
+            print(f"Error checking Deep Research trigger: {e}")
         
         # Save detailed decision data locally and to Cloud
         decision_data = {
@@ -1208,5 +1428,23 @@ class StockService:
         today_str = datetime.now().strftime("%Y-%m-%d")
         self.sent_notifications.add((symbol, today_str))
 
+
+    def _get_previous_trading_day(self, date_obj: datetime.date) -> datetime.date:
+        """
+        Calculates the previous trading day.
+        Monday (0) -> Friday ( -3 days)
+        Sunday (6) -> Friday ( -2 days)
+        Saturday (5) -> Friday ( -1 day)
+        Others -> Yesterday ( -1 day)
+        """
+        weekday = date_obj.weekday()
+        if weekday == 0: # Monday
+            return date_obj - timedelta(days=3)
+        elif weekday == 6: # Sunday
+            return date_obj - timedelta(days=2)
+        elif weekday == 5: # Saturday
+            return date_obj - timedelta(days=1)
+        else:
+            return date_obj - timedelta(days=1)
 
 stock_service = StockService()

@@ -1,0 +1,11 @@
+{
+  "verdict": "WAIT_FOR_STABILIZATION",
+  "risk_level": "High",
+  "catalyst_type": "Structural",
+  "reasoning_bullet_points": [
+    "Immunovant's IMVT-1402 presents a credible 'best-in-class' threat with deeper IgG suppression (74-82%) and autoinjector convenience, directly challenging Vyvgart's long-term dominance.",
+    "The -6.45% drop represents a rational repricing of terminal value multiples rather than a temporary sentiment overreaction to 'noise'.",
+    "Technical indicators show a breakout below the Lower Bollinger Band (Price 704 < BB 735), suggesting strong bearish momentum that has not yet found a floor."
+  ],
+  "knife_catch_warning": "True"
+}

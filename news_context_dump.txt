@@ -1,0 +1,580 @@
+=== FULL NEWS AGENT CONTEXT DUMP ===
+This file contains the exact text string injected into the News Agent prompt.
+==========================================================================
+
+
+>> TICKER: GOOG
+Total Items Passed: 30
+--------------------------------------------------
+
+You are the **News & Sentiment Agent**.
+Your goal is to gauge the market sentiment and identifying key narrative drivers for GOOG.
+You have access to recent News Headlines and Summaries, and the latest Quarterly Report.
+
+CONTEXT: The stock has dropped -5.00%. We need to know WHY.
+
+INPUT DATA:
+1. RECENT NEWS HEADLINES AND SUMMARIES:
+--- SOURCE: Benzinga/Massive ---
+- 2025-12-12: "Digital Dominance: The Surge in US Digital Ad Spending Overtakes Traditional Media" (Massive (GlobeNewswire Inc.))
+  CONTENT:
+Summary: The global advertising agencies market is projected to grow from $383.64 billion in 2024 to $398.77 billion in 2025, driven by 5G, IoT, digital advertising, and AI innovations, with digital ad spending overtaking television advertising.
+
+Insight Analysis:
+- [DNTUY] NEUTRAL: Included in market report's company list without specific performance indicators
+- [GOOG] POSITIVE: Proactively developing Gen Z-focused marketing strategies and music lineup
+- [GOOGL] POSITIVE: Proactively developing Gen Z-focused marketing strategies and music lineup
+- [WPP] NEUTRAL: Mentioned as a key market player without specific performance details
+
+Keywords: 5G, IoT, digital advertising, AI, influencer marketing, augmented reality
+
+- 2025-12-12: Scott Galloway Calls SpaceX Incredible Company With 'Bigger Moat' Than OpenAI, But Refuses To Invest In It (Massive (Benzinga))
+  CONTENT:
+Summary: NYU professor Scott Galloway praised SpaceX's achievements while criticizing Elon Musk's business practices, highlighting the company's potential $1.5 trillion IPO valuation and unique space travel capabilities.
+
+Insight Analysis:
+- [TSLA] NEUTRAL: Mentioned in context of market valuation comparison with potential SpaceX IPO
+- [GOOG] NEUTRAL: Mentioned as a potential AI competitor to OpenAI
+- [GOOGL] NEUTRAL: Mentioned as a potential AI competitor to OpenAI
+
+Keywords: SpaceX, IPO, Elon Musk, space travel, technology
+
+- 2025-12-12: Broadcom’s AI Revenue Surge Meets Margin Reality as Shares Sink (Massive (Investing.com))
+  CONTENT:
+Summary: Broadcom reported record quarterly revenue of $18.02 billion, driven by AI demand, but experienced share price decline due to lower margins in its AI segment and concerns about future earnings quality.
+
+Insight Analysis:
+- [AVGO] NEUTRAL: Strong revenue growth ($63.9B annually) offset by lower AI segment margins and flat non-AI revenue, causing investor uncertainty
+- [NVDA] NEUTRAL: Mentioned as continuing to advance GPU technology, with custom chips seen as complementary rather than replacement
+- [GOOG] NEUTRAL: Mentioned as a customer for Broadcom's custom AI accelerators, with no specific positive or negative context
+- [GOOGL] NEUTRAL: Mentioned as a customer for Broadcom's custom AI accelerators, with no specific positive or negative context
+- [ORCL] NEGATIVE: Experienced sharp stock selloff due to warnings about capital spending outpacing revenues, reflecting broader tech sector AI investment concerns
+
+Keywords: AI, semiconductor, revenue, margins, hyperscalers
+
+- 2025-12-12: Warren Buffett Is Dumping Apple and Bank of America Shares and Buying This Red-Hot AI Stock to End 2025 (Massive (The Motley Fool))
+  CONTENT:
+Summary: Warren Buffett's Berkshire Hathaway is reducing stakes in Apple and Bank of America while investing in Alphabet, signaling a strategic shift towards AI-focused tech companies with strong financial performance.
+
+Insight Analysis:
+- [AAPL] NEGATIVE: Reduced stake due to high valuation relative to earnings growth and modest recent earnings performance
+- [BAC] NEUTRAL: Selling shares to lock in profits after significant stock appreciation since 2011
+- [BACpB] NEUTRAL: Selling shares to lock in profits after significant stock appreciation since 2011
+- [BACpE] NEUTRAL: Selling shares to lock in profits after significant stock appreciation since 2011
+- [BACpK] NEUTRAL: Selling shares to lock in profits after significant stock appreciation since 2011
+- [BACpL] NEUTRAL: Selling shares to lock in profits after significant stock appreciation since 2011
+- [BACpM] NEUTRAL: Selling shares to lock in profits after significant stock appreciation since 2011
+- [BACpN] NEUTRAL: Selling shares to lock in profits after significant stock appreciation since 2011
+- [BACpO] NEUTRAL: Selling shares to lock in profits after significant stock appreciation since 2011
+- [BACpP] NEUTRAL: Selling shares to lock in profits after significant stock appreciation since 2011
+- [BACpQ] NEUTRAL: Selling shares to lock in profits after significant stock appreciation since 2011
+- [BACpS] NEUTRAL: Selling shares to lock in profits after significant stock appreciation since 2011
+- [BMLpG] NEUTRAL: Selling shares to lock in profits after significant stock appreciation since 2011
+- [BMLpH] NEUTRAL: Selling shares to lock in profits after significant stock appreciation since 2011
+- [BMLpJ] NEUTRAL: Selling shares to lock in profits after significant stock appreciation since 2011
+- [BMLpL] NEUTRAL: Selling shares to lock in profits after significant stock appreciation since 2011
+- [MERpK] NEUTRAL: Selling shares to lock in profits after significant stock appreciation since 2011
+- [GOOG] POSITIVE: Strong AI capabilities, first $100 billion quarterly revenue, substantial free cash flow, competitive search engine, and recent dividend initiation
+- [GOOGL] POSITIVE: Strong AI capabilities, first $100 billion quarterly revenue, substantial free cash flow, competitive search engine, and recent dividend initiation
+- [BRK.A] NEUTRAL: Transitioning leadership and repositioning investment portfolio with focus on cash-generating businesses
+- [BRK.B] NEUTRAL: Transitioning leadership and repositioning investment portfolio with focus on cash-generating businesses
+
+Keywords: Warren Buffett, Berkshire Hathaway, AI, tech stocks, investment strategy
+
+- 2025-12-12: Should You Buy D-Wave Quantum Stock While It's Under $30? (Massive (The Motley Fool))
+  CONTENT:
+Summary: D-Wave Quantum, a quantum computing specialist, has experienced significant stock volatility, gaining 2,470% since November 2024 but recently dropping 40% from its peak. The company focuses on quantum annealing, a different approach to quantum computing compared to gate-based methods, but remains highly speculative with an expensive valuation.
+
+Insight Analysis:
+- [QBTS] NEUTRAL: The stock shows potential in an emerging technology sector, but has an extremely high valuation (395x trailing sales), high volatility, and significant uncertainty about future market success
+- [RGTI] NEUTRAL: Mentioned as a peer in quantum computing, but no specific analysis provided
+- [RGTIW] NEUTRAL: Mentioned as a peer in quantum computing, but no specific analysis provided
+- [GOOG] NEUTRAL: Mentioned as working on quantum computing, with no specific sentiment analysis in the article
+- [GOOGL] NEUTRAL: Mentioned as working on quantum computing, with no specific sentiment analysis in the article
+- [IBM] NEUTRAL: Mentioned as working on quantum computing, with no specific sentiment analysis in the article
+
+Keywords: quantum computing, quantum annealing, stock analysis, technology investment
+
+- 2025-12-11: Oracle Stock Hit Hard: Why Its AI Pipeline Could Drive a 2026 Rally (Massive (Investing.com))
+  CONTENT:
+Summary: Oracle's stock price dropped after Q2 earnings, but the company's strategic AI transformation and strong multicloud growth suggest potential long-term value, with a massive $523 billion remaining performance obligation (RPO) indicating future revenue potential.
+
+Insight Analysis:
+- [ORCL] NEUTRAL: Mixed Q2 results with 14% revenue growth, 34% cloud growth, and 817% multicloud gain, but stock price dropped due to infrastructure investment and revenue slightly missing consensus
+- [NVDA] POSITIVE: Mentioned as part of Oracle's third-party technology partnerships, with GPU capacity reported as sold out
+- [MSFT] POSITIVE: Oracle's products are embedded in Microsoft's cloud network, providing growth opportunities
+- [AMZN] POSITIVE: Oracle's products are embedded in Amazon's cloud network, providing growth opportunities
+- [GOOG] POSITIVE: Oracle's products are embedded in Alphabet's cloud network, providing growth opportunities
+- [GOOGL] POSITIVE: Oracle's products are embedded in Alphabet's cloud network, providing growth opportunities
+
+Keywords: AI, cloud computing, multicloud, Oracle, earnings, technology transformation
+
+- 2025-12-11: Why Planet Labs Stock Is Skyrocketing This Week (Massive (The Motley Fool))
+  CONTENT:
+Summary: Planet Labs experienced significant stock growth due to strong Q3 earnings, 33% revenue increase, positive free cash flow, and strategic partnerships with Nvidia and Google for advanced satellite technology.
+
+Insight Analysis:
+- [PL] POSITIVE: Strong quarterly performance with 33% revenue growth, 70% defense/intelligence revenue increase, and strategic tech partnerships
+- [PL.WS] POSITIVE: Strong quarterly performance with 33% revenue growth, 70% defense/intelligence revenue increase, and strategic tech partnerships
+- [NVDA] POSITIVE: Collaborating with Planet Labs on AI satellite technology using Jetson AI platform
+- [GOOG] POSITIVE: Partnering with Planet Labs to deploy prototype satellites with Tensor Processing Units in 2027
+- [GOOGL] POSITIVE: Partnering with Planet Labs to deploy prototype satellites with Tensor Processing Units in 2027
+
+Keywords: satellite, earth observation, AI, space technology, earnings growth
+
+- 2025-12-11: An Anthropic IPO Could Be Here Sooner Than We Thought! (Massive (The Motley Fool))
+  CONTENT:
+Summary: Anthropic is preparing for a potential IPO in 2026, with current private valuation around $350 billion and projected annual recurring revenue of $9 billion in 2025, potentially becoming one of the largest tech IPOs in history.
+
+Insight Analysis:
+- [GOOG] POSITIVE: Considered to have the clearest AI monetization roadmap and viewed as a stable investment option
+- [GOOGL] POSITIVE: Considered to have the clearest AI monetization roadmap and viewed as a stable investment option
+- [KLAR] NEUTRAL: Evolving business model with innovative membership tiers, showing potential for growth in payment services
+
+Keywords: AI, IPO, Anthropic, OpenAI, technology investment
+
+- 2025-12-11: Pixalate’s November 2025 LATAM SSP ‘Direct’ Access to Top 100 Mobile Apps Rankings: Google AdExchange No. 1 on Google Play Store (97%) (Massive (GlobeNewswire Inc.))
+  CONTENT:
+Summary: Pixalate analyzed Supply-Side Platforms (SSPs) direct-seller relationships with top mobile apps in Latin America, revealing Google AdExchange as the leader with 97% direct access on Google Play Store and 100% on Apple App Store.
+
+Insight Analysis:
+- [GOOG] POSITIVE: Ranked #1 in direct access for both Google Play Store (97%) and Apple App Store (100%) in Latin American mobile apps market
+- [GOOGL] POSITIVE: Ranked #1 in direct access for both Google Play Store (97%) and Apple App Store (100%) in Latin American mobile apps market
+- [MGNI] POSITIVE: Ranked #2 in direct access for Google Play Store (96%) and #3 in Apple App Store (98%) in Latin American mobile apps market
+- [PUBM] NEUTRAL: Ranked #3 in Google Play Store (95%) and tied for #2 in Apple App Store (100%) in Latin American mobile apps market
+
+Keywords: SSP, mobile apps, digital advertising, app-ads.txt, direct access
+
+- 2025-12-11: Alphabet Just Did Something It Hasn't Done in 7 Years. Time to Buy? (Massive (The Motley Fool))
+  CONTENT:
+Summary: Alphabet recently surpassed Microsoft's market capitalization for the first time since 2018, reaching $3.8 trillion. The company's growth is driven by Google Search, Google Cloud, and AI investments, with a recent court ruling reducing antitrust risks.
+
+Insight Analysis:
+- [GOOG] POSITIVE: Strong revenue growth, successful AI investments, favorable court ruling, market cap expansion, and reasonable valuation at 30x forward earnings
+- [GOOGL] POSITIVE: Strong revenue growth, successful AI investments, favorable court ruling, market cap expansion, and reasonable valuation at 30x forward earnings
+- [MSFT] NEUTRAL: Overtaken by Alphabet in market cap, but still a significant tech company
+- [AAPL] NEUTRAL: Mentioned as another large market cap company, no specific performance details provided
+- [NVDA] NEUTRAL: Mentioned as having a larger market cap than Alphabet, no specific performance details provided
+
+Keywords: Alphabet, Google, AI, market capitalization, cloud services, antitrust
+
+--- SOURCE: Alpha Vantage ---
+- 2025-12-11: Alphabet (GOOG) Stock After Hours: Waymo Recall, GPT‑5.2 Shock and What to Watch Before the December 12 Open (ts2.tech)
+  SUMMARY: Alphabet (GOOG) Class C shares saw a sharp decline then steadied in after-hours trading on December 11, 2025, influenced by a Waymo robotaxi recall, OpenAI's launch of GPT-5.2, and rising concerns about an AI spending bubble. Despite these immediate headwinds, the article notes a broadly bullish long-term outlook for Alphabet, citing impressive financial performance, analyst consensus, and significant investment by Berkshire Hathaway. Investors are advised to monitor pre-market price action, further developments on Waymo and GPT-5.2, sector moves, and options expiration dynamics before the market opens on December 12.
+
+--- SOURCE: Finnhub ---
+- 2025-12-12: The Biggest Threat To Nvidia Is Google, Broadcom's Q4 Just Proved It (SeekingAlpha)
+  SUMMARY: Google's AI innovations and custom chips threaten Nvidia's dominance. Read here for more on the shifting AI landscape and what it means for tech investors.
+
+- 2025-12-12: The 'Edge AI' Bear Case (SeekingAlpha)
+  SUMMARY: Edge AI has been touted as a plausible bear case for the âAI tradeâ for much of the last couple of years.
+
+- 2025-12-11: Invesco Global Core Equity Fund: Q3 2025 Portfolio Positioning And Performance Highlights (SeekingAlpha)
+  SUMMARY: Invesco Global Core Equity Fund Q3 2025: New positions, strategic sales, and performance analysis. Click here to read the full report.
+
+- 2025-12-11: Oracle made a $300 billion bet on OpenAI. It's paying the price. (Yahoo)
+  SUMMARY: Investors are wary of Oracle's reliance on OpenAI.
+
+- 2025-12-11: Sector Update: Consumer Stocks Rise Late Afternoon (Yahoo)
+  SUMMARY: Consumer stocks rose late Thursday afternoon, with the State Street Consumer Staples Select Sector S
+
+- 2025-12-11: Sector Update: Tech Stocks Decline Late Afternoon (Yahoo)
+  SUMMARY: Tech stocks were lower late Thursday afternoon, with the State Street Technology Select Sector SPDR
+
+- 2025-12-11: Elon Musk declares early victory over $45 billion rival (Yahoo)
+  SUMMARY: The techies are at it again on social media. Autonomous driving is expected to be a trillion-dollar industry within the next decade, so everyone from Amazon to Alphabet to Tesla is fighting to become the driver of the next revolution in transportation. 20 million Tesla vehicles delivered10 ...
+
+- 2025-12-11: Tracking George Soros's 13F Portfolio - Q3 2025 Update (SeekingAlpha)
+  SUMMARY: Soros Fund Management's Q3 2025 13F portfolio value fell to $7.02B. Read more on its portfolio shifts, top stock picks like Amazon, and key trades.
+
+- 2025-12-11: Google Stock Dips Amid OpenAI Model Upgrade In Leadership Battle (Yahoo)
+  SUMMARY: Google stock fell amid OpenAI's release of a new AI model, a Disney investment in OpenAI, and a pull back in AI stocks spurred by Oracle.
+
+- 2025-12-11: The Day Google Became An AI Stock (SeekingAlpha)
+  SUMMARY: Discover why Alphabet's P/E hit a new low amid AI threats and antitrust action. Learn how Google became a vertically integrated AI leader. Read the full report for expert insights!
+
+- 2025-12-11: Deepwater: AI bull run continues in 2026; small cap tech to outperform (Yahoo)
+  SUMMARY: Investing.com -- Deepwater Asset Management has released its market predictions for 2026 on Thursday, forecasting a 10% gain for the Nasdaq driven primarily by continued strength in AI investments.
+
+- 2025-12-11: Sector Update: Consumer Stocks Advance in Afternoon Trading (Yahoo)
+  SUMMARY: Consumer stocks rose Thursday afternoon with the State Street Consumer Staples Select Sector SPDR ET
+
+- 2025-12-11: If Google wins AI race, Nvidia is 'in trouble,' says author of Jensen Huang biography (Yahoo)
+  SUMMARY: Jensen Huang biography author Stephen Witt explains why Google's self-developed AI model, Gemini, could pose a threat to Nvidia's AI dominance
+
+--- SOURCE: Yahoo Finance ---
+- 2025-12-12: Why Disney's OpenAI alliance is a blueprint for AI content deals (Yahoo Finance)
+  SUMMARY: Disney's entertainment pipeline of theme parks, movies, and merch now includes AI.
+
+- 2025-12-12: YouTube Creators Can Now be Paid in PYUSD as Stablecoin Payouts Build Momentum (CCN)
+  SUMMARY: U.S. YouTube creators can now earn payouts in stablecoins. The integration builds on Google's adoption of PayPal Hyperwallet. Major platform operators are exploring stablecoin payouts. ...
+
+- 2025-12-12: 2 Magnificent Artificial Intelligence Stocks to Buy in 2026 (Motley Fool)
+  SUMMARY: Strong AI spending is expected to persist through 2030.
+
+- 2025-12-12: YouTube allows American creators to receive payouts in stablecoins (TheStreet)
+  SUMMARY: YouTube, the video-sharing giant owned by Google, now allows U.S. creators to receive payouts in stablecoins, Fortune reported on Dec. 11. YouTube has opted for PayPal's (Nasdaq: PYPL) PYUSD stablecoin for the latest crypto move as it already is PayPal’s existing customer and uses the ...
+
+- 2025-12-12: Why Alphabet (GOOG) Stock Drops On Thursday (GuruFocus.com)
+  SUMMARY: Alphabet (GOOGL) Slips Amid NHTSA Review of Waymo Self-Driving Cars
+
+- 2025-12-12: YouTube Creators in US Can Now Accept PayPal’s PYUSD Stablecoin (Coinspeaker)
+  SUMMARY: PayPal’s PYUSD stablecoin is set to get a major boost as Alphabet Inc’s video streaming platform YouTube said that US-based creators can now accept payments in PYUSD. This development comes as the crypto regulatory landscape improves, showing greater acceptance for stablecoin, especially after the GENIUS Act approval in July 2025. ...
+
+
+--- ADDITIONAL NEWS SOURCES (DefeatBeta) ---
+- 2025-12-06 - TechCrunch: Ex-Googler’s Yoodli triples valuation to $300M+ with AI built to assist, not replace, people (https://finance.yahoo.com/news/ex-googler-yoodli-triples-valuation-234358139.html)
+- 2025-12-06 - TheStreet: Waymo investigation could stop autonomous driving in its tracks (https://finance.yahoo.com/m/4b380989-494a-38fc-840c-8c2011c6f329/waymo-investigation-could.html)
+- 2025-12-06 - Motley Fool: Which Artificial Intelligence (AI) Stocks Are Billionaires Buying the Most? (https://finance.yahoo.com/m/84e03577-a697-3a13-927f-10b69b1c5695/which-artificial-intelligence.html)
+- 2025-12-06 - Investor's Business Daily: Top Funds Get Googly-Eyed Over This Breakout AI Stock Not Named Nvidia Or Palantir (https://finance.yahoo.com/m/59b980bf-b25c-319c-be89-9b4ef55882cb/top-funds-get-googly-eyed.html)
+- 2025-12-06 - Bloomberg: Google Must Limit Default Contracts to One Year, Judge Rules (https://finance.yahoo.com/news/google-must-limit-default-contracts-222442639.html)
+
+
+2. QUARTERLY REPORT SNIPPET (Transcript/Filing):
+Earnings Call Transcript - Date: 2025-10-29 00:00:00
+
+Operator: Welcome, everyone. Thank you for standing by for the Alphabet Third Quarter 2025 Earnings Conference Call. [Operator Instructions] I would now like to hand the conference over to your speaker today, Jim Friedland, Head of Investor Relations. Please go ahead.
+
+James Friedland: Thank you. Good afternoon, everyone, and welcome to Alphabet's Third Quarter 2025 Earnings Conference Call. With us today are Sundar Pichai, Philipp Schindler, and Anat Ashkenazi. Now I'll quickly cover the safe harbor. Some of the statements that we make today regarding our business, operations and financial performance may be considered forward-looking. Such statements are based on current expectations and assumptions that are subject to a number of risks and uncertainties. Actual results could differ materially. Please refer to our forms 10-K and 10-Q, including the risk factors. We undertake no obligation to update any forward-looking statement. During this call, we will present both GAAP and non-GAAP financial measures. A reconciliation of non-GAAP to GAAP measures is included in today's earnings press release, which is distributed and available to the public through our Investor Relations website located at abc.xyz/investor. Our comments will be on year-over-year comparisons unless we state otherwise. And now I'll turn the call over to Sundar.
+
+Sundar Pichai: Thank you, Jim. Good afternoon, everyone, and thanks for joining us. This was a terrific quarter for Alphabet, driven by double-digit growth across every major part of our business. We are seeing AI now driving real business results across the company. We delivered our first ever $100 billion quarter. 5 years ago, our quarterly revenue was at $50 billion. Our revenue number has doubled since then, and we are firmly in the generative AI era. In parallel, we've built for the long term and diversified with successful businesses in cloud, YouTube and subscriptions. Our momentum is strong, and we are shipping at speed. As just a few examples: our first-party models, like Gemini, now process 7 billion tokens per minute via direct API used by our customers. The Gemini app now has over 650 million monthly active users, and queries increased by 3x from Q2. Cloud had another great quarter of accelerating growth with AI revenue as a key driver. Cloud backlog grew 46% quarter-over-quarter to $155 billion. And we crossed $300 million paid subscriptions led by growth in Google One and YouTube Premium. Today, I'll discuss progress in our full stack approach to AI and then share highlights from search, cloud, YouTube and Waymo. As a reminder, our full stack approach spans AI infrastructure, world-class research including models and tooling, and our products and platforms that bring AI to people everywhere. First up, AI infrastructure. Our extensive and reliable infrastructure, which powers all of Google's products is the foundation of our stack and a key differentiator. We are scaling the most advanced chips in our data centers, including GPUs from our partner, NVIDIA, as well as our own purposeful TPUs. And we are the only company providing a wide range of both. As we announced yesterday at NVIDIA GTC, we are now shipping the new A4X Max instances powered by NVIDIA GB300 to our cloud customers. Our highly sought-after TPU portfolio is led by our 7-generation TPU, Ironwood, which will be generally available soon. We are investing in TPU capacity to meet the tremendous demand we are seeing from customers and partners, and we are excited that Anthropic recently shared plans to access up to 1 million TPUs. Next world-class AI research, including models and tooling. Our models are world-leading. GEMINI 2.5 Pro, Veo, Genie 3 under viral sensation Nano Banana are among the very best in class. Over 230 million videos have been generated with Veo 3, and more than 13 million developers have built with our generative models. We are looking forward to the release of Gemini 3 later this year. Our research leadership is advancing next frontier technologies. Last week, we announced that our Willow quantum chip achieved a major breakthrough, running an algorithm 13,000x faster than 1 of the world's best supercomputers, and the result is verifiable, paving the way to future practical applications. Speaking of quantum, let me congratulate Michel Devoret, our Chief Scientist for Quantum Hardware. He received a Nobel in physics for early research he did in the 1980s. Three Nobels awarded to current Googlers in 2 years, incredible. And third, our products and platforms. We are bringing AI to more people and developers than anyone else. In July, we announced that we processed 980 trillion monthly tokens across all our surfaces. We are now processing over 1.3 quarterly and monthly tokens, more than 20x growth in a year, phenomenal. This quarter, we took big steps to reimagine Chrome as a browser powered by AI through deep integrations with Gemini and AI Mode in search with more agentic capabilities coming soon. In August at Made by Google, we unveiled our Pixel 10 series of devices. They are the first with our most powerful chip designed to run on Gemini Tensor G5. They're our best reviewed devices ever. And last week, we launched Android XR, our new operating system at Samsung's Galaxy XR device. It brings new ways to use headsets and glasses with Gemini at the core. Now turning to highlights from Search. AI is driving an expansionary moment for Search. As people learn what they can do with our new AI experiences, they're increasingly coming back to Search more. Search and its AI experiences are built to highlight the web, sending billions of clicks to sites every day. During the Q2 call, we shared that overall queries and commercial queries continue to grow year-over-year. This growth rate increased in Q3, largely driven by our AI investments in Search, most notably AI Overviews and AI Mode. Let me dive into the momentum we are seeing. As we have shared before, AI Overviews drive meaningful query growth. This effect was even stronger in Q3 as users continue to learn that Google can answer more of their questions, and it's particularly encouraging to see the effect was more pronounced with younger people. We're also seeing that AI Mode is resonating well with users. In the U.S., we have seen strong and consistent week-over-week growth in usage since launch and queries doubled over the quarter. Over the last quarter, we rolled out AI Mode globally across 40 languages in record time. It now has over 75 million daily active users, and we shipped over 100 improvements to the product in Q3, an incredibly fast pace. Most importantly, AI Mode is already driving incremental total query growth for Search. Philipp will talk more about monetization and share how AI is helping people connect with businesses and shop on Search. Next, Google Cloud. Our complete enterprise AI product portfolio is accelerating growth in revenue, operating margins and backlog. In Q3, customer demand strengthened in 3 ways. One, we are signing new customers faster. The number of new GCP customers increased by nearly 34% year-over-year. Two, we are signing larger deals. We have signed more deals over $1 billion through Q3 this year than we did in the previous 2 years combined. Third, we are deepening our relationships. Over 70% of existing Google Cloud customers use our AI products, including Banco BV, Best Buy and FairPrice Group. As we scale, we are diversifying revenue. Today, 13 product lines are each at an annual run rate over $1 billion. And we are improving operating margin with highly differentiated products built with our own technology. This deep product differentiation starts with our AI infrastructure. We have a decade of experience building AI accelerators and today, offer the widest array of chips. This leadership is winning customers like HCA Healthcare, LG AI Research and Macquarie Bank, and it's why 9 of the top 10 AI labs choose Google Cloud. We are also the only cloud provider offering our own leading generative AI models including Gemini, Imagen, Veo, Chirp and Lyria. Adoption is rapidly accelerating. In Q3, revenue from products built on our generative AI models grew more than 200% year-over-year. Over the past 12 months, nearly 150 Google Cloud customers each processed approximately 1 trillion tokens with our models for a wide range of applications. For example, WPP is creating campaigns with up to 70% efficiency gains. Swarovski has increased e-mail open rates by 17% and accelerated campaign localization by 10x. Earlier this month, we launched Gemini Enterprise, the new front door for AI in the workplace, and we are seeing strong adoption for agents built on this platform. Our packaged enterprise agents in Gemini Enterprise are optimized for a variety of domains, are highly differentiated and offer significant out-of-box value to customers. We have already crossed 2 million subscribers across 700 companies. Next, YouTube. In the living room, YouTube has remained #1 in streaming watch time in the U.S. for more than 2 years, according to Nielsen. Last month marked YouTube's first time as a live NFL broadcaster. This exclusive global broadcast live from Brazil drew more than 19 million fans and set a new record for most concurrent viewers of a live stream on YouTube. YouTube Shorts also continues to perform well. In the U.S., Shorts now earn more revenue per watch hour than traditional in-stream on YouTube. At our Made on YouTube event, we rolled out a number of AI-powered features that are helping create a supercharged creation and build their businesses. AI is now streamlining the entire content creation workflow from generated video tools and more efficient editing to AI-powered insights that help creators optimize their channels. We are also using AI to expand monetization, automatically identifying products to make their videos more shoppable. Philipp will discuss in more detail. And finally, Waymo, next year Waymo aims to open service in London, and they are working to bring service to Tokyo. They've also announced expansions to Dallas, Nashville, Denver and Seattle and secured permission to operate fully autonomously at San Jose and San Francisco Airports. Autonomous testing continues to scale in New York City. The new Waymo for Business allows enterprises to offer Waymo as a work travel option. And we launched Waymo teens accounts in Phoenix this summer. We are pleased to see usage steadily increase with positive feedback from teens and their parents alike. Waymo's growth and momentum are strong, and 2026 is shaping up to be an exciting year. Overall, a milestone quarter, the incredible work of our teams is driving momentum across the board and our leadership in AI positions us so well for the opportunity ahead. I want to thank all of our partners and our employees for their hard work and an excellent Q3. With that, I'll turn it over to Philipp.
+
+Philipp Schindler: Thanks, Sundar, and hello, everyone. I'll quickly cover performance for Google Services for the quarter, then structure the rest of my remarks around the great progress we're delivering across search, ads, YouTube and partnerships. Google Services revenues were $87 billion for the quarter, up 14% year-on-year driven by accelerated growth in Search and YouTube, partially offset by year-on-year decline in network revenues. Adding some further color to our results. The 15% increase in Search and other was led by growth across all major verticals with the largest contributions from retail and financial services. YouTube saw similar performance across verticals. Its 15% growth in advertising revenues was driven by direct response followed by brand. Starting with Search and other revenues, which delivered over $56 billion in revenue for the quarter. As Sundar mentioned, AI is driving an expansionary moment and transforming how people use Google Search. Our investments in new AI experiences, such as AI Overviews and AI Mode, continued to drive growth in overall queries, including commercial queries, creating more opportunities for monetization. These AI experiences are enhancing how people connect with businesses and shop on Search. We recently added shopping capabilities in AI Mode, which now help people shop conversationally in Search, and we expanded try-on capabilities to more clothing items, now available to anyone in the U.S. Lastly, we're making it easier for consumers to benefit from deals through new loyalty offerings like personalized annotations on organic results and ads. Looking at monetization. Businesses can now tap into our most powerful AI search experiences. Using our most advanced AI models, we can understand and predict intent like never before, unlocking entirely new commercial pathways to provide valuable new consumer connections and helping us monetize even more efficiently. Rolled out globally in September, AI Max and Search is already used by hundreds of thousands of advertisers, currently making it the fastest-growing AI-powered search ads product. In Q3 alone, AI Max unlocked billions of net new queries. By delivering the most relevant ad across surfaces and matching advertisers against additional queries they weren't reaching before, AI Max helps advertisers discover new customers at the exact moment they need their product or service. Kayak, for example, look to grow conversions while staying within their ROAS goals. After turning on AI Max and Search, they grew their conversion value by 12% in early tests. We continue to infuse generative AI capabilities at every step of the marketing process. We rolled out Imagen 4 in Asset Studio and Product Studio, helping businesses produce more and better creatives. On the measurement front, we enriched the model supporting Meridian, our marketing mix model, with additional variables, and more granular reporting in PMax is making bidding more effective. Financial services company SoFi has been using PMax to meet its ambitious growth targets and help drive a 39% improvement in its conversion volume year-over-year. Moving to YouTube, where we saw accelerated revenue growth. Our recommendation systems are driving robust watch time growth in our key monetization areas like shorts and living room. As we leverage Gemini models, we're seeing further discovery improvement. On direct response, we're excited about the growth in revenue we're seeing, especially from small and medium advertisers adopting demand gen. We also improved performance on demand gen with over 100 launches helping to increase conversion value by more than 40% for advertisers using target-based bidding on YouTube. The retail vertical continues to lead our growth on YouTube with demand gen helping us further monetize shopping-related categories. Looking at the living room, our long-term bet, more advertisers are adopting interactive direct response ads, leading to an annual revenue run rate exceeding $1 billion globally for this format. For our viewers, we continue to give fans greater access across sports, while tapping into the best of YouTube's product innovation and creator-led content. Sundar mentioned that we expanded our NFL partnership with our first-ever exclusive global broadcast of an NFL game. Brands love the opportunity, and we sold all our ad inventory within a couple of weeks. Looking at creators. A significant force behind the thriving YouTube creator economy is the collaboration between creators and brands. Tools like direct linking to deals, websites and shorts and swappable brand segments in long form will soon help creators show how they deliver great value for brands. Thanks to a collaboration with Dude Perfect, Comcast, Xfinity drove an 8% search lift, beating other Xfinity ads, recall lift on shorts by 34%. At the same time, it decreased the cost per lifted user by 50% when compared to the next most efficient ad. We continue to invest in AI-powered features that are helping creators supercharge creation and build their businesses. with Veo 3 integration and speech to song, creators go from idea to iteration quicker, and new channel insights help them better understand performance. Ending on YouTube with our subscriptions product. We're also seeing momentum with strong growth in offerings such as YouTube Music and Premium and YouTube TV. We're also applying Gemini internally to help us serve customers with increased speed, intelligence and efficiency. Our sales teams use Gemini enriched with ads knowledge to streamline customer interactions. This increased productivity by over 10% led to hundreds of millions in incremental revenue and frees up sellers to engage with more customers at a deeper, more strategic level. In our customer support division, Gemini-powered solutions have managed over 40 million customer sessions so far this year and resolved hundreds of thousands of customer inquiries, and we're just getting started. As always, I'll wrap with the progress we're seeing across partnerships where our customers tap into the strength and breadth of Google's products to accelerate their transformation. Revolut, the global financial services company, leverages Google Cloud's Vertex AI platform and Gemini models to help power its advanced customer service chatbot, develop new hyper-personalized financial products and offer predictive insights. Revolut is also increasing its presence on YouTube adopting Veo 3 for personalized creatives, making Google a key ads partner for delivering growth and launching new markets. In closing, I'd like to thank Googlers everywhere for their contributions to our success and as always, to our customers and partners for their continued trust. And of course, a huge thanks to all of you as we celebrate 25 years of Google Ads. Anat, over to you.
+
+Anat Ashkenazi: Thank you, Philipp. My comments will focus on year-over-year comparisons for the third quarter, unless I state otherwise. I will start with results at the Alphabet level and will then cover our segment results. I'll end with some commentary on our outlook for the fourth quarter of 2025. We had an outstanding quarter in Q3, continuing the strong momentum we've had throughout the year, delivering double-digit revenue growth across Search and YouTube advertising, subscriptions, platforms and devices, and Google Cloud. Consolidated revenue reached $102.3 billion, a 16% year-over-year increase or 15% in constant currency. Total cost of revenue was $41.4 billion, up 13%. TAC was $14.9 billion, up 8%. Other cost of revenues was $26.5 billion, up 16%, with the increase primarily driven by content acquisition costs largely for YouTube, followed by depreciation and other technical infrastructure operations costs. Total operating expenses increased 28% to $29.7 billion. R&D expenses increased by 22%, driven by compensation, depreciation expenses related to our AI efforts. Sales and marketing expenses were flat, and G&A expenses increased meaningfully, primarily due to the $3.5 billion charge related to the European Commission fine mentioned in the earnings press release. Operating income increased 9% this quarter to $31.2 billion, and operating margin was 30.5%. Excluding the EC fine, operating income increased 22%, and operating margin was 33.9%. Operating margin benefited from strong revenue growth and continued efficiencies in our expense base, offset by the legal charge and a significant increase in depreciation expense. Other income and expenses was $12.8 billion, primarily due to unrealized gains in our nonmarketable equity securities portfolio. Net income increased 33% to $35 billion, and earnings per share increased 35% to $2.87. We generated free cash flow of $24.5 billion in the third quarter and $73.6 billion for the trailing 12 months. Free cash flow in Q3 benefited from strong operating cash flow and recent tax changes regarding the timing of when research and development costs are expensed and assets are depreciated. This was partially offset by higher CapEx. We ended the quarter with $98.5 billion in cash and marketable securities. Turning to segment results. Google Services revenues increased 14% to $87.1 billion, reflecting strength in Google Search, YouTube advertising and subscriptions. Google Search and other advertising revenues increased by 15% to $56.6 billion, representing another robust quarter with continued growth across all major verticals with the largest contributions from retail and financial services. YouTube advertising revenues increased 15% to $10.3 billion driven by direct response advertising, followed by brand. Network advertising revenues of $7.4 billion were down 3%. Subscriptions, platforms and devices revenues increased 21% this quarter to $12.9 billion, driven by very strong growth in both YouTube and Google One subscriptions. Google Services operating income increased 9% to $33.5 billion. Operating margin declined year-over-year to 38.5% as healthy revenue growth and continued efficiencies in our expense base were offset by the impact of the EC fine, which was fully reflected in the Google Services segment. Turning to the Google Cloud segment, which again delivered very strong results this quarter as cloud continued to benefit from our enterprise AI optimized stack, including our own custom TPUs and our industry-leading AI models. Cloud revenue increased by 34% to $15.2 billion in the third quarter, driven by strong performance in GCP, which continued to grow at a rate that was much higher than Cloud's overall revenue growth rate. GCP's growth was driven by enterprise AI products, which are generating billions in quarterly revenue. We had strong growth in enterprise AI infrastructure and enterprise AI solutions, which benefited from demand for our industry-leading models, including Gemini 2.5. Core GCP was also a meaningful contributor to growth. And we had double-digit growth in Workspace, which was driven by an increase in average revenues per seat and the number of seats. Cloud operating income increased by 85% to $3.6 billion, and operating margin increased from 17.1% in the third quarter last year to 23.7% this quarter. The expansion in Cloud operating margin was driven by strong revenue performance and continued efficiencies in our expense base partially offset by higher technical infrastructure usage costs, which includes depreciation expense and other operations costs such as energy. Google Cloud's backlog increased 46% sequentially and 82% year-over-year, reaching $155 billion at the end of the third quarter. The increase was driven primarily by strong demand for enterprise AI. As Sundar mentioned earlier, Cloud has signed more billion-dollar deals in the first 9 months of 2025 than in the past 2 years combined. In Other Bets, revenues were $344 million, and operating loss was $1.4 billion in the third quarter. Within Other Bets, we continue to allocate more resources to businesses like Waymo, where we see opportunities to create substantial value. With respect to CapEx, in the third quarter, our CapEx was $24 billion. The vast majority of our CapEx was invested in technical infrastructure with approximately 60% of that investment in servers and 40% in data centers and networking equipment. In Q3, we returned capital to shareholders through repurchases of stock of $11.5 billion and dividend payments of $2.5 billion. Turning to our outlook. I would like to provide some commentary on factors that will impact our business performance in the fourth quarter of 2025 as well as an updated outlook for CapEx for the year. First, in terms of revenues, we're pleased with the overall momentum of our business. At the current spot rates, we could see an FX tailwind to our revenues in Q4. However, the volatility in exchange rates could affect the impact of FX on Q4 revenues. As for our segments, in Google Services, year-over-year comparisons in advertising will be negatively impacted by the strong spend on U.S. elections in the fourth quarter of 2024, particularly on YouTube. In Cloud, demand for our products remains high as evidenced by the accelerating revenue growth and the $49 billion sequential increase in Cloud backlog in Q3. In GCP, we see strong demand for enterprise AI infrastructure, including TPUs and GPUs, enterprise AI solutions driven by demand for Gemini 2.5 and our other AI models, and core GCP infrastructure and other services such as cybersecurity and data analytics. As I've mentioned on previous earnings calls, while we have been working hard to increase capacity and have improved the pace of server deployments and data center construction, we still expect to remain in a tight demand-supply environment in Q4 and 2026. Moving to investments. We're continuing to invest aggressively due to the demand we're experiencing from Cloud customers as well as the growth opportunities we see across the company. We now expect CapEx to be in the range of $91 billion to $93 billion in 2025, up from our previous estimate of $85 billion, keeping in mind that the timing of cash payments can cause variability in the reported CapEx number. Looking out to 2026, we expect a significant increase in CapEx, and we'll provide more detail on our fourth quarter earnings call. In terms of expenses, first, as I've mentioned on the previous earnings calls, the significant increase in our investments in technical infrastructure will continue to put pressure on the P&L in the form of higher depreciation expenses and related data center operations costs such as energy. In the third quarter, depreciation increased $1.6 billion year-over-year to $5.6 billion, reflecting a growth rate of 41%. Given the overall increase in CapEx investments, we expect the growth rate in depreciation to accelerate slightly in Q4. Second, we expect sales and marketing expenses to be more heavily weighted to the end of the year in part to support product launches and the holiday season. Q3 was a strong quarter, and we're excited with the adoption of our AI products helped by a rapid pace of innovation and great execution by our teams. This translated into strong momentum in Search, YouTube ads, subscription, platforms and devices in Cloud, resulting in our first $100 billion-plus quarter. Now Sundar, Philipp and I will now take your questions.
+
+Operator: [Operator Instructions] Our first question comes from Brian Nowak with Morgan Stanley.
+
+Brian Nowak: The first one maybe for Philipp or Sundar. It's on agentic e-commerce and agentic travel. There's a lot of external Wall Street discussion about agentic e-commerce potentially monetizing at a lower rate than search. So the question is what factors are you most focused on to sort of ensure a smooth transition for your search business and for your advertisers as you move over to a more agentic world? And the second one, Sundar, is on Waymo. How far are we from an integration of Waymo into more of the core Gemini capabilities and the users on the platform taking your user data of where I'm going, what hotel I'm staying at, what airport I'm staying at and having integrated that into Waymo? If you can actually have users use their profiles to pre-schedule Waymos, how far off is that? What do we have to do?
+
+Philipp Schindler: Brian, great question. This is all early, but we see agentic experiences really as additive to the way people seek information. It helps us answer people's tough questions. It helps us -- it helps people get stuff done, and it helps businesses in the process. And we're working on multiple agentic experiences across key verticals such as travel, commerce, shopping and so on, and we're paying a lot of attention to creating a seamless user experience but also to the fact that we need to integrate different partner ecosystems in a way that it creates value for them. And by the way, we're also working closely with a lot of our partners on the other side through our cloud services to improve their own agentic experiences. And so maybe we go a little deeper on the shopping side where we actually use AI already very actively to improve the shopping experience. As you know, we launched a more visual experience on AI Mode. That gives people a much more intuitive conversational way to shop. You can simply describe what you're looking for now like the way you talk to a friend, and we'll show you the visual shopping results. And then we think about building an agentic shopping future and it has to be one, again, that benefits both users and merchants here. And you know that AIO, we also introduced new agentic checkout, which will let shoppers use like agentic AI to buy products from merchant sites and so on. We have a partnership with PayPal to help merchants build agentic commerce experiences. We have a new open protocols for agent-to-agent transactions and so on and so on.
+
+Sundar Pichai: And Brian, on Waymo, a great question. I was reflecting, I think, on the exact same topic. I'm scheduled to meet with the team to do a review on it in a few weeks out. Look, it is an exciting time. Waymo clearly is scaling up, particularly in 2026. And I think the possibility, as you said, of Gemini, particularly with the multimodal experience as well as services like YouTube, I think there's a real opportunity to make the in-car experience dramatically better. Definitely something we are excited about, and you'll see newer experiences in 2026 for sure.
+
+Operator: Our next question comes from Doug Anmuth with JPMorgan.
+
+Douglas Anmuth: Philipp, maybe you can just talk more about some of the drivers of the core search strength. And I guess, in particular, when you think about AI Overviews and AI Mode, we know that query growth is accelerating. But can you help us understand from there kind of what happens in terms of clicks per query and conversion rates and pricing in these AI-driven search formats? And then, Anat, can you talk about where you see opportunities in the core cost base as you look to make room to absorb the rapid growth in infrastructure and depreciation going forward?
+
+Philipp Schindler: So let me give you a bit of vertical color first. In Q3, Search and other revenues again delivered growth across all major verticals, as we said, was from retail and financial services. Health care was also a contributor to the growth here. Our new AI experiences, you mentioned the AI Overviews, AI Mode, continued to drive growth in overall queries, including commercial queries, really creating more opportunities for monetization. AI Overviews is scaling up and working for our entire user base. We're now scaled to over 2 billion users here, and we're continuing to expand ads in AI Overviews in English to more countries, across desktop, mobile and so on. And as I've shared before, for AI Overviews, even at our current baseline of ads below and within the AI's response, overall, we see the monetization at approximately the same rate. So over time, we're excited about the opportunity of richer experiences in AI Mode and AI Overviews to basically open up then the opportunity for also much richer placements. And I think as I've said on a prior call, we manage the business to drive great outcomes for our users and an attractive ROI for advertisers. We don't really manage to paid clicks and CPC targets. But as you will see in the 10-Q, paid clicks were up 7% year-on-year and CPCs were up 7% year-on-year.
+
+Anat Ashkenazi: Doug, and to your question around where else can we see more opportunity for efficiency and productivity, and I think you heard me say before, this is not a onetime type of effort but rather an ongoing way in which we manage the business, and the key here is that the more we drive productivity across our business, the more we can invest in the business for growth and obviously continue to drive improvement in the P&L. Some of the areas are things that you've heard us talk about in the past such as moderating the pace of head count growth, optimizing real estate footprint but also as we invest more and more in our technical infrastructure, ensuring that we are optimizing that build-out and the overall technical infrastructure we have that a lot of the data centers, for example, that we build ourselves, so they're optimized and we make sure we do them in the most efficient way. Sundar mentioned on one of the previous calls the productivity associated with leveraging AI for Google. So this -- the example, the percent of code, now nearly half of all code generated by AI, that's a way for us to leverage AI to drive further productivity across the business. And obviously, we always look at making sure that when we provide services or products that we get the right economics and the right value for what we provide. So the one good example is Shorts, which has a lower revenue share than in stream that helps to improve some of our gross margins. So this is an effort. We have ongoing -- I've mentioned in the past that we have a headwind with depreciation, obviously, increasing alongside our CapEx increase. So we're -- we have efforts across the organization to ensure we run the business in the most disciplined and productive way while continuing to invest for future growth.
+
+Operator: Our next question comes from Eric Sheridan with Goldman Sachs.
+
+Eric Sheridan: Maybe 2 if I could. Sundar, when you think about your custom silicon efforts across the organization, can you reflect a little bit about the opportunity set you see with each passing generation of custom silicon both in terms of driving operating efficiencies inside the organization and potentially increased monetization efforts around those outside of the organization? Second question would be for Philipp. Obviously, we could see the YouTube advertising revenue number in the reported results. Can you reflect little bit about the scaling of the subscription side of YouTube offerings and how the 2 parts together maybe represent an interesting framework in thinking about the monetization side of YouTube increasingly being a mix of both ads and subscription?
+
+Sundar Pichai: Eric, overall, I would say, we are seeing substantial demand for our AI infrastructure products, including TPU-based and GPU-based solutions. It is one of the key drivers of our growth over the past year. And I think on a going-forward basis, I think we continue to see very strong demand, and we are investing to meet that. I do think a big part of what differentiates Google Cloud effectively, we are the -- we have taken a full -- deep full stack approach to AI. So we are -- and that really plays out, right? We are the only hyperscaler who is really building offerings on our own models, and we are also highly differentiated on our own technology. So to your question, I think that does give us the opportunity to continue driving growth in operating margins in Cloud as we have done in the past. And also, I think from a revenue, sets the infrastructure portion of our business to be a growth driver looking ahead as well.
+
+Philipp Schindler: And to the second part of your question, look, just taking a quick step back, we often describe YouTube's business as a flywheel. Obviously, it, first of all, starts with the creators, and we have significantly invested here to be the place that YouTube creators really call their home. That's a big piece of it, the #1 piece. Viewers, of course, YouTube has billions of monthly logged-in users and every day, people watch billions of hours of video. And we talked about how our recommendation systems are driving robust watch time growth and so on and so on. So on the monetization side, YouTube's business is really powered, I would say, at, let's call it, a twin engine monetization strategy, combining its advertising business and its growing subscription services. Both YouTube ads and subscription saw strong growth this quarter. And so looking at YouTube Music and Premium, users are, on average, delivering more value to creators, to music, media partners and YouTube itself than even ad-supported users do. So in other words, on average, a YouTube Music and Premium subscriber generates a meaningful higher gross profit than they were simply an ad-supported users. Fans come from all over the world. You know this and this engagement through ads and subscription generates YouTube's revenues and funds what I started with, these creators here and this then drives more viewership and engagement and so on. And that's the flywheel. And so our priority continues like this growth cycle. We're happy with this twin engine monetization strategy.
+
+Operator: Our next question comes from Mark Shmulik with Bernstein.
+
+Mark Shmulik: Sundar, with the strong adoption of Gemini, AI Mode and Overviews across the user base, are there any meaningful differences to call out kind of around the behavior and depth of engagement for those users across the entire Google ecosystem. And then, Philipp, I know we kind of asked this most quarters, but I'm curious kind of what some of the adoption you've seen around AI Overviews and Mode, how you see the economics of search evolving with the higher commercial and total query volume and how it kind of compares against the incremental cost to deliver these results.
+
+Sundar Pichai: Mark, look, I think obviously, AI Overviews are a natural part of the Google experience, and so engagement is very, very high. I would say AI Mode, you have varied cohorts that are people who are casual users, who are checking it out. And then -- but there's a core group, which really likes AI Mode and is passionate about it, and so you see the early adopters. The product is resonating very strongly, and they are seeking it out. So I think that's how I would highlight the difference. With Gemini, again, a set of engaged user base who are seeking out the product and so on, but across the board, I think the trajectory has been we are definitely seeing in each of those use cases, a set of early adopters and then more people coming in and the people who are using it continue to use it more over time and report high user satisfaction. So I would say the underlying product metrics are pretty encouraging to see as well.
+
+Philipp Schindler: Look, into the second part of your question, I think we covered before -- Sundar covered the query development. And as I've just said before, for the AI Overviews, even at our current baseline of ads, right, whether above, below and within the AI response, overall, we see the monetization at approximately the same rate. And this is a great baseline for further innovation. We talked about this. We're excited about where this can go. And on the AI Mode side, we're testing as an AI Mode, and we'll continue to test and learn before we expand this any further. So that's in combination with what we mentioned about the commercial query overall development. I think we're in a good place here. You could also argue that on queries, that historically have not been well monetized. We think there is a potential opportunity here where you can obviously imagine that we can build this out with smart AI integration.
+
+Operator: Our next question comes from Michael Nathanson with MoffettNathanson.
+
+Michael Nathanson: I have 2, 1 for Philipp, 1 for Anat. Philipp, it's clear that when people use AI Mode, the query length is much longer. Could you talk about how that longer length may be impacting your ability to drive ROAS and what you're seeing in terms of some of the early -- the benefits of maybe longer query length? And then, Anat, you came to Alphabet from a pharmaceutical company. You've been there more than a year. Can you talk a bit about how you're working to look at ROIC internally? And what early signs are you seeing that gives you confidence that the spending is really driving better returns longer term?
+
+Philipp Schindler: Look, as Sundar shared, AI Mode now has over like 75 million daily active users in the U.S. and we see a strong and consistent week-over-week growth in usage since launch, and the queries doubled over the quarter. And as I also mentioned, we're testing ads in AI Mode. We'll continue to test before we expand any further. It's really too early to tell and go into any of the details of that testing.
+
+Anat Ashkenazi: Yes. And the question related to ROIC and how we look at just overall our business and where do we see early signs that are encouraging, so first, I would say it's not just early signs because we're seeing returns, obviously, in the Cloud business. You've heard us talk about the fact that we already are generating billions of dollars from AI in the quarter. But then across the board, we have a rigorous framework and approach by which we evaluate these long-term investments that are meant to do 2 things. One is to ensure we have -- we built a resilient growth profile for the company, but also that we meet the demand of the customers that we have here in the more near and midterm. So we look at it across the business. We evaluate the potential return for each one of them whether it's in Cloud, and I think that's more visible, obviously, externally given that you see the revenue generated and the fact that we're unable to meet, at this point, customer demand. We have more demand than we have supplied. In our ads business, you see the fact that we're investing to transform search, as you heard from Philipp and Sundar, with AIO and AI Mode. So we're excited to see what our investments are -- how our investments are helping advertisers as well; YouTube, where it's helping power recommendations. So we're -- when we make a decision on investment in the long term, we go through a very rigorous process of assessing what the return could be and over what time frame we will see that return to give us the high level of confidence to then invest and make those investments for the long term. So it's a very rigorous approach.
+
+Operator: Our next question comes from Ross Sandler with Barclays.
+
+Ross Sandler: Great. About 20% of Google's search queries are commercial historically, and you've talked a bunch on this call about how AI Overviews are kind of expanding the breadth of queries. Could you talk about how new products from the monetization side, like AI Max, are potentially increasing the percent of commercial queries?
+
+Philipp Schindler: So look, AI Max, and I mentioned this in my call before, improves the ability for advertisers to target a wider range of queries. Separately, there is the question of whether queries actually increase with AI Mode, and Sundar actually talked about it and mentioned the opportunity that he sees here. So I think it's important to separate those 2 things. And I personally also see this, what I just said in my last remarks, that I think, over time, there's an opportunity to actually take, let's say, queries that are not fully commercial but could have an adjacent commercial relationship to basically expand this into more attractive ads offerings without -- while really creating a really interesting user experience at the same time.
+
+Sundar Pichai: Yes. And the only thing I would add is just stepping back broadly, I think AI Overviews and AI Mode are dramatically improving search. We can see it in user satisfaction, user quality, all our metrics, and they're universal in the nature. They apply across the universality of human needs. So I think we are seeing it in breadth. And so naturally, over time, that will apply to commercial categories as well.
+
+Operator: Our next question comes from Ken Gawrelski with Wells Fargo.
+
+Kenneth Gawrelski: Two questions, please. First, it appears more and more clear that all the new modes -- Google with Gemini Overview -- AI Overviews, AI Mode, even ChatGPT is growing the addressable market for engagement and search-like behavior. Could you talk about what gives you confidence that it will also grow the addressable market for marketing activity and overall revenue associated with that behavior? That's question one. And question two is just more about as you think about AI Mode, AI Overviews and traditional Google Search, how do you think -- do you see a world in 12 to 24 months, those all will exist? And does the user eventually pick what mode they want? Is -- does the algorithm pick the mode? Can you talk a little bit about how you think that will progress over the next 12 to 24 months?
+
+Sundar Pichai: Ken, thanks. Look, I think it's a dynamic moment, and I think we are meeting people in the moment with what they are trying to do. Obviously, search is evolving, and between AI Overviews and AI Mode, I think we are able to kind of give that range of experience for people in this moment. Over time, you will expect us to -- you can expect us to make the experiences simpler in a way that, just like we did universal search many, many years ago, we may have done text search, image search, video search, et cetera, and then we kind of brought it together as universal search. So you will see evolutions like that, but I think we want to be sensitive to making sure we are meeting the users in terms of what they are looking for. I think Gemini allows us to build a more personal, proactive, powerful AI assistant for that moment. And I think having the 2 surfaces search in Gemini allows us to really serve users across the breadth of their needs. And -- but over time, we will thoughtfully look for opportunities to make the experience better for users. And to the first part, I would broadly say, as I do think we've been consistently saying for a while now, this is an expansionary moment, and we are seeing people engage more. And I think when they do that, naturally, a portion of that information for users, those journeys are commercial in nature. So I would expect that to play out over time as well.
+
+Operator: Our last question comes from Justin Post with BAML.
+
+Justin Post: Great. Just a couple. Sundar, I think you mentioned Gemini 3 is coming. Maybe you can comment on the pace of innovation in frontier models. Is there still just a tremendous amount of innovation? Or is it slowing at all? And then you mentioned a number of large deals signed in the last 9 months for cloud, which is great. Any changes in the economics of these deals as far as long-term profitability? Anything we should be aware of?
+
+Sundar Pichai: Thanks, Justin. The first on the on the pace of frontier model research and development. Look, I think 2 things are both simultaneously true. I'm incredibly impressed by the pace at which the teams are executing and the pace at which we are improving these models. But it also is true at the same time that each of the prior model you're trying to get better over is now getting more and more capable. So I think both the pace is increasing, but sometimes we are taking the time to put out a notably improved model, so I think -- and that may take slightly longer. But I do think the underlying pace is phenomenal to see. And I'm excited about our Gemini 3.0 release later this year. On cloud, I would point out as a sign of the momentum, I think the number of deals greater than $1 billion that we signed in the first 3 quarters of this year are greater than the 2 years prior. So we are definitely seeing strong momentum, and we are executing at pace. And in terms of long-term economics, I would say that, again, us being a full stack AI player and the fact that we are developing highly differentiated products on our own technology, I think, will help us drive a good trajectory here as you have seen over the past few years.
+
+Operator: And that concludes our question-and-answer session for today. I'd like to turn the conference back over to Jim Friedland for any further remarks.
+
+James Friedland: Thanks, everyone, for joining us today. We look forward to speaking with you again on our fourth quarter 2025 call. Thank you, and have a good evening.
+
+Operator: Thank you, everyone. This concludes today's conference call. Thank you for participating. You may now disconnect.
+
+
+
+NOTE ON DATA:
+You have been provided with additional data files (JSON/PDF-derived content) in the input.
+Treat this as **additional information** which can be **considered or dropped if outdated**.
+Take good care about duplications; do not add them up, but rather treat them with caution. Be rational.
+Verify dates where possible. If any source data seems older or less relevant than the primary source, prioritize the primary source.
+
+TASK:
+- Determine if the drop is due to temporary panic/overreaction or a fundamental structural change. Is this a short-term negative event?
+- Identify the dominant narrative (Fear vs Greed? Growth vs Stagnation?).
+- Highlight specific events from news or the report that are driving sentiment.
+- Check for consistency: Do the headlines match the company's internal tone in the report?
+- **CRITICAL ASSESSMENT**: Assess the validity of the news. Is it "Hype" or "Fluff"? Be skeptical of clickbait or promotional content. If a source looks unreliable or the headline is sensationalist, note it. Distinguish between hard facts (earnings miss, lawsuit) and opinion pieces.
+
+OUTPUT:
+A sentiment analysis report.
+Use headers: "Sentiment Overview", "Reason for Drop", "Extended Transcript Summary", "Key Drivers", "Narrative Check", "Top 5 Sources".
+
+SECTION: "Extended Transcript Summary":
+If transcript data is provided, you MUST provide a detailed summary (bullet points).
+Focus on:
+- Guidance & Outlook (most important)
+- Management Tone (Confident vs Defessive)
+- Key Operational Updates or Strategic Shifts
+If no transcript is available, state "No Transcript Available".
+
+CITATION REQUIREMENT:
+If valid news items are provided, you MUST list the Top 5 Sources that influenced your analysis.
+If NO news items are provided in the input, explicitly state "No Sources Available" in this section.
+DO NOT simulate or hallucinate sources if real data is missing.
+
+MACRO CHECK:
+At the very end of your response, on a new line, explicitly state "NEEDS_ECONOMICS: TRUE" if:
+1. The company has significant business exposure to the US Economy.
+2. The stock drop might be related to macro factors (Interest Rates, Inflation, Recession fears).
+Otherwise, state "NEEDS_ECONOMICS: FALSE".
+
+DROP REASON CHECK:
+Also, explicitly state on a new line: "REASON_FOR_DROP_IDENTIFIED: YES" if you have found a specific news event or report detail explaining the drop (e.g. "missed earnings", "CEO resignation", "lawsuit").
+If the drop is a mystery or just general market noise with no specific catalyst found, state "REASON_FOR_DROP_IDENTIFIED: NO".
+
+==================================================
+
+>> TICKER: RIVN
+Total Items Passed: 25
+--------------------------------------------------
+
+You are the **News & Sentiment Agent**.
+Your goal is to gauge the market sentiment and identifying key narrative drivers for RIVN.
+You have access to recent News Headlines and Summaries, and the latest Quarterly Report.
+
+CONTEXT: The stock has dropped -5.00%. We need to know WHY.
+
+INPUT DATA:
+1. RECENT NEWS HEADLINES AND SUMMARIES:
+--- SOURCE: Benzinga/Massive ---
+- 2025-12-11: Why Rivian Stock Sank After Its AI Event Today (Massive (The Motley Fool))
+  CONTENT:
+Summary: Rivian held its first 'Autonomy and AI Day' and announced an in-house autonomy processor for its electric vehicles, but investors were underwhelmed by the lack of concrete autonomous driving timelines, causing the stock to drop.
+
+Insight Analysis:
+- [RIVN] NEGATIVE: Stock dropped up to 10% after the event due to investors wanting more specific details about autonomous driving capabilities and timelines. While the company announced an in-house autonomy processor and plans for future developments, the market perceived the presentation as lacking immediate concrete advancements.
+
+Keywords: autonomous driving, AI, electric vehicles, processor, self-driving
+
+- 2025-12-09: With Rivian Stock Surging, Is It a Buy Before 2025 Ends? (Massive (The Motley Fool))
+  CONTENT:
+Summary: Rivian's stock has surged over 30% in 2025, driven by strong Q3 financial performance, a strategic partnership with Volkswagen, and upcoming affordable electric vehicle launches like the R2 SUV in 2026.
+
+Insight Analysis:
+- [RIVN] POSITIVE: Strong Q3 revenue growth (78% YoY), narrowing losses, profitable gross margin, strategic Volkswagen partnership, and upcoming affordable EV launches
+- [VWAGY] POSITIVE: Formed $5.8 billion joint venture with Rivian, leveraging Rivian's electrical architecture and software for future EV models
+- [TSLA] NEUTRAL: Mentioned as a competitive benchmark for Rivian's upcoming R2 SUV, which will directly compete with Tesla's Model Y
+
+Keywords: electric vehicles, EV, stock performance, Rivian, Volkswagen, Tesla
+
+- 2025-12-06: Could Buying Rivian Automotive Stock Today Set You Up for Life? (Massive (The Motley Fool))
+  CONTENT:
+Summary: Rivian, an electric vehicle startup, is preparing to launch its mass-market R2 model in 2026, which could be critical to its long-term business sustainability. The company has achieved production scale but remains unprofitable, with significant risks and potential for future growth.
+
+Insight Analysis:
+- [RIVN] NEUTRAL: The company shows potential with successful production goals and significant cash reserves, but faces substantial risks including profitability challenges and uncertain market reception of its upcoming R2 model. The article suggests cautious optimism with a clear acknowledgment of potential failure.
+
+Keywords: electric vehicles, EV, startup, investment, automotive, technology
+
+- 2025-12-04: 1 No-Brainer Electric Vehicle (EV) Stock to Buy With $500 Right Now (Massive (The Motley Fool))
+  CONTENT:
+Summary: Rivian is positioned as a promising EV startup following Tesla's business model, with plans to launch a mass-market truck in 2026 and strong financial backing from investors like Amazon and Volkswagen.
+
+Insight Analysis:
+- [RIVN] POSITIVE: Successfully produced award-winning electric trucks, achieved gross profit, has significant cash reserves ($4.8B), and plans to launch mass-market R2 model in 2026
+- [TSLA] POSITIVE: Pioneered EV market, forced major automakers to take electric vehicles seriously, established successful business model for EV startups
+- [LCID] NEUTRAL: Still struggling to achieve production levels compared to Rivian, not yet a proven success in the EV market
+
+Keywords: electric vehicles, EV, Rivian, Tesla, mass-market truck, investment
+
+- 2025-12-03: Thor's Strong Numbers Come With A Consumer Reality Check (Massive (Benzinga))
+  CONTENT:
+Summary: Thor Industries reported strong Q1 fiscal 2026 earnings, beating analyst expectations with increased sales and improved margins across segments, though management remains cautious about consumer sentiment.
+
+Insight Analysis:
+- [THO] POSITIVE: Exceeded earnings expectations, increased sales by 11.5% YoY, improved gross margins, and maintained fiscal year guidance despite market uncertainties
+- [RIVN] NEUTRAL: Briefly mentioned in related news with 24% sales surge, but not a focus of the primary article
+
+Keywords: RV, earnings, revenue, consumer sentiment, market outlook
+
+- 2025-12-03: EVgo Autocharge+ Surpasses 5 Million Sessions and Sixfold Enrollment Growth, Delivering Seamless EV Charging Nationwide (Massive (GlobeNewswire Inc.))
+  CONTENT:
+Summary: EVgo has achieved over 5 million Autocharge+ sessions with sixfold enrollment growth since 2023, now supporting nearly 80 EV models and attracting over 300,000 customers nationwide.
+
+Insight Analysis:
+- [EVGO] POSITIVE: Demonstrated significant growth in charging sessions, customer enrollment, and technological innovation in EV charging infrastructure
+- [EVGOW] POSITIVE: Demonstrated significant growth in charging sessions, customer enrollment, and technological innovation in EV charging infrastructure
+- [F] NEUTRAL: Mentioned as having high Autocharge+ enrollment without specific performance details
+- [FpB] NEUTRAL: Mentioned as having high Autocharge+ enrollment without specific performance details
+- [FpC] NEUTRAL: Mentioned as having high Autocharge+ enrollment without specific performance details
+- [FpD] NEUTRAL: Mentioned as having high Autocharge+ enrollment without specific performance details
+- [RIVN] NEUTRAL: Mentioned as having high Autocharge+ enrollment without specific performance details
+
+Keywords: electric vehicles, EV charging, Autocharge+, fast charging, CCS vehicles, NACS vehicles
+
+- 2025-12-03: Trump Administration To Propose Loosening Major Fuel Economy Standards: Report (Massive (Benzinga))
+  CONTENT:
+Summary: The Trump administration plans to propose significant relaxation of fuel economy standards for vehicles manufactured between 2022 and 2031, potentially reducing emissions requirements and favoring internal combustion engine vehicles over electric vehicles.
+
+Insight Analysis:
+- [F] NEGATIVE: Proposed rollback undermines Ford's commitment to electric vehicle targets and potential future emissions reduction goals
+- [FpB] NEGATIVE: Proposed rollback undermines Ford's commitment to electric vehicle targets and potential future emissions reduction goals
+- [FpC] NEGATIVE: Proposed rollback undermines Ford's commitment to electric vehicle targets and potential future emissions reduction goals
+- [FpD] NEGATIVE: Proposed rollback undermines Ford's commitment to electric vehicle targets and potential future emissions reduction goals
+- [GM] NEGATIVE: Proposed regulations could disrupt EV transition plans and reduce incentives for electric vehicle development
+- [RIVN] NEGATIVE: Previously reported nearly $100 million revenue shortfall due to fuel economy rule changes
+- [TSLA] NEGATIVE: Potential loss of ZEV credits and disruption to industry leadership in electric vehicles
+- [STLA] NEUTRAL: Already paid significant fines for previous fuel economy non-compliance, potential mixed impact from new regulations
+
+Keywords: fuel economy, emissions, electric vehicles, automotive regulations
+
+- 2025-11-30: Should You Buy Ford While It's Below $14? (Massive (The Motley Fool))
+  CONTENT:
+Summary: Ford is adjusting its electric vehicle strategy, focusing on cost-efficient platforms and hybrid offerings while navigating complex tariff policies. The company has seen a 31% stock rise this year but faces challenges in the competitive automotive market.
+
+Insight Analysis:
+- [F] NEUTRAL: The company is making strategic adjustments by reducing costly EV investments, focusing on hybrid vehicles and commercial markets. While experiencing stock growth, it has significant EV segment losses ($3.6 billion) and modest historical returns (4.3% annually).
+- [FpB] NEUTRAL: The company is making strategic adjustments by reducing costly EV investments, focusing on hybrid vehicles and commercial markets. While experiencing stock growth, it has significant EV segment losses ($3.6 billion) and modest historical returns (4.3% annually).
+- [FpC] NEUTRAL: The company is making strategic adjustments by reducing costly EV investments, focusing on hybrid vehicles and commercial markets. While experiencing stock growth, it has significant EV segment losses ($3.6 billion) and modest historical returns (4.3% annually).
+- [FpD] NEUTRAL: The company is making strategic adjustments by reducing costly EV investments, focusing on hybrid vehicles and commercial markets. While experiencing stock growth, it has significant EV segment losses ($3.6 billion) and modest historical returns (4.3% annually).
+- [GM] NEUTRAL: Mentioned as a competitor in the automotive industry, with no specific positive or negative details provided.
+- [TSLA] NEUTRAL: Noted as an EV competitor, with no specific evaluation of its current performance or strategy.
+- [RIVN] NEUTRAL: Mentioned as an EV maker competing in the market, with no detailed analysis provided.
+
+Keywords: Ford, electric vehicles, tariffs, automotive industry, hybrid vehicles
+
+- 2025-11-29: 2 Things Every Lucid Group Investor Needs to Know (Massive (The Motley Fool))
+  CONTENT:
+Summary: Lucid Group aims to expand beyond car manufacturing into technology licensing and robotaxi services, with a potential Uber partnership. However, despite high growth potential, the stock remains risky due to share dilution and lack of profitability.
+
+Insight Analysis:
+- [LCID] NEUTRAL: High growth potential through Uber partnership and robotaxi technology, but significant risks including share dilution and current unprofitability
+- [TSLA] POSITIVE: Profitable company with diverse revenue streams and strong robotaxi potential
+- [UBER] NEUTRAL: Investing in Lucid's technology with potential robotaxi expansion
+- [RIVN] NEUTRAL: Emerging electric vehicle manufacturer with positive gross margins
+
+Keywords: electric vehicles, robotaxis, technology licensing, investment risk
+
+- 2025-11-26: 2 Things Every Rivian Investor Needs to Know (Massive (The Motley Fool))
+  CONTENT:
+Summary: Rivian is positioning itself as a competitive electric vehicle manufacturer by planning to launch three new models under $50,000 and investing in autonomous driving technology, potentially challenging Tesla's market dominance.
+
+Insight Analysis:
+- [RIVN] POSITIVE: The company is expanding its product line with more affordable models, investing in AI and self-driving capabilities, and trading at a significant discount compared to competitors
+- [TSLA] NEUTRAL: Mentioned as a market leader with strong robotaxi potential, but potentially facing increased competition from Rivian
+
+Keywords: electric vehicles, autonomous driving, AI, technology, investment
+
+--- SOURCE: Alpha Vantage ---
+- 2025-12-05: Rivian CFO Claire McDonough Sells Shares Under Trading Plan (TradingView)
+  SUMMARY: Rivian Automotive's CFO, Claire McDonough, sold a total of 29,249 Class A Common Stock shares on December 2 and December 4, 2025, for a cumulative value of $508,171. These sales were executed under a Rule 10b5-1 trading plan adopted in September 2025. Following these transactions, McDonough directly holds 730,017 shares of Rivian.
+
+--- SOURCE: Finnhub ---
+- 2025-12-12: The Biggest Threat To Nvidia Is Google, Broadcom's Q4 Just Proved It (SeekingAlpha)
+  SUMMARY: Google's AI innovations and custom chips threaten Nvidia's dominance. Read here for more on the shifting AI landscape and what it means for tech investors.
+
+- 2025-12-11: Rivian Automotive, Inc. (RIVN) Discusses AI-Centric Approach to Vehicle Autonomy and Technology Roadmap Prepared Remarks Transcript (SeekingAlpha)
+  SUMMARY: Rivian Automotive, Inc. (RIVN) Discusses AI-Centric Approach to Vehicle Autonomy and Technology Roadmap December 11, 2025 12:00 PM ESTCompany...
+
+- 2025-12-09: Using Quantitative Signal Data For Portfolio Management (SeekingAlpha)
+  SUMMARY: One question weâve been asked many times is whether ValuEngine stock ratings can be used for portfolio management or merely for trading stocks.
+
+- 2025-12-08: FAN: Understanding The Structure And Suitability Of This Wind Power ETF (SeekingAlpha)
+  SUMMARY: Explore the First Trust Global Wind Energy ETF (FAN) for targeted wind industry exposure.
+
+- 2025-12-05: Rivian: Improving Margins, Nice Catalyst Ahead (Rating Upgrade) (SeekingAlpha)
+  SUMMARY: Rivian shows improving margins, policy support, services growth, broader infrastructure, and an R2 catalyst. See why RIVN stock is upgraded to strong buy.
+
+--- SOURCE: Yahoo Finance ---
+- 2025-12-12: Trending tickers: Broadcom, Lululemon, Rivian, Robinhood and Card Factory (Yahoo Finance UK)
+  SUMMARY: The latest investor updates on stocks that are trending on Friday
+
+- 2025-12-12: Rivian Expands Hands-Free Driving in AI Push (The Wall Street Journal)
+  SUMMARY: Rivian  is doubling down on an AI-centric approach to develop fully autonomous vehicles, as the money-losing electric-vehicle maker faces a tough market for its trucks and SUVs.  Rivian’s hands-free driving feature will be updated later this month to more closely resemble  Tesla’s  system when the company expands its availability to a territory more than 20 times its current size.  Rivian has also developed its own computer chip—as Tesla has—to enable its vehicles to quickly process data from the road and feed the AI model that powers its self-driving.
+
+- 2025-12-11: Highlights from Fortune Brainstorm AI San Francisco (Fortune)
+  SUMMARY: From deep dives into the enterprise deployment of agents to explorations of the new geography of data centers, Brainstorm AI provided a valuable snapshot of the AI landscape at the close of the year.
+
+- 2025-12-11: Rivian Went Full Tesla, With One Exception. The Stock Dropped. (Barrons.com)
+  SUMMARY: Rivian Automotive  investors reacted with caution on Thursday after the electric-vehicle maker hosted its first autonomy and artificial-intelligence day.  The itself event was positive: Rivian said that it plans to use AI computing to develop self-driving cars.  The goal is truly hands-free autonomous driving that Rivian will sell to drivers on a subscription basis.
+
+- 2025-12-11: Rivian Chooses Different Path Than Tesla; Adds LiDAR To Autonomy Platform (Investor's Business Daily)
+  SUMMARY: Rivian held its "Autonomy & AI Day" at noon ET Thursday, with the EV startup announcing it has added LiDAR to its autonomous driving setup.  Following the the event, RIVN stock sank in Thursday's stock market.  CEO RJ Scaringe, speaking from Palo Alto, said in late 2026 its "Generation 3" autonomy platform will use AI, along with 65 megapixel cameras, a radar array with an added front-facing long range LiDAR.
+
+- 2025-12-11: Rivian’s Autonomy & AI Day Failed to Move the Needle for RIVN Stock. How Should You Play It Here? (Barchart)
+  SUMMARY: Rivian announced a custom chip, new AI models, and in-house vehicle computer.
+
+- 2025-12-11: Stocks to Watch Thursday: Disney, Eli Lilly, Coca-Cola, Rivian (The Wall Street Journal)
+  SUMMARY: ↗️ Disney (DIS): The company is investing $1 billion in OpenAI and will license its characters for use in ChatGPT and videos. Shares gained 2.4%. The deal was unveiled after Disney accused Google of infringing its copyrights "on a massive scale,” highlighting its carrot-and-stick approach to AI.
+
+- 2025-12-11: Rivian announces $2,500 Autonomy+ self-driving upgrade, reveals new AI chip to keep pace with rivals (Yahoo Finance)
+  SUMMARY: Rivian rolled out the future of its tech stack at the company's first-ever Autonomy & AI Day.
+
+- 2025-12-11: Rivian Bets Big With New AI Chip and Lidar (Bloomberg)
+  SUMMARY: Rivian is making a high-stakes bet that its own AI chip and a new lidar system will power its path to driverless autonomy. Bloomberg TV's Ed Ludlow reports.
+
+
+
+2. QUARTERLY REPORT SNIPPET (Transcript/Filing):
+Mock transcript for context.
+
+NOTE ON DATA:
+You have been provided with additional data files (JSON/PDF-derived content) in the input.
+Treat this as **additional information** which can be **considered or dropped if outdated**.
+Take good care about duplications; do not add them up, but rather treat them with caution. Be rational.
+Verify dates where possible. If any source data seems older or less relevant than the primary source, prioritize the primary source.
+
+TASK:
+- Determine if the drop is due to temporary panic/overreaction or a fundamental structural change. Is this a short-term negative event?
+- Identify the dominant narrative (Fear vs Greed? Growth vs Stagnation?).
+- Highlight specific events from news or the report that are driving sentiment.
+- Check for consistency: Do the headlines match the company's internal tone in the report?
+- **CRITICAL ASSESSMENT**: Assess the validity of the news. Is it "Hype" or "Fluff"? Be skeptical of clickbait or promotional content. If a source looks unreliable or the headline is sensationalist, note it. Distinguish between hard facts (earnings miss, lawsuit) and opinion pieces.
+
+OUTPUT:
+A sentiment analysis report.
+Use headers: "Sentiment Overview", "Reason for Drop", "Extended Transcript Summary", "Key Drivers", "Narrative Check", "Top 5 Sources".
+
+SECTION: "Extended Transcript Summary":
+If transcript data is provided, you MUST provide a detailed summary (bullet points).
+Focus on:
+- Guidance & Outlook (most important)
+- Management Tone (Confident vs Defessive)
+- Key Operational Updates or Strategic Shifts
+If no transcript is available, state "No Transcript Available".
+
+CITATION REQUIREMENT:
+If valid news items are provided, you MUST list the Top 5 Sources that influenced your analysis.
+If NO news items are provided in the input, explicitly state "No Sources Available" in this section.
+DO NOT simulate or hallucinate sources if real data is missing.
+
+MACRO CHECK:
+At the very end of your response, on a new line, explicitly state "NEEDS_ECONOMICS: TRUE" if:
+1. The company has significant business exposure to the US Economy.
+2. The stock drop might be related to macro factors (Interest Rates, Inflation, Recession fears).
+Otherwise, state "NEEDS_ECONOMICS: FALSE".
+
+DROP REASON CHECK:
+Also, explicitly state on a new line: "REASON_FOR_DROP_IDENTIFIED: YES" if you have found a specific news event or report detail explaining the drop (e.g. "missed earnings", "CEO resignation", "lawsuit").
+If the drop is a mystery or just general market noise with no specific catalyst found, state "REASON_FOR_DROP_IDENTIFIED: NO".
+
+==================================================

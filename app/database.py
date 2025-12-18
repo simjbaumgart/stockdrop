@@ -34,7 +34,15 @@ def init_db():
             region TEXT,
             is_earnings_drop BOOLEAN DEFAULT 0,
             earnings_date TEXT,
-            ai_score REAL
+            ai_score REAL,
+            deep_research_verdict TEXT,
+            deep_research_risk TEXT,
+            deep_research_catalyst TEXT,
+            deep_research_knife_catch TEXT,
+            deep_research_score INTEGER,
+            deep_research_swot TEXT,
+            deep_research_global_analysis TEXT,
+            deep_research_local_analysis TEXT
         )
     ''')
     
@@ -52,7 +60,15 @@ def init_db():
             "is_earnings_drop": "BOOLEAN DEFAULT 0",
             "earnings_date": "TEXT",
             "ai_score": "REAL",
-            "git_version": "TEXT"
+            "git_version": "TEXT",
+            "deep_research_score": "INTEGER",
+            "deep_research_swot": "TEXT",
+            "deep_research_global_analysis": "TEXT",
+            "deep_research_local_analysis": "TEXT",
+            "deep_research_verdict": "TEXT",
+            "deep_research_risk": "TEXT",
+            "deep_research_catalyst": "TEXT",
+            "deep_research_knife_catch": "TEXT"
         }
         
         for col_name, col_type in new_columns.items():
@@ -219,3 +235,49 @@ def get_today_decision_symbols() -> List[str]:
     except Exception as e:
         print(f"Error fetching today's decision symbols: {e}")
         return []
+
+def get_analyzed_companies_since(date_str: str) -> List[str]:
+    """
+    Get a list of company names analyzed on or after the specific date.
+    Returns a list of uppercase company names.
+    """
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        # Filter where company_name is not null and date >= date_str
+        cursor.execute("SELECT DISTINCT company_name FROM decision_points WHERE company_name IS NOT NULL AND date(timestamp) >= date(?)", (date_str,))
+        rows = cursor.fetchall()
+        
+        companies = []
+        for row in rows:
+            if row[0]:
+                companies.append(row[0].upper())
+        conn.close()
+        return companies
+    except Exception as e:
+        print(f"Error fetching analyzed companies: {e}")
+        return []
+
+def update_deep_research_data(decision_id: int, verdict: str, risk: str, catalyst: str, knife_catch: str, score: int = 0, swot: str = None, global_analysis: str = None, local_analysis: str = None) -> bool:
+    """Update deep research fields for a decision point."""
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE decision_points 
+            SET deep_research_verdict = ?, 
+                deep_research_risk = ?, 
+                deep_research_catalyst = ?, 
+                deep_research_knife_catch = ?,
+                deep_research_score = ?,
+                deep_research_swot = ?,
+                deep_research_global_analysis = ?,
+                deep_research_local_analysis = ?
+            WHERE id = ?
+        ''', (verdict, risk, catalyst, knife_catch, score, swot, global_analysis, local_analysis, decision_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"Error updating deep research data: {e}")
+        return False

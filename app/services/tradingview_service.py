@@ -303,6 +303,11 @@ class TradingViewService:
                 'Recommend.MA',
                 # Performance
                 'Perf.W',
+                'Perf.1M',
+                'Perf.3M',
+                'Perf.6M',
+                'Perf.Y',
+                'Perf.5Y',
                 'Perf.YTD',
                 # Financials - Valuation
                 'price_book_fq', 'price_earnings_ttm', 'enterprise_value_ebitda_ttm', 'price_free_cash_flow_ttm', 'dividend_yield_recent',
@@ -360,6 +365,11 @@ class TradingViewService:
                         "low": row['low'],
                         "volume": row['volume'],
                         "perf_w": row['Perf.W'],
+                        "perf_1m": row['Perf.1M'],
+                        "perf_3m": row['Perf.3M'],
+                        "perf_6m": row['Perf.6M'],
+                        "perf_1y": row['Perf.Y'],
+                        "perf_5y": row['Perf.5Y'],
                         "perf_ytd": row['Perf.YTD'],
                         "recommend_all": row['Recommend.All'],
                         "recommend_ma": row['Recommend.MA'],

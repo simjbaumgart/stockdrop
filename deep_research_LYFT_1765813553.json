@@ -1,0 +1,13 @@
+{
+  "verdict": "WAIT_FOR_STABILIZATION",
+  "risk_level": "Medium",
+  "catalyst_type": "Structural",
+  "reasoning_bullet_points": [
+    "Insider sale of $3.89M (Director Aggarwal) acted as a negative sentiment trigger, despite being a pre-planned 10b5-1 transaction.",
+    "Structural headwinds from Autonomous Vehicle competition (Waymo reaching 14M rides, Tesla robotaxi threat) are causing a valuation compression.",
+    "Technical breakdown: Price shattered the 20-day and 50-day SMAs; RSI at 35 indicates momentum is bearish but not yet at capitulation levels.",
+    "Valuation concerns: High P/E (~51x) leaves the stock vulnerable to multiple contraction amidst decelerating growth guidance.",
+    "Major support lies lower at the 200-day SMA ($16.53), suggesting further downside potential before a durable bottom."
+  ],
+  "knife_catch_warning": "True"
+}

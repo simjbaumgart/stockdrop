@@ -1,0 +1,12 @@
+{
+  "verdict": "SPECULATIVE_BUY",
+  "risk_level": "High",
+  "catalyst_type": "Temporary",
+  "reasoning_bullet_points": [
+    "The -6.70% drop was triggered by a UBS 'Neutral' initiation (valuation call), not a fundamental deterioration, creating a 'sell-the-news' reaction.",
+    "Technical support held firmly at the 50-day SMA ($78.27) with low relative volume (0.75), indicating a lack of institutional conviction in the sell-off.",
+    "The December 30, 2025 PDUFA for relacorilant is a massive positive catalyst; clinical data (GRACE trial) strongly supports approval, which would offset risks from generic Korlym erosion.",
+    "Structural risks (Teva generic launch, Medicare formulary losses) are real but are slow-moving compared to the immediate binary upside of the PDUFA decision."
+  ],
+  "knife_catch_warning": "False"
+}
