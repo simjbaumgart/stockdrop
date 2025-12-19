@@ -17,10 +17,16 @@ class YahooTickerResolver:
             'BME': '.MC',     # Madrid (Spain)
             'FSX': '.F',      # Frankfurt
             'XETR': '.DE',    # Xetra (Germany)
+            'XETRA': '.DE',   # Alias
+            'GER': '.DE',     # Alias
             'OMXSTO': '.ST',  # Stockholm (Sweden)
             'OMXHEX': '.HE',  # Helsinki (Finland)
             'OMXCOP': '.CO',  # Copenhagen (Denmark)
             'EURONEXT': '.PA', # Default to Paris (Risky, requires fallback often)
+            'PAR': '.PA',      # Paris
+            'AMS': '.AS',      # Amsterdam
+            'BRU': '.BR',      # Brussels
+            'LIS': '.LS',      # Lisbon
             
             # Asia
             'TSE': '.T',      # Tokyo
@@ -30,57 +36,79 @@ class YahooTickerResolver:
             'NSE': '.NS',     # India (NSE)
             'BSE': '.BO',     # India (BSE)
             'TWSE': '.TW',    # Taiwan
+            'KSE': '.KS',     # Korea
             
             # Americas
             'TSX': '.TO',     # Toronto
             'TSXV': '.V',     # TSX Venture
+            'TRT': '.TO',     # Toronto Alias
             'NASDAQ': '',     # US (No suffix)
             'NYSE': '',       # US (No suffix)
             'AMEX': '',       # US (No suffix)
             'OTC': '',        # OTC often has no suffix, or .OB
+            'US': '',         # Generic US
         }
 
-    def resolve(self, symbol: str, exchange: str = "", name: str = "") -> str:
+        # 2. Region Map (Fallback if Exchange missing)
+        self.region_map = {
+            'germany': '.DE',
+            'uk': '.L',
+            'britain': '.L',
+            'france': '.PA',
+            'italy': '.MI',
+            'spain': '.MC',
+            'switzerland': '.SW',
+            'sweden': '.ST',
+            'india': '.NS',
+            'japan': '.T',
+            'china': '.SS',
+            'hong kong': '.HK',
+            'canada': '.TO',
+            'australia': '.AX',
+            'brazil': '.SA'
+        }
+
+    def resolve(self, symbol: str, exchange: str = "", name: str = "", region: str = "") -> str:
         """
         Tries to find the correct Yahoo Ticker.
         Returns the best guess string.
-        
-        Args:
-            symbol: The stock symbol (e.g. "AAPL", "NESN")
-            exchange: The exchange code from TradingView (e.g. "NASDAQ", "SIX")
-            name: The company name (e.g. "Nestle S.A.")
         """
         # clean inputs
         symbol = symbol.strip() if symbol else ""
         exchange = exchange.strip().upper() if exchange else ""
         name = name.strip() if name else ""
+        region = region.strip().lower() if region else ""
+        
+        # Handle dot replacement for TSX/CA symbols often (BBD.B -> BBD-B)
+        if region in ['canada', 'ca'] or exchange in ['TSX', 'TSXV', 'TRT']:
+            symbol = symbol.replace('.', '-')
 
-        # METHOD A: Try Static Mapping
-        # If we know the exchange perfectly, just add the suffix.
+        # METHOD A: Try Static Mapping (Exchange)
         if exchange in self.suffix_map:
             suffix = self.suffix_map[exchange]
-            
-            # Special logic for Euronext (Ambiguous) or German LS (not in map)
-            # Euronext covers Paris, Amsterdam, Brussels, Lisbon.
-            if exchange == 'EURONEXT':
-                # We skip static mapping for Euronext to force a Search (Method B)
-                # unless we assume Paris (.PA) which is in the map.
-                # The prompt suggested skipping it. But let's check if we want to default to something?
-                # The user code had: if exchange == 'EURONEXT': pass else: return ...
-                pass 
-            else:
+            if suffixes := self.suffix_map.get(exchange): 
+                 # Handle cases where suffix might be conditional (e.g. Euronext)
+                 pass
+            # Skip Euronext general key if we want search
+            if exchange != 'EURONEXT':
                 return f"{symbol}{suffix}"
 
-        # METHOD B: The "Search API" Fallback
-        # If mapping didn't work (or it's ambiguous like 'LS' or 'EURONEXT'),
-        # we ask Yahoo: "What is the ticker for [Company Name]?"
-        if name:
-            print(f"🔍 Searching Yahoo for: {name} ({exchange})...")
+        # METHOD B: Try Static Mapping (Region)
+        if not exchange and region:
+            for key, suff in self.region_map.items():
+                if key in region:
+                    return f"{symbol}{suff}"
+
+        # METHOD C: The "Search API" Fallback
+        # If mapping didn't work, ask Yahoo.
+        # Now allows searching by Symbol even if Name is missing.
+        if name or (symbol and len(symbol) > 0 and symbol.isalpha()):
+            print(f"🔍 Searching Yahoo for: {name or symbol} ({exchange or region})...")
             result = self._search_yahoo(name, symbol)
             if result:
                 return result
         
-        # Fallback: validation of just symbol (sometimes symbol is unique enough)
+        # Fallback: validation of just symbol
         return symbol
 
     def _search_yahoo(self, query_name: str, query_symbol: str) -> Optional[str]:
@@ -92,7 +120,7 @@ class YahooTickerResolver:
             headers = {'User-Agent': 'Mozilla/5.0'}
             # Try searching by name first
             params = {
-                'q': query_name,
+                'q': query_name if query_name else query_symbol,
                 'quotesCount': 5,
                 'newsCount': 0
             }
@@ -107,8 +135,8 @@ class YahooTickerResolver:
                     if quote.get('quoteType') == 'EQUITY':
                         return quote['symbol']
                         
-            # Backup: Try searching by Symbol if Name failed
-            if query_symbol and query_symbol != query_name:
+            # Backup: Try searching by Symbol if Name failed (and we didn't just try it)
+            if query_name and query_symbol and query_symbol != query_name:
                 params['q'] = query_symbol
                 r = requests.get(url, headers=headers, params=params, timeout=5)
                 data = r.json()

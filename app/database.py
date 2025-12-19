@@ -88,6 +88,34 @@ def init_db():
             FOREIGN KEY (decision_id) REFERENCES decision_points (id)
         )
     ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS batch_comparisons (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date TEXT NOT NULL,
+            candidate_symbols TEXT NOT NULL,
+            status TEXT DEFAULT 'STARTED',
+            completed_at TIMESTAMP,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    # Migration for batch_comparisons
+    try:
+        cursor.execute("PRAGMA table_info(batch_comparisons)")
+        columns = [info[1] for info in cursor.fetchall()]
+        
+        batch_columns = {
+            "status": "TEXT DEFAULT 'STARTED'",
+            "completed_at": "TIMESTAMP"
+        }
+        
+        for col_name, col_type in batch_columns.items():
+            if col_name not in columns:
+                print(f"Migrating database: Adding column {col_name} to batch_comparisons")
+                cursor.execute(f"ALTER TABLE batch_comparisons ADD COLUMN {col_name} {col_type}")
+
+    except Exception as e:
+        print(f"Error during batch table migration: {e}") 
     conn.commit()
     conn.close()
 
@@ -228,7 +256,7 @@ def get_today_decision_symbols() -> List[str]:
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
         # SQLite 'date' function returns YYYY-MM-DD
-        cursor.execute("SELECT symbol FROM decision_points WHERE date(timestamp) = date('now')")
+        cursor.execute("SELECT symbol FROM decision_points WHERE date(timestamp) = date('now') AND status != 'Pending'")
         symbols = [row[0] for row in cursor.fetchall()]
         conn.close()
         return symbols
@@ -245,7 +273,7 @@ def get_analyzed_companies_since(date_str: str) -> List[str]:
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
         # Filter where company_name is not null and date >= date_str
-        cursor.execute("SELECT DISTINCT company_name FROM decision_points WHERE company_name IS NOT NULL AND date(timestamp) >= date(?)", (date_str,))
+        cursor.execute("SELECT DISTINCT company_name FROM decision_points WHERE company_name IS NOT NULL AND date(timestamp) >= date(?) AND status != 'Pending'", (date_str,))
         rows = cursor.fetchall()
         
         companies = []
@@ -281,3 +309,159 @@ def update_deep_research_data(decision_id: int, verdict: str, risk: str, catalys
     except Exception as e:
         print(f"Error updating deep research data: {e}")
         return False
+
+def get_todays_strong_buy_candidates(date_str: str = None) -> List[dict]:
+    """
+    Get today's candidates eligible for Batch Comparison.
+    Criteria: (Recommendation LIKE 'STRONG BUY') OR (Recommendation LIKE 'BUY' AND score >= 75)
+    """
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        target_date = date_str if date_str else "now"
+        date_query = "date(?)" if date_str else "date('now')"
+        params = (target_date,) if date_str else ()
+
+        # NOTE: ai_score might be stored as REAL.
+        cursor.execute(f'''
+            SELECT * FROM decision_points 
+            WHERE date(timestamp) = {date_query}
+            AND (
+                recommendation LIKE '%STRONG BUY%' 
+                OR 
+                (recommendation LIKE '%BUY%' AND ai_score >= 75)
+            )
+            ORDER BY ai_score DESC
+        ''', params)
+        rows = cursor.fetchall()
+        conn.close()
+        return [dict(row) for row in rows]
+    except Exception as e:
+        print(f"Error fetching batch candidates: {e}")
+        return []
+
+def check_if_batch_processed(symbols: List[str], date_str: str = None) -> bool:
+    """
+    Check if this exact set of symbols has been processed today.
+    Returns True if processed OR currently running (within timeout).
+    Returns False if never processed OR timed out (> 30 mins).
+    """
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        sorted_symbols = ",".join(sorted(symbols))
+        target_date = date_str if date_str else "now"
+        date_query = "date(?)" if date_str else "date('now')"
+        
+        params = (target_date, sorted_symbols) if date_str else (sorted_symbols,)
+        
+        # Check for existing record
+        if date_str:
+            cursor.execute('''
+                SELECT id, status, timestamp 
+                FROM batch_comparisons 
+                WHERE date = date(?) AND candidate_symbols = ? 
+                ORDER BY id DESC LIMIT 1
+            ''', (date_str, sorted_symbols))
+        else:
+            cursor.execute('''
+                SELECT id, status, timestamp 
+                FROM batch_comparisons 
+                WHERE date = date('now') AND candidate_symbols = ? 
+                ORDER BY id DESC LIMIT 1
+            ''', (sorted_symbols,))
+            
+        row = cursor.fetchone()
+        conn.close()
+
+        if not row:
+            return False # Never seen before
+            
+        status = row['status']
+        timestamp_str = row['timestamp']
+        
+        if status == 'COMPLETED':
+            return True
+            
+        # Check Timeout for STARTED/RUNNING
+        from datetime import datetime
+        try:
+            # timestamp format: YYYY-MM-DD HH:MM:SS
+            start_time = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S")
+            now = datetime.now()
+            
+            diff_seconds = (now - start_time).total_seconds()
+            if diff_seconds > 1800: # 30 minutes
+                print(f"[Batch Logic] Previous run timed out ({int(diff_seconds)}s ago). marking as TIMEOUT and restarting.")
+                update_batch_status(row['id'], 'TIMEOUT')
+                return False # Restart
+            else:
+                print(f"[Batch Logic] Previous run still active ({int(diff_seconds)}s). Skipping.")
+                return True # Still valid/running
+                
+        except Exception as e:
+            print(f"[Batch Logic] Error parsing time: {e}. Assuming processed.")
+            return True
+
+    except Exception as e:
+        print(f"Error checking batch history: {e}")
+        return False
+
+def update_batch_status(batch_id: int, status: str) -> bool:
+    """Update the status of a batch comparison."""
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        
+        if status == 'COMPLETED':
+            cursor.execute('''
+                UPDATE batch_comparisons 
+                SET status = ?, completed_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            ''', (status, batch_id))
+        else:
+            cursor.execute('''
+                UPDATE batch_comparisons 
+                SET status = ?
+                WHERE id = ?
+            ''', (status, batch_id))
+            
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"Error updating batch status: {e}")
+        return False
+
+def log_batch_run(symbols: List[str], date_str: str = None) -> int:
+    """Log that a batch comparison has been queued/run. Returns batch_id."""
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        
+        sorted_symbols = ",".join(sorted(symbols))
+        
+        # Insert with status STARTED
+        if date_str:
+            cursor.execute('''
+                INSERT INTO batch_comparisons (date, candidate_symbols, status)
+                VALUES (date(?), ?, 'STARTED')
+            ''', (date_str, sorted_symbols))
+        else:
+             cursor.execute('''
+                INSERT INTO batch_comparisons (date, candidate_symbols, status)
+                VALUES (date('now'), ?, 'STARTED')
+            ''', (sorted_symbols,))
+            
+        batch_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        return batch_id
+    except Exception as e:
+        print(f"Error logging batch run: {e}")
+        return None
+

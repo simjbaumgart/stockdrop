@@ -229,7 +229,9 @@ class StockService:
             if price == 0.0 and snapshot.daily_bar:
                 price = snapshot.daily_bar.close
                 
-            prev_close = snapshot.prev_daily_bar.close if snapshot.prev_daily_bar else 0.0
+            # Safer access for prev_daily_bar which might be previous_daily_bar or missing
+            prev_bar = getattr(snapshot, 'prev_daily_bar', None) or getattr(snapshot, 'previous_daily_bar', None)
+            prev_close = prev_bar.close if prev_bar else 0.0
             open_price = snapshot.daily_bar.open if snapshot.daily_bar else 0.0
             day_high = snapshot.daily_bar.high if snapshot.daily_bar else 0.0
             day_low = snapshot.daily_bar.low if snapshot.daily_bar else 0.0
@@ -299,6 +301,7 @@ class StockService:
         """
         print("Checking for large cap drops...")
         # self.deep_research_candidates = [] # Removed batch queue
+        potential_batch_candidates = [] # For Deep Research Comparison
         
         # --- GATEKEEPER PHASE 1: Global Market Regime ---
         regime_info = gatekeeper_service.check_market_regime()
@@ -545,25 +548,74 @@ class StockService:
                         continue
 
                     # Run Deep Analysis Immediately
-                    self._run_deep_analysis(
+                    res = self._run_deep_analysis(
                         symbol, price, change_percent, stock, company_name, exchange, 
                         reasons, market_context, news_data, is_earnings, earnings_date_str, current_version,
                         technical_analysis
                     )
+                    
+                    if res:
+                        rec = res.get('recommendation', 'HOLD')
+                        score = res.get('ai_score', 0)
+                        if "STRONG BUY" in rec.upper() or ("BUY" in rec.upper() and score >= 75):
+                            print(f"[Batch Comparison] Adding {symbol} to candidate list (Score: {score})")
+                            potential_batch_candidates.append(res)
                     
         # Process Deferred Tasks
         if deferred_tasks:
             print(f"\nProcessing {len(deferred_tasks)} deferred stocks (0 news)...")
             for task in deferred_tasks:
                 print(f"Processing deferred: {task['symbol']}...")
-                self._run_deep_analysis(
+                res = self._run_deep_analysis(
                      task['symbol'], task['price'], task['change_percent'], task['stock'], 
                      task['company_name'], task['exchange'], task['reasons'], 
                      task['market_context'], task['news_data'], task['is_earnings'], 
                      task['earnings_date_str'], task['current_version'],
                      task['technical_analysis']
                 )
+                
+        # --- PERSISTENT BATCH COMPARISON TRIGGER ---
+        # Instead of in-memory list, we check the DB for all candidates found TODAY.
+        # This handles interrupted cycles/restarts.
+        
+        from app.database import get_todays_strong_buy_candidates, check_if_batch_processed, log_batch_run
+        
+        candidates = get_todays_strong_buy_candidates(today_str)
+        
+        # Check Deep Research Queue Size
+        # Only trigger batch comparison if the queue is not backed up (< 2 items)
+        queue_size = deep_research_service.queue.qsize()
+        
+        if len(candidates) >= 3:
+            if queue_size < 2:
+                # Sort by Score Descending (DB already does this, but ensure)
+                candidates.sort(key=lambda x: x.get('ai_score', 0) or 0, reverse=True)
+                
+                # Take Top 3
+                top_3_candidates = candidates[:3]
+                top_3_symbols = [c['symbol'] for c in top_3_candidates]
+                
+                # Check if this specific batch (or subset) has been processed?
+                # We track the exact set of symbols.
+                if not check_if_batch_processed(top_3_symbols, today_str):
+                    print(f"\n[Batch Comparison] Found {len(candidates)} candidates today. Top 3: {top_3_symbols}")
+                    print(f"[Batch Comparison] Triggering Deep Research Comparison Task...")
                     
+                    # Log FIRST to get ID
+                    batch_id = log_batch_run(top_3_symbols, today_str)
+                    
+                    if batch_id:
+                        deep_research_service.queue_batch_comparison_task(top_3_candidates, batch_id)
+                    else:
+                        print(f"Error logging batch run, skipping queue.")
+                else:
+                    # Already processed this set
+                    pass
+            else:
+                 print(f"\n[Batch Comparison] Candidates ready ({len(candidates)}/3), but Deep Research Queue is busy ({queue_size} items). Waiting.")
+        else:
+             print(f"\n[Batch Comparison] Current candidate count: {len(candidates)}/3 (from DB).")
+
         print(f"[{datetime.now().strftime('%H:%M:%S')}] Cycle completed. Large cap drops check finished.")
 
     def _is_actively_traded(self, symbol: str, region: str = "US", volume: float = 0, exchange: str = "", name: str = "") -> bool:
@@ -702,7 +754,7 @@ class StockService:
         # But resolver is robust.
         # We can pass what we have.
         try:
-            return self.resolver.resolve(symbol, exchange, name)
+            return self.resolver.resolve(symbol, exchange, name, region)
         except Exception as e:
             print(f"Resolver Error: {e}. Falling back to symbol {symbol}")
             return symbol
@@ -1392,6 +1444,7 @@ class StockService:
             "change_percent": change_percent,
             "recommendation": recommendation,
             "reasoning": reasoning,
+            "ai_score": float(score) if isinstance(score, (int, float, str)) and str(score).replace('.', '', 1).isdigit() else 0,
             "pe_ratio": stock.get("pe_ratio", 0.0),
             "market_cap": stock.get("market_cap", 0.0),
             "sector": stock.get("sector", self.stock_metadata.get(symbol, {}).get("sector", "Unknown")),
@@ -1427,6 +1480,8 @@ class StockService:
             
         today_str = datetime.now().strftime("%Y-%m-%d")
         self.sent_notifications.add((symbol, today_str))
+
+        return decision_data
 
 
     def _get_previous_trading_day(self, date_obj: datetime.date) -> datetime.date:

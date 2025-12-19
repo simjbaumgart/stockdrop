@@ -28,7 +28,7 @@ class ResearchService:
         if self.api_key:
             genai.configure(api_key=self.api_key)
             self.model = genai.GenerativeModel('gemini-3-pro-preview')
-            self.flash_model = genai.GenerativeModel('gemini-2.5-flash')
+            self.flash_model = genai.GenerativeModel('gemini-3-flash-preview')
         else:
             logger.warning("GEMINI_API_KEY not found. Research service will use mock data.")
             self.model = None
@@ -126,16 +126,28 @@ class ResearchService:
         # Print Competitive Summary to Console (Post-Execution)
         print(f"\n  > [Competitive Landscape Agent] Analysis Complete.")
         try:
+            # Flexible matching for the header (handling potential markdown formatting like ##)
             if "Summary & Key Points" in comp_report:
-                summary_section = comp_report.split("Summary & Key Points")[-1].split("\n\n")[0].strip()
-                lines = summary_section.split('\n')
+                # Take everything after the header
+                summary_part = comp_report.split("Summary & Key Points")[-1]
+                
+                # Scan the lines for bullet points
+                lines = summary_part.strip().split('\n')
                 print("    Key Takeaways:")
                 count = 0
+                found_bullets = False
                 for line in lines:
-                    if line.strip().startswith('-') or line.strip().startswith('*') or line.strip().startswith('1.'):
-                        print(f"    {line.strip()}")
+                    s = line.strip()
+                    # Check for standard bullet markers (including numbered lists like "1.")
+                    if len(s) > 2 and (s.startswith('-') or s.startswith('*') or (s[0].isdigit() and s[1] in ['.', ')'])):
+                        print(f"    {s}")
                         count += 1
+                        found_bullets = True
                         if count >= 3: break
+                
+                if not found_bullets:
+                     print("    (Summary found but no bullet points detected)")
+
             else:
                 print("    (Detailed report generated, see full output)")
         except Exception as e:
@@ -714,16 +726,33 @@ A strictly formatted JSON object:
                 with self.lock:
                     state.agent_calls += 1
             
-            # Special handling for News Agent with Grounding
-            if agent_name == "News Agent" and self.grounding_client:
-                 return self._call_news_agent_with_grounding(prompt)
+            # List of agents that should use Grounding (Internet Search)
+            # Technical and Economics added as per user request
+            # Bull, Bear, and Fund Manager added as per user request
+            grounded_agents = [
+                "News Agent",
+                "Competitive Landscape Agent",
+                "Market Sentiment Agent",
+                "Technical Agent", 
+                "Economics Agent",
+                "Bull Researcher",
+                "Bear Researcher",
+                "Bull Defense",
+                "Fund Manager"
+            ]
 
-            # Special handling for Economics Agent (Use Flash)
-            if agent_name == "Economics Agent" and self.flash_model:
-                logger.info(f"Calling Economics Agent with Gemini 2.5 Flash...")
-                response = self.flash_model.generate_content(prompt, request_options=RequestOptions(timeout=600))
-                return response.text
+            if agent_name in grounded_agents and self.grounding_client:
+                 model_to_use = "gemini-3-flash-preview"
+                 
+                 # Bull, Bear, and Fund Manager should use Gemini 3 Pro
+                 if agent_name in ["Bull Researcher", "Bear Researcher", "Bull Defense", "Fund Manager"]:
+                     model_to_use = "gemini-3-pro-preview"
+                 
+                 logger.info(f"Calling {agent_name} with {model_to_use} + Grounding...")
+                 return self._call_grounded_model(prompt, model_name=model_to_use, agent_context=agent_name)
 
+            # Default (Bull, Bear, Manager) -> Main Model (Gemini 3 Pro) without grounding
+            # Using standard generate_content (old SDK)
             # Rate limit buffer
             time.sleep(2)
             
@@ -733,12 +762,37 @@ A strictly formatted JSON object:
             logger.error(f"Error in {agent_name}: {e}")
             return f"[Error: {e}]"
 
+    def _call_grounded_model(self, prompt: str, model_name: str, agent_context: str = "") -> str:
+        """
+        Generic helper to call a model with Google Search Grounding enabled.
+        """
+        try:
+            config = {
+                "tools": [{"google_search": {}}],
+                "temperature": 0.7
+            }
+            
+            response = self.grounding_client.models.generate_content(
+                model=model_name,
+                contents=prompt,
+                config=config
+            )
+            
+            # Format and return with citations
+            report_text = self._format_citations(response)
+            report_text += f"\n\n(Context: {agent_context} | Model: {model_name} | Grounding: Enabled)"
+            return report_text
+            
+        except Exception as e:
+            logger.error(f"Grounding Call Failed for {agent_context}: {e}")
+            return f"[Error in {agent_context}: {e}]"
+
     def _call_competitive_agent(self, prompt: str) -> str:
         """
         Calls Gemini 3 with Google Search Grounding for the Competitive Landscape Agent.
         """
         try:
-            logger.info("Calling Competitive Landscape Agent (Gemini 3 + Search)...")
+            logger.info("Calling Competitive Landscape Agent (Gemini 2.5 Flash + Search)...")
             
             config = {
                 "tools": [
@@ -748,7 +802,7 @@ A strictly formatted JSON object:
             }
             
             # Using the exact same model as News Agent for consistency
-            model_name = "gemini-3-pro-preview"
+            model_name = "gemini-3-flash-preview"
             
             response = self.grounding_client.models.generate_content(
                 model=model_name,
@@ -774,7 +828,7 @@ A strictly formatted JSON object:
         Also runs a comparison with Flash 2.5 for the first 20 runs.
         """
         try:
-            logger.info("Calling News Agent with Google Search Grounding (Gemini 3)...")
+            logger.info("Calling News Agent with Google Search Grounding (Gemini 2.5 Flash)...")
             
             # Use dictionary config as requested for Gemini 3
             config = {
@@ -784,7 +838,7 @@ A strictly formatted JSON object:
                 "temperature": 0.7
             }
 
-            model_name = "gemini-3-pro-preview" 
+            model_name = "gemini-3-flash-preview" 
 
             # 1. Main Call (Gemini 3)
             response = self.grounding_client.models.generate_content(
@@ -803,7 +857,7 @@ A strictly formatted JSON object:
                 os.makedirs(self.COMPARISON_DIR, exist_ok=True)
                 existing_files = [f for f in os.listdir(self.COMPARISON_DIR) if f.endswith("_gemini3.txt")]
                 
-                if len(existing_files) < self.COMPARISON_LIMIT:
+                if False: # Disabled Comparison since we are now using Flash as main
                     logger.info(f"[Experiment] Running Flash 2.5 Comparison ({len(existing_files) + 1}/{self.COMPARISON_LIMIT})...")
                     
                     flash_model_name = "gemini-2.0-flash-exp" # Using Flash 2.0 Exp as proxy/alias for 2.5 if 2.5 isn't available, or assuming user meant 'gemini-2.0-flash-exp' which is often the 'flash 2.5' preview.
@@ -828,15 +882,15 @@ A strictly formatted JSON object:
                         # NO, I must follow user instruction. If they mapped 2.5 to something else, fine.
                         # I will use "gemini-2.0-flash-exp" because that is the actual model name for the new Flash usually.
                         # Wait, let's look at the Economics agent valid model name in __init__ from Step 204.
-                        # I added `self.flash_model = genai.GenerativeModel('gemini-2.5-flash')`.
-                        # So I should use 'gemini-2.5-flash' here too to be consistent.
+                        # I added `self.flash_model = genai.GenerativeModel('gemini-3-flash-preview')`.
+                        # So I should use 'gemini-3-flash-preview' here too to be consistent.
                         
                         contents=prompt,
                         config=config
                     )
                     
                     flash_text = self._format_citations(flash_response)
-                    flash_text += f"\n\n(Generated with gemini-2.5-flash & Google Search Grounding)"
+                    flash_text += f"\n\n(Generated with gemini-3-flash-preview & Google Search Grounding)"
                     
                     # Save to files
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -916,8 +970,8 @@ A strictly formatted JSON object:
         """
 
         try:
-            # Configure for Gemini 2.5 Flash (using 'gemini-2.0-flash-exp' or 'gemini-2.5-flash' if available)
-            # User requested 'gemini-2.5-flash'. We will try to use the flash model configured in init
+            # Configure for Gemini 3 Flash (using 'gemini-2.0-flash-exp' or 'gemini-3-flash-preview' if available)
+            # User requested 'gemini-3-flash-preview'. We will try to use the flash model configured in init
             # or fallback to the experiment string.
             
             # Use dictionary config for tools
@@ -926,10 +980,8 @@ A strictly formatted JSON object:
                 "temperature": 0.5 # Lower temp for factual market data
             }
             
-            # Prioritize Gemini 2.5 Flash (or 2.0 Flash Exp which is often specificied as the preview)
-            # We will use the string "gemini-2.0-flash-exp" as it is the current public preview name for the next gen flash.
-            # If the user specifically mapped "gemini-2.5-flash" on their backend, we would use that, but "gemini-2.0-flash-exp" is safer for "newest flash".
-            model_name = "gemini-2.0-flash-exp"
+            # Prioritize Gemini 2.5 Flash as requested
+            model_name = "gemini-3-flash-preview"
             
             response = self.grounding_client.models.generate_content(
                 model=model_name,

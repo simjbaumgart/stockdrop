@@ -47,6 +47,7 @@ async def startup_event():
     asyncio.create_task(run_storage_upload())
     asyncio.create_task(run_daily_summary())
     asyncio.create_task(run_performance_tracking())
+    asyncio.create_task(run_trade_report_update())
 
 async def run_periodic_check():
     while True:
@@ -56,7 +57,22 @@ async def run_periodic_check():
             await asyncio.to_thread(stock_service.check_large_cap_drops)
         except Exception as e:
             print(f"Error in periodic check: {e}")
-        await asyncio.sleep(7200) # Check every 2 hours
+        await asyncio.sleep(1800) # Check every 30 minutes
+
+async def run_trade_report_update():
+    """
+    Updates the trade_report_full.csv every 5 minutes.
+    """
+    import generate_trade_report
+    while True:
+        try:
+            print(f"[Scheduler] Updating Trade Report CSV... {datetime.now().strftime('%H:%M:%S')}")
+            # Run in thread pool to avoid blocking
+            await asyncio.to_thread(generate_trade_report.main)
+            print("[Scheduler] Trade Report Update Completed.")
+        except Exception as e:
+            print(f"[Scheduler] Error updating trade report: {e}")
+        await asyncio.sleep(3600) # Run every 60 minutes
 
 async def run_storage_upload():
     while True:
