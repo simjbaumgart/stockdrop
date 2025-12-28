@@ -71,11 +71,17 @@ def init_db():
             "deep_research_knife_catch": "TEXT"
         }
         
+        
         for col_name, col_type in new_columns.items():
             if col_name not in columns:
                 print(f"Migrating database: Adding column {col_name} to decision_points")
                 cursor.execute(f"ALTER TABLE decision_points ADD COLUMN {col_name} {col_type}")
                 
+        # Check for data_depth column separately as it is a newer addition
+        if "data_depth" not in columns:
+             print(f"Migrating database: Adding column data_depth to decision_points")
+             cursor.execute(f"ALTER TABLE decision_points ADD COLUMN data_depth TEXT")
+
     except Exception as e:
         print(f"Error during database migration: {e}")
 
@@ -116,6 +122,19 @@ def init_db():
 
     except Exception as e:
         print(f"Error during batch table migration: {e}") 
+        
+    # Migration: Add batch_winner to decision_points
+    try:
+        cursor.execute("PRAGMA table_info(decision_points)")
+        columns = [info[1] for info in cursor.fetchall()]
+        
+        if "batch_winner" not in columns:
+            print("Migrating database: Adding column batch_winner to decision_points")
+            cursor.execute("ALTER TABLE decision_points ADD COLUMN batch_winner BOOLEAN DEFAULT 0")
+            
+    except Exception as e:
+        print(f"Error during batch_winner migration: {e}")
+        
     conn.commit()
     conn.close()
 
@@ -167,24 +186,28 @@ def add_decision_point(symbol: str, price: float, drop_percent: float, recommend
         print(f"Error adding decision point: {e}")
         return None
 
-def update_decision_point(decision_id: int, recommendation: str, reasoning: str, status: str, ai_score: float = None) -> bool:
+def update_decision_point(decision_id: int, recommendation: str, reasoning: str, status: str, ai_score: float = None, data_depth: str = None) -> bool:
     """Update an existing decision point."""
     try:
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
         
+        # Build dynamic query
+        query = "UPDATE decision_points SET recommendation = ?, reasoning = ?, status = ?"
+        params = [recommendation, reasoning, status]
+        
         if ai_score is not None:
-            cursor.execute('''
-                UPDATE decision_points 
-                SET recommendation = ?, reasoning = ?, status = ?, ai_score = ?
-                WHERE id = ?
-            ''', (recommendation, reasoning, status, ai_score, decision_id))
-        else:
-            cursor.execute('''
-                UPDATE decision_points 
-                SET recommendation = ?, reasoning = ?, status = ?
-                WHERE id = ?
-            ''', (recommendation, reasoning, status, decision_id))
+            query += ", ai_score = ?"
+            params.append(ai_score)
+            
+        if data_depth is not None:
+            query += ", data_depth = ?"
+            params.append(data_depth)
+            
+        query += " WHERE id = ?"
+        params.append(decision_id)
+            
+        cursor.execute(query, tuple(params))
         conn.commit()
         conn.close()
         return True
@@ -452,7 +475,7 @@ def log_batch_run(symbols: List[str], date_str: str = None) -> int:
                 VALUES (date(?), ?, 'STARTED')
             ''', (date_str, sorted_symbols))
         else:
-             cursor.execute('''
+            cursor.execute('''
                 INSERT INTO batch_comparisons (date, candidate_symbols, status)
                 VALUES (date('now'), ?, 'STARTED')
             ''', (sorted_symbols,))
@@ -464,4 +487,85 @@ def log_batch_run(symbols: List[str], date_str: str = None) -> int:
     except Exception as e:
         print(f"Error logging batch run: {e}")
         return None
+
+def get_unbatched_candidates_by_date(date_str: str) -> List[dict]:
+    """
+    Get completed deep research candidates for a specific date that have NOT been batched yet.
+    """
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT * FROM decision_points 
+            WHERE date(timestamp) = ?
+            AND deep_research_verdict IS NOT NULL 
+            AND deep_research_verdict != '' 
+            AND deep_research_verdict != '-'
+            AND (batch_id IS NULL OR batch_id = '')
+            ORDER BY ai_score DESC
+        ''', (date_str,))
+        
+        rows = cursor.fetchall()
+        conn.close()
+        return [dict(row) for row in rows]
+    except Exception as e:
+        print(f"Error fetching unbatched candidates: {e}")
+        return []
+
+def mark_batch_winner(symbol: str, date_str: str = None) -> bool:
+    """
+    Mark a specific stock as the winner of its batch.
+    """
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        
+        # If date provided, use it to narrow scope, though symbol + recent timestamp might be enough.
+        # Safest is update where symbol matches and batch_id is set.
+        
+        if date_str:
+            cursor.execute('''
+                UPDATE decision_points 
+                SET batch_winner = 1 
+                WHERE symbol = ? AND date(timestamp) = ?
+            ''', (symbol, date_str))
+        else:
+             cursor.execute('''
+                UPDATE decision_points 
+                SET batch_winner = 1 
+                WHERE symbol = ? AND date(timestamp) = date('now')
+            ''', (symbol,))
+            
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"Error marking batch winner: {e}")
+        return False
+
+def get_distinct_dates_with_unbatched_candidates() -> List[str]:
+    """
+    Get a list of date strings (YYYY-MM-DD) that have unbatched completed candidates.
+    """
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT DISTINCT date(timestamp) FROM decision_points 
+            WHERE deep_research_verdict IS NOT NULL 
+            AND deep_research_verdict != '' 
+            AND deep_research_verdict != '-'
+            AND (batch_id IS NULL OR batch_id = '')
+        ''')
+        
+        rows = cursor.fetchall()
+        conn.close()
+        return [row[0] for row in rows if row[0]]
+    except Exception as e:
+        print(f"Error fetching distinct dates: {e}")
+        return []
+
 

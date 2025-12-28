@@ -1,7 +1,6 @@
-from google import genai as genai_v1 # Old SDK (aliasing just in case, or keep as genai and alias new one)
 import google.generativeai as genai # Existing SDK
-from google.generativeai.types import RequestOptions
-from google import genai as new_genai # New SDK
+# from google.generativeai.types import RequestOptions
+from google import genai as new_genai # New SDK (Enabled)
 from google.genai import types as new_types
 import os
 import logging
@@ -14,6 +13,7 @@ from app.services.fred_service import fred_service
 import time
 import requests
 from app.services.deep_research_service import deep_research_service
+from app.services.seeking_alpha_service import seeking_alpha_service
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -28,7 +28,7 @@ class ResearchService:
         if self.api_key:
             genai.configure(api_key=self.api_key)
             self.model = genai.GenerativeModel('gemini-3-pro-preview')
-            self.flash_model = genai.GenerativeModel('gemini-3-flash-preview')
+            self.flash_model = genai.GenerativeModel('gemini-3.5-flash-preview')
         else:
             logger.warning("GEMINI_API_KEY not found. Research service will use mock data.")
             self.model = None
@@ -57,8 +57,9 @@ class ResearchService:
         """
         Orchestrates the new 3-Phase Agent Flow:
         1. Agents (Technical + News) -> MarketState.reports
-        2. Researchers (Brain) -> MarketState.debate_transcript
-        3. Risk/FundManager (Safety) -> Final Decision
+        1. Agents (Technical + News) -> MarketState.reports
+        2. Bull & Bear Perspectives (Parallel) -> MarketState.reports['bull'/'bear']
+        3. Portfolio Manager (Internet Verification) -> Final Decision
         """
         if not self._check_and_increment_usage():
             return {"recommendation": "SKIP", "reasoning": "Daily limit reached."}
@@ -101,13 +102,15 @@ class ResearchService:
         news_report = ""
         sentiment_report = ""
         comp_report = ""
+        sa_report = ""
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
             futures = {
                 executor.submit(run_agent, "Technical Agent", self._call_agent, tech_prompt, "Technical Agent", state): "technical",
                 executor.submit(run_agent, "News Agent", self._call_agent, news_prompt, "News Agent", state): "news",
                 executor.submit(run_agent, "Market Sentiment Agent", self._call_market_sentiment_agent, state.ticker, state): "sentiment",
-                executor.submit(run_agent, "Competitive Landscape Agent", self._call_agent, comp_prompt, "Competitive Landscape Agent", state): "competitive"
+                executor.submit(run_agent, "Competitive Landscape Agent", self._call_agent, comp_prompt, "Competitive Landscape Agent", state): "competitive",
+                executor.submit(run_agent, "Seeking Alpha Agent", seeking_alpha_service.get_evidence, state.ticker): "seeking_alpha"
             }
             
             for future in concurrent.futures.as_completed(futures):
@@ -122,6 +125,8 @@ class ResearchService:
                     sentiment_report = result
                 elif agent_name == "Competitive Landscape Agent":
                     comp_report = result
+                elif agent_name == "Seeking Alpha Agent":
+                    sa_report = result
 
         # Print Competitive Summary to Console (Post-Execution)
         print(f"\n  > [Competitive Landscape Agent] Analysis Complete.")
@@ -171,21 +176,43 @@ class ResearchService:
             "news": news_report,
             "market_sentiment": sentiment_report,
             "economics": economics_report,
-            "competitive": comp_report
+            "competitive": comp_report,
+            "seeking_alpha": sa_report
         }
+
+        # Validate Reports (Quality Control)
+        # Check for short or missing inputs before passing to Bull/Bear/Storage
+        from app.services.quality_control_service import QualityControlService
+        state.reports = QualityControlService.validate_council_reports(state.reports, state.ticker)
+
+
+        # --- Save Council 1 Output to JSON ---
+        try:
+            council_dir = "data/council_reports"
+            os.makedirs(council_dir, exist_ok=True)
+            council_file = f"{council_dir}/{state.ticker}_{state.date}_council1.json"
+            
+            with open(council_file, "w") as f:
+                json.dump(state.reports, f, indent=4)
+            
+            print(f"  > [System] AI Council 1 Reports saved to {council_file}")
+        except Exception as e:
+            logger.error(f"Failed to save Council 1 reports: {e}")
         
-        # --- Phase 2: The Researcher Debate (Brain) ---
-        print("  > Phase 2: Starting Bull/Bear Debate...")
-        self._run_debate(state, drop_str)
+        # --- Phase 2: Bull & Bear Perspectives (Brain) ---
+        self._run_bull_bear_perspectives(state, drop_str)
         
-        # --- Phase 3: Risk Compliance & Final Decision ---
-        print("  > Phase 3: Risk Council & Fund Manager...")
+        # Validate Bull & Bear Reports
+        state.reports = QualityControlService.validate_reports(state.reports, state.ticker, ["bull", "bear"])
+        
+        # --- Phase 3: Portfolio Manager & Decision ---
+        print("  > Phase 3: Portfolio Manager Decision...")
         final_decision = self._run_risk_council_and_decision(state, drop_str)
         state.final_decision = final_decision
         
         # --- Print Final Decision to Console ---
         print("\n" + "="*50)
-        print(f"  [FUND MANAGER DECISION]: {final_decision.get('action')}")
+        print(f"  [PORTFOLIO MANAGER DECISION]: {final_decision.get('action')}")
         print(f"  Score: {final_decision.get('score')}/100")
         print(f"  Reason: {final_decision.get('reason')}")
         print("  Key Decision Points:")
@@ -228,6 +255,32 @@ class ResearchService:
         economics_run = "NEEDS_ECONOMICS: TRUE" in news_report and economics_report != "" and "failed to fetch" not in economics_report
         drop_reason_identified = "REASON_FOR_DROP_IDENTIFIED: YES" in news_report
 
+        
+        # --- Calculate Data Depth Metrics ---
+        news_items = raw_data.get('news_items', [])
+        news_count = len(news_items)
+        news_length = sum(len(n.get('content', '') or '') + len(n.get('summary', '') or '') for n in news_items)
+        
+        transcript_text = raw_data.get('transcript_text', "")
+        transcript_length = len(transcript_text)
+        
+        indicators = raw_data.get('indicators', {})
+        indicators_count = len(indicators)
+        
+        competitive_report_length = len(comp_report)
+        market_sentiment_report_length = len(sentiment_report)
+        economics_report_length = len(economics_report)
+        
+        data_depth = {
+            "news_count": news_count,
+            "news_length": news_length,
+            "transcript_length": transcript_length,
+            "indicators_count": indicators_count,
+            "competitive_report_length": competitive_report_length,
+            "market_sentiment_report_length": market_sentiment_report_length,
+            "economics_report_length": economics_report_length
+        }
+
         return {
             "recommendation": recommendation,
             "score": final_decision.get("score", 50),
@@ -236,8 +289,8 @@ class ResearchService:
             "detailed_report": self._format_full_report(state, deep_reasoning_report),
             # Legacy compatibility fields
             "technician_report": state.reports.get('technical', ''),
-            "bull_report": self._extract_debate_side(state, "Bull"),
-            "bear_report": self._extract_debate_side(state, "Bear"),
+            "bull_report": state.reports.get('bull', ''),
+            "bear_report": state.reports.get('bear', ''),
             "macro_report": state.reports.get('news', ''),
             "reasoning": final_decision.get("reason", ""),
             "agent_calls": state.agent_calls,
@@ -245,31 +298,51 @@ class ResearchService:
                 "economics_run": economics_run,
                 "drop_reason_identified": drop_reason_identified
             },
-            "key_decision_points": final_decision.get("key_decision_points", [])
+            "key_decision_points": final_decision.get("key_decision_points", []),
+            "market_sentiment_report": state.reports.get('market_sentiment', ''),
+            "competitive_report": state.reports.get('competitive', ''),
+            "data_depth": data_depth
         }
 
-    def _run_debate(self, state: MarketState, drop_str: str):
+    def _run_bull_bear_perspectives(self, state: MarketState, drop_str: str):
         """
-        Executes the adversarial debate loop.
+        Executes Bull and Bear agents in parallel to generate independent playbooks.
         """
-        # Round 1: Bull Thesis
+        import concurrent.futures
+
+        print("  > Phase 2: Running Bull & Bear Agents in Parallel...")
+        
         bull_prompt = self._create_bull_prompt(state, drop_str)
-        bull_thesis = self._call_agent(bull_prompt, "Bull Researcher", state)
-        print(f"\n  [BULL THESIS]:\n{bull_thesis}")
-        state.debate_transcript.append(f"**BULL ARGUMENT:**\n{bull_thesis}")
-        
-        # Round 2: Bear Rebuttal
-        # Round 2: Bear Rebuttal
-        bear_prompt = self._create_bear_prompt(state, bull_thesis, drop_str)
-        bear_rebuttal = self._call_agent(bear_prompt, "Bear Researcher", state)
-        print(f"\n  [BEAR REBUTTAL]:\n{bear_rebuttal}")
-        state.debate_transcript.append(f"**BEAR REBUTTAL:**\n{bear_rebuttal}")
-        
-        # Round 3: Bull Defense
-        bull_defense_prompt = self._create_bull_defense_prompt(state, bear_rebuttal)
-        bull_defense = self._call_agent(bull_defense_prompt, "Bull Defense", state)
-        print(f"\n  [BULL DEFENSE]:\n{bull_defense}")
-        state.debate_transcript.append(f"**BULL DEFENSE:**\n{bull_defense}")
+        bear_prompt = self._create_bear_prompt(state, drop_str)
+
+        bull_report = ""
+        bear_report = ""
+
+        def run_agent(name, func, *args):
+            try:
+                # print(f"    - Starting {name}...")
+                return name, func(*args)
+            except Exception as e:
+                logger.error(f"Error in {name}: {e}")
+                return name, f"[Error in {name}: {e}]"
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            futures = {
+                executor.submit(run_agent, "Bull Researcher", self._call_agent, bull_prompt, "Bull Researcher", state): "bull",
+                executor.submit(run_agent, "Bear Researcher", self._call_agent, bear_prompt, "Bear Researcher", state): "bear"
+            }
+            
+            for future in concurrent.futures.as_completed(futures):
+                agent_name, result = future.result()
+                if agent_name == "Bull Researcher":
+                    bull_report = result
+                    print(f"  > [Bull Researcher] Report Generated.")
+                elif agent_name == "Bear Researcher":
+                    bear_report = result
+                    print(f"  > [Bear Researcher] Report Generated.")
+
+        state.reports['bull'] = bull_report
+        state.reports['bear'] = bear_report
 
     def _run_risk_council_and_decision(self, state: MarketState, drop_str: str) -> Dict:
         """
@@ -299,8 +372,7 @@ class ResearchService:
         if "CORPORATE" in news_report.upper():
             risky_support.append("Corporate events identified.")
             
-        # 3. Fund Manager (Final Decision)
-        # 3. Fund Manager (Final Decision)
+        # 3. Portfolio Manager (Final Decision)
         manager_prompt = self._create_fund_manager_prompt(state, safe_concerns, risky_support, drop_str)
         decision_json_str = self._call_agent(manager_prompt, "Fund Manager", state)
         decision = self._extract_json(decision_json_str)
@@ -493,7 +565,7 @@ Use headers: "Technical Signal", "Oversold Status", "Context from Report", "Verd
         if db_transcript and len(transcript) < 100:
              transcript = db_transcript
         elif db_transcript:
-             transcript += f"\n\n--- ADDITIONAL TRANSCRIPT DATA (DefeatBeta) ---\n{db_transcript[:2000]}..." # Append snippet
+             transcript += f"\n\n--- ADDITIONAL TRANSCRIPT DATA (DefeatBeta) ---\n{db_transcript}" # Append snippet
 
         # Mix DefeatBeta news
         if db_news:
@@ -502,8 +574,8 @@ Use headers: "Technical Signal", "Oversold Status", "Context from Report", "Verd
                 news_summary += f"- {line}\n"
 
         return f"""
-You are the **News & Sentiment Agent**.
-Your goal is to gauge the market sentiment and identifying key narrative drivers for {state.ticker}.
+You are the **News Agent**.
+Your goal is to gauge the stock's sentiment and identify key narrative drivers for {state.ticker}.
 You have access to recent News Headlines and Summaries, and the latest Quarterly Report.
 
 CONTEXT: The stock has dropped {drop_str}. We need to know WHY.
@@ -560,7 +632,8 @@ If the drop is a mystery or just general market noise with no specific catalyst 
     def _create_economics_agent_prompt(self, state: MarketState, macro_data: Dict) -> str:
         return f"""
 You are the **Macro Economics Agent**.
-Your goal is to analyze the US Macroeconomic environment and its potential impact on {state.ticker}.
+Your goal is to analyze the US and World Economic environment and its potential impact on {state.ticker}.
+Use the internet to find additional data if needed.
 
 INPUT DATA (FRED API):
 {json.dumps(macro_data, indent=2)}
@@ -615,73 +688,62 @@ Structure it as follows:
 
     def _create_bull_prompt(self, state: MarketState, drop_str: str) -> str:
         return f"""
-You are the **Bullish Researcher**. Your goal is to maximize the firm's exposure to this asset.
+You are the **Bullish Researcher**. Your goal is to look optimistically at the given stock.
 CONTEXT: We are looking for a swing trade / short-term recovery opportunity on this {drop_str} drop.
-Review the Agent Reports below, ESPECIALLY the "Extended Transcript Summary" in the News Report.
+You received additional data from an analysis team below.
 
 AGENT REPORTS:
 {json.dumps(state.reports, indent=2)}
 
 TASK:
-Construct a persuasive argument for a LONG position.
-1. If available, you SHOULD cite specific positive drivers from the **News Headlines** and **Earnings Transcript** to support your thesis.
-2. Do not rely solely on technicals; explain the FUNDAMENTAL/NARRATIVE reason for a reversal.
-3. If the transcript mentions a temporary issue (e.g., supply chain) that is resolving, highlight it.
+Construct a persuasive argument for a LONG position (The Bull Case).
+1. Explain the "Narrative" for the bounce.
+2. Cite specific positive drivers from the **News Headlines** and **Earnings Transcript**.
+3. Do not rely solely on technicals; explain the FUNDAMENTAL reason for a reversal.
+4. Remember that the Market often priced in information already but sometimes too much or too little.
 
 SAFETY:
-DO NOT HALLUCINATE: If no news/transcript is provided or relevant, rely on the technicals/fundamentals present. State "No specific news drivers found" if applicable. Do not invent events.
+Answer primarily from the provided Agent Reports.
+However, you have access to Google Search to fill in gaps if the reports are missing critical recent context or to check if a "Fear" narrative is overblown.
+DO NOT HALLUCINATE.
 
 OUTPUT:
 A comprehensive bullish playbook.
-We argue that contexts should function not as concise summaries, but as comprehensive, evolving playbooks—detailed, inclusive, and rich with domain insights.
-Argue why this specific drop is an overreaction and a buying opportunity.
+Use headers: "Bullish Narrative", "Evidence from Report", "Catalysts", "Conclusion".
 """
 
-    def _create_bear_prompt(self, state: MarketState, bull_thesis: str, drop_str: str) -> str:
+    def _create_bear_prompt(self, state: MarketState, drop_str: str) -> str:
         return f"""
 You are the **Bearish Researcher**. Your goal is to protect the firm's capital from risk.
 CONTEXT: The stock dropped {drop_str}.
-Review the Agent Reports (especially the "Extended Transcript Summary") and the Bull's argument.
+Review the Agent Reports (especially the "Extended Transcript Summary").
 
 AGENT REPORTS:
 {json.dumps(state.reports, indent=2)}
 
-BULL'S ARGUMENT:
-{bull_thesis}
-
 TASK:
-Deconstruct the Bull's argument ruthlessly.
-1. If available, you SHOULD cite specific negative risks from the **News and Transcript** (e.g., guidance cut, macro headwinds, management hesitation).
-2. Use the fundamental data to show why the drop is justified.
-3. Point out if the Bull is ignoring a "fatal flaw" mentioned in the News.
+Construct a persuasive but logical and rational argument for a NO TRADE or SHORT position (The Bear Case).
+1. Explain why this drop is justified or could go deeper.
+2. Cite specific negative risks from the **News and Transcript** (guidance cuts, macro headwinds).
+3. Be skeptical of the "Dip Buy" mentality.
 
 SAFETY:
-DO NOT HALLUCINATE: If data is missing/limited, stick to what is known. Do not invent negative news.
+Answer primarily from the provided Agent Reports.
+However, you have access to Google Search to check for "Red Flags" that might be missing (e.g. lawsuits, fraud allegations, major analyst downgrades).
+DO NOT HALLUCINATE.
 
 OUTPUT:
 A comprehensive bearish playbook.
-We argue that contexts should function not as concise summaries, but as comprehensive, evolving playbooks—detailed, inclusive, and rich with domain insights.
-Argue why this is a 'falling knife'. Why should we NOT catch this bounce?
-"""
-
-    def _create_bull_defense_prompt(self, state: MarketState, bear_rebuttal: str) -> str:
-        return f"""
-You are the **Bullish Researcher**. The Bear has attacked your thesis.
-Defend your position. Acknowledge valid risks but explain why the upside outweighs them.
-
-BEAR'S REBUTTAL:
-{bear_rebuttal}
-
-OUTPUT:
-A comprehensive defense playbook.
-We argue that contexts should function not as concise summaries, but as comprehensive, evolving playbooks—detailed, inclusive, and rich with domain insights.
+Use headers: "Bearish Narrative", "Risks & Red Flags", "Fundamental Flaws", "Conclusion".
 """
 
     def _create_fund_manager_prompt(self, state: MarketState, safe_concerns: List[str], risky_support: List[str], drop_str: str) -> str:
-        debate_text = "\\n\\n".join(state.debate_transcript)
+        bull_report = state.reports.get('bull', 'No Bull Report')
+        bear_report = state.reports.get('bear', 'No Bear Report')
+        
         return f"""
-You are the **Fund Manager**. You have the final vote.
-You must weigh the Agent Reports and the Debate Transcript to make a decision.
+You are the **Portfolio Manager**. You have the final vote.
+You must weigh the arguments from the Bull Agent and the Bear Agent, and Review the original Agent Reports.
 
 DECISION CONTEXT: This is a Swing Trade / Short-term Recovery play on a stock that dropped {drop_str}.
 
@@ -689,16 +751,24 @@ RISK FACTORS (For Consideration):
 - Technical Flags: {safe_concerns}
 - News Flags: {risky_support}
 
-DEBATE TRANSCRIPT:
-{debate_text}
+BULL CASE:
+{bull_report}
 
-AGENT REPORTS (Technical & News):
+BEAR CASE:
+{bear_report}
+
+AGENT REPORTS (Data):
 {json.dumps(state.reports, indent=2)}
 
+CRITICAL TASK:
+1. **TRUST BUT VERIFY**: You have access to Google Search. Use it to verify the key claims made by the Bull and Bear.
+   - If the Bull claims "Earnings Beat", check if it was actually a beat or a mixed bag.
+   - If the Bear claims "Lawsuit", verify the severity.
+2. Weigh the evidence. Who has the stronger case based on FACTS, not just rhetoric?
+3. Decide whether to BUY (Catch the bounce), HOLD (Wait for clarity), or SELL (Avoid/Short).
+
 OBJECTIVE:
-Decide whether to BUY, HOLD, or SELL.
-Evaluate if the risk/reward favors a short-term bounce. We are not marrying this stock for years; will it recover in the near term?
-Take calculated risks. If the Fundamental/News context (Agent Reports) explains a drop and it seems temporary, it might be a buying opportunity.
+Make a decision based on the Probability of Profit.
 
 OUTPUT:
 A strictly formatted JSON object:
@@ -706,11 +776,11 @@ A strictly formatted JSON object:
   "action": "STRONG BUY" | "BUY" | "HOLD" | "SELL" | "STRONG SELL",
   "size": "String (e.g. 'Standard', 'Half', 'Double')",
   "score": Number (0-100),
-  "reason": "String (One sentence summary of your decision logic)",
+  "reason": "String (One sentence summary: 'Bull case verified strong with X catalyst' or 'Bear case dominates due to Y risk')",
   "key_decision_points": [
-      "String (Point 1 - why you made this decision)",
-      "String (Point 2 - specific data point)",
-      "String (Point 3 - risk mitigation)"
+      "String (Point 1 - Verification result)",
+      "String (Point 2 - Winner of the argument)",
+      "String (Point 3 - Risk mitigation)"
   ]
 }}
 """
@@ -737,7 +807,6 @@ A strictly formatted JSON object:
                 "Economics Agent",
                 "Bull Researcher",
                 "Bear Researcher",
-                "Bull Defense",
                 "Fund Manager"
             ]
 
@@ -745,7 +814,7 @@ A strictly formatted JSON object:
                  model_to_use = "gemini-3-flash-preview"
                  
                  # Bull, Bear, and Fund Manager should use Gemini 3 Pro
-                 if agent_name in ["Bull Researcher", "Bear Researcher", "Bull Defense", "Fund Manager"]:
+                 if agent_name in ["Bull Researcher", "Bear Researcher", "Fund Manager", "News Agent","Technical Agent"]:
                      model_to_use = "gemini-3-pro-preview"
                  
                  logger.info(f"Calling {agent_name} with {model_to_use} + Grounding...")
@@ -762,9 +831,10 @@ A strictly formatted JSON object:
             logger.error(f"Error in {agent_name}: {e}")
             return f"[Error: {e}]"
 
-    def _call_grounded_model(self, prompt: str, model_name: str, agent_context: str = "") -> str:
+    def _call_grounded_model(self, prompt: str, model_name: str, agent_context: str = "", retry_count: int = 0) -> str:
         """
         Generic helper to call a model with Google Search Grounding enabled.
+        Includes retry logic for Gemini 3 Pro if it fails to ground correctly.
         """
         try:
             config = {
@@ -777,6 +847,32 @@ A strictly formatted JSON object:
                 contents=prompt,
                 config=config
             )
+
+            # Check for FunctionCall (finish_reason 10) which indicates failure to auto-ground on Pro
+            # We access the candidate safely
+            candidate = response.candidates[0] if response.candidates else None
+            finish_reason = candidate.finish_reason if candidate else None
+            
+            # 10 is STOP_REASON_FUNCTION_CALL
+            if finish_reason == 10 or finish_reason == "STOP_REASON_FUNCTION_CALL":
+                 
+                 # RETRY LOGIC (Pro only)
+                 if retry_count < 1 and "pro" in model_name:
+                     logger.warning(f"Model {model_name} returned FunctionCall (Attempt {retry_count+1}). Retrying...")
+                     return self._call_grounded_model(prompt, model_name, agent_context, retry_count=1)
+                 
+                 # FAILURE VISIBILITY
+                 msg = f"""
+################################################################################
+[CRITICAL WARNING] GROUNDING FAILURE IN {agent_context.upper()}
+Model: {model_name}
+Reason: Model returned a Function Call (10) instead of grounded text despite retry.
+Process continuing but this agent's output is compromised.
+################################################################################
+"""
+                 print(msg)
+                 logger.error(msg)
+                 return f"[SYSTEM ERROR: Grounding failed for {agent_context}. Model returned invalid Function Call.]"
             
             # Format and return with citations
             report_text = self._format_citations(response)
@@ -784,7 +880,14 @@ A strictly formatted JSON object:
             return report_text
             
         except Exception as e:
-            logger.error(f"Grounding Call Failed for {agent_context}: {e}")
+            logger.error(f"Grounding Call Failed for {agent_context} (Model: {model_name}): {e}")
+            
+            # RETRY ON EXCEPTION
+            if retry_count < 1 and "pro" in model_name:
+                 logger.info("Exception with Pro. Retrying same model...")
+                 return self._call_grounded_model(prompt, model_name, agent_context, retry_count=1)
+            
+            print(f"\\n!!! GROUNDING EXCEPTION ({agent_context}): {e} !!!\\n")
             return f"[Error in {agent_context}: {e}]"
 
     def _call_competitive_agent(self, prompt: str) -> str:
@@ -980,8 +1083,8 @@ A strictly formatted JSON object:
                 "temperature": 0.5 # Lower temp for factual market data
             }
             
-            # Prioritize Gemini 2.5 Flash as requested
-            model_name = "gemini-3-flash-preview"
+            # Prioritize Gemini 3.5 Flash as requested
+            model_name = "gemini-3.5-flash-preview"
             
             response = self.grounding_client.models.generate_content(
                 model=model_name,
@@ -1052,17 +1155,31 @@ A strictly formatted JSON object:
             
         except Exception as e:
             logger.error(f"Error formatting citations: {e}")
-            return response.text if response.text else str(e)
+            try:
+                # Safe access to text if available, else string representation
+                if response.candidates and response.candidates[0].content and response.candidates[0].content.parts:
+                     return response.candidates[0].content.parts[0].text or "Empty Text"
+                return "Error: No Content"
+            except:
+                return f"[Error formatting response: {str(e)}]"
 
-    def _extract_json(self, text: str) -> dict:
+    def _extract_json(self, text: str) -> Optional[Dict]:
+        """
+        Robust JSON extractor that handles markdown code blocks.
+        """
         try:
+            # Find the start and end of the JSON object
+            # Simple heuristic: Look for first { and last }
             start = text.find('{')
-            end = text.rfind('}') + 1
+            end = text.rfind('}')
+            
             if start != -1 and end != -1:
-                return json.loads(text[start:end])
-        except Exception:
-            pass
-        return {}
+                json_str = text[start:end+1]
+                return json.loads(json_str)
+            return None
+        except Exception as e:
+            logger.error(f"Failed to extract JSON: {e}")
+            return None
 
     def _format_full_report(self, state: MarketState, deep_report: str = "") -> str:
         debate_section = ''.join([f"\n{entry}\n" for entry in state.debate_transcript])

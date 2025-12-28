@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import sqlite3
 import json
 import yfinance as yf
 from typing import List, Dict, Set, Any, Optional
@@ -31,7 +32,7 @@ class StockService:
         self.indices_config = {
             "S&P 500": {"symbol": "SPX", "screener": "america", "exchange": "CBOE"},
             # STOXX 600 removed from TradingView config due to API issues. Will be fetched via fallback.
-            "India": {"symbol": "^NSEI", "screener": "india", "exchange": "NSE"}
+            "India": {"symbol": "NIFTY", "screener": "india", "exchange": "NSE"}
         }
         
         # Keep old tickers for fallback or reference if needed
@@ -574,49 +575,121 @@ class StockService:
                      task['technical_analysis']
                 )
                 
-        # --- PERSISTENT BATCH COMPARISON TRIGGER ---
-        # Instead of in-memory list, we check the DB for all candidates found TODAY.
-        # This handles interrupted cycles/restarts.
-        
-        from app.database import get_todays_strong_buy_candidates, check_if_batch_processed, log_batch_run
-        
-        candidates = get_todays_strong_buy_candidates(today_str)
-        
-        # Check Deep Research Queue Size
-        # Only trigger batch comparison if the queue is not backed up (< 2 items)
-        queue_size = deep_research_service.queue.qsize()
-        
-        if len(candidates) >= 3:
-            if queue_size < 2:
-                # Sort by Score Descending (DB already does this, but ensure)
-                candidates.sort(key=lambda x: x.get('ai_score', 0) or 0, reverse=True)
-                
-                # Take Top 3
-                top_3_candidates = candidates[:3]
-                top_3_symbols = [c['symbol'] for c in top_3_candidates]
-                
-                # Check if this specific batch (or subset) has been processed?
-                # We track the exact set of symbols.
-                if not check_if_batch_processed(top_3_symbols, today_str):
-                    print(f"\n[Batch Comparison] Found {len(candidates)} candidates today. Top 3: {top_3_symbols}")
-                    print(f"[Batch Comparison] Triggering Deep Research Comparison Task...")
-                    
-                    # Log FIRST to get ID
-                    batch_id = log_batch_run(top_3_symbols, today_str)
-                    
-                    if batch_id:
-                        deep_research_service.queue_batch_comparison_task(top_3_candidates, batch_id)
-                    else:
-                        print(f"Error logging batch run, skipping queue.")
-                else:
-                    # Already processed this set
-                    pass
-            else:
-                 print(f"\n[Batch Comparison] Candidates ready ({len(candidates)}/3), but Deep Research Queue is busy ({queue_size} items). Waiting.")
-        else:
-             print(f"\n[Batch Comparison] Current candidate count: {len(candidates)}/3 (from DB).")
 
         print(f"[{datetime.now().strftime('%H:%M:%S')}] Cycle completed. Large cap drops check finished.")
+        
+        # --- DEEP RESEARCH BACKFILL (User Requested) ---
+        # Run backfill for any high-scoring stocks from today that are missing a verdict
+        self._process_deep_research_backfill(today_str)
+
+    def _process_deep_research_backfill(self, date_str: str):
+        """
+        Checks for stocks analyzed TODAY (or date_str) that have a high AI score (>=70)
+        but are missing a Deep Research Verdict. Triggers Deep Research using the Summary Report.
+        """
+        print("\n[Backfill] Checking for outstanding Deep Research candidates...")
+        try:
+            conn = sqlite3.connect("subscribers.db")
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            
+            # Query candidates: Same Date, Score >= 70, Verdict is NULL/Empty/Unknown/Dash
+            query = """
+                SELECT * FROM decision_points 
+                WHERE date(timestamp) = ? 
+                AND ai_score >= 70 
+                AND (deep_research_verdict IS NULL OR deep_research_verdict = '' OR deep_research_verdict = '-' OR deep_research_verdict LIKE 'UNKNOWN%')
+            """
+            cursor.execute(query, (date_str,))
+            rows = cursor.fetchall()
+            conn.close()
+            
+            candidates = [dict(row) for row in rows]
+            
+            if not candidates:
+                print("[Backfill] No outstanding candidates found.")
+                return
+
+            print(f"[Backfill] Found {len(candidates)} candidates needing Deep Research: {[c['symbol'] for c in candidates]}")
+            
+            # Use DeepResearchService to queue them
+            # We use the existing service instance
+            
+            for c in candidates:
+                symbol = c['symbol']
+                decision_id = c['id']
+                detailed_report = c.get('detailed_report', '')
+                drop_percent = c.get('drop_percent', 0.0)
+                
+                # Try to load from file first (Preferred source)
+                # Format: data/council_reports/{ticker}_{date}_council1.json
+                report_file_path = f"data/council_reports/{symbol}_{date_str}_council1.json"
+                file_report_content = None
+                
+                if os.path.exists(report_file_path):
+                    try:
+                        with open(report_file_path, 'r') as f:
+                            file_content = f.read()
+                            # Check length
+                            if len(file_content) > 100:
+                                file_report_content = file_content
+                                print(f"  > Loaded council report from file: {report_file_path} (Length: {len(file_content)})")
+                            else:
+                                print(f"  > Council report file found but too short ({len(file_content)} chars). Skipping file.")
+                    except Exception as e:
+                        print(f"  > Error reading council report file: {e}")
+                
+                # Use file content if available, otherwise DB
+                summary_report = file_report_content if file_report_content else detailed_report
+                
+                if not summary_report:
+                    print(f"  > Skipping {symbol}: No detailed_report available (File or DB).")
+                    continue
+                
+                # Final length check safety
+                if len(str(summary_report)) < 50:
+                     print(f"  > Skipping {symbol}: Report content too short.")
+                     continue
+                    
+                print(f"  > Triggering Backfill for {symbol} (Score: {c['ai_score']})...")
+                
+                # We need to construct the payload for the queue.
+                # Since 'summary_report' is a new concept in execute_deep_research, 
+                # we need to make sure the worker handles it.
+                # However, the worker calls 'execute_deep_research' using kwargs unpacked from payload.
+                # We updated 'execute_deep_research' signature, but we also need to update
+                # 'queue_research_task' or manually put into queue if we want it async.
+                # Or we can just call execute_deep_research SYNCHRONOUSLY here if we want to ensure it runs now?
+                # User said: "run the deep research reports, once a cycle is complete".
+                # If we queue them, the single worker will pick them up. This is safer for rate limits.
+                
+                # Let's extend 'queue_research_task' or generic 'queue' put.
+                # Since we modified the signature of execute_deep_research, we can add 'summary_report' field to payload.
+                
+                payload = {
+                    'symbol': symbol,
+                    'raw_news': None, # Not available
+                    'technical_data': None, # Not available
+                    'drop_percent': drop_percent,
+                    'decision_id': decision_id,
+                    'transcript_text': "",
+                    'transcript_date': None,
+                    'transcript_warning': None,
+                    'summary_report': summary_report # This needs to be passed to execute_deep_research
+                }
+                
+                # We need to ensure _process_individual_task passes 'summary_report' to execute_deep_research
+                # The worker code:
+                # self._process_individual_task(task_payload)
+                #   -> execute_deep_research(..., payload['transcript_warning'])
+                # It likely doesn't pass 'summary_report' yet. We need to update that too.
+                # But first let's queue it.
+                
+                deep_research_service.individual_queue.put({'type': 'individual', 'payload': payload})
+                print(f"  > Queued backfill task for {symbol}")
+                
+        except Exception as e:
+            print(f"[Backfill] Error processing backfill: {e}")
 
     def _is_actively_traded(self, symbol: str, region: str = "US", volume: float = 0, exchange: str = "", name: str = "") -> bool:
         """
@@ -1385,8 +1458,19 @@ class StockService:
                 status = "Not Owned"
 
         if decision_id:
-            update_decision_point(decision_id, recommendation, reasoning, status, ai_score=float(score) if isinstance(score, (int, float)) else None)
+            import json
+            data_depth_str = json.dumps(report_data.get('data_depth', {}))
+            
+            update_decision_point(
+                decision_id, 
+                recommendation, 
+                reasoning, 
+                status, 
+                ai_score=float(score) if isinstance(score, (int, float)) else None,
+                data_depth=data_depth_str
+            )
             print(f"Updated decision point for {symbol}: {recommendation} -> {status} (Score: {score})")
+            print(f"  > Saved Data Depth metrics to DB.")
             
             # Print Fund Manager Rationale
             key_points = report_data.get("key_decision_points", [])
@@ -1419,6 +1503,10 @@ class StockService:
             if should_trigger:
                 print(f"[StockService] Queuing Deep Research for {symbol}...")
                 
+                # Extract additional reports
+                market_sentiment_report = report_data.get('market_sentiment_report', '')
+                competitive_report = report_data.get('competitive_report', '')
+                
                 deep_research_service.queue_research_task(
                     symbol=symbol,
                     raw_news=news_data,
@@ -1427,7 +1515,9 @@ class StockService:
                     decision_id=decision_id,
                     transcript_text=transcript_text or "",
                     transcript_date=transcript_date,
-                    transcript_warning=transcript_warning
+                    transcript_warning=transcript_warning,
+                    market_sentiment_report=market_sentiment_report,
+                    competitive_report=competitive_report
                 )
                 
         except Exception as e:

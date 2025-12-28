@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import sqlite3
 import pandas as pd
 import yfinance as yf
@@ -38,35 +39,62 @@ def main():
     benchmarks = ['^GSPC', '^DJI', '^GDAXI']
     all_symbols = unique_symbols + benchmarks
     
-    # 1. Batch Download History (1 Year should cover recent decisions)
-    print(f"Batch fetching data for {len(all_symbols)} symbols (including benchmarks)...")
-    
-    # Chunking symbols to avoid URL length issues or API limits
-    chunk_size = 100
+    # Cache Configuration
+    CACHE_FILE = os.path.join("data", "yfinance_cache.pkl")
+    CACHE_DURATION = 6 * 3600  # 6 hours
+
     all_history = pd.DataFrame()
+    cache_valid = False
+
+    if os.path.exists(CACHE_FILE):
+        # Check file age
+        file_age = time.time() - os.path.getmtime(CACHE_FILE)
+        if file_age < CACHE_DURATION:
+            print(f"Loading data from cache ({file_age/3600:.1f}h old)...")
+            try:
+                all_history = pd.read_pickle(CACHE_FILE)
+                if not all_history.empty:
+                    cache_valid = True
+            except Exception as e:
+                print(f"Error loading cache: {e}")
     
-    for i in range(0, len(all_symbols), chunk_size):
-        chunk = all_symbols[i:i+chunk_size]
-        print(f"  Downloading chunk {i}-{i+len(chunk)}...")
-        try:
-             # Using threads=True for speed
-            data = yf.download(chunk, period="1y", progress=False, threads=True, group_by='ticker')
-            if not data.empty:
-                if len(chunk) == 1:
-                     # If single ticker, yfinance returns dataframe with columns 'Open', 'Close' etc.
-                     # We need to make it MultiIndex to be consistent if possible, or just handle it.
-                     # Easiest is to add ticker as top level level if it's missing
-                     if isinstance(data.columns, pd.Index) and not isinstance(data.columns, pd.MultiIndex):
-                         # Create MultiIndex
-                         iterables = [[chunk[0]], data.columns]
-                         data.columns = pd.MultiIndex.from_product(iterables, names=['Ticker', 'Price'])
-                
-                if all_history.empty:
-                    all_history = data
-                else:
-                    all_history = pd.concat([all_history, data], axis=1)
-        except Exception as e:
-            print(f"Error downloading chunk: {e}")
+    if not cache_valid:
+        # 1. Batch Download History (1 Year should cover recent decisions)
+        print(f"Cache miss or expired. Batch fetching data for {len(all_symbols)} symbols (including benchmarks)...")
+        
+        # Chunking symbols to avoid URL length issues or API limits
+        chunk_size = 100
+        
+        for i in range(0, len(all_symbols), chunk_size):
+            chunk = all_symbols[i:i+chunk_size]
+            print(f"  Downloading chunk {i}-{i+len(chunk)}...")
+            try:
+                 # Using threads=True for speed
+                data = yf.download(chunk, period="1y", progress=False, threads=True, group_by='ticker')
+                if not data.empty:
+                    if len(chunk) == 1:
+                         # If single ticker, yfinance returns dataframe with columns 'Open', 'Close' etc.
+                         # We need to make it MultiIndex to be consistent if possible, or just handle it.
+                         # Easiest is to add ticker as top level level if it's missing
+                         if isinstance(data.columns, pd.Index) and not isinstance(data.columns, pd.MultiIndex):
+                             # Create MultiIndex
+                             iterables = [[chunk[0]], data.columns]
+                             data.columns = pd.MultiIndex.from_product(iterables, names=['Ticker', 'Price'])
+                    
+                    if all_history.empty:
+                        all_history = data
+                    else:
+                        all_history = pd.concat([all_history, data], axis=1)
+            except Exception as e:
+                print(f"Error downloading chunk: {e}")
+
+        # Save to cache
+        if not all_history.empty:
+             try:
+                 all_history.to_pickle(CACHE_FILE)
+                 print("Data cached successfully.")
+             except Exception as e:
+                 print(f"Error caching data: {e}")
 
     report_data = []
     
@@ -176,6 +204,16 @@ def main():
             else:
                 bench_data[f"{bench_name} 1W"] = "-"
 
+        deep_research_verdict = d.get('deep_research_verdict')
+        batch_id = d.get('batch_id')
+        batch_winner = d.get('batch_winner')
+        
+        batch_status = "-"
+        if batch_winner:
+            batch_status = "🏆 WINNER"
+        elif batch_id:
+            batch_status = "Compared"
+
         row = {
             "Date": decision_dt.strftime("%Y-%m-%d"),
             "Symbol": symbol,
@@ -185,6 +223,8 @@ def main():
             "Price @ Dec": f"{price_at_decision:.2f}" if price_at_decision else "-",
             "Price +1W": f"{week_later_price:.2f}" if week_later_price else "-",
             "Performance": f"{perf_pct:+.2f}%" if price_at_decision and week_later_price else "-",
+            "Verdict": deep_research_verdict if deep_research_verdict else "-",
+            "Batch": batch_status,
             "Status": status
         }
         # Add benchmark data
@@ -203,7 +243,7 @@ def main():
     LIMIT = 100
     shown_data = report_data[:LIMIT]
     
-    headers = ["Date", "Symbol", "Market", "Score", "Rec", "Price @ Dec", "Price +1W", "Performance", "SP500 1W", "Dow 1W", "DAX 1W", "Status"]
+    headers = ["Date", "Symbol", "Market", "Score", "Rec", "Price @ Dec", "Price +1W", "Performance", "SP500 1W", "Dow 1W", "DAX 1W", "Verdict", "Batch", "Status"]
     widths = {h: len(h) for h in headers}
     for row in shown_data:
         for h in headers:

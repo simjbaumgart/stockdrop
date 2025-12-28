@@ -1,14 +1,3 @@
-def get_git_version():
-    """
-    Retrieves the current git version (tag + hash).
-    """
-    import subprocess
-    try:
-        version = subprocess.check_output(["git", "describe", "--tags", "--always"], stderr=subprocess.STDOUT).decode("utf-8").strip()
-        return version
-    except Exception:
-        return "unknown"
-
 import re
 from dateutil import parser
 
@@ -56,6 +45,7 @@ def prune_data(data, max_words=3):
                         keys_to_remove.append(key)
             elif isinstance(value, (dict, list)):
                 prune_data(value, max_words)
+                # Optional: Remove empty dicts/lists? User didn't ask, keeping them.
         
         for key in keys_to_remove:
             del data[key]
