@@ -79,7 +79,7 @@ async def run_trade_report_update():
     """
     Updates the trade_report_full.csv every 5 minutes.
     """
-    import generate_trade_report
+    from scripts.core import generate_trade_report
     while True:
         try:
             print(f"[Scheduler] Updating Trade Report CSV... {datetime.now().strftime('%H:%M:%S')}")
