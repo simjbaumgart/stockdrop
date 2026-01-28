@@ -94,6 +94,24 @@ View the dashboard at `http://localhost:8000`.
 
 ---
 
+## 📊 Performance Analysis
+
+We analyze the performance of the AI Council's `deep_research_verdict` by comparing the price at recommendation vs. the price 1 week later.
+
+### ROI Distribution by Verdict
+![ROI Violin Plot](docs/images/violin_plot.png)
+
+### Summary Statistics (ROI %)
+
+| Verdict | Count | Mean | Median | Min | Max |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **HARD_AVOID** | 6 | -15.08% | -3.24% | -99.84% | 19.65% |
+| **SPECULATIVE_BUY** | 34 | 3.53% | 6.45% | -99.36% | 68.01% |
+| **STRONG_BUY** | 3 | 6.29% | -1.69% | -8.94% | 29.49% |
+| **WAIT_FOR_STABILIZATION** | 96 | 3.79% | 1.56% | -39.93% | 65.61% |
+
+---
+
 ## ⚠️ Disclaimer
 **THIS SOFTWARE IS FOR EDUCATIONAL AND RESEARCH PURPOSES ONLY.**
 It is NOT financial advice. The "decisions" made by the AI agents are simulations. Trading stocks involves significant risk of capital loss. Do not trade based on these outputs.
