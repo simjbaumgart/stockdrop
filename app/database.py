@@ -503,6 +503,7 @@ def get_unbatched_candidates_by_date(date_str: str) -> List[dict]:
             AND deep_research_verdict IS NOT NULL 
             AND deep_research_verdict != '' 
             AND deep_research_verdict != '-'
+            AND (recommendation IN ('BUY', 'STRONG BUY', 'SPECULATIVE BUY') OR recommendation LIKE '%BUY%')
             AND (batch_id IS NULL OR batch_id = '')
             ORDER BY ai_score DESC
         ''', (date_str,))
@@ -558,6 +559,7 @@ def get_distinct_dates_with_unbatched_candidates() -> List[str]:
             WHERE deep_research_verdict IS NOT NULL 
             AND deep_research_verdict != '' 
             AND deep_research_verdict != '-'
+            AND (recommendation IN ('BUY', 'STRONG BUY', 'SPECULATIVE BUY') OR recommendation LIKE '%BUY%')
             AND (batch_id IS NULL OR batch_id = '')
         ''')
         

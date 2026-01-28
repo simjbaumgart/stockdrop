@@ -1,0 +1,154 @@
+[
+  {
+    "id": "4533386",
+    "type": "news",
+    "attributes": {
+      "publishOn": "2025-12-19T06:47:32-05:00",
+      "isLockedPro": false,
+      "commentCount": 0,
+      "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2217849566/image_2217849566.jpg",
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {},
+      "title": "Apple-Google potential AI partnership, tech stocks gaining, among Wedbush's top 10 tech predictions for 2026",
+      "isPaywalled": false
+    },
+    "relationships": {
+      "author": {
+        "data": {
+          "id": "54324280",
+          "type": "newsAuthorUser"
+        }
+      },
+      "sentiments": {
+        "data": []
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "544",
+            "type": "tag"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": [
+          {
+            "id": "764439",
+            "type": "tag"
+          },
+          {
+            "id": "777536",
+            "type": "tag"
+          }
+        ]
+      }
+    },
+    "links": {
+      "self": "/news/4533386-apple-google-potential-ai-partnership-tech-stocks-gaining-among-wedbushs-top-10-tech-predictions-for-2026"
+    }
+  },
+  {
+    "id": "4533342",
+    "type": "news",
+    "attributes": {
+      "publishOn": "2025-12-19T04:50:05-05:00",
+      "isLockedPro": false,
+      "commentCount": 2,
+      "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2230807736/image_2230807736.jpg",
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {},
+      "title": "Japan plans its largest data center hub with 3.1 GW capacity in Nanto city",
+      "isPaywalled": false
+    },
+    "relationships": {
+      "author": {
+        "data": {
+          "id": "54324280",
+          "type": "newsAuthorUser"
+        }
+      },
+      "sentiments": {
+        "data": []
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "544",
+            "type": "tag"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": [
+          {
+            "id": "764439",
+            "type": "tag"
+          }
+        ]
+      }
+    },
+    "links": {
+      "self": "/news/4533342-japan-plans-its-largest-data-center-hub-with-31-gw-capacity-in-nanto-city"
+    }
+  },
+  {
+    "id": "4533117",
+    "type": "news",
+    "attributes": {
+      "publishOn": "2025-12-18T14:48:55-05:00",
+      "isLockedPro": false,
+      "commentCount": 35,
+      "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2214959014/image_2214959014.jpg",
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {},
+      "title": "Amazon, Google, Microsoft partner with US Energy Department to drive innovations through 'Genesis Mission'",
+      "isPaywalled": false
+    },
+    "relationships": {
+      "author": {
+        "data": {
+          "id": "59792192",
+          "type": "newsAuthorUser"
+        }
+      },
+      "sentiments": {
+        "data": []
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "544",
+            "type": "tag"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": [
+          {
+            "id": "764439",
+            "type": "tag"
+          },
+          {
+            "id": "777536",
+            "type": "tag"
+          }
+        ]
+      }
+    },
+    "links": {
+      "self": "/news/4533117-amazon-google-microsoft-partner-with-us-energy-department-to-drive-innovations-through-genesis-mission"
+    }
+  }
+]

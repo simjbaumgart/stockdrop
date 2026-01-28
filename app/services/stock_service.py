@@ -2,6 +2,7 @@ import pandas as pd
 import os
 import sqlite3
 import json
+import requests
 import yfinance as yf
 from typing import List, Dict, Set, Any, Optional
 from datetime import datetime, timedelta
@@ -20,6 +21,23 @@ from app.services.drive_service import drive_service
 from app.services.benzinga_service import benzinga_service
 from app.services.yahoo_ticker_resolver import YahooTickerResolver
 from app.services.deep_research_service import deep_research_service
+from app.services.seeking_alpha_service import seeking_alpha_service
+
+# FIX: Bypass SSL verification for NLTK download inside DefeatBeta (Global Fix)
+import ssl
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    pass
+else:
+    ssl._create_default_https_context = _create_unverified_https_context
+
+try:
+    from defeatbeta_api.data.ticker import Ticker
+except ImportError:
+    print("DefeatBeta not installed or import failed.")
+    Ticker = None
+
 
 
 class StockService:
@@ -168,6 +186,7 @@ class StockService:
         
         # Batch Candidates for Deep Research (Deprecated)
         # self.deep_research_candidates = []
+
 
     def get_indices(self) -> Dict:
         # Try fetching from TradingView first
@@ -598,6 +617,7 @@ class StockService:
                 SELECT * FROM decision_points 
                 WHERE date(timestamp) = ? 
                 AND ai_score >= 70 
+                AND (recommendation LIKE '%BUY%' OR recommendation LIKE '%STRONG BUY%')
                 AND (deep_research_verdict IS NULL OR deep_research_verdict = '' OR deep_research_verdict = '-' OR deep_research_verdict LIKE 'UNKNOWN%')
             """
             cursor.execute(query, (date_str,))
@@ -705,7 +725,7 @@ class StockService:
             # Suffix mapping for yfinance
             yf_symbol = self._resolve_yfinance_ticker(symbol, region, exchange, name)
             
-            # Use yfinance for quick volume check
+            # Use yfinance for quick volume check with shared session
             ticker = yf.Ticker(yf_symbol)
             hist = ticker.history(period="5d")
             
@@ -849,6 +869,13 @@ class StockService:
             "image": str
         }
         """
+        # --- SEEKING ALPHA (Local Context) ---
+        try:
+            sa_counts = seeking_alpha_service.get_counts(symbol)
+            print(f"  > Seeking Alpha (Local): {sa_counts['total']} articles (Analysis: {sa_counts['analysis']}, News: {sa_counts['news']}, PR: {sa_counts['pr']}, WSB: {sa_counts['wsb']} [{sa_counts['wsb_date']}])")
+        except Exception as e:
+            print(f"  > Seeking Alpha (Local): Error getting counts ({e})")
+
         news_items = []
         massive_items = []
         other_items = []
@@ -892,6 +919,19 @@ class StockService:
                 print(f"Error fetching Benzinga news: {e}")
         else:
              print(f"  > Skipping Massive/Benzinga for non-US region: {region}")
+             
+        # --- MARKET NEWS INTEGRATION (US ONLY) ---
+        if region == "US" or region == "America":
+             try:
+                 market_news = benzinga_service.get_market_news(limit=5)
+                 if market_news:
+                     print(f"  > Fetched {len(market_news)} Market Context articles (SPY/DIA/QQQ).")
+                     for item in market_news:
+                         # Tag as Market News so ResearchService knows
+                         item['provider'] = 'Market News (Benzinga)'
+                         massive_items.append(item)
+             except Exception as e:
+                 print(f"Error fetching market news: {e}")
 
 
         # Resolve yfinance ticker for news ensuring we don't pick up colliding US stocks
@@ -1134,7 +1174,9 @@ class StockService:
             # 1. Try DefeatBeta First
             print(f"[StockService] Fetching transcript for {symbol} from DefeatBeta...")
             try:
-                from defeatbeta_api.data.ticker import Ticker
+                if Ticker is None:
+                    raise ImportError("DefeatBeta Ticker not available")
+                
                 db_ticker = Ticker(symbol)
                 transcripts = db_ticker.earning_call_transcripts()
                 df = transcripts.get_transcripts_list()

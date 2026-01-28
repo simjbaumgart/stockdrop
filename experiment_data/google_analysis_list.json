@@ -1,0 +1,173 @@
+[
+  {
+    "id": "4854256",
+    "type": "article",
+    "attributes": {
+      "publishOn": "2025-12-18T02:30:01-05:00",
+      "isLockedPro": false,
+      "commentCount": 21,
+      "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2203181480/image_2203181480.jpg",
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {},
+      "title": "Why I Am Buying Alphabet Over Microsoft",
+      "isPaywalled": false,
+      "structuredInsights": null
+    },
+    "relationships": {
+      "author": {
+        "data": {
+          "id": "107188",
+          "type": "author"
+        }
+      },
+      "sentiments": {
+        "data": [
+          {
+            "id": "687211",
+            "type": "sentiment"
+          },
+          {
+            "id": "687541",
+            "type": "sentiment"
+          }
+        ]
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "544",
+            "type": "tag"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": []
+      }
+    },
+    "links": {
+      "self": "/article/4854256-microsoft-vs-alphabet-buying-goog-stock-over-msft"
+    }
+  },
+  {
+    "id": "4854010",
+    "type": "article",
+    "attributes": {
+      "publishOn": "2025-12-17T08:30:44-05:00",
+      "isLockedPro": false,
+      "commentCount": 12,
+      "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2246202362/image_2246202362.jpg",
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {},
+      "title": "Alphabet: From AI Victim To AI King",
+      "isPaywalled": false,
+      "structuredInsights": null
+    },
+    "relationships": {
+      "author": {
+        "data": {
+          "id": "107751",
+          "type": "author"
+        }
+      },
+      "sentiments": {
+        "data": [
+          {
+            "id": "687029",
+            "type": "sentiment"
+          },
+          {
+            "id": "687031",
+            "type": "sentiment"
+          },
+          {
+            "id": "687030",
+            "type": "sentiment"
+          }
+        ]
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "544",
+            "type": "tag"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": []
+      }
+    },
+    "links": {
+      "self": "/article/4854010-alphabet-from-ai-victim-to-ai-king"
+    }
+  },
+  {
+    "id": "4853635",
+    "type": "article",
+    "attributes": {
+      "publishOn": "2025-12-16T07:28:48-05:00",
+      "isLockedPro": false,
+      "commentCount": 20,
+      "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2233579000/image_2233579000.jpg",
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {},
+      "title": "Alphabet Emerging As The Winner In The AI Race, But Is Overvalued (Rating Downgrade)",
+      "isPaywalled": false,
+      "structuredInsights": null
+    },
+    "relationships": {
+      "author": {
+        "data": {
+          "id": "104084",
+          "type": "author"
+        }
+      },
+      "sentiments": {
+        "data": [
+          {
+            "id": "686557",
+            "type": "sentiment"
+          },
+          {
+            "id": "686559",
+            "type": "sentiment"
+          },
+          {
+            "id": "686558",
+            "type": "sentiment"
+          },
+          {
+            "id": "686925",
+            "type": "sentiment"
+          }
+        ]
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "544",
+            "type": "tag"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": []
+      }
+    },
+    "links": {
+      "self": "/article/4853635-alphabet-emerging-as-the-winner-in-the-ai-race"
+    }
+  }
+]

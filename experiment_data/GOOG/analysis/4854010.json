@@ -1,0 +1,846 @@
+{
+  "data": {
+    "id": "4854010",
+    "type": "fullArticle",
+    "attributes": {
+      "publishOn": "2025-12-17T08:30:44-05:00",
+      "isLockedPro": false,
+      "commentCount": 2,
+      "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2246202362/image_2246202362.jpg",
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "investing-ideas": {
+          "id": 10727,
+          "slug": "investing-ideas",
+          "kind": "general",
+          "path": "/stock-ideas",
+          "title": "Stock Ideas",
+          "sasource": "theme_breadcrumb"
+        },
+        "long-ideas": {
+          "id": 1936,
+          "slug": "long-ideas",
+          "kind": "breadcrumb",
+          "path": "/stock-ideas/long-ideas",
+          "title": "Long Ideas",
+          "sasource": "theme_breadcrumb"
+        },
+        "garp-theme": {
+          "id": 143031,
+          "slug": "garp-theme",
+          "kind": "common",
+          "non_theme": true
+        },
+        "alpha-rich-earnings": {
+          "id": 115192,
+          "slug": "alpha-rich-earnings",
+          "kind": "common",
+          "non_theme": true
+        },
+        "high-quality-business-model": {
+          "id": 548906,
+          "slug": "high-quality-business-model",
+          "kind": "common",
+          "non_theme": true
+        },
+        "industry-disruption": {
+          "id": 142821,
+          "slug": "industry-disruption",
+          "kind": "common",
+          "non_theme": true
+        },
+        "industry-leader": {
+          "id": 548926,
+          "slug": "industry-leader",
+          "kind": "common",
+          "non_theme": true
+        },
+        "margin-expansion": {
+          "id": 142841,
+          "slug": "margin-expansion",
+          "kind": "common",
+          "non_theme": true
+        },
+        "market-share-growth": {
+          "id": 115272,
+          "slug": "market-share-growth",
+          "kind": "common",
+          "non_theme": true
+        },
+        "new-earning-asset": {
+          "id": 548986,
+          "slug": "new-earning-asset",
+          "kind": "common",
+          "non_theme": true
+        },
+        "new-market-opportunity": {
+          "id": 142871,
+          "slug": "new-market-opportunity",
+          "kind": "common",
+          "non_theme": true
+        },
+        "new-operational-efficiencies-synergies": {
+          "id": 142881,
+          "slug": "new-operational-efficiencies-synergies",
+          "kind": "common",
+          "non_theme": true
+        },
+        "sum-of-the-parts": {
+          "id": 142991,
+          "slug": "sum-of-the-parts",
+          "kind": "common",
+          "non_theme": true
+        },
+        "magnificent-7": {
+          "id": 777536,
+          "slug": "magnificent-7",
+          "kind": "general"
+        },
+        "alpha-rich-opportunity": {
+          "id": 114692,
+          "slug": "alpha-rich-opportunity",
+          "kind": "general"
+        },
+        "alpha-rich-investment-style": {
+          "id": 114682,
+          "slug": "alpha-rich-investment-style",
+          "kind": "general"
+        },
+        "more-tags": {
+          "id": 698258,
+          "slug": "more-tags",
+          "kind": "general"
+        },
+        "us": {
+          "id": 326,
+          "slug": "us",
+          "kind": "common",
+          "non_theme": true
+        },
+        "communication-services": {
+          "id": 50,
+          "slug": "communication-services",
+          "kind": "sector",
+          "path": "/sectors/communication-services",
+          "title": "Communication Services",
+          "sasource": "theme_breadcrumb"
+        }
+      },
+      "title": "Alphabet: From AI Victim To AI King",
+      "summary": [
+        "Alphabet (GOOG/GOOGL) is upgraded to Strong Buy, driven by robust AI leadership, diversified growth, and resilient core businesses.\n        ",
+        "GOOG delivered a record quarter with $102.35B revenue (+16% Y/Y), $2.87 GAAP EPS, and surging Google Cloud and subscription revenues.\n        ",
+        "Massive CapEx ($91\u201393B) targets AI infrastructure, with strategic stakes in SpaceX, Waymo, and Anthropic bolstering future optionality.\n        ",
+        "Key risks include unchecked AI spending and regulatory threats to search and ad tech dominance, but current prospects are the strongest in years.\n        "
+      ],
+      "isPaywalled": false,
+      "structuredInsights": null,
+      "lastModified": "2025-12-17T08:34:39-05:00",
+      "isModerated": false,
+      "availableTranslations": [
+        "ko",
+        "zh"
+      ],
+      "locale": "en",
+      "closestTradingDate": "2025-12-17",
+      "beforeOpeningHours": true,
+      "isEarningsSlides": false,
+      "isExclusive": true,
+      "isTranscript": false,
+      "excludedByTag": false,
+      "transcriptPath": null,
+      "likesCount": 0,
+      "disabledStatus": "allowed",
+      "disabledMessage": null,
+      "status": "published",
+      "disclosure": "<p id=\"a-disclosure\"><b>Analyst\u2019s Disclosure:</b><span>I/we have a beneficial long position in the shares of GOOG either through stock ownership, options, or other derivatives.</span><span id=\"top-business-disclosure\"> I wrote this article myself, and it expresses my own opinions. I am not receiving compensation for it (other than from Seeking Alpha). I have no business relationship with any company whose stock is mentioned in this article. </span></p><p id='a-disclosure-more'><strong>Seeking Alpha's Disclosure:</strong> Past performance is no guarantee of future results. No recommendation or advice is being given as to whether any investment is suitable for a particular investor. Any views or opinions expressed above may not reflect those of Seeking Alpha as a whole. Seeking Alpha is not a licensed securities dealer, broker or US investment adviser or investment bank. Our analysts are third party authors that include both professional investors and individual investors who may not be licensed or certified by any institute or regulatory body.</p>",
+      "articleActionableItem": null,
+      "inEmbargo": false,
+      "isNoindex": false,
+      "isNoarchive": true,
+      "content": "<p data-eci=\"true\"><figure class=\"getty-figure\" data-type=\"getty-image\"><picture> <img src=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2246202362/image_2246202362.jpg?io=getty-c-w630\" alt=\"Google Announces Largest-Ever Germany Investment\" data-id=\"2246202362\" data-type=\"getty-image\" width=\"1536\" height=\"1025\" srcset=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2246202362/image_2246202362.jpg?io=getty-c-w1536 1536w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2246202362/image_2246202362.jpg?io=getty-c-w1280 1280w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2246202362/image_2246202362.jpg?io=getty-c-w1080 1080w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2246202362/image_2246202362.jpg?io=getty-c-w750 750w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2246202362/image_2246202362.jpg?io=getty-c-w640 640w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2246202362/image_2246202362.jpg?io=getty-c-w480 480w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2246202362/image_2246202362.jpg?io=getty-c-w320 320w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2246202362/image_2246202362.jpg?io=getty-c-w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 132px), (max-width: 1199px) calc(100vw - 666px), (max-width: 1307px) calc(100vw - 708px), 600px\" fetchpriority=\"high\"> </picture><figcaption><p class=\"item-caption\"></p> <p class=\"item-credits\">Sean Gallup/Getty Images News</p></figcaption></figure></p> <div class=\"inline_ad_placeholder\"></div> <h2>Introduction</h2> <p>It has been a while since I last reviewed <strong>Alphabet (NASDAQ:</strong> <span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/GOOG\" title=\"Alphabet Inc.\">GOOG</a></span>/<span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/GOOGL\" title=\"Alphabet Inc.\">GOOGL</a></span><strong>)</strong> and stamped it with <a href=\"https://seekingalpha.com/article/4775410-investors-undervalue-alphabet-stock-monopoly-and-youtube-streaming-leadership\">a Buy rating back in April</a>. It is fair to say that the company</p>",
+      "quickInsights": [
+        {
+          "question": "How does Alphabet\u2019s AI and cloud strategy impact its growth outlook?",
+          "answer": "GOOG\u2019s AI-first infrastructure and Google Cloud\u2019s $155B backlog position it for outsized growth, with potential for a 50% revenue jump in 2026."
+        },
+        {
+          "question": "What valuation supports the Strong Buy rating for GOOG?",
+          "answer": "GOOG trades at a 30.5x Non-GAAP P/E, with Cloud valued at ~$600B and Moonshots at ~$100B, offering growth at a reasonable price as core search remains resilient."
+        },
+        {
+          "question": "What are the most material risks to Alphabet\u2019s thesis?",
+          "answer": "Unchecked AI CapEx could pressure FCF, and regulatory rulings may erode search and ad tech dominance, especially if forced divestitures occur or default search payments are banned."
+        }
+      ],
+      "twitContent": "Alphabet: From AI Victim To AI King $GOOG $GOOGL $GOOG:CA #markets #finance #trading https://seekingalpha.com/article/4854010-alphabet-from-ai-victim-to-ai-king?source=tweet",
+      "innerMarketing": "",
+      "marketingBullet": "",
+      "isMpwLocked": true,
+      "isReit": false,
+      "videoData": null,
+      "marketingBulletVariant": null,
+      "marketingBio": null,
+      "audioDuration": 710.496,
+      "originalTitle": "Alphabet: From AI Victim To AI King"
+    },
+    "relationships": {
+      "author": {
+        "data": {
+          "id": "107751",
+          "type": "author"
+        }
+      },
+      "sentiments": {
+        "data": []
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "544",
+            "type": "tag"
+          },
+          {
+            "id": "148893",
+            "type": "tag"
+          },
+          {
+            "id": "764529",
+            "type": "tag"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": [
+          {
+            "id": "554436",
+            "type": "tag"
+          },
+          {
+            "id": "786492",
+            "type": "tag"
+          },
+          {
+            "id": "786162",
+            "type": "tag"
+          }
+        ]
+      },
+      "otherTags": {
+        "data": [
+          {
+            "id": "780904",
+            "type": "tag"
+          },
+          {
+            "id": "1936",
+            "type": "tag"
+          },
+          {
+            "id": "143031",
+            "type": "tag"
+          },
+          {
+            "id": "115192",
+            "type": "tag"
+          },
+          {
+            "id": "548906",
+            "type": "tag"
+          },
+          {
+            "id": "142821",
+            "type": "tag"
+          },
+          {
+            "id": "548926",
+            "type": "tag"
+          },
+          {
+            "id": "142841",
+            "type": "tag"
+          },
+          {
+            "id": "115272",
+            "type": "tag"
+          },
+          {
+            "id": "548986",
+            "type": "tag"
+          },
+          {
+            "id": "142871",
+            "type": "tag"
+          },
+          {
+            "id": "142881",
+            "type": "tag"
+          },
+          {
+            "id": "142991",
+            "type": "tag"
+          },
+          {
+            "id": "554436",
+            "type": "tag"
+          },
+          {
+            "id": "786492",
+            "type": "tag"
+          },
+          {
+            "id": "786162",
+            "type": "tag"
+          },
+          {
+            "id": "544",
+            "type": "tag"
+          },
+          {
+            "id": "148893",
+            "type": "tag"
+          },
+          {
+            "id": "764529",
+            "type": "tag"
+          },
+          {
+            "id": "777536",
+            "type": "tag"
+          },
+          {
+            "id": "17335",
+            "type": "tag"
+          },
+          {
+            "id": "606619",
+            "type": "tag"
+          },
+          {
+            "id": "10727",
+            "type": "tag"
+          },
+          {
+            "id": "114692",
+            "type": "tag"
+          },
+          {
+            "id": "114682",
+            "type": "tag"
+          },
+          {
+            "id": "698258",
+            "type": "tag"
+          },
+          {
+            "id": "326",
+            "type": "tag"
+          }
+        ]
+      },
+      "coAuthors": {
+        "data": []
+      },
+      "presentations": {
+        "data": []
+      },
+      "updates": {
+        "data": []
+      },
+      "corrections": {
+        "data": []
+      }
+    },
+    "links": {
+      "self": "/article/4854010-alphabet-from-ai-victim-to-ai-king",
+      "canonical": "https://seekingalpha.com/article/4854010-alphabet-from-ai-victim-to-ai-king",
+      "uriImage": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2246202362/image_2246202362.jpg?io=getty-c-w1536",
+      "schemaImage": [
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2246202362/image_2246202362.jpg?io=getty-c-w1280",
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2246202362/image_2246202362.jpg?io=getty-c-crop-16-9",
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2246202362/image_2246202362.jpg?io=getty-c-crop-4-3"
+      ]
+    }
+  },
+  "included": [
+    {
+      "id": "107751",
+      "type": "author",
+      "attributes": {
+        "company": null,
+        "slug": "louis-gerard",
+        "userId": 61549894,
+        "tagId": 780904,
+        "bio": "<p>As a detail-oriented investor with a strong foundation in finance and business writing, I focus on analyzing undervalued and disliked companies or industries that have strong fundamentals and good cash flows. I have a particular interest in sectors such as Oil&Gas and consumer goods. Basically, anything that has been unloved for unjustified reasons that could offer substantial returns. Energy Transfer is one of those companies that I came across when no one wanted to touch it and now I can't resolve myself to sell it. I will always focus more on long-term value investing but I can sometimes lose myself in possible deal arbitrage such as with Microsoft/ Activision Blizzard, Spirit Airlines/Jetblue (that one still hurts), and Nippon/U.S. Steel (perfect exit at $50.19). I tend to shun businesses that I can't understand either high-tech or certain consumer goods such as fashion (give me a Levi's jeans). I don't understand why anyone would invest in cryptocurrencies as well. Through Seeking Alpha, I aim to connect with like-minded investors, share insights, and build a collaborative community of individuals seeking superior returns and informed decision-making, currently on a quest to review every public company.</p>",
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/061/549/894/small_pic.png",
+          "medium": "https://seekingalpha.com/images/users_profile/061/549/894/medium_pic.png",
+          "big": "https://seekingalpha.com/images/users_profile/061/549/894/big_pic.png",
+          "extra_large": "https://seekingalpha.com/images/users_profile/061/549/894/extra_large_pic.png"
+        },
+        "nick": "Louis Gerard",
+        "deactivated": null,
+        "memberSince": 2024,
+        "isRss": false,
+        "contributorSince": 2024,
+        "followersCount": 1659
+      },
+      "relationships": {
+        "user": {
+          "data": {
+            "id": "61549894",
+            "type": "user"
+          }
+        },
+        "userBioTags": {
+          "data": [
+            {
+              "id": "1041828",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1041829",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1041830",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1041831",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1041832",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1041833",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1041834",
+              "type": "userBioTag"
+            }
+          ]
+        },
+        "authorResearch": {
+          "data": null
+        }
+      },
+      "links": {
+        "self": "/author/louis-gerard",
+        "profileUrl": "/author/louis-gerard",
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "id": "544",
+      "type": "tag",
+      "attributes": {
+        "slug": "goog",
+        "name": "GOOG",
+        "company": "Alphabet Inc.",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "NASDAQ",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/GOOG"
+      }
+    },
+    {
+      "id": "148893",
+      "type": "tag",
+      "attributes": {
+        "slug": "googl",
+        "name": "GOOGL",
+        "company": "Alphabet Inc.",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "NASDAQ",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/GOOGL"
+      }
+    },
+    {
+      "id": "764529",
+      "type": "tag",
+      "attributes": {
+        "slug": "goog:ca",
+        "name": "GOOG:CA",
+        "company": "Alphabet Inc.",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "TSX",
+        "fundTypeId": 8,
+        "isDefunct": false,
+        "currency": "CAD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/GOOG:CA"
+      }
+    },
+    {
+      "id": "554436",
+      "type": "tag",
+      "attributes": {
+        "slug": "space",
+        "name": "SPACE",
+        "company": "SpaceX",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "Private",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/SPACE"
+      }
+    },
+    {
+      "id": "786492",
+      "type": "tag",
+      "attributes": {
+        "slug": "waymo",
+        "name": "WAYMO",
+        "company": "Waymo LLC",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "Private",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/WAYMO"
+      }
+    },
+    {
+      "id": "786162",
+      "type": "tag",
+      "attributes": {
+        "slug": "anthro",
+        "name": "ANTHRO",
+        "company": "Anthropic",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "Private",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/ANTHRO"
+      }
+    },
+    {
+      "id": "780904",
+      "type": "tag",
+      "attributes": {
+        "slug": "louis-gerard",
+        "name": "Louis Gerard",
+        "company": null,
+        "tagKind": "Tags::AuthorTag"
+      },
+      "links": {
+        "self": "/author/louis-gerard"
+      }
+    },
+    {
+      "id": "1936",
+      "type": "tag",
+      "attributes": {
+        "slug": "long-ideas",
+        "name": "Long Ideas",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=long-ideas"
+      }
+    },
+    {
+      "id": "143031",
+      "type": "tag",
+      "attributes": {
+        "slug": "garp-theme",
+        "name": "GARP-THEME",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=garp-theme"
+      }
+    },
+    {
+      "id": "115192",
+      "type": "tag",
+      "attributes": {
+        "slug": "alpha-rich-earnings",
+        "name": "Alpha-Rich Earnings",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=alpha-rich-earnings"
+      }
+    },
+    {
+      "id": "548906",
+      "type": "tag",
+      "attributes": {
+        "slug": "high-quality-business-model",
+        "name": "High Quality Business Model",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=high-quality-business-model"
+      }
+    },
+    {
+      "id": "142821",
+      "type": "tag",
+      "attributes": {
+        "slug": "industry-disruption",
+        "name": "Industry Disruption",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=industry-disruption"
+      }
+    },
+    {
+      "id": "548926",
+      "type": "tag",
+      "attributes": {
+        "slug": "industry-leader",
+        "name": "Industry Leader",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=industry-leader"
+      }
+    },
+    {
+      "id": "142841",
+      "type": "tag",
+      "attributes": {
+        "slug": "margin-expansion",
+        "name": "Margin Expansion",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=margin-expansion"
+      }
+    },
+    {
+      "id": "115272",
+      "type": "tag",
+      "attributes": {
+        "slug": "market-share-growth",
+        "name": "Market Share Growth",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=market-share-growth"
+      }
+    },
+    {
+      "id": "548986",
+      "type": "tag",
+      "attributes": {
+        "slug": "new-earning-asset",
+        "name": "New Earning Asset",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=new-earning-asset"
+      }
+    },
+    {
+      "id": "142871",
+      "type": "tag",
+      "attributes": {
+        "slug": "new-market-opportunity",
+        "name": "New Market Opportunity",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=new-market-opportunity"
+      }
+    },
+    {
+      "id": "142881",
+      "type": "tag",
+      "attributes": {
+        "slug": "new-operational-efficiencies-synergies",
+        "name": "New Operational Efficiencies / Synergies",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=new-operational-efficiencies-synergies"
+      }
+    },
+    {
+      "id": "142991",
+      "type": "tag",
+      "attributes": {
+        "slug": "sum-of-the-parts",
+        "name": "Sum of the Parts",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=sum-of-the-parts"
+      }
+    },
+    {
+      "id": "777536",
+      "type": "tag",
+      "attributes": {
+        "slug": "magnificent-7",
+        "name": "Magnificent 7",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/magnificent-7"
+      }
+    },
+    {
+      "id": "17335",
+      "type": "tag",
+      "attributes": {
+        "slug": "sa-exclusive",
+        "name": "SA Exclusive",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/sa-exclusive"
+      }
+    },
+    {
+      "id": "606619",
+      "type": "tag",
+      "attributes": {
+        "slug": "quality-multiplier",
+        "name": "Quality Multiplier",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/quality-multiplier"
+      }
+    },
+    {
+      "id": "10727",
+      "type": "tag",
+      "attributes": {
+        "slug": "investing-ideas",
+        "name": "Investing Ideas",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/investing-ideas"
+      }
+    },
+    {
+      "id": "114692",
+      "type": "tag",
+      "attributes": {
+        "slug": "alpha-rich-opportunity",
+        "name": "Alpha-Rich Opportunity",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/alpha-rich-opportunity"
+      }
+    },
+    {
+      "id": "114682",
+      "type": "tag",
+      "attributes": {
+        "slug": "alpha-rich-investment-style",
+        "name": "Alpha-Rich Investment Style",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/alpha-rich-investment-style"
+      }
+    },
+    {
+      "id": "698258",
+      "type": "tag",
+      "attributes": {
+        "slug": "more-tags",
+        "name": "More Tags",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/more-tags"
+      }
+    },
+    {
+      "id": "326",
+      "type": "tag",
+      "attributes": {
+        "slug": "us",
+        "name": "United States",
+        "company": null,
+        "tagKind": "Tags::Country"
+      },
+      "links": {
+        "self": "/articles?filters=us"
+      }
+    }
+  ]
+}

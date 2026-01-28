@@ -1,0 +1,281 @@
+{
+  "data": {
+    "attributes": {
+      "publishOn": "2025-12-15T08:39:47-05:00",
+      "isLockedPro": false,
+      "commentCount": 0,
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "activist-target": {
+          "id": 115132,
+          "non_theme": true
+        },
+        "industry-leader": {
+          "id": 548926,
+          "non_theme": true
+        },
+        "margin-contraction": {
+          "id": 548966,
+          "non_theme": true
+        },
+        "alpha-rich-opportunity": {
+          "id": 114692
+        },
+        "more-tags": {
+          "id": 698258
+        },
+        "us": {
+          "id": 326,
+          "non_theme": true
+        },
+        "consumer-staples": {
+          "id": 30
+        }
+      },
+      "title": "Lamb Weston: Stability Returns, But Performance Is Far From Impressive",
+      "summary": [
+        "Lamb Weston has stabilized after a sharp share price decline, but its 2026 outlook remains underwhelming with flat sales and declining EBITDA.",
+        "Despite activist involvement and cost-cutting efforts, LW\u2019s earnings power is stable at just above $3 per share, with little imminent margin improvement expected.",
+        "Net debt remains high at nearly $3.9 billion, and leverage is elevated, limiting flexibility despite modest cash flow gains and reduced capital spending.",
+        "Shares have rebounded 20% since spring, now trading at a 20x earnings multiple, but compelling upside requires a return to meaningful margin growth."
+      ],
+      "isPaywalled": false,
+      "structuredInsights": null,
+      "lastModified": "2025-12-15T08:42:23-05:00",
+      "isModerated": false,
+      "availableTranslations": [],
+      "closestTradingDate": "2025-12-15",
+      "beforeOpeningHours": true,
+      "isEarningsSlides": false,
+      "isExclusive": true,
+      "isTranscript": false,
+      "excludedByTag": false,
+      "transcriptPath": null,
+      "likesCount": 0,
+      "disabledMessage": null,
+      "disclosure": "<p id=\"a-disclosure\"><b>Analyst\u2019s Disclosure:</b><span>I/we have no stock, option or similar derivative position in any of the companies mentioned, and no plans to initiate any such positions within the next 72 hours.</span><span id=\"top-business-disclosure\"> I wrote this article myself, and it expresses my own opinions. I am not receiving compensation for it (other than from Seeking Alpha). I have no business relationship with any company whose stock is mentioned in this article. </span></p><p id='a-disclosure-more'><strong>Seeking Alpha's Disclosure:</strong> Past performance is no guarantee of future results. No recommendation or advice is being given as to whether any investment is suitable for a particular investor. Any views or opinions expressed above may not reflect those of Seeking Alpha as a whole. Seeking Alpha is not a licensed securities dealer, broker or US investment adviser or investment bank. Our analysts are third party authors that include both professional investors and individual investors who may not be licensed or certified by any institute or regulatory body.</p>",
+      "articleActionableItem": null,
+      "inEmbargo": false,
+      "isNoindex": false,
+      "isNoarchive": true,
+      "content": "<p data-eci=\"true\"><figure class=\"getty-figure\" data-type=\"getty-image\"><picture> <img src=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2192062267/image_2192062267.jpg?io=getty-c-w630\" alt=\"Lamb Weston headquarters in Eagle, Idaho, USA. Lamb Weston is a premier potato and fries company.\" data-id=\"2192062267\" data-type=\"getty-image\" width=\"1536\" height=\"1024\" srcset=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2192062267/image_2192062267.jpg?io=getty-c-w1536 1536w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2192062267/image_2192062267.jpg?io=getty-c-w1280 1280w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2192062267/image_2192062267.jpg?io=getty-c-w1080 1080w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2192062267/image_2192062267.jpg?io=getty-c-w750 750w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2192062267/image_2192062267.jpg?io=getty-c-w640 640w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2192062267/image_2192062267.jpg?io=getty-c-w480 480w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2192062267/image_2192062267.jpg?io=getty-c-w320 320w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2192062267/image_2192062267.jpg?io=getty-c-w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 132px), (max-width: 1199px) calc(100vw - 666px), (max-width: 1307px) calc(100vw - 708px), 600px\" fetchpriority=\"high\"> </picture><figcaption><p class=\"item-caption\"> </p> <p class=\"item-credits\">JHVEPhoto/iStock Editorial via Getty Images</p></figcaption></figure></p> <div class=\"inline_ad_placeholder\"></div> <p>In March I <a href=\"https://seekingalpha.com/article/4763886-lamb-weston-painful-potatoes\">concluded</a> that the situation around <strong>Lamb Weston (<span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/LW\" title=\"Lamb Weston Holdings, Inc.\">LW</a></span>)</strong> was painful, after shares were cut in half in less than two years time due to declining margins and compressed earnings multiples.</p> <p>Dealing<span class=\"paywall-full-content invisible\"> with significant volatility and leverage employed, the risk-reward here looked a lot more compelling, despite soft guidance for 2025. This was in part the result of inflationary pressure and market share losses, as activist involvement pushing for changes looked compelling.</span></p> <p class=\"paywall-full-content invisible\">Despite efforts to improve the positioning, cash flow generation, and a general intent to reduce costs, the 2026 outlook is rather underwhelming here, which makes it that while stability has arrived, the situation is far from inspiring here.</p> <h2 class=\"paywall-full-content invisible\">Potatoes &amp; Frozen Goos</h2> <p class=\"paywall-full-content invisible\">Lamb Weston was spun off from Conagra Brands (<a href=\"https://seekingalpha.com/symbol/CAG\" title=\"Conagra Brands, Inc.\">CAG</a>) a decade ago, back in 2016, to be more precise. The company is a producer of frozen foods, potatoes in particular, as well as a wide range of related products, including fries and potatoes, but also twisters and dippers.</p> <p class=\"paywall-full-content invisible\">The company produces and distributes such products to restaurants through the wholesale channel as well as retail outlets. Fries play a key role in this, being one of the most popular items on the restaurant menu while being the most profitable one as well.</p> <p class=\"paywall-full-content invisible\">Just over a $3 billion business at the time of the separation, the company has doubled sales in just about 7 years, although the company has found itself in a rougher space in recent years. The company is the market leader in the North American frozen potato category and the second-largest player in the global frozen potato category, operating dozens of factories across the globe while employing about 10,000 workers to produce all these products.</p> <p class=\"paywall-full-content invisible\">The company has doubled sales, driven by a combination of continued demand for fries, inflationary pressures, and some M&amp;A efforts. Operating margins have come in anywhere between ten and twenty percent of sales, while minimal share buybacks have been delivered upon lately.</p> <p class=\"paywall-full-content invisible\">When I last looked at the shares in the spring of this year, shares had lost half their value from a 2023 peak to levels at $51. Following the purchase of the European joint venture, the company originally guided for fiscal 2024 sales around $6.8 billion. EBITDA was seen near $1.5 billion, with earnings seen around $5.20 per share. However, the results came in short compared to the guidance, driven by softer inflationary trends but also market share losses.</p> <p class=\"paywall-full-content invisible\">After missing on the 2024 results, Lamb Weston guided for 2025 sales at a midpoint of $6.7 billion. EBITDA had been seen down to a midpoint of $1.43 billion with earnings seen around $4.60 per share, all while net debt of $3.7 billion was rather substantial, also amidst continued net capital investments, buybacks, and dividends. By the spring, the full-year sales guidance was cut to $6.4 billion, yet worse is that EBITDA was seen down to just $1.19 billion, with earnings seen in the low $3s, as the general situation was rather uncertain.</p> <p class=\"paywall-full-content invisible\">Down to $51 per share, the market value of Lamb Weston fell to $7.3 billion, yet at the same time, net debt was up to $4.0 billion, for a 3.4 times leverage ratio, with investors feeling at unease with the situation. Believing sustainable operating margins to come in around 10-12% of sales, I originally believed that in between a prevailing revenue base and the situation at large, sustainable earnings were actually seen just below $3 per share. That would imply that shares traded around a market multiple.</p> <p class=\"paywall-full-content invisible\">However, some changes were arriving, with Jana Partners getting on board, yet in between reasonable multiples for sustainable earnings, I was hoping for an entry point in the forties, which unfortunately has not materialized.</p> <h2 class=\"paywall-full-content invisible\">A Modest Recovery</h2> <p class=\"paywall-full-content invisible\">Since the spring, shares of Lamb Weston have generally recovered a bit, having traded in a $50-$65 range over the past half a year, currently exchanging hands at $60 per share.</p> <p class=\"paywall-full-content invisible\">Over the summer, Lamb Weston <a href=\"https://investors.lambweston.com/news-releases/2025/07-23-2025-130151206\" rel=\"nofollow\">reported</a> pretty flat results for the fiscal year 2025, with revenues down minimally to $6.45 billion, although sales growth returned in the fourth quarter. Adjusted EBITDA fell from $1.42 billion in 2024 to $1.22 billion, a bit stronger than guided for after a generally stronger fourth-quarter performance. Adjusted earnings came in at $3.35 per share, all a bit stronger than guided for.</p> <p class=\"paywall-full-content invisible\">Somewhat worrisome is that fiscal 2026 sales were seen as flat at $6.45 billion; however, adjusted EBITDA is seen down to a midpoint of $1.1 billion, weighing on earnings here. Capital spending is seen around $500 million; this number is actually down a bit from a $638 million number in 2025, all while net debt remains very substantial at $4.0 billion. While the company targets cash and cost-cutting efforts, little of these are seen in terms of the improvements in terms of the 2026 guidance.</p> <p class=\"paywall-full-content invisible\">In September, Lamb Weston <a href=\"https://investors.lambweston.com/news-releases/2025/09-30-2025-133029182\" rel=\"noopener\">reported</a> first quarter sales that were flat, as well as a 1% increase in quarterly adjusted EBITDA to $302 million, with adjusted earnings down four pennies to $0.74 per share. Amidst some modest cash flow improvements, net debt is down to less than $3.9 billion, as all aspects of the outlook are reaffirmed here.</p> <h2 class=\"paywall-full-content invisible\">And Now?</h2> <p class=\"paywall-full-content invisible\">Frankly, Lamb Weston seems to be on a more stable footing here, with volumes gradually recovering, although the quick-service restaurant segment is performing softer as well, with consumers across the world still strapped by inflationary trends, even as its goods become more affordable.</p> <p class=\"paywall-full-content invisible\">By now, I am still erring a bit on the cautious side. Since the spring, shares have gained some 20%, having moved up from the fifty mark to the sixty mark, while little has changed amidst a rather uninspiring 2026 outlook provided. With earnings power seen as stable at $3 and change per share this year, a high-teens earnings multiple has re-rated to 20 times again, all amidst a non-inspiring performance, but definitely some sense of stability arriving here.</p> <div class=\"before_last_paragraph-piano-placeholder paywall-full-content invisible\"></div> <p class=\"paywall-full-content invisible\">The stabilization aspects give room for comfort, but that does not necessarily equate to appeal being evident here; as for that, some real (margin) growth has to return.</p>",
+      "quickInsights": null,
+      "twitContent": "Lamb Weston: Stability Returns, But Performance Is Far From Impressive $LW #investing #business #stocks https://seekingalpha.com/article/4853353-lamb-weston-stability-returns-but-performance-far-from-impressive?source=tweet",
+      "innerMarketing": "<p>If you like to see more ideas, please subscribe to the premium service \"Value in Corporate Events\" <a href=\"https://seekingalpha.com/mp/486-value-in-corporate-events/articles\">here</a> and try the free trial. In this service we cover major earnings events, M&amp;A, IPOs and other significant corporate events with actionable ideas. Furthermore, we provide coverage of situations and names on request!</p><p></p>",
+      "marketingBullet": "Looking for a helping hand in the market? Members of Value In Corporate Events get exclusive ideas and guidance to navigate any climate.  <a href='/checkout/mp_486&source=mp_marketing_text_top' sasource='mp_marketing_text_top'>Learn More \u00bb</a>",
+      "isReit": false,
+      "videoData": null,
+      "marketingBulletVariant": "I am The Value Investor. I've been researching financial markets for 10+ years using major business events as an indicator of future performance. I run the investing group <a href=\"/checkout/mp_486?source=content_type%3Areact%7Curl_first_level%3Asa-source-first-level-url%7Csection%3Aauthor_bullets%3A1057833%7Csection_asset%3Aauthor_bullets%3A-value-in-corporate-events\" data-test-id=\"author-custom-template-link\">Value In Corporate Events</a>",
+      "marketingBio": "The Value Investor has a Master of Science with specialization in financial markets and a decade of experience tracking companies via catalytic company events.\n\nAs the leader of the investing group <a href=\"/checkout/mp_486?source=content_type%3Areact%7Curl_first_level%3Asa-source-first-level-url%7Csection%3Aauthor_root%3A1057833%7Csection_asset%3Aauthor_root%3A-value-in-corporate-events\" data-test-id=\"author-custom-template-link\">Value In Corporate Events</a> they provide members with opportunities to capitalize on IPOs, mergers & acquisitions, earnings reports and changes in corporate capital allocation. Coverage includes 10 major events a month with an eye towards finding the best opportunities. <a href=\"/checkout/mp_486?source=content_type%3Areact%7Curl_first_level%3Asa-source-first-level-url%7Csection%3Aauthor_root%3A1057833%7Csection_asset%3Aauthor_root%3A-value-in-corporate-events\" data-test-id=\"author-custom-template-link\">Learn more</a>.",
+      "audioDuration": 476.16,
+      "originalTitle": "Lamb Weston: Stability Returns, But Performance Is Far From Impressive"
+    },
+    "relationships": {
+      "author": {
+        "data": {}
+      },
+      "sentiments": {
+        "data": [
+          {}
+        ]
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "571204"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": [
+          {},
+          {},
+          {},
+          {},
+          {
+            "id": "571204"
+          },
+          {},
+          {},
+          {},
+          {},
+          {
+            "id": "326"
+          }
+        ]
+      },
+      "coAuthors": {
+        "data": []
+      },
+      "presentations": {
+        "data": []
+      },
+      "updates": {
+        "data": []
+      },
+      "corrections": {
+        "data": []
+      }
+    },
+    "links": {
+      "schemaImage": []
+    }
+  },
+  "included": [
+    {
+      "id": "486",
+      "attributes": {
+        "createdAt": "2015-04-29T11:34:36-04:00",
+        "title": "Value In Corporate Events",
+        "reviewCount": 0,
+        "shortPitch": "Finding value that gets unlocked in M&A, IPOs and other corporate events",
+        "categories": [],
+        "serviceAssistantIds": [],
+        "inAppPurchasesAllowedInIos": false,
+        "inAppPurchasesAllowedInAndroid": false,
+        "activeSubscriptionsCount": -6,
+        "showPriceAlert": false,
+        "description": "There are many events in a company's life that lead to pivots and, for nimble investors, opportunities: IPOs, mergers & acquisitions, big and small; earnings reports, and capital allocation moves (share offerings, bond deals, etc.). Value In Corporate Events focuses on events like these. I cover 10 major events a month with an eye towards finding the best opportunities. ",
+        "landingPageColor": null,
+        "adUnits": [],
+        "tempData": {},
+        "price": 30.0,
+        "annualPriceWithDiscount": 399.2,
+        "monthlyPlanEnabled": false,
+        "chatEnabled": true,
+        "allowAffiliateDiscount": false,
+        "showHeadlines": true
+      },
+      "relationships": {
+        "author": {
+          "data": {}
+        }
+      }
+    },
+    {
+      "attributes": {
+        "company": null,
+        "userId": 1057833,
+        "tagId": 35604,
+        "bio": "<p>The Value Investor has a Master of Science with specialization in financial markets and a decade of experience tracking companies via catalytic company events.</p>\r\nAs the leader of the investing group <a href=\"https://seekingalpha.com/checkout?service_id=mp_486\">Value In Corporate Events</a> they provide members with opportunities to capitalize on IPOs, mergers & acquisitions, earnings reports and changes in corporate capital allocation. Coverage includes 10 major events a month with an eye towards finding the best opportunities. <a href=\"https://seekingalpha.com/checkout?service_id=mp_486\">Learn more</a>.",
+        "image": {},
+        "deactivated": null,
+        "memberSince": 2011,
+        "isRss": false,
+        "contributorSince": 2011,
+        "followersCount": 27397
+      },
+      "relationships": {
+        "user": {
+          "data": {}
+        },
+        "userBioTags": {
+          "data": [
+            {},
+            {},
+            {}
+          ]
+        },
+        "authorResearch": {
+          "data": {
+            "id": "486"
+          }
+        }
+      },
+      "links": {
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "id": "571204",
+      "attributes": {
+        "company": "Lamb Weston Holdings, Inc.",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "id": "326",
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "articleId": 4853353,
+        "createdAt": "2025-12-15T08:39:47.000-05:00",
+        "typeId": 2
+      },
+      "relationships": {
+        "article": {
+          "data": {}
+        },
+        "tag": {
+          "data": {
+            "id": "571204"
+          }
+        }
+      }
+    }
+  ]
+}

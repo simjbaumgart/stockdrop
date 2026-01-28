@@ -1,0 +1,1663 @@
+{
+  "data": {
+    "id": "4533437",
+    "type": "fullArticle",
+    "attributes": {
+      "publishOn": "2022-08-12T02:45:00-04:00",
+      "isLockedPro": false,
+      "commentCount": 7,
+      "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1321485109/image_1321485109.jpg",
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "us-economy": {
+          "id": 614456,
+          "slug": "us-economy",
+          "kind": "general",
+          "path": "/market-outlook/us-economy",
+          "title": "US Economy"
+        },
+        "macro-view": {
+          "id": 12627,
+          "slug": "macro-view",
+          "kind": "general"
+        },
+        "financial-advisors": {
+          "id": 567578,
+          "slug": "financial-advisors",
+          "kind": "general",
+          "path": "/investing-strategy/financial-advisors",
+          "title": "Advisor"
+        }
+      },
+      "title": "Inflation Debates - YoY Vs. MoM",
+      "summary": [
+        "A surprisingly controversial debate broke out in recent days when Joe Biden said there was no inflation. He was, of course, referring to the month over month reading which showed a slight decline in prices.",
+        "The BLS measures inflation on a monthly basis and while the 12-month year-over-year comparison showed a 8.5% increase the monthly price was flat on a month over month basis.",
+        "There are a bunch of problems with this focus on monthly inflation. First, we adjust inflation data specifically because short-term data is very noisy."
+      ],
+      "isPaywalled": false,
+      "structuredInsights": null,
+      "lastModified": "2022-08-12T02:45:02-04:00",
+      "isModerated": false,
+      "availableTranslations": [],
+      "locale": "en",
+      "closestTradingDate": "2022-08-12",
+      "beforeOpeningHours": true,
+      "isEarningsSlides": false,
+      "isExclusive": false,
+      "isTranscript": false,
+      "excludedByTag": false,
+      "transcriptPath": null,
+      "likesCount": 15,
+      "disabledStatus": "allowed",
+      "disabledMessage": null,
+      "status": "published",
+      "disclosure": "",
+      "articleActionableItem": null,
+      "inEmbargo": false,
+      "isNoindex": false,
+      "isNoarchive": true,
+      "content": "<p data-eci=\"true\"><figure class=\"getty-figure\" data-type=\"getty-image\"><picture> <img src=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1321485109/image_1321485109.jpg?io=getty-c-w750\" alt=\"The word Inflation three dimensional in yellow. Surface in concrete and cracked, in yellow, ref\u00f6ection on the floor. The background in black.\" data-id=\"1321485109\" data-type=\"getty-image\" width=\"5142px\" height=\"3000px\" srcset=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1321485109/image_1321485109.jpg?io=getty-c-w1536 1536w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1321485109/image_1321485109.jpg?io=getty-c-w1280 1280w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1321485109/image_1321485109.jpg?io=getty-c-w1080 1080w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1321485109/image_1321485109.jpg?io=getty-c-w750 750w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1321485109/image_1321485109.jpg?io=getty-c-w640 640w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1321485109/image_1321485109.jpg?io=getty-c-w480 480w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1321485109/image_1321485109.jpg?io=getty-c-w320 320w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1321485109/image_1321485109.jpg?io=getty-c-w240 240w\" sizes=\"(max-width: 768px) calc(100vw - 36px), (max-width: 1024px) calc(100vw - 132px), (max-width: 1200px) calc(66.6vw - 72px), 600px\" fetchpriority=\"high\"> </picture><figcaption><p class=\"item-caption\"> </p> <p>Torsten Asmus</p></figcaption></figure></p> <div class=\"inline_ad_placeholder\"></div> <p>A surprisingly controversial debate broke out in recent days when Joe Biden said there was no inflation. He was, of course, referring to the month over month reading which showed a slight decline in prices. The BLS measures inflation on a<span class=\"paywall-full-content invisible\"> monthly basis and while the 12-month year-over-year comparison showed an 8.5% increase the monthly price was flat on a month over month basis.</span></p> <p class=\"paywall-full-content invisible\">Twitter seemed especially argumentative about this point. I know, I know \u2013 it\u2019s shocking to hear that people on Twitter argue. But it seemed politically motivated to me and so here\u2019s a dollop of apolitical perspective on this debate.</p> <p class=\"paywall-full-content invisible\">There are a bunch of problems with this focus on monthly inflation. First, we adjust inflation data specifically because short-term data is very noisy. For instance, the BLS prefers to look at core inflation readings that strip out volatile items like food and energy.</p> <p class=\"paywall-full-content invisible\">This is because focusing on short-term volatile items can give you a false understanding of what\u2019s really going on with longer-term trends. This doesn\u2019t mean the headline reading is meaningless \u2013 it just means that you can get a better perspective using core. Core inflation was actually up modestly this month.</p> <p class=\"paywall-full-content invisible\">In addition to focusing on core items that reduce the volatility of short-term data<strong> <a href=\"https://www.bls.gov/osmr/research-papers/2022/pdf/ec220070.pdf\" data-id=\"https://www.bls.gov/osmr/research-papers/2022/pdf/ec220070.pdf\" rel=\"nofollow\">the BLS specifically states</a> </strong>that <strong>longer-term trimmed mean</strong> measures are more reliable:</p> <p class=\"paywall-full-content invisible\"><figure class=\"regular-img-figure paywall-full-content invisible\" contenteditable=\"false\"><picture> <img src=\"https://static.seekingalpha.com/uploads/2022/8/12/saupload_Dumb.png?io=w640\" alt=\"BLS long-term trimmed mean measures\" contenteditable=\"false\" loading=\"lazy\"> </picture><figcaption><p class=\"item-caption\"> </p></figcaption></figure></p> <p class=\"paywall-full-content invisible\">So Biden committed two statistical inflation sins here. Not only did he use headline inflation, but he used the short-term version to present that data. In other words, he didn't use the trimmed mean data, and he used the short-term data. Double no-no when presenting the data in an objective manner.</p> <p class=\"paywall-full-content invisible\"><em>This is part of why Biden\u2019s comments were controversial. He seemed to be distracting from the long-term more reliable trend data to promote a narrative based on the less reliable short-term trend data.</em></p> <p class=\"paywall-full-content invisible\">Now, this doesn\u2019t mean that the monthly data is completely meaningless. After all, the long-term trend could be exaggerating the narrative at this specific juncture. That is, if inflation has peaked, as I believe it has, then talking about 8.5% inflation is a rear-view mirror talking point and can make people feel worse about things than they really are and will be.</p> <p class=\"paywall-full-content invisible\">On the other hand, it\u2019s the weighted average of the data that matters most. So, for instance, inflation has been trending higher for most of the last 2 years. If you\u2019d used a 6-month measure of inflation to define the current trend then you\u2019d have been more worried about potentially entrenched inflation. On the other, other hand, if you\u2019d used monthly readings, you would have consistently said inflation was starting to trend down, when in fact that was just short-term noise.</p> <p class=\"paywall-full-content invisible\"><figure class=\"regular-img-figure paywall-full-content invisible\" contenteditable=\"false\"><picture> <img src=\"https://static.seekingalpha.com/uploads/2022/8/12/saupload_MoM-580x349.png?io=w640\" alt=\"MoM vs. YoY debate\" contenteditable=\"false\" loading=\"lazy\"> </picture><figcaption><p class=\"item-caption\">MoM vs. YoY debate <span>(Author)</span></p></figcaption></figure></p> <p class=\"paywall-full-content invisible\">Of course, if the weighted change had been more significant this month then Biden might have a stronger argument. For example, if inflation was -10% on a monthly basis then the weighted long-term average would have shifted materially lower and that might be cause for serious alarm.</p> <p class=\"paywall-full-content invisible\">This was essentially what happened in late 2008 during the financial crisis and it was an unusual period where short-term data was not just noisy data, but a real sign of serious problems. That\u2019s obviously not what\u2019s happening now.</p> <p class=\"paywall-full-content invisible\">So yes, it\u2019s reassuring to see inflation moderating on a monthly basis. But the long-term trend in long-term trimmed mean data is still high so it\u2019s far too early to celebrate.</p> <p class=\"paywall-full-content invisible\">So, now when you decide to present inflation data at this week\u2019s BBQ with your friends you can provide a more pragmatic perspective by emphasizing that while the monthly inflation reading was 0%, it\u2019s generally more reliable to use a long-term trimmed mean measure to give us a broader perspective of the broader trends in inflation.</p> <p class=\"paywall-full-content invisible\"><em><a href=\"https://www.pragcap.com/inflation-debates-yoy-vs-mom/\" rel=\"nofollow\">Original Post</a></em></p> <div class=\"before_last_paragraph-piano-placeholder paywall-full-content invisible\"></div> <p class=\"paywall-full-content invisible\"><strong>Editor's Note:</strong> The summary bullets for this article were chosen by Seeking Alpha editors.</p>",
+      "quickInsights": null,
+      "twitContent": "Inflation Debates - YoY Vs. MoM $AGZ $BIL $DFVL-DEFUNCT-34916 #economy #stockmarket #finance https://seekingalpha.com/article/4533437-inflation-debates-yoy-vs-mom?source=tweet",
+      "innerMarketing": "",
+      "marketingBullet": "",
+      "isReit": false,
+      "videoData": null,
+      "marketingBulletVariant": null,
+      "marketingBio": null,
+      "audioDuration": null,
+      "originalTitle": "Inflation Debates - YoY Vs. MoM"
+    },
+    "relationships": {
+      "author": {
+        "data": {
+          "id": "22600",
+          "type": "author"
+        }
+      },
+      "sentiments": {
+        "data": []
+      },
+      "primaryTickers": {
+        "data": []
+      },
+      "secondaryTickers": {
+        "data": [
+          {
+            "id": "11253",
+            "type": "tag"
+          },
+          {
+            "id": "332",
+            "type": "tag"
+          },
+          {
+            "id": "13904",
+            "type": "tag"
+          },
+          {
+            "id": "328",
+            "type": "tag"
+          },
+          {
+            "id": "330",
+            "type": "tag"
+          },
+          {
+            "id": "14640",
+            "type": "tag"
+          },
+          {
+            "id": "9599",
+            "type": "tag"
+          },
+          {
+            "id": "13903",
+            "type": "tag"
+          },
+          {
+            "id": "4063",
+            "type": "tag"
+          },
+          {
+            "id": "40281",
+            "type": "tag"
+          },
+          {
+            "id": "14920",
+            "type": "tag"
+          },
+          {
+            "id": "15079",
+            "type": "tag"
+          },
+          {
+            "id": "6155",
+            "type": "tag"
+          },
+          {
+            "id": "6154",
+            "type": "tag"
+          },
+          {
+            "id": "7886",
+            "type": "tag"
+          },
+          {
+            "id": "13905",
+            "type": "tag"
+          },
+          {
+            "id": "15313",
+            "type": "tag"
+          },
+          {
+            "id": "2456",
+            "type": "tag"
+          },
+          {
+            "id": "9026",
+            "type": "tag"
+          },
+          {
+            "id": "15077",
+            "type": "tag"
+          },
+          {
+            "id": "6153",
+            "type": "tag"
+          },
+          {
+            "id": "15078",
+            "type": "tag"
+          },
+          {
+            "id": "37451",
+            "type": "tag"
+          },
+          {
+            "id": "16334",
+            "type": "tag"
+          },
+          {
+            "id": "17774",
+            "type": "tag"
+          },
+          {
+            "id": "16335",
+            "type": "tag"
+          },
+          {
+            "id": "10661",
+            "type": "tag"
+          },
+          {
+            "id": "13902",
+            "type": "tag"
+          },
+          {
+            "id": "16374",
+            "type": "tag"
+          },
+          {
+            "id": "5977",
+            "type": "tag"
+          },
+          {
+            "id": "451585",
+            "type": "tag"
+          },
+          {
+            "id": "16372",
+            "type": "tag"
+          },
+          {
+            "id": "16371",
+            "type": "tag"
+          },
+          {
+            "id": "34916",
+            "type": "tag"
+          },
+          {
+            "id": "160505",
+            "type": "tag"
+          },
+          {
+            "id": "34915",
+            "type": "tag"
+          },
+          {
+            "id": "571185",
+            "type": "tag"
+          },
+          {
+            "id": "569760",
+            "type": "tag"
+          },
+          {
+            "id": "6688",
+            "type": "tag"
+          },
+          {
+            "id": "136021",
+            "type": "tag"
+          },
+          {
+            "id": "6687",
+            "type": "tag"
+          },
+          {
+            "id": "35911",
+            "type": "tag"
+          },
+          {
+            "id": "12802",
+            "type": "tag"
+          },
+          {
+            "id": "35693",
+            "type": "tag"
+          },
+          {
+            "id": "113652",
+            "type": "tag"
+          },
+          {
+            "id": "463325",
+            "type": "tag"
+          }
+        ]
+      },
+      "otherTags": {
+        "data": [
+          {
+            "id": "13115",
+            "type": "tag"
+          },
+          {
+            "id": "567952",
+            "type": "tag"
+          },
+          {
+            "id": "11253",
+            "type": "tag"
+          },
+          {
+            "id": "332",
+            "type": "tag"
+          },
+          {
+            "id": "13904",
+            "type": "tag"
+          },
+          {
+            "id": "328",
+            "type": "tag"
+          },
+          {
+            "id": "330",
+            "type": "tag"
+          },
+          {
+            "id": "14640",
+            "type": "tag"
+          },
+          {
+            "id": "9599",
+            "type": "tag"
+          },
+          {
+            "id": "13903",
+            "type": "tag"
+          },
+          {
+            "id": "4063",
+            "type": "tag"
+          },
+          {
+            "id": "40281",
+            "type": "tag"
+          },
+          {
+            "id": "14920",
+            "type": "tag"
+          },
+          {
+            "id": "15079",
+            "type": "tag"
+          },
+          {
+            "id": "6155",
+            "type": "tag"
+          },
+          {
+            "id": "6154",
+            "type": "tag"
+          },
+          {
+            "id": "7886",
+            "type": "tag"
+          },
+          {
+            "id": "13905",
+            "type": "tag"
+          },
+          {
+            "id": "15313",
+            "type": "tag"
+          },
+          {
+            "id": "2456",
+            "type": "tag"
+          },
+          {
+            "id": "9026",
+            "type": "tag"
+          },
+          {
+            "id": "15077",
+            "type": "tag"
+          },
+          {
+            "id": "6153",
+            "type": "tag"
+          },
+          {
+            "id": "15078",
+            "type": "tag"
+          },
+          {
+            "id": "37451",
+            "type": "tag"
+          },
+          {
+            "id": "16334",
+            "type": "tag"
+          },
+          {
+            "id": "17774",
+            "type": "tag"
+          },
+          {
+            "id": "16335",
+            "type": "tag"
+          },
+          {
+            "id": "10661",
+            "type": "tag"
+          },
+          {
+            "id": "13902",
+            "type": "tag"
+          },
+          {
+            "id": "16374",
+            "type": "tag"
+          },
+          {
+            "id": "5977",
+            "type": "tag"
+          },
+          {
+            "id": "451585",
+            "type": "tag"
+          },
+          {
+            "id": "16372",
+            "type": "tag"
+          },
+          {
+            "id": "16371",
+            "type": "tag"
+          },
+          {
+            "id": "34916",
+            "type": "tag"
+          },
+          {
+            "id": "160505",
+            "type": "tag"
+          },
+          {
+            "id": "34915",
+            "type": "tag"
+          },
+          {
+            "id": "571185",
+            "type": "tag"
+          },
+          {
+            "id": "569760",
+            "type": "tag"
+          },
+          {
+            "id": "6688",
+            "type": "tag"
+          },
+          {
+            "id": "136021",
+            "type": "tag"
+          },
+          {
+            "id": "6687",
+            "type": "tag"
+          },
+          {
+            "id": "35911",
+            "type": "tag"
+          },
+          {
+            "id": "12802",
+            "type": "tag"
+          },
+          {
+            "id": "35693",
+            "type": "tag"
+          },
+          {
+            "id": "113652",
+            "type": "tag"
+          },
+          {
+            "id": "463325",
+            "type": "tag"
+          },
+          {
+            "id": "614456",
+            "type": "tag"
+          },
+          {
+            "id": "9082",
+            "type": "tag"
+          },
+          {
+            "id": "12627",
+            "type": "tag"
+          },
+          {
+            "id": "567578",
+            "type": "tag"
+          }
+        ]
+      },
+      "coAuthors": {
+        "data": []
+      },
+      "presentations": {
+        "data": []
+      },
+      "updates": {
+        "data": []
+      },
+      "corrections": {
+        "data": []
+      }
+    },
+    "links": {
+      "self": "/article/4533437-inflation-debates-yoy-vs-mom",
+      "canonical": "https://seekingalpha.com/article/4533437-inflation-debates-yoy-vs-mom",
+      "uriImage": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1321485109/image_1321485109.jpg?io=getty-c-w1536",
+      "schemaImage": [
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1321485109/image_1321485109.jpg?io=getty-c-w1280",
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1321485109/image_1321485109.jpg?io=getty-c-crop-16-9",
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1321485109/image_1321485109.jpg?io=getty-c-crop-4-3"
+      ]
+    }
+  },
+  "included": [
+    {
+      "id": "22600",
+      "type": "author",
+      "attributes": {
+        "company": null,
+        "slug": "cullen-roche",
+        "userId": 324881,
+        "tagId": 13115,
+        "bio": "Mr. Roche is the founder of Discipline Funds, a provider of multi-asset low cost ETFs and financial advisory services. To learn more about Discipline Funds please see:<br>https://disciplinefunds.com/<br><p><br></p><p><br></p>",
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/000/324/881/small_pic.png",
+          "medium": "https://seekingalpha.com/images/users_profile/000/324/881/medium_pic.png",
+          "big": "https://seekingalpha.com/images/users_profile/000/324/881/big_pic.png",
+          "extra_large": "https://seekingalpha.com/images/users_profile/000/324/881/extra_large_pic.png"
+        },
+        "nick": "Cullen Roche",
+        "deactivated": null,
+        "memberSince": 2008,
+        "isRss": true,
+        "contributorSince": 2008,
+        "followersCount": 68897
+      },
+      "relationships": {
+        "user": {
+          "data": {
+            "id": "324881",
+            "type": "user"
+          }
+        },
+        "userBioTags": {
+          "data": [
+            {
+              "id": "24481",
+              "type": "userBioTag"
+            },
+            {
+              "id": "24491",
+              "type": "userBioTag"
+            },
+            {
+              "id": "24501",
+              "type": "userBioTag"
+            },
+            {
+              "id": "24511",
+              "type": "userBioTag"
+            }
+          ]
+        },
+        "authorResearch": {
+          "data": null
+        }
+      },
+      "links": {
+        "self": "/author/cullen-roche",
+        "profileUrl": "/author/cullen-roche",
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "id": "11253",
+      "type": "tag",
+      "attributes": {
+        "slug": "tbt",
+        "name": "TBT",
+        "company": "ProShares UltraShort 20+ Year Treasury ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/TBT"
+      }
+    },
+    {
+      "id": "332",
+      "type": "tag",
+      "attributes": {
+        "slug": "tlt",
+        "name": "TLT",
+        "company": "iShares 20+ Year Treasury Bond ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NASDAQ",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/TLT"
+      }
+    },
+    {
+      "id": "13904",
+      "type": "tag",
+      "attributes": {
+        "slug": "tmv",
+        "name": "TMV",
+        "company": "Direxion Daily 20+ Year Treasury Bear 3X Shares ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/TMV"
+      }
+    },
+    {
+      "id": "328",
+      "type": "tag",
+      "attributes": {
+        "slug": "ief",
+        "name": "IEF",
+        "company": "iShares 7-10 Year Treasury Bond ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NASDAQ",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/IEF"
+      }
+    },
+    {
+      "id": "330",
+      "type": "tag",
+      "attributes": {
+        "slug": "shy",
+        "name": "SHY",
+        "company": "iShares 1-3 Year Treasury Bond ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NASDAQ",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/SHY"
+      }
+    },
+    {
+      "id": "14640",
+      "type": "tag",
+      "attributes": {
+        "slug": "tbf",
+        "name": "TBF",
+        "company": "ProShares Short 20+ Year Treasury ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/TBF"
+      }
+    },
+    {
+      "id": "9599",
+      "type": "tag",
+      "attributes": {
+        "slug": "edv",
+        "name": "EDV",
+        "company": "Vanguard Extended Duration Treasury Index Fund ETF Shares",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/EDV"
+      }
+    },
+    {
+      "id": "13903",
+      "type": "tag",
+      "attributes": {
+        "slug": "tmf",
+        "name": "TMF",
+        "company": "Direxion Daily 20+ Year Treasury Bull 3X Shares ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/TMF"
+      }
+    },
+    {
+      "id": "4063",
+      "type": "tag",
+      "attributes": {
+        "slug": "pst",
+        "name": "PST",
+        "company": "ProShares UltraShort 7-10 Year Treasury ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/PST"
+      }
+    },
+    {
+      "id": "40281",
+      "type": "tag",
+      "attributes": {
+        "slug": "ttt",
+        "name": "TTT",
+        "company": "ProShares UltraPro Short 20+ Year Treasury ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/TTT"
+      }
+    },
+    {
+      "id": "14920",
+      "type": "tag",
+      "attributes": {
+        "slug": "zroz",
+        "name": "ZROZ",
+        "company": "PIMCO 25+ Year Zero Coupon U.S. Treasury Index Exchange-Traded Fund ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/ZROZ"
+      }
+    },
+    {
+      "id": "15079",
+      "type": "tag",
+      "attributes": {
+        "slug": "vglt",
+        "name": "VGLT",
+        "company": "Vanguard Long-Term Treasury Index Fund ETF Shares",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NASDAQ",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/VGLT"
+      }
+    },
+    {
+      "id": "6155",
+      "type": "tag",
+      "attributes": {
+        "slug": "tlh",
+        "name": "TLH",
+        "company": "iShares 10-20 Year Treasury Bond ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/TLH"
+      }
+    },
+    {
+      "id": "6154",
+      "type": "tag",
+      "attributes": {
+        "slug": "iei",
+        "name": "IEI",
+        "company": "iShares 3-7 Year Treasury Bond ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NASDAQ",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/IEI"
+      }
+    },
+    {
+      "id": "7886",
+      "type": "tag",
+      "attributes": {
+        "slug": "bil",
+        "name": "BIL",
+        "company": "State Street\u00ae SPDR\u00ae Bloomberg 1-3 Month T-Bill ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/BIL"
+      }
+    },
+    {
+      "id": "13905",
+      "type": "tag",
+      "attributes": {
+        "slug": "tyo",
+        "name": "TYO",
+        "company": "Direxion Daily 7-10 Year Treasury Bear 3X Shares ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/TYO"
+      }
+    },
+    {
+      "id": "15313",
+      "type": "tag",
+      "attributes": {
+        "slug": "ubt",
+        "name": "UBT",
+        "company": "ProShares Ultra 20+ Year Treasury ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/UBT"
+      }
+    },
+    {
+      "id": "2456",
+      "type": "tag",
+      "attributes": {
+        "slug": "ust",
+        "name": "UST",
+        "company": "ProShares Ultra 7-10 Year Treasury ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/UST"
+      }
+    },
+    {
+      "id": "9026",
+      "type": "tag",
+      "attributes": {
+        "slug": "govi",
+        "name": "GOVI",
+        "company": "Invesco Equal Weight 0-30 Year Treasury ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NASDAQ",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/GOVI"
+      }
+    },
+    {
+      "id": "15077",
+      "type": "tag",
+      "attributes": {
+        "slug": "vgsh",
+        "name": "VGSH",
+        "company": "Vanguard Short-Term Treasury Index Fund ETF Shares",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NASDAQ",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/VGSH"
+      }
+    },
+    {
+      "id": "6153",
+      "type": "tag",
+      "attributes": {
+        "slug": "shv",
+        "name": "SHV",
+        "company": "iShares 0\u20131 Year Treasury Bond ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NASDAQ",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/SHV"
+      }
+    },
+    {
+      "id": "15078",
+      "type": "tag",
+      "attributes": {
+        "slug": "vgit",
+        "name": "VGIT",
+        "company": "Vanguard Intermediate-Term Treasury Index Fund ETF Shares",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NASDAQ",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/VGIT"
+      }
+    },
+    {
+      "id": "37451",
+      "type": "tag",
+      "attributes": {
+        "slug": "govt",
+        "name": "GOVT",
+        "company": "iShares U.S. Treasury Bond ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "BATS",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/GOVT"
+      }
+    },
+    {
+      "id": "16334",
+      "type": "tag",
+      "attributes": {
+        "slug": "scho",
+        "name": "SCHO",
+        "company": "Schwab Short-Term U.S. Treasury ETF\u2122",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/SCHO"
+      }
+    },
+    {
+      "id": "17774",
+      "type": "tag",
+      "attributes": {
+        "slug": "tbx",
+        "name": "TBX",
+        "company": "ProShares Short 7-10 Year Treasury ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/TBX"
+      }
+    },
+    {
+      "id": "16335",
+      "type": "tag",
+      "attributes": {
+        "slug": "schr",
+        "name": "SCHR",
+        "company": "Schwab Intermediate-Term U.S. Treasury ETF\u2122",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/SCHR"
+      }
+    },
+    {
+      "id": "10661",
+      "type": "tag",
+      "attributes": {
+        "slug": "gsy",
+        "name": "GSY",
+        "company": "Invesco Ultra Short Duration ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/GSY"
+      }
+    },
+    {
+      "id": "13902",
+      "type": "tag",
+      "attributes": {
+        "slug": "tyd",
+        "name": "TYD",
+        "company": "Direxion Daily 7-10 Year Treasury Bull 3X Shares ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/TYD"
+      }
+    },
+    {
+      "id": "16374",
+      "type": "tag",
+      "attributes": {
+        "slug": "dtyl-defunct-16374",
+        "name": "DTYL",
+        "company": "iPath US Treasury 10-Year Bull ETN",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "BATS",
+        "fundTypeId": 1,
+        "isDefunct": true,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/DTYL-DEFUNCT-16374"
+      }
+    },
+    {
+      "id": "5977",
+      "type": "tag",
+      "attributes": {
+        "slug": "egf-defunct-5977",
+        "name": "EGF",
+        "company": "BlackRock Enhanced Government Fund Inc.",
+        "tagKind": "Tags::Ticker",
+        "equityType": "cef",
+        "exchange": "NYSE",
+        "fundTypeId": 3,
+        "isDefunct": true,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/EGF-DEFUNCT-5977"
+      }
+    },
+    {
+      "id": "451585",
+      "type": "tag",
+      "attributes": {
+        "slug": "vustx",
+        "name": "VUSTX",
+        "company": "Vanguard Long-Term Treasury Fund Investor Shares",
+        "tagKind": "Tags::Ticker",
+        "equityType": "mutual-funds",
+        "exchange": "MUTF",
+        "fundTypeId": 2,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/VUSTX"
+      }
+    },
+    {
+      "id": "16372",
+      "type": "tag",
+      "attributes": {
+        "slug": "dtus-defunct-16372",
+        "name": "DTUS",
+        "company": "iPath US Treasury 2-Year Bear ETN",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "BATS",
+        "fundTypeId": 1,
+        "isDefunct": true,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/DTUS-DEFUNCT-16372"
+      }
+    },
+    {
+      "id": "16371",
+      "type": "tag",
+      "attributes": {
+        "slug": "dtul-defunct-16371",
+        "name": "DTUL",
+        "company": "iPath US Treasury 2-year Bull ETN",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "BATS",
+        "fundTypeId": 1,
+        "isDefunct": true,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/DTUL-DEFUNCT-16371"
+      }
+    },
+    {
+      "id": "34916",
+      "type": "tag",
+      "attributes": {
+        "slug": "dfvl-defunct-34916",
+        "name": "DFVL",
+        "company": "iPath U.S. Treasury 5-Year Bull ETN",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "BATS",
+        "fundTypeId": 1,
+        "isDefunct": true,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/DFVL-DEFUNCT-34916"
+      }
+    },
+    {
+      "id": "160505",
+      "type": "tag",
+      "attributes": {
+        "slug": "tapr-defunct-160505",
+        "name": "TAPR",
+        "company": "Barclays Inverse US Treasury Composite ETN",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "BATS",
+        "fundTypeId": 1,
+        "isDefunct": true,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/TAPR-DEFUNCT-160505"
+      }
+    },
+    {
+      "id": "34915",
+      "type": "tag",
+      "attributes": {
+        "slug": "dfvs-defunct-34915",
+        "name": "DFVS",
+        "company": "iPath U.S. Treasury 5-Year Bear ETN",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "BATS",
+        "fundTypeId": 1,
+        "isDefunct": true,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/DFVS-DEFUNCT-34915"
+      }
+    },
+    {
+      "id": "571185",
+      "type": "tag",
+      "attributes": {
+        "slug": "sysb",
+        "name": "SYSB",
+        "company": "iShares Systematic Bond ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "BATS",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/SYSB"
+      }
+    },
+    {
+      "id": "569760",
+      "type": "tag",
+      "attributes": {
+        "slug": "gbil",
+        "name": "GBIL",
+        "company": "Goldman Sachs Access Treasury 0-1 Year ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/GBIL"
+      }
+    },
+    {
+      "id": "6688",
+      "type": "tag",
+      "attributes": {
+        "slug": "udn",
+        "name": "UDN",
+        "company": "Invesco DB US Dollar Index Bearish Fund ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/UDN"
+      }
+    },
+    {
+      "id": "136021",
+      "type": "tag",
+      "attributes": {
+        "slug": "usdu",
+        "name": "USDU",
+        "company": "WisdomTree Bloomberg U.S. Dollar Bullish Fund ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/USDU"
+      }
+    },
+    {
+      "id": "6687",
+      "type": "tag",
+      "attributes": {
+        "slug": "uup",
+        "name": "UUP",
+        "company": "Invesco DB US Dollar Index Bullish Fund ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/UUP"
+      }
+    },
+    {
+      "id": "35911",
+      "type": "tag",
+      "attributes": {
+        "slug": "rinf",
+        "name": "RINF",
+        "company": "ProShares Inflation Expectations ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/RINF"
+      }
+    },
+    {
+      "id": "12802",
+      "type": "tag",
+      "attributes": {
+        "slug": "agz",
+        "name": "AGZ",
+        "company": "iShares Agency Bond ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/AGZ"
+      }
+    },
+    {
+      "id": "35693",
+      "type": "tag",
+      "attributes": {
+        "slug": "spts",
+        "name": "SPTS",
+        "company": "State Street\u00ae SPDR\u00ae Portfolio Short Term Treasury ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/SPTS"
+      }
+    },
+    {
+      "id": "113652",
+      "type": "tag",
+      "attributes": {
+        "slug": "ftsd",
+        "name": "FTSD",
+        "company": "Franklin Short Duration U.S. Government ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/FTSD"
+      }
+    },
+    {
+      "id": "463325",
+      "type": "tag",
+      "attributes": {
+        "slug": "lmbs",
+        "name": "LMBS",
+        "company": "First Trust Low Duration Opportunities ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NASDAQ",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/LMBS"
+      }
+    },
+    {
+      "id": "13115",
+      "type": "tag",
+      "attributes": {
+        "slug": "cullen-roche",
+        "name": "Cullen Roche",
+        "company": null,
+        "tagKind": "Tags::AuthorTag"
+      },
+      "links": {
+        "self": "/author/cullen-roche"
+      }
+    },
+    {
+      "id": "567952",
+      "type": "tag",
+      "attributes": {
+        "slug": "wealth-management",
+        "name": "Wealth Management",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=wealth-management"
+      }
+    },
+    {
+      "id": "614456",
+      "type": "tag",
+      "attributes": {
+        "slug": "us-economy",
+        "name": "US Economy",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/us-economy"
+      }
+    },
+    {
+      "id": "9082",
+      "type": "tag",
+      "attributes": {
+        "slug": "sa-submit",
+        "name": "SA Submit",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/sa-submit"
+      }
+    },
+    {
+      "id": "12627",
+      "type": "tag",
+      "attributes": {
+        "slug": "macro-view",
+        "name": "Macro View",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/macro-view"
+      }
+    },
+    {
+      "id": "567578",
+      "type": "tag",
+      "attributes": {
+        "slug": "financial-advisors",
+        "name": "Financial Advisors",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/financial-advisors"
+      }
+    }
+  ]
+}

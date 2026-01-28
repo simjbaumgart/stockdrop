@@ -1,0 +1,397 @@
+{
+  "data": {
+    "attributes": {
+      "publishOn": "2025-12-24T18:16:48-05:00",
+      "isLockedPro": false,
+      "commentCount": 0,
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "investing-ideas": {
+          "id": 10727
+        },
+        "long-ideas": {
+          "id": 1936
+        },
+        "deep-value": {
+          "id": 115452,
+          "non_theme": true
+        },
+        "share-buyback": {
+          "id": 142981,
+          "non_theme": true
+        },
+        "high-quality-business-model": {
+          "id": 548906,
+          "non_theme": true
+        },
+        "industry-leader": {
+          "id": 548926,
+          "non_theme": true
+        },
+        "ai-tech": {
+          "id": 764439
+        },
+        "magnificent-7": {
+          "id": 777536
+        },
+        "alpha-rich-investment-style": {
+          "id": 114682
+        },
+        "alpha-rich-opportunity": {
+          "id": 114692
+        },
+        "more-tags": {
+          "id": 698258
+        },
+        "us": {
+          "id": 326,
+          "non_theme": true
+        },
+        "information-technology": {
+          "id": 45
+        }
+      },
+      "title": "Apple Doesn't Need A Stronger AI Portfolio",
+      "summary": [
+        "Apple Inc. remains a global tech leader with a market cap exceeding $4 trillion.",
+        "Its dominance is anchored in robust hardware platform performance.",
+        "Current market debates focus on AAPL's competitive positioning in artificial intelligence.",
+        "Valuation and future growth hinge on how AAPL addresses AI-related concerns."
+      ],
+      "isPaywalled": false,
+      "structuredInsights": null,
+      "lastModified": "2025-12-24T18:18:22-05:00",
+      "isModerated": false,
+      "availableTranslations": [],
+      "closestTradingDate": "2025-12-26",
+      "beforeOpeningHours": false,
+      "isEarningsSlides": false,
+      "isExclusive": true,
+      "isTranscript": false,
+      "excludedByTag": false,
+      "transcriptPath": null,
+      "likesCount": 0,
+      "disabledMessage": null,
+      "disclosure": "<p id=\"a-disclosure\"><b>Analyst\u2019s Disclosure:</b><span>I/we have a beneficial long position in the shares of AAPL either through stock ownership, options, or other derivatives.</span><span id=\"top-business-disclosure\"> I wrote this article myself, and it expresses my own opinions. I am not receiving compensation for it (other than from Seeking Alpha). I have no business relationship with any company whose stock is mentioned in this article. </span></p><p id='a-disclosure-more'><strong>Seeking Alpha's Disclosure:</strong> Past performance is no guarantee of future results. No recommendation or advice is being given as to whether any investment is suitable for a particular investor. Any views or opinions expressed above may not reflect those of Seeking Alpha as a whole. Seeking Alpha is not a licensed securities dealer, broker or US investment adviser or investment bank. Our analysts are third party authors that include both professional investors and individual investors who may not be licensed or certified by any institute or regulatory body.</p>",
+      "articleActionableItem": null,
+      "inEmbargo": false,
+      "isNoindex": false,
+      "isNoarchive": true,
+      "content": "<p data-eci=\"true\"><figure class=\"getty-figure\" data-type=\"getty-image\"><picture> <img src=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1705316992/image_1705316992.jpg?io=getty-c-w630\" alt=\"Apple Store at 5th Ave in Manhattan, New York City\" data-id=\"1705316992\" data-type=\"getty-image\" width=\"1536\" height=\"986\" srcset=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1705316992/image_1705316992.jpg?io=getty-c-w1536 1536w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1705316992/image_1705316992.jpg?io=getty-c-w1280 1280w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1705316992/image_1705316992.jpg?io=getty-c-w1080 1080w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1705316992/image_1705316992.jpg?io=getty-c-w750 750w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1705316992/image_1705316992.jpg?io=getty-c-w640 640w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1705316992/image_1705316992.jpg?io=getty-c-w480 480w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1705316992/image_1705316992.jpg?io=getty-c-w320 320w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1705316992/image_1705316992.jpg?io=getty-c-w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 132px), (max-width: 1199px) calc(100vw - 666px), (max-width: 1307px) calc(100vw - 708px), 600px\" fetchpriority=\"high\"> </picture><figcaption><p class=\"item-caption\"> </p> <p class=\"item-credits\">ozgurdonmaz/iStock Unreleased via Getty Images</p></figcaption></figure></p> <div class=\"inline_ad_placeholder\"></div> <p>Apple Inc. (<span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/AAPL\" title=\"Apple Inc.\">AAPL</a></span>) has consistently been one of the largest tech companies in the world, worth more than $4 trillion. The company has consistently benefited from the dominance of its hardware platforms, although there are market concerns<span class=\"paywall-full-content\"> around its AI positioning. Despite that, Apple is continuing to be a substantial platform for AI with continued growth.</span></p> <h2 class=\"paywall-full-content\">Apple Financial Results</h2> <p class=\"paywall-full-content\">Apple managed to earn impressive financial results in the most recent quarter.</p> <p class=\"paywall-full-content\"><figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><picture> <span><a href=\"https://static.seekingalpha.com/uploads/2025/12/17/34591885-1765951882743219_origin.png\" rel=\"lightbox\" data-width=\"1470\" data-height=\"902\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkedin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2025/12/17/34591885-1765951882743219_origin.png?io=w640\" alt=\"Apple Press Release\" contenteditable=\"false\" width=\"640\" height=\"393\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/17/34591885-1765951882743219_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2025/12/17/34591885-1765951882743219_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/17/34591885-1765951882743219_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/17/34591885-1765951882743219_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span> </picture><figcaption><p class=\"item-caption\"><span>Apple Press Release</span></p></figcaption></figure></p> <p class=\"paywall-full-content\">The company crossed more than $100 billion in quarterly revenue a first for a non year-ending quarter (traditionally its largest). The company managed to achieve high single-digit YoY revenue growth, incredible given its scale, and it did that with total cost of sales at only $54 billion. That means roughly 52% of the company's revenue is cost of sales.</p> <p class=\"paywall-full-content\">That's incredibly impressive for a primarily hardware company. At the same time, unlike other tech companies, Apple has comfortably managed investing in artificial intelligence, without blowing out any semblance of a budget. The company's R&amp;D expenses have expanded by combined with G&amp;A the segment is still at less than $16 billion / year.</p> <p class=\"paywall-full-content\">The net result is after paying taxes, Apple had net income of $27.5 billion. That's more than $100 billion in annualized net income for the giant, net income that it continues to rapidly grow. </p> <h2 class=\"paywall-full-content\">Apple Platform Dominance</h2> <p class=\"paywall-full-content\">At the same time, those who're afraid of the impact of artificial intelligence would do well to note Apple's status as a platform. </p> <p class=\"paywall-full-content\"><figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><picture> <span><a href=\"https://static.seekingalpha.com/uploads/2025/12/17/34591885-17659518638645403_origin.png\" rel=\"lightbox\" data-width=\"1624\" data-height=\"688\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkedin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2025/12/17/34591885-17659518638645403_origin.png?io=w640\" alt=\"Apple App Charts\" contenteditable=\"false\" width=\"640\" height=\"271\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/17/34591885-17659518638645403_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2025/12/17/34591885-17659518638645403_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/17/34591885-17659518638645403_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/17/34591885-17659518638645403_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span> </picture><figcaption><p class=\"item-caption\"><span>Apple App Charts</span></p></figcaption></figure></p> <p class=\"paywall-full-content\">The top free iPhone app is currently ChatGPT. That application that everyone is concerned about replacing iPhone is being used through the iPhone. Similarly, the same people using ChatGPT online are using it through Mac. The same through coding tools like Claude AI etc. which are being run on the same laptops programmers were already using.</p> <p class=\"paywall-full-content\">This is key in our view, because offloading compute for tasks to large language models, or LLMs, could potentially even reduce people's needs for beefy local compute enabling them to shift from Desktops to personal computing such as Laptops. </p> <h2 class=\"paywall-full-content\">Apple Segment Breakdown</h2> <p class=\"paywall-full-content\">From a segment perspective, the Apple thesis remains strong with great performance across the board. </p> <p class=\"paywall-full-content\"><figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><picture> <span><a href=\"https://static.seekingalpha.com/uploads/2025/12/17/34591885-17659518983010604_origin.png\" rel=\"lightbox\" data-width=\"1506\" data-height=\"624\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkedin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2025/12/17/34591885-17659518983010604_origin.png?io=w640\" alt=\"Apple Press Release\" contenteditable=\"false\" width=\"640\" height=\"265\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/17/34591885-17659518983010604_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2025/12/17/34591885-17659518983010604_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/17/34591885-17659518983010604_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/17/34591885-17659518983010604_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span> </picture><figcaption><p class=\"item-caption\"><span>Apple Press Release</span></p></figcaption></figure></p> <p class=\"paywall-full-content\">The company only saw revenue decline in the Greater China, where Apple is facing strong domestic competition. However, even here, the company's revenue decline was in the low single-digits. Everywhere outside of the market where there's concerted effort to limit the company in favor of domestic alternatives is seeing high single-digit to double-digit growth. </p> <p class=\"paywall-full-content\">Apple is seeing strength in categories as well. While the iPad and Wearables categories remained flat, the company saw strong iPhone and Mac growth, the core categories that lead to follow-on growth with other categories. Apple's services business also remained incredibly strong. This is another sign of Apple's strength. </p> <h2 class=\"paywall-full-content\">Apple Shareholder Return Potential</h2> <p class=\"paywall-full-content\">Since starting its shareholder return program, Apple managed to reducing its outstanding shares by 43%. </p> <p class=\"paywall-full-content\"><figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><picture> <span><a href=\"https://static.seekingalpha.com/uploads/2025/12/24/34591885-17665575916547306_origin.png\" rel=\"lightbox\" data-width=\"1580\" data-height=\"710\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkedin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2025/12/24/34591885-17665575916547306_origin.png?io=w640\" alt=\"Macrotrends\" contenteditable=\"false\" width=\"640\" height=\"288\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/24/34591885-17665575916547306_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2025/12/24/34591885-17665575916547306_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/24/34591885-17665575916547306_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/24/34591885-17665575916547306_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span> </picture><figcaption><p class=\"item-caption\"><span>Macrotrends</span></p></figcaption></figure></p> <p class=\"paywall-full-content\">Apple has spent more than <a href=\"https://finance.yahoo.com/news/apples-704-billion-decade-long-213225306.html?guccounter=1&amp;guce_referrer=aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbS8&amp;guce_referrer_sig=AQAAAKXNxfFl8G7lU9hdnEQxqconS02yzQ5SEU4Q4RFKYE1SQtiQvmaDh67so0zwqunhCA-m8qpI7D54d99aZLAvapsC1pX_M71C1zevrraKyHceNDo0KQnZPAasIqwSuvylqIcidKxtXOenqCxUgQ1TWl9DqFcIwMZm-eXgOzN8t8zY\" rel=\"nofollow\">$700 billion to purchase these shares</a>, or $64 / share. That's a quarter of current prices. Apple recently announced an <a href=\"https://finance.yahoo.com/news/apple-nasdaqgs-aapl-announces-100-172903679.html?guccounter=1&amp;guce_referrer=aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbS8&amp;guce_referrer_sig=AQAAAKXNxfFl8G7lU9hdnEQxqconS02yzQ5SEU4Q4RFKYE1SQtiQvmaDh67so0zwqunhCA-m8qpI7D54d99aZLAvapsC1pX_M71C1zevrraKyHceNDo0KQnZPAasIqwSuvylqIcidKxtXOenqCxUgQ1TWl9DqFcIwMZm-eXgOzN8t8zY\" rel=\"nofollow\">extra $100 billion buyback</a> after a $110 billion buyback last year. The company has a very modest dividend of &lt;0.4%, but with buybacks total shareholder returns are roughly 3% annualized.</p> <p class=\"paywall-full-content\">It's modest, but for a company growing at the high single-digits, it's still very respectable. The company's growth will enable increasing buybacks and shareholder returns and enable the company to expand into its P/E of ~30x that goes virtually entirely to shareholders.</p> <h2 class=\"paywall-full-content\">Thesis Risk</h2> <p class=\"paywall-full-content\">The largest risk to our thesis is Apple's valuation. Apple is sitting right at a $4 trillion market capitalization, with $112 billion in TTM net income. That puts the company at a P/E of ~30x. In a difficult market, Apple needs continued net income growth to justify its valuation, and whether or not that happens remains to be seen.</p> <h2 class=\"paywall-full-content\">Conclusion</h2> <p class=\"paywall-full-content\">Apple is one of the largest companies in the world with a $4 trillion market capitalization. The company has managed to shrink its shares outstanding by almost 50% over the past 13 years and it's focused on continuing to improve that. The company is spending almost $10 billion per month on share repurchases an indication of its massive scale. </p> <div class=\"before_last_paragraph-piano-placeholder paywall-full-content\"></div> <p class=\"paywall-full-content\">The company is achieving high single-digit growth with strength on every segment of its platform. In addition, the company is the core platform that people are using for their AI usage, whether through ChatGPT or AI coding. Going forward, this makes Apple a valuable long-term investment. Let us know your thoughts in the comments below.</p>",
+      "quickInsights": null,
+      "twitContent": "Apple Doesn't Need A Stronger AI Portfolio $AAPL $AAPL:CA $ZAAP:CA #stockmarket #finance #investing https://seekingalpha.com/article/4855684-apple-doesnt-need-a-stronger-ai-portfolio?source=tweet",
+      "innerMarketing": "<h2><a href=\"https://seekingalpha.com/checkout?service_id=mp_1298\">You Only Get 1 Chance To Retire, Join The #1 Retirement Service</a></h2><p>The Retirement Forum provides actionable ideals, a high-yield safe retirement portfolio, and macroeconomic outlooks, all to help you maximize your capital and your income. We search the entire market to help you maximize returns.\u00a0</p><p><strong>Recommendations from a top 0.2% TipRanks author!</strong></p><p>Retirement is complicated and you only get once chance to do it right. Don't miss out because you didn't know what was out there.</p><p><!--StartFragment--><img src=\"https://g.foolcdn.com/editorial/images/522791/man-and-woman-relaxing-in-lounge-chairs-on-a-beach-in-the-maldives-mature-couple-vacation-early-retirement.jpg\" alt=\"Only 4% of Americans Are Taking Advantage of This Smart Retirement Move |  The Motley Fool\" loading=\"lazy\"><!--EndFragment--></p><p>We provide:</p><ul>\n<li>Model portfolios to generate high retirement cash flow.\u00a0<!--EndFragment-->\n</li>\n<li>Deep-dive actionable research.<br>\n</li>\n<li>Recommendation spreadsheets and option strategies.\u00a0\u00a0</li>\n</ul><p><strong><a href=\"https://seekingalpha.com/checkout?service_id=mp_1298\">Click for our discounted 2-week free trial!</a></strong></p>",
+      "marketingBullet": "The Retirement Forum members get exclusive access to our real-world portfolio. See all our investments <a href='/checkout/mp_1298&source=mp_marketing_text_top' sasource='mp_marketing_text_top'>here \u00bb</a>",
+      "isReit": false,
+      "videoData": null,
+      "marketingBulletVariant": "I am The Value Portfolio, an experienced analyst specializing in stock research and wealth growth. I run the investing group <a href=\"/checkout/mp_1298?source=content_type%3Areact%7Curl_first_level%3Asa-source-first-level-url%7Csection%3Aauthor_bullets%3A34591885%7Csection_asset%3Aauthor_bullets%3A-the-retirement-forum\" data-test-id=\"author-custom-template-link\">The Retirement Forum</a> where I focus on ideas to prepare you for retirement.",
+      "marketingBio": "The Value Portfolio specializes in building retirement portfolios and utilizes a fact-based research strategy to identify investments. This includes extensive readings of 10Ks, analyst commentary, market reports, and investor presentations. He invests real money in the stocks he recommends.\n\nHe is the leader of the investing group <a href=\"/checkout/mp_1298?source=content_type%3Areact%7Curl_first_level%3Asa-source-first-level-url%7Csection%3Aauthor_root%3A34591885%7Csection_asset%3Aauthor_root%3A-the-retirement-forum\" data-test-id=\"author-custom-template-link\">The Retirement Forum</a> with features including: model portfolios, macro overviews, in-depth company analysis and retirement planning information. <a href=\"/checkout/mp_1298?source=content_type%3Areact%7Curl_first_level%3Asa-source-first-level-url%7Csection%3Aauthor_root%3A34591885%7Csection_asset%3Aauthor_root%3A-the-retirement-forum\" data-test-id=\"author-custom-template-link\">Learn more</a>.",
+      "audioDuration": 343.872,
+      "originalTitle": "Apple Doesn't Need A Stronger AI Portfolio"
+    },
+    "relationships": {
+      "author": {
+        "data": {}
+      },
+      "sentiments": {
+        "data": [
+          {},
+          {},
+          {}
+        ]
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "146"
+          },
+          {},
+          {}
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": [
+          {},
+          {
+            "id": "1936"
+          },
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {
+            "id": "146"
+          },
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {
+            "id": "326"
+          }
+        ]
+      },
+      "coAuthors": {
+        "data": []
+      },
+      "presentations": {
+        "data": []
+      },
+      "updates": {
+        "data": []
+      },
+      "corrections": {
+        "data": []
+      }
+    },
+    "links": {
+      "schemaImage": []
+    }
+  },
+  "included": [
+    {
+      "id": "1298",
+      "attributes": {
+        "createdAt": "2019-01-02T14:13:16-05:00",
+        "rating": "3.8",
+        "reviewCount": 4,
+        "shortPitch": "The #1 Service for Retirement Success, Actionable Ideas + Model Portfolios!",
+        "categories": [],
+        "serviceAssistantIds": [],
+        "inAppPurchasesAllowedInIos": false,
+        "inAppPurchasesAllowedInAndroid": false,
+        "activeSubscriptionsCount": 3,
+        "showPriceAlert": false,
+        "description": "You only get one shot to retire properly, yet most people are underprepared for retirement. Even for those prepared, conflicting information makes retirement planning a labyrinth. At The Retirement Forum, you will directly profit from our research into undervalued investment opportunities, model portfolios, and retirement strategies, all in order to have a successful retirement.",
+        "landingPageColor": null,
+        "adUnits": [],
+        "tempData": {},
+        "price": 59.0,
+        "annualPriceWithDiscount": 399.2,
+        "monthlyPlanEnabled": false,
+        "chatEnabled": true,
+        "allowAffiliateDiscount": false,
+        "showHeadlines": true
+      },
+      "relationships": {
+        "author": {
+          "data": {}
+        }
+      }
+    },
+    {
+      "attributes": {
+        "company": null,
+        "userId": 34591885,
+        "tagId": 486166,
+        "bio": "<p>The Value Portfolio specializes in building retirement portfolios and utilizes a fact-based research strategy to identify investments. This includes extensive readings of 10Ks, analyst commentary, market reports, and investor presentations. He invests real money in the stocks he recommends.</p>\r\nHe is the leader of the investing group <a href=\"https://seekingalpha.com/checkout?service_id=mp_1298\">The Retirement Forum</a> with features including: model portfolios, macro overviews, in-depth company analysis and retirement planning information. <a href=\"https://seekingalpha.com/checkout?service_id=mp_1298\">Learn more</a>.",
+        "image": {},
+        "deactivated": null,
+        "memberSince": 2014,
+        "isRss": false,
+        "contributorSince": 2015,
+        "followersCount": 37402
+      },
+      "relationships": {
+        "user": {
+          "data": {}
+        },
+        "userBioTags": {
+          "data": [
+            {},
+            {},
+            {},
+            {}
+          ]
+        },
+        "authorResearch": {
+          "data": {
+            "id": "1298"
+          }
+        }
+      },
+      "links": {
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "id": "146",
+      "attributes": {
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "fundTypeId": 8,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "fundTypeId": 8,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "id": "1936",
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "name": "High Quality Business Model",
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "id": "326",
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "articleId": 4855684,
+        "createdAt": "2025-12-24T18:16:48.000-05:00",
+        "typeId": 1
+      },
+      "relationships": {
+        "article": {
+          "data": {}
+        },
+        "tag": {
+          "data": {
+            "id": "146"
+          }
+        }
+      }
+    },
+    {
+      "attributes": {
+        "articleId": 4855684,
+        "createdAt": "2025-12-24T18:16:48.000-05:00",
+        "typeId": 1
+      },
+      "relationships": {
+        "article": {
+          "data": {}
+        },
+        "tag": {
+          "data": {}
+        }
+      }
+    },
+    {
+      "attributes": {
+        "articleId": 4855684,
+        "createdAt": "2025-12-24T18:16:48.000-05:00",
+        "typeId": 1
+      },
+      "relationships": {
+        "article": {
+          "data": {}
+        },
+        "tag": {
+          "data": {}
+        }
+      }
+    }
+  ]
+}

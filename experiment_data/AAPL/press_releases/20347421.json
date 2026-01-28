@@ -1,0 +1,45 @@
+{
+  "data": {
+    "attributes": {
+      "commentCount": 0,
+      "title": "Italy antitrust agency fines Apple $116 million for abusing dominance with privacy feature",
+      "publishOn": "2025-12-22T11:59:00.000-05:00",
+      "lastModified": "2025-12-22T11:59:19-05:00",
+      "widgetLinks": null,
+      "content": "<div>\n<p>\n  </p>\n<p>ROME (AP) \u2014 Italy\u2019s antitrust authority fined Apple (<a href=\"https://seekingalpha.com/symbol/AAPL\">AAPL</a>) 98.6 million euros ($116 million) on Monday after determining that operating one of its <a href=\"https://apnews.com/article/france-apple-antitrust-fine-d993553dc64b56b69f5266cf1fe79d95\">privacy features</a> restricted App Store competition.</p>\n  <p>Apple abused its dominant position with its App Tracking Transparency policy, which forces apps to obtain permission before collecting data to target users with personalized ads, the authority said in a statement.</p>\n  <p>The company <a href=\"https://apnews.com/article/technology-business-eea494f3a1158100de0d4bbd93f5c31f\">rolled out ATT</a> starting in April 2021 as part of an update to the operating system powering the iPhone and iPad. While the feature was designed to tighten up privacy, it faced criticism from Big Tech rivals that it would make it harder for smaller apps to survive without charging consumers.</p>\n  <p>The authority didn\u2019t criticize the policy per se, but the fact that the Apple system requires third-party app makers to ask users for consent twice in order to comply with Europe\u2019s strict privacy rules.</p>\n  <p>\u201cAs a result, such double consent requirement is harmful to developers, whose business model relies on the sale of advertising space, as well as to advertisers and advertising intermediation platforms,\u201d the authority said.</p>\n  <p>The authority said that the double consent required was \u201cdisproportionate\u201d to the stated goal of data protection.</p>\n  <p>The finding is similar to one by the French antitrust watchdog, which in March fined Apple 150 million euros ($162 million) over the consent feature.</p>\n  <p>Apple didn\u2019t immediately respond to a request for comment. In 2023, when Italy\u2019s antitrust authority announced its investigation, the <span class=\"location\" value=\"LU/us.ca.cupino\">Cupertino, Calif.</span>-based company <a href=\"https://apnews.com/article/italy-antitrust-apple-apps-2908125fb7963d75dfb21ef802156867\">defended its framework</a> and said it would engage with the Italian antitrust authority to address its questions.</p>\n  \nCopyright 2025 The Associated Press. All rights reserved. This material may not be published, broadcast, rewritten or redistributed without permission.\n\n</div>",
+      "widgetTitle": null
+    },
+    "relationships": {
+      "acquireService": {
+        "data": {
+          "id": "68"
+        }
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "146"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": []
+      }
+    },
+    "links": {}
+  },
+  "included": [
+    {
+      "id": "68",
+      "attributes": {}
+    },
+    {
+      "id": "146",
+      "attributes": {},
+      "links": {}
+    }
+  ]
+}

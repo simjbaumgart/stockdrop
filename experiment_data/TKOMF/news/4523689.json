@@ -1,0 +1,118 @@
+{
+  "data": {
+    "attributes": {
+      "publishOn": "2025-11-19T04:19:31-05:00",
+      "isLockedPro": false,
+      "commentCount": 0,
+      "gettyImageUrl": null,
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "earnings": {
+          "id": 10,
+          "non_theme": false
+        },
+        "japan": {
+          "id": 18066,
+          "title": null,
+          "non_theme": true
+        },
+        "large-cap": {
+          "id": 115402,
+          "title": null,
+          "non_theme": true
+        },
+        "hidden-from-qp": {
+          "id": 578794,
+          "title": null,
+          "non_theme": true
+        },
+        "guidance": {
+          "id": 601061,
+          "title": null,
+          "non_theme": true
+        },
+        "breaking-news": {
+          "id": 614459,
+          "title": null,
+          "non_theme": true
+        },
+        "templated": {
+          "id": 778493,
+          "title": null,
+          "non_theme": true
+        }
+      },
+      "title": "Tokio Marine Holdings GAAP EPS of \u00a5359.12, revenue of \u00a52685.89B; updates FY outlook",
+      "isPaywalled": false,
+      "lastModified": "2025-11-19T04:25:37-05:00",
+      "content": "<ul>\n<li>Tokio Marine Holdings <a href=\"https://ssl4.eir-parts.net/doc/8766/tdnet/2722400/00.pdf\" target=\"_blank\" rel=\"nofollow\">press release</a> (<a href=\"https://seekingalpha.com/symbol/TKOMY\" title=\"Tokio Marine Holdings, Inc.\">OTCPK:TKOMY</a>): 1H GAAP EPS of\u00a0\u00a5359.12.</li>\n<li>Net premiums written of \u00a52685.89B (-0.4% Y/Y). <img src=\"https://static.seekingalpha.com/uploads/2025/11/19/saupload_Screenshot_2025-11-19_144828.png?io=w640\" width=\"1417\" height=\"361\" fetchpriority=\"high\" srcset=\"https://static.seekingalpha.com/uploads/2025/11/19/saupload_Screenshot_2025-11-19_144828.png?io=w1280 1280w,https://static.seekingalpha.com/uploads/2025/11/19/saupload_Screenshot_2025-11-19_144828.png?io=w1080 1080w,https://static.seekingalpha.com/uploads/2025/11/19/saupload_Screenshot_2025-11-19_144828.png?io=w750 750w,https://static.seekingalpha.com/uploads/2025/11/19/saupload_Screenshot_2025-11-19_144828.png?io=w640 640w,https://static.seekingalpha.com/uploads/2025/11/19/saupload_Screenshot_2025-11-19_144828.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/11/19/saupload_Screenshot_2025-11-19_144828.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/11/19/saupload_Screenshot_2025-11-19_144828.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\">\n</li>\n</ul><div class=\"signup_widget_placeholder\"></div><div id=\"more-links\">\n<h2>More on Tokio Marine Holdings</h2>\n<ul>\n<li><a class=\"more-link\" href=\"https://seekingalpha.com/symbol/TKOMY/ratings/quant-ratings\">Seeking Alpha\u2019s Quant Rating on Tokio Marine Holdings</a></li>\n<li><a class=\"more-link\" href=\"https://seekingalpha.com/symbol/TKOMY/earnings\">Historical earnings data for Tokio Marine Holdings</a></li>\n<li><a class=\"more-link\" href=\"https://seekingalpha.com/symbol/TKOMY/income-statement\">Financial information for Tokio Marine Holdings</a></li>\n</ul>\n</div>",
+      "disclosure": null,
+      "quickInsights": null,
+      "metered": false,
+      "availableTranslations": [],
+      "correctionReason": null,
+      "audioDuration": 27.864,
+      "originalTitle": "Tokio Marine Holdings GAAP EPS of \u00a5359.12, revenue of \u00a52685.89B; updates FY outlook"
+    },
+    "relationships": {
+      "author": {
+        "data": {}
+      },
+      "sentiments": {
+        "data": []
+      },
+      "primaryTickers": {
+        "data": [
+          {},
+          {}
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": []
+      },
+      "ratingChangeNotice": {}
+    },
+    "links": {
+      "schemaImage": {}
+    }
+  },
+  "included": [
+    {
+      "attributes": {
+        "userId": 52365730,
+        "image": {},
+        "nick": "Meghavi Singh, SA News Editor",
+        "bio": "<p>Meghavi Singh is an editor on the India news team of Seeking Alpha, based in Pune.</p><p>Before joining Seeking Alpha in 2020, she worked with HSBC Bank for 12+ years in the wealth management and Regulatory Reporting departments. Prior to HSBC, she began her career with Gridstone Research, a financial research start-up, as a research associate for a period of 3 years, tracking company events and financial results for the US Consumer Sector.</p><p>She has two daughters and lives in Pune, India.</p><p> </p>"
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": "Tokio Marine Holdings, Inc.",
+        "fundTypeId": 8,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": "Tokio Marine Holdings, Inc.",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    }
+  ]
+}

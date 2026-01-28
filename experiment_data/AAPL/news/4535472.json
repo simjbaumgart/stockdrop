@@ -1,0 +1,158 @@
+{
+  "data": {
+    "attributes": {
+      "publishOn": "2025-12-26T09:41:53-05:00",
+      "isLockedPro": false,
+      "commentCount": 0,
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "us": {
+          "id": 326,
+          "title": null,
+          "non_theme": true
+        },
+        "health-care": {
+          "id": 17896,
+          "title": null,
+          "non_theme": true
+        },
+        "information-technology": {
+          "id": 17994,
+          "title": null,
+          "non_theme": true
+        },
+        "regulatory-change": {
+          "id": 115322,
+          "title": null,
+          "non_theme": true
+        },
+        "large-cap": {
+          "id": 115402,
+          "title": null,
+          "non_theme": true
+        },
+        "event-special-situations": {
+          "id": 115462,
+          "title": null,
+          "non_theme": true
+        },
+        "hidden-from-qp": {
+          "id": 578794,
+          "title": null,
+          "non_theme": true
+        },
+        "news-metered": {
+          "id": 614465,
+          "title": null,
+          "non_theme": true
+        },
+        "magnificent-7": {
+          "id": 777536,
+          "title": null,
+          "non_theme": true
+        },
+        "health-care-equipment": {
+          "id": 787717,
+          "title": null,
+          "non_theme": true
+        },
+        "technology-hardware-storage-and-peripherals": {
+          "id": 787747,
+          "title": null,
+          "non_theme": true
+        }
+      },
+      "title": "Apple Watch US imports continue after judge rejects ban related to blood-oxygen sensor patent case: report",
+      "isPaywalled": false,
+      "lastModified": "2025-12-26T09:43:07-05:00",
+      "content": "<figure class=\"getty-figure\" contenteditable=\"false\" data-show-to-all=\"false\" data-type=\"getty-image\"><picture><img src=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1314052259/image_1314052259.jpg?io=getty-c-w630\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 132px), (max-width: 1199px) calc(100vw - 666px), (max-width: 1307px) calc(100vw - 708px), 600px\" srcset=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1314052259/image_1314052259.jpg?io=getty-c-w1536 1536w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1314052259/image_1314052259.jpg?io=getty-c-w1280 1280w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1314052259/image_1314052259.jpg?io=getty-c-w1080 1080w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1314052259/image_1314052259.jpg?io=getty-c-w750 750w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1314052259/image_1314052259.jpg?io=getty-c-w640 640w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1314052259/image_1314052259.jpg?io=getty-c-w480 480w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1314052259/image_1314052259.jpg?io=getty-c-w320 320w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1314052259/image_1314052259.jpg?io=getty-c-w240 240w\" alt=\"Woman using smart watch and smart phone, Apple watch\" width=\"4240\" height=\"2832\" data-caption=\"raditya\" data-id=\"1314052259\" data-image-type=\"Getty\" data-original-src=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1314052259/image_1314052259.jpg?io=getty-c-w630\" data-source=\"\" data-type=\"getty-image\" fetchpriority=\"high\"></picture><figcaption class=\"caption\" data-type=\"getty-image\"><p class=\"item-credits\">raditya</p></figcaption></figure><p data-eci=\"true\">Apple (<span class=\"ticker-hover-wrapper\"><span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/AAPL\" title=\"Apple Inc.\">AAPL</a></span></span>) can continue to import its Apple Watch into the U.S. after a federal judge denied a request to block them by Masimo (<span class=\"ticker-hover-wrapper\"><span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/MASI\" title=\"Masimo Corporation\">MASI</a></span></span>) stemming from its lawsuit versus the U.S. Customs and Border Protection over blood-oxygen<span class=\"paywall-full-content\"> sensor patents, according to Bloomberg Law.</span></p> <p class=\"paywall-full-content\">In a minute order issued on Tuesday, Judge Ana Reyes denied <a title=\"Masimo's\" href=\"https://www.bloomberglaw.com/public/desktop/document/MASIMOCORPORATIONvUNITEDSTATESCUSTOMSANDBORDERPROTECTIONetalDocke/1?doc_id=X1JTJD9LJ5U8RFA8FCSPQ58PA4G\" target=\"_blank\" rel=\"nofollow\">Masimo's</a> August motion for a temporary restraining order and preliminary injunction, the <a title=\"report\" href=\"https://news.bloomberglaw.com/ip-law/apple-watch-imports-continue-as-judge-rejects-ban-in-paused-case\" target=\"_blank\" rel=\"nofollow\">report</a> said.</p> <p class=\"paywall-full-content\">The case revolves around the Series 9 and Ultra 2 versions of the Apple Watch. The Irvine, California-based Masimo, which develops non-invasive health monitoring technologies, alleged that these Apple Watches \"infringed Masimo's patents related to light-based pulse oximetry technology.\"</p> <p class=\"paywall-full-content\">The U.S. International Trade Commission issued a Limited Exclusion Order back in October 2023 to protect Masimo's patented technology. In response, Apple introduced a redesigned Blood Oxygen feature for some Apple Watch Series 9, Series 10, and Apple Watch Ultra 2 users through an iPhone and Apple Watch software update. </p> <p class=\"paywall-full-content\">\"Following this update, sensor data from the Blood Oxygen app on Apple Watch will be measured and calculated on the paired iPhone, and results can be viewed in the Respiratory section of the Health app,\" Apple said in <a title=\"August.\" href=\"https://www.apple.com/newsroom/2025/08/an-update-on-blood-oxygen-for-apple-watch-in-the-us/\" target=\"_blank\" rel=\"nofollow\">August.</a> \"This update was enabled by a recent U.S. Customs ruling.\" </p> <p class=\"paywall-full-content\">However, Masimo does not agree that the iPhone and Apple Watch pairing feature to read blood oxygen levels goes far enough to alleviate the patent issues.</p> <p class=\"paywall-full-content\">\"In an August 2025 ruling that was published just yesterday, CBP inexplicably reversed its January 2025 decision prohibiting the importation of the watch-plus-phone combination and did so through an ex parte processing, without providing Masimo any notice or opportunity to participate,\" Masimo said in a court filing.</p> <div class=\"before_last_paragraph-piano-placeholder\"></div><p class=\"paywall-full-content\">The U.S. International Trade Commission recently launched a new proceeding to further examine the dispute.</p> <div class=\"signup_widget_placeholder\"></div><div id=\"more-links\" class=\"paywall-full-content\"> <h2>More on Apple and Masimo </h2> <ul> <li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4855684-apple-doesnt-need-a-stronger-ai-portfolio\">Apple Doesn't Need A Stronger AI Portfolio</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4855483-there-is-no-streaming-war\">There Is No Streaming War</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4855457-apple-3-big-new-year-woes\">Apple's 3 Big New Year Woes</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/news/4535461-foreign-phone-shipments-in-china-surge-128-in-november\">Foreign phone shipments in China surge 128% in November: report</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/news/4534716-lead-times-for-iphone-17-continue-to-dwindle-jp-morgan-says\">Lead times for iPhone 17 continue to dwindle, JP Morgan says</a></li> </ul> </div>",
+      "disclosure": null,
+      "quickInsights": [
+        {
+          "question": "How does the U.S. court ruling affect Apple Watch imports amid Masimo's patent dispute?",
+          "answer": "The court denied Masimo's request to block Apple Watch imports, allowing ongoing imports while the patent dispute continues.",
+          "order": 1
+        },
+        {
+          "question": "What technological modifications did Apple make to address Masimo's blood-oxygen patent concerns?",
+          "answer": "Apple redesigned the Blood Oxygen feature to have sensor data measured on the paired iPhone, aiming to address patent issues after a U.S. Customs ruling.",
+          "order": 2
+        },
+        {
+          "question": "How might ongoing U.S. International Trade Commission proceedings impact the Apple-Masimo patent dispute?",
+          "answer": "The latest ITC proceeding could further review and potentially impact decisions on importation and patent infringement outcomes for Apple Watches.",
+          "order": 3
+        }
+      ],
+      "metered": true,
+      "availableTranslations": [],
+      "correctionReason": null,
+      "audioDuration": 130.896,
+      "originalTitle": "Apple Watch US imports continue after judge rejects ban related to blood-oxygen sensor patent case: report"
+    },
+    "relationships": {
+      "author": {
+        "data": {}
+      },
+      "sentiments": {
+        "data": []
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "146"
+          },
+          {
+            "id": "8696"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": []
+      },
+      "ratingChangeNotice": {}
+    },
+    "links": {
+      "schemaImage": []
+    }
+  },
+  "included": [
+    {
+      "attributes": {
+        "userId": 59792192,
+        "image": {},
+        "nick": "Brandon Evans, SA News Editor",
+        "bio": "<p>I have more than 20 years of experience in journalism. Topics covered range from small-town politics and crime to analyzing energy commodities.</p>"
+      },
+      "links": {}
+    },
+    {
+      "id": "146",
+      "attributes": {
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "id": "8696",
+      "attributes": {
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    }
+  ]
+}

@@ -1,0 +1,943 @@
+{
+  "data": {
+    "id": "4533386",
+    "type": "fullArticle",
+    "attributes": {
+      "publishOn": "2022-08-11T22:53:41-04:00",
+      "isLockedPro": false,
+      "commentCount": 0,
+      "gettyImageUrl": null,
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "us": {
+          "id": 326,
+          "slug": "us",
+          "kind": "common",
+          "non_theme": true
+        },
+        "financials": {
+          "id": 40,
+          "slug": "financials",
+          "kind": "sector",
+          "path": "/stock-ideas/financial",
+          "title": "Financials\u00a0",
+          "sasource": "theme_breadcrumb"
+        }
+      },
+      "title": "Toast, Inc. 2022 Q2 - Results - Earnings Call Presentation",
+      "summary": [],
+      "isPaywalled": false,
+      "structuredInsights": null,
+      "lastModified": "2022-08-11T22:53:41-04:00",
+      "isModerated": false,
+      "availableTranslations": [],
+      "locale": "en",
+      "closestTradingDate": "2022-08-12",
+      "beforeOpeningHours": false,
+      "isEarningsSlides": true,
+      "isExclusive": false,
+      "isTranscript": false,
+      "excludedByTag": false,
+      "transcriptPath": null,
+      "likesCount": 1,
+      "disabledStatus": "allowed",
+      "disabledMessage": null,
+      "status": "published",
+      "disclosure": "",
+      "articleActionableItem": null,
+      "inEmbargo": false,
+      "isNoindex": false,
+      "isNoarchive": true,
+      "content": "<p data-eci=\"true\">The following slide deck was published by Toast, Inc. in conjunction with their 2022 Q2 earnings call.</p> <p><figure class=\"sa-presentation paywall-full-content invisible\" data-id=\"86579\"></figure></p>",
+      "quickInsights": null,
+      "twitContent": "Toast, Inc. 2022 Q2 - Results - Earnings Call Presentation $TOST #business #economy #finance https://seekingalpha.com/article/4533386-toast-inc-2022-q2-results-earnings-call-presentation?source=tweet",
+      "innerMarketing": "",
+      "marketingBullet": "",
+      "isReit": false,
+      "videoData": null,
+      "marketingBulletVariant": null,
+      "marketingBio": null,
+      "audioDuration": null,
+      "originalTitle": "Toast, Inc. 2022 Q2 - Results - Earnings Call Presentation"
+    },
+    "relationships": {
+      "author": {
+        "data": {
+          "id": "44211",
+          "type": "author"
+        }
+      },
+      "sentiments": {
+        "data": []
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "612577",
+            "type": "tag"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": [
+          {
+            "id": "96991",
+            "type": "tag"
+          },
+          {
+            "id": "612577",
+            "type": "tag"
+          },
+          {
+            "id": "568658",
+            "type": "tag"
+          },
+          {
+            "id": "326",
+            "type": "tag"
+          },
+          {
+            "id": "17994",
+            "type": "tag"
+          },
+          {
+            "id": "17995",
+            "type": "tag"
+          }
+        ]
+      },
+      "coAuthors": {
+        "data": []
+      },
+      "presentations": {
+        "data": [
+          {
+            "id": "86579",
+            "type": "presentation"
+          }
+        ]
+      },
+      "updates": {
+        "data": []
+      },
+      "corrections": {
+        "data": []
+      }
+    },
+    "links": {
+      "self": "/article/4533386-toast-inc-2022-q2-results-earnings-call-presentation",
+      "canonical": "https://seekingalpha.com/article/4533386-toast-inc-2022-q2-results-earnings-call-presentation",
+      "uriImage": "https://static.seekingalpha.com/assets/og_image_1200-29b2bfe1a595477db6826bd2126c63ac2091efb7ec76347a8e7f81ba17e3de6c.png",
+      "schemaImage": null
+    }
+  },
+  "included": [
+    {
+      "id": "44211",
+      "type": "author",
+      "attributes": {
+        "company": null,
+        "slug": "sa-transcripts",
+        "userId": 101639,
+        "tagId": 96991,
+        "bio": "Seeking Alpha's transcripts team is responsible for the development of all of our transcript-related projects. We currently publish thousands of quarterly earnings calls per quarter on our site and are continuing to grow and expand our coverage. The purpose of this profile is to allow us to share with our readers new transcript-related developments. Thanks, SA Transcripts Team",
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/000/101/639/small_pic.png",
+          "medium": "https://seekingalpha.com/images/users_profile/000/101/639/medium_pic.png",
+          "big": "https://seekingalpha.com/images/users_profile/000/101/639/big_pic.png",
+          "extra_large": "https://seekingalpha.com/images/users_profile/000/101/639/extra_large_pic.png"
+        },
+        "nick": "SA Transcripts",
+        "deactivated": null,
+        "memberSince": 2007,
+        "isRss": false,
+        "contributorSince": 2013,
+        "followersCount": 157429
+      },
+      "relationships": {
+        "user": {
+          "data": {
+            "id": "101639",
+            "type": "user"
+          }
+        },
+        "userBioTags": {
+          "data": [
+            {
+              "id": "958652",
+              "type": "userBioTag"
+            }
+          ]
+        },
+        "authorResearch": {
+          "data": null
+        }
+      },
+      "links": {
+        "self": "/author/sa-transcripts",
+        "profileUrl": "/author/sa-transcripts",
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "id": "612577",
+      "type": "tag",
+      "attributes": {
+        "slug": "tost",
+        "name": "TOST",
+        "company": "Toast, Inc.",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "NYSE",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/TOST"
+      }
+    },
+    {
+      "id": "96991",
+      "type": "tag",
+      "attributes": {
+        "slug": "sa-transcripts",
+        "name": "SA Transcripts",
+        "company": null,
+        "tagKind": "Tags::AuthorTag"
+      },
+      "links": {
+        "self": "/author/sa-transcripts"
+      }
+    },
+    {
+      "id": "568658",
+      "type": "tag",
+      "attributes": {
+        "slug": "earnings-slides",
+        "name": "Earnings Slides",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/earnings-slides"
+      }
+    },
+    {
+      "id": "326",
+      "type": "tag",
+      "attributes": {
+        "slug": "us",
+        "name": "United States",
+        "company": null,
+        "tagKind": "Tags::Country"
+      },
+      "links": {
+        "self": "/articles?filters=us"
+      }
+    },
+    {
+      "id": "17994",
+      "type": "tag",
+      "attributes": {
+        "slug": "information-technology",
+        "name": "Information Technology",
+        "company": null,
+        "tagKind": "Tags::GicsSector"
+      },
+      "links": {
+        "self": "/tag/information-technology"
+      }
+    },
+    {
+      "id": "17995",
+      "type": "tag",
+      "attributes": {
+        "slug": "application-software",
+        "name": "Application Software",
+        "company": null,
+        "tagKind": "Tags::GicsSubIndustry"
+      },
+      "links": {
+        "self": "/tag/application-software"
+      }
+    },
+    {
+      "id": "2341352",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 1,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static3.seekingalpha.com/uploads/sa_presentations/579/86579/slides/1.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341353",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 2,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static1.seekingalpha.com/uploads/sa_presentations/579/86579/slides/2.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341354",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 3,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static2.seekingalpha.com/uploads/sa_presentations/579/86579/slides/3.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341355",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 4,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static.seekingalpha.com/uploads/sa_presentations/579/86579/slides/4.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341356",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 5,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static2.seekingalpha.com/uploads/sa_presentations/579/86579/slides/5.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341357",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 6,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static.seekingalpha.com/uploads/sa_presentations/579/86579/slides/6.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341358",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 7,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static1.seekingalpha.com/uploads/sa_presentations/579/86579/slides/7.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341359",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 8,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static3.seekingalpha.com/uploads/sa_presentations/579/86579/slides/8.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341360",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 9,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static.seekingalpha.com/uploads/sa_presentations/579/86579/slides/9.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341361",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 10,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static2.seekingalpha.com/uploads/sa_presentations/579/86579/slides/10.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341362",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 11,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static.seekingalpha.com/uploads/sa_presentations/579/86579/slides/11.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341363",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 12,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static2.seekingalpha.com/uploads/sa_presentations/579/86579/slides/12.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341364",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 13,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static1.seekingalpha.com/uploads/sa_presentations/579/86579/slides/13.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341365",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 14,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static3.seekingalpha.com/uploads/sa_presentations/579/86579/slides/14.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341366",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 15,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static1.seekingalpha.com/uploads/sa_presentations/579/86579/slides/15.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341367",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 16,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static3.seekingalpha.com/uploads/sa_presentations/579/86579/slides/16.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341368",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 17,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static2.seekingalpha.com/uploads/sa_presentations/579/86579/slides/17.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341369",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 18,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static.seekingalpha.com/uploads/sa_presentations/579/86579/slides/18.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341370",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 19,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static1.seekingalpha.com/uploads/sa_presentations/579/86579/slides/19.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341371",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 20,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static3.seekingalpha.com/uploads/sa_presentations/579/86579/slides/20.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341372",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 21,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static1.seekingalpha.com/uploads/sa_presentations/579/86579/slides/21.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341373",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 22,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static3.seekingalpha.com/uploads/sa_presentations/579/86579/slides/22.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341374",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 23,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static.seekingalpha.com/uploads/sa_presentations/579/86579/slides/23.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341375",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 24,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static2.seekingalpha.com/uploads/sa_presentations/579/86579/slides/24.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341376",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 25,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static.seekingalpha.com/uploads/sa_presentations/579/86579/slides/25.jpg?ts=0"
+      }
+    },
+    {
+      "id": "2341377",
+      "type": "presentationSlide",
+      "attributes": {
+        "presentationId": 86579,
+        "order": 26,
+        "title": "",
+        "notes": ""
+      },
+      "relationships": {
+        "presentation": {
+          "data": {
+            "id": "86579",
+            "type": "presentation"
+          }
+        }
+      },
+      "links": {
+        "self": "https://static2.seekingalpha.com/uploads/sa_presentations/579/86579/slides/26.jpg?ts=0"
+      }
+    },
+    {
+      "id": "86579",
+      "type": "presentation",
+      "attributes": {
+        "isInProgress": false,
+        "isSuccessfulConversion": true,
+        "totalSlides": 26,
+        "placeholderCss": ".sa-presentation[data-id=\"86579\"]",
+        "originalFileUrl": "https://static.seekingalpha.com/uploads/sa_presentations/579/86579/original.pdf"
+      },
+      "relationships": {
+        "slides": {
+          "data": [
+            {
+              "id": "2341352",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341353",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341354",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341355",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341356",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341357",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341358",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341359",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341360",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341361",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341362",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341363",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341364",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341365",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341366",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341367",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341368",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341369",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341370",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341371",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341372",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341373",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341374",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341375",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341376",
+              "type": "presentationSlide"
+            },
+            {
+              "id": "2341377",
+              "type": "presentationSlide"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

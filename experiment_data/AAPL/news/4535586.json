@@ -1,0 +1,293 @@
+{
+  "data": {
+    "attributes": {
+      "publishOn": "2025-12-28T16:29:36-05:00",
+      "isLockedPro": false,
+      "commentCount": 0,
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "us": {
+          "id": 326,
+          "title": null,
+          "non_theme": true
+        },
+        "commodities": {
+          "id": 375,
+          "non_theme": false
+        },
+        "new-etfs": {
+          "id": 4546,
+          "title": null,
+          "non_theme": true
+        },
+        "hidden-from-qp": {
+          "id": 578794,
+          "title": null,
+          "non_theme": true
+        },
+        "market-pulse": {
+          "id": 601058,
+          "title": null,
+          "non_theme": true
+        },
+        "na-cap": {
+          "id": 614453,
+          "title": null,
+          "non_theme": true
+        },
+        "news-metered": {
+          "id": 614465,
+          "title": null,
+          "non_theme": true
+        },
+        "breaking-news-alert": {
+          "id": 615780,
+          "title": null,
+          "non_theme": true
+        },
+        "news-insight": {
+          "id": 780297,
+          "title": null,
+          "non_theme": true
+        }
+      },
+      "title": "Silver is now the third most valuable asset in the world",
+      "isPaywalled": false,
+      "lastModified": "2025-12-28T16:30:00-05:00",
+      "content": "<figure class=\"getty-figure\" contenteditable=\"false\" data-show-to-all=\"false\" data-type=\"getty-image\"><picture><img src=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2229263348/image_2229263348.jpg?io=getty-c-w630\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 132px), (max-width: 1199px) calc(100vw - 666px), (max-width: 1307px) calc(100vw - 708px), 600px\" srcset=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2229263348/image_2229263348.jpg?io=getty-c-w1536 1536w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2229263348/image_2229263348.jpg?io=getty-c-w1280 1280w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2229263348/image_2229263348.jpg?io=getty-c-w1080 1080w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2229263348/image_2229263348.jpg?io=getty-c-w750 750w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2229263348/image_2229263348.jpg?io=getty-c-w640 640w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2229263348/image_2229263348.jpg?io=getty-c-w480 480w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2229263348/image_2229263348.jpg?io=getty-c-w320 320w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2229263348/image_2229263348.jpg?io=getty-c-w240 240w\" alt=\"Old and scratched silver bar, side view, on black glass\" width=\"1536\" height=\"1022\" data-caption=\"PeterHermesFurian\" data-id=\"2229263348\" data-image-type=\"Getty\" data-original-src=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2229263348/image_2229263348.jpg?io=getty-c-w630\" data-source=\"\" data-type=\"getty-image\" fetchpriority=\"high\"></picture><figcaption class=\"caption\" data-type=\"getty-image\"><p class=\"item-credits\">PeterHermesFurian</p></figcaption></figure><p data-eci=\"true\">Spot silver's (<span class=\"ticker-hover-wrapper\"><span class=\"ticker-hover-wrapper\"><span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/XAGUSD:CUR\" title=\"Silver Spot Price\">XAGUSD:CUR</a></span></span></span>) whopping <span style=\"color: #008000;\">+174%</span> rise this year has turned the metal into the third most valuable asset in the world, trailing only gold (<a href=\"https://seekingalpha.com/symbol/XAUUSD:CUR\" title=\"Gold Spot Price\">XAUUSD:CUR</a>) and Nvidia (<span class=\"ticker-hover-wrapper\"><span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/NVDA\" title=\"NVIDIA Corporation\">NVDA</a></span></span>) and outstripping tech titans such as<span class=\"paywall-full-content\"> Apple (</span><span class=\"ticker-hover-wrapper paywall-full-content\"><span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/AAPL\" title=\"Apple Inc.\">AAPL</a></span></span><span class=\"paywall-full-content\">), Alphabet (</span><span class=\"ticker-hover-wrapper paywall-full-content\"><span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/GOOGL\" title=\"Alphabet Inc.\">GOOGL</a></span></span><span class=\"paywall-full-content\">), and Microsoft (</span><span class=\"ticker-hover-wrapper paywall-full-content\"><span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/MSFT\" title=\"Microsoft Corporation\">MSFT</a></span></span><span class=\"paywall-full-content\">). </span></p> <p class=\"paywall-full-content\">According to CompaniesMarketCap, silver's market cap stands at $4.485T. Gold tops the list with a market cap of $31.719T, followed by chip behemoth Nvidia (<a href=\"https://seekingalpha.com/symbol/NVDA\" title=\"NVIDIA Corporation\">NVDA</a>) at $4.638T. See the top 10 below:</p> <figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><img src=\"https://static.seekingalpha.com/cdn/s3/uploads/attachment/image/0e3e303d344ac1664c9e1047007401c8.png?io=w640\" alt=\"All assets by market cap\" width=\"900\" height=\"608\" data-caption=\"\" data-original-src=\"https://static.seekingalpha.com/cdn/s3/uploads/attachment/image/0e3e303d344ac1664c9e1047007401c8.png\" data-rel=\"lightbox\" data-source=\"CompaniesMarketCap\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/cdn/s3/uploads/attachment/image/0e3e303d344ac1664c9e1047007401c8.png?io=w750 750w,https://static.seekingalpha.com/cdn/s3/uploads/attachment/image/0e3e303d344ac1664c9e1047007401c8.png?io=w640 640w,https://static.seekingalpha.com/cdn/s3/uploads/attachment/image/0e3e303d344ac1664c9e1047007401c8.png?io=w480 480w,https://static.seekingalpha.com/cdn/s3/uploads/attachment/image/0e3e303d344ac1664c9e1047007401c8.png?io=w320 320w,https://static.seekingalpha.com/cdn/s3/uploads/attachment/image/0e3e303d344ac1664c9e1047007401c8.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"><figcaption class=\"overlay-title\"><p class=\"item-caption\"><span class=\"item-source\">CompaniesMarketCap</span></p></figcaption></figure><p class=\"paywall-full-content\">Spot silver (<a href=\"https://seekingalpha.com/symbol/XAGUSD:CUR\" title=\"Silver Spot Price\">XAGUSD:CUR</a>) last closed at $79.11/oz, a <span style=\"color: #008000;\">+173.9%</span> YTD gain, after hitting a record high at $79.29 on Friday. Its meteoric advance has been fueled by supply constraints, its designation as a U.S. critical mineral, solid industrial demand, and a broader rally in precious metals driven by expectations of U.S. interest rate cuts and volatility amplified by low liquidity.</p> <p class=\"paywall-full-content\">Also see:</p> <p class=\"paywall-full-content\"><a title=\"Silver tops all-time high of $70/oz and these mining companies have taken notice\" href=\"https://seekingalpha.com/news/4534799-silver-tops-all-time-high-of-70-oz-and-these-mining-companies-have-taken-notice\" target=\"_blank\">Silver tops all-time high of $70/oz and these mining companies have taken notice</a></p> <p class=\"paywall-full-content\"><a title=\"Silver explodes to record highs in 2025 \u2014 Hecla Mining skyrockets nearly 300%\" href=\"https://seekingalpha.com/news/4533053-silver-explodes-to-record-highs-in-2025-hecla-mining-skyrockets-nearly-300\" target=\"_blank\">Silver explodes to record highs in 2025 \u2014 Hecla Mining skyrockets nearly 300%</a> </p> <div class=\"before_last_paragraph-piano-placeholder\"></div><p class=\"paywall-full-content\">Here are some silver- and silver-mining-focused exchange-traded funds: (<span class=\"ticker-hover-wrapper\"><span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/SLV\" title=\"iShares Silver Trust ETF\">SLV</a></span></span>), (<span class=\"ticker-hover-wrapper\"><span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/SIVR\" title=\"abrdn Physical Silver Shares ETF\">SIVR</a></span></span>), (<span class=\"ticker-hover-wrapper\"><span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/AGQ\" title=\"ProShares Ultra Silver ETF\">AGQ</a></span></span>), (<span class=\"ticker-hover-wrapper\"><span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/ZSL\" title=\"ProShares UltraShort Silver ETF\">ZSL</a></span></span>), (<span class=\"ticker-hover-wrapper\"><span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/PSLV\" title=\"Sprott Physical Silver Trust\">PSLV</a></span></span>), (<span class=\"ticker-hover-wrapper\"><span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/SIL\" title=\"Global X Silver Miners ETF\">SIL</a></span></span>), (<span class=\"ticker-hover-wrapper\"><span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/SILJ\" title=\"Amplify Junior Silver Miners ETF\">SILJ</a></span></span>), and (<span class=\"ticker-hover-wrapper\"><span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/SLVP\" title=\"iShares MSCI Global Silver and Metals Miners ETF\">SLVP</a></span></span>). </p> <div class=\"signup_widget_placeholder\"></div><div id=\"more-links\" class=\"paywall-full-content\"> <h2>More on silver</h2> <ul> <li><a href=\"https://seekingalpha.com/article/4855967-as-silver-surges-toward-magical-100-mark-global-debt-levels-are-exploding-us-dollar-is-dying\">As Silver Surges Toward The Magical $100 Mark, Global Debt Levels Are Exploding And The U.S. Dollar Is Dying</a></li> <li><a href=\"https://seekingalpha.com/article/4855952-2025-metal-frenzy-year-end-wrap-up-2026-outlook\">The 2025 Metal Frenzy: A Year-End Wrap-Up And 2026 Outlook</a></li> <li><a href=\"https://seekingalpha.com/article/4855886-magnificent-metals\">Magnificent Metals</a></li> <li><a href=\"https://seekingalpha.com/news/4535569-sa-asks-whats-the-best-silver-play-right-now-for-investors\">SA Asks: What's the best silver play right now for investors?</a></li> <li><a href=\"https://seekingalpha.com/news/4535572-silver-soars-to-hit-another-record-high-gold-extends-rally\">Silver soars to hit another record high, gold extends rally</a></li> </ul> </div>",
+      "disclosure": null,
+      "quickInsights": null,
+      "metered": true,
+      "availableTranslations": [],
+      "correctionReason": null,
+      "audioDuration": 99.768,
+      "originalTitle": "Silver is now the third most valuable asset in the world"
+    },
+    "relationships": {
+      "author": {
+        "data": {}
+      },
+      "sentiments": {
+        "data": []
+      },
+      "primaryTickers": {
+        "data": [
+          {},
+          {
+            "id": "481"
+          },
+          {
+            "id": "1217"
+          },
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {
+            "id": "1150"
+          },
+          {
+            "id": "146"
+          },
+          {},
+          {
+            "id": "575"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": [
+          {}
+        ]
+      },
+      "otherTags": {
+        "data": []
+      },
+      "ratingChangeNotice": {}
+    },
+    "links": {
+      "schemaImage": []
+    }
+  },
+  "included": [
+    {
+      "attributes": {
+        "userId": 56228617,
+        "image": {},
+        "nick": "Anuron Mitra, SA News Editor",
+        "bio": "<p>Anuron is a U.S. stock market reporter for Seeking Alpha. He covers the daily Wall Street report, while also writing analysis pieces centered around equities, Treasury yields, the Federal Reserve and the U.S. economy. He is based in Bengaluru, India.</p><p>Anuron joined Seeking Alpha in March 2022 from Reuters News, where he spent nearly six years and covered U.S. breaking news, India breaking news and the health and pharmaceutical sector. </p><p>Anuron graduated from Christ University in Bengaluru in 2013 and holds a triple undergraduate degree in journalism, psychology and English. </p>"
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "fundTypeId": 5,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "id": "481",
+      "attributes": {
+        "company": "iShares Silver Trust ETF",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "id": "1217",
+      "attributes": {
+        "company": "Global X Silver Miners ETF",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": "ProShares Ultra Silver ETF",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": "ProShares UltraShort Silver ETF",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": "Sprott Physical Silver Trust",
+        "fundTypeId": 3,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": "abrdn Physical Silver Shares ETF",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": "Amplify Junior Silver Miners ETF",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": "iShares MSCI Global Silver and Metals Miners ETF",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "id": "1150",
+      "attributes": {
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "id": "146",
+      "attributes": {
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "id": "575",
+      "attributes": {
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "fundTypeId": 5,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    }
+  ]
+}

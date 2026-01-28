@@ -1,0 +1,113 @@
+{
+  "data": {
+    "attributes": {
+      "publishOn": "2024-05-20T07:45:49-04:00",
+      "isLockedPro": false,
+      "commentCount": 0,
+      "gettyImageUrl": null,
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "earnings": {
+          "id": 10,
+          "non_theme": false
+        },
+        "japan": {
+          "id": 18066,
+          "title": null,
+          "non_theme": true
+        },
+        "large-cap": {
+          "id": 115402,
+          "title": null,
+          "non_theme": true
+        },
+        "guidance": {
+          "id": 601061,
+          "title": null,
+          "non_theme": true
+        },
+        "breaking-news": {
+          "id": 614459,
+          "title": null,
+          "non_theme": true
+        },
+        "news-metered": {
+          "id": 614465,
+          "title": null,
+          "non_theme": true
+        }
+      },
+      "title": "Tokio Marine GAAP EPS of \u00a5351.59, net premiums written of \u00a54824.99B; initiates FY24 outlook",
+      "isPaywalled": false,
+      "lastModified": "2024-05-20T07:47:07-04:00",
+      "content": "<ul> <li>Tokio Marine Holdings <a href=\"https://www.tokiomarinehd.com/en/ir/event/presentation/2023/qsbph40000002ear-att/4Q_FY2023_Summary_Report_e.pdf\" target=\"_blank\">press release</a> (<a href=\"https://seekingalpha.com/symbol/TKOMY\" title=\"Tokio Marine Holdings, Inc.\">OTCPK:TKOMY</a>): FY GAAP EPS of \u00a5351.59.</li> <li>Net premiums written of \u00a54824.99B (+7.9% Y/Y).</li> <li>Net cash provided by operating activities increased by \u00a564.4 billion to \u00a51,072.1 billion compared to the previous fiscal year.</li> <li>As a result, Cash and cash equivalents at the<span class=\"paywall-full-content\"> end of the year were \u00a51,086.9 billion, an increase of \u00a5101.5 billion from that as of March 31, 2023.</span> </li> <li class=\"paywall-full-content\"> <strong>Consolidated Business Forecasts for the fiscal year 2024:</strong> The company's consolidated business forecasts for the fiscal year 2024 are \u00a51,200.0 billion for Ordinary profit and \u00a5870.0 billion for net income attributable to owners of the parent; Net income per share - Basic of \u00a5440.99.</li> <li class=\"paywall-full-content\">Net premiums written, and Life insurance premiums are projected to be \u00a55,240.0 billion and \u00a5870.0 billion respectively.</li> <li class=\"paywall-full-content\">Net incurred losses related to natural catastrophes occurring during the period are projected to be \u00a5136.0 billion in Japan and \u00a589.0 billion outside Japan.</li> </ul> <div class=\"signup_widget_placeholder\"></div><div id=\"more-links\" class=\"paywall-full-content\"> <h2>More on Tokio Marine Holdings</h2> <ul> <li><a href=\"https://seekingalpha.com/article/4686411-tokio-marine-holdings-poised-to-benefit-from-emerging-markets\" class=\"more-link\">Tokio Marine Holdings: Poised To Benefit From Emerging Markets</a></li> <li><a href=\"https://seekingalpha.com/symbol/TKOMY/earnings\" class=\"more-link\">Historical earnings data for Tokio Marine Holdings</a></li> <li><a href=\"https://seekingalpha.com/symbol/TKOMY/income-statement\" class=\"more-link\">Financial information for Tokio Marine Holdings</a></li> </ul> </div>",
+      "disclosure": null,
+      "quickInsights": null,
+      "metered": true,
+      "availableTranslations": [],
+      "correctionReason": null,
+      "audioDuration": null,
+      "originalTitle": "Tokio Marine GAAP EPS of \u00a5351.59, net premiums written of \u00a54824.99B; initiates FY24 outlook"
+    },
+    "relationships": {
+      "author": {
+        "data": {}
+      },
+      "sentiments": {
+        "data": []
+      },
+      "primaryTickers": {
+        "data": [
+          {},
+          {}
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": []
+      },
+      "ratingChangeNotice": {}
+    },
+    "links": {
+      "schemaImage": {}
+    }
+  },
+  "included": [
+    {
+      "attributes": {
+        "userId": 52365730,
+        "image": {},
+        "nick": "Meghavi Singh, SA News Editor",
+        "bio": "<p>Meghavi Singh is an editor on the India news team of Seeking Alpha, based in Pune.</p><p>Before joining Seeking Alpha in 2020, she worked with HSBC Bank for 12+ years in the wealth management and Regulatory Reporting departments. Prior to HSBC, she began her career with Gridstone Research, a financial research start-up, as a research associate for a period of 3 years, tracking company events and financial results for the US Consumer Sector.</p><p>She has two daughters and lives in Pune, India.</p><p> </p>"
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": "Tokio Marine Holdings, Inc.",
+        "fundTypeId": 8,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": "Tokio Marine Holdings, Inc.",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "data": {
+    "attributes": {
+      "publishOn": "2025-12-19T08:34:36-05:00",
+      "isLockedPro": false,
+      "commentCount": 2,
+      "gettyImageUrl": null,
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "earnings": {
+          "id": 10,
+          "non_theme": false
+        },
+        "us": {
+          "id": 326,
+          "title": null,
+          "non_theme": true
+        },
+        "mid-cap": {
+          "id": 115412,
+          "title": null,
+          "non_theme": true
+        },
+        "hidden-from-qp": {
+          "id": 578794,
+          "title": null,
+          "non_theme": true
+        },
+        "breaking-news": {
+          "id": 614459,
+          "title": null,
+          "non_theme": true
+        },
+        "templated": {
+          "id": 778493,
+          "title": null,
+          "non_theme": true
+        },
+        "consumer-staples": {
+          "id": 787629,
+          "title": null,
+          "non_theme": true
+        },
+        "packaged-foods-and-meats": {
+          "id": 787713,
+          "title": null,
+          "non_theme": true
+        }
+      },
+      "title": "Lamb Weston Non-GAAP EPS of $0.69 beats by $0.04, revenue of $1.62B beats by $30M",
+      "isPaywalled": false,
+      "lastModified": "2025-12-19T08:35:17-05:00",
+      "content": "<ul>\n<li>Lamb Weston <a href=\"https://seekingalpha.com/pr/20345844-lamb-weston-reports-second-quarter-fiscal-2026-results-reaffirms-fiscal-year-2026-outlook\">press release</a> (<span class=\"ticker-hover-wrapper\"><span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/LW\" title=\"Lamb Weston Holdings, Inc.\">LW</a></span></span>): Q2 Non-GAAP EPS of $0.69 <span style=\"color: green;\"> beats by $0.04</span>.</li>\n<li>Revenue of $1.62B (+1.3% Y/Y) <span style=\"color: green;\"> beats by $30M</span>.</li>\n<li><div class=\"table-responsive\">\n<span class=\"sa-table-scroll-wrapper sa-hide-scrollbar\"><span data-intersection-boundary=\"start\" data-test-id=\"table-scroll-wrapper-boundary-start\"></span><table data-should-enlarge=\"true\"><tbody>\n<tr>\n<td colspan=\"1\" rowspan=\"1\"><p data-eci=\"true\">\u00a0</p></td>\n<td colspan=\"1\" rowspan=\"1\"><p>\u00a0</p></td>\n<td colspan=\"1\" rowspan=\"1\"><p>Fiscal 2026 Guidance</p></td>\n</tr>\n<tr>\n<td colspan=\"1\" rowspan=\"1\"><p>Net Sales</p></td>\n<td colspan=\"1\" rowspan=\"1\"><p>\u00a0</p></td>\n<td colspan=\"1\" rowspan=\"1\"><p>$6.35 billion to $6.55 billion</p></td>\n</tr>\n<tr>\n<td colspan=\"1\" rowspan=\"1\"><p>Adjusted EBITDA</p></td>\n<td colspan=\"1\" rowspan=\"1\"><p>\u00a0</p></td>\n<td colspan=\"1\" rowspan=\"1\"><p>$1.00 billion to $1.20 billion</p></td>\n</tr>\n<tr>\n<td colspan=\"1\" rowspan=\"1\"><p>Cash Used for Capital Expenditures</p></td>\n<td colspan=\"1\" rowspan=\"1\"><p>\u00a0</p></td>\n<td colspan=\"1\" rowspan=\"1\"><p>Approximately $500 million</p></td>\n</tr>\n</tbody></table>\n<span data-intersection-boundary=\"end\" data-test-id=\"table-scroll-wrapper-boundary-end\"></span></span><button type=\"button\" class=\"sa-table-enlarge-button\">Click to enlarge</button>\n</div></li>\n</ul><div class=\"signup_widget_placeholder\"></div><div id=\"more-links\">\n<h2>More on Lamb Weston</h2>\n<ul>\n<li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4853850-lamb-weston-plunge-doesnt-mean-shares-are-tasty-now-rating-downgrade\">Lamb Weston's Plunge Doesn't Mean Shares Are Tasty Now (Rating Downgrade)</a></li>\n<li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4853628-lamb-weston-a-fry-utility-trapped-in-a-capacity-cycle\">Lamb Weston: A Fry Utility Trapped In A Capacity Cycle</a></li>\n<li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4853353-lamb-weston-stability-returns-but-performance-far-from-impressive\">Lamb Weston: Stability Returns, But Performance Is Far From Impressive</a></li>\n<li><a class=\"more-link\" href=\"https://seekingalpha.com/news/4532963-lamb-weston-q2-2026-earnings-preview\">Lamb Weston Q2 2026 Earnings Preview</a></li>\n<li><a class=\"more-link\" href=\"https://seekingalpha.com/news/4529850-sa-quant-ranks-top-packaged-food-and-meat-stocks-as-campbells-beats-q1-estimates\">SA Quant ranks top packaged food and meat stocks as Campbell's beats Q1 estimates</a></li>\n</ul>\n</div>",
+      "disclosure": null,
+      "quickInsights": null,
+      "metered": false,
+      "availableTranslations": [],
+      "correctionReason": null,
+      "audioDuration": 35.136,
+      "originalTitle": "Lamb Weston Non-GAAP EPS of $0.69 beats by $0.04, revenue of $1.62B beats by $30M"
+    },
+    "relationships": {
+      "author": {
+        "data": {}
+      },
+      "sentiments": {
+        "data": []
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "571204"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": []
+      },
+      "ratingChangeNotice": {}
+    },
+    "links": {
+      "schemaImage": {}
+    }
+  },
+  "included": [
+    {
+      "attributes": {
+        "userId": 1108356,
+        "image": {},
+        "nick": "Gaurav Batavia, SA News Editor",
+        "bio": "<p>Gaurav Batavia is a Senior Managing Editor of the India news team at Seeking Alpha who oversees news planning and creation. He manages a team of 13 editors and monitors the results of various content campaign pieces to ensure they follow tone and style guides. </p><p>Before joining Seeking Alpha in 2010, Gaurav handled research analysis of financial statements of U.S. companies at First Order Analytics. Prior to FOA, he began his career with Gridstone Research, tracking financial results for the US tech, media and telecom sector.</p><p>He holds a Post-Graduate Diploma in Management of Business Administration and a Master of Commerce degree.</p>"
+      },
+      "links": {}
+    },
+    {
+      "id": "571204",
+      "attributes": {
+        "company": "Lamb Weston Holdings, Inc.",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    }
+  ]
+}

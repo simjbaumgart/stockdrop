@@ -50,14 +50,30 @@ async def startup_event():
     asyncio.create_task(run_trade_report_update())
 
 async def run_periodic_check():
+    check_interval = 1200 # 20 minutes
+    log_interval = 300   # 5 minutes
+    last_check_time = 0  # Ensure first run happens immediately
+
     while True:
         try:
-            # Run the check in a thread pool to avoid blocking the event loop
-            # since check_large_cap_drops is synchronous (uses yfinance)
-            await asyncio.to_thread(stock_service.check_large_cap_drops)
+            now_ts = datetime.now().timestamp()
+            if now_ts - last_check_time >= check_interval:
+                print(f"[Scheduler] Running Periodic Stock Drop Check... {datetime.now().strftime('%H:%M:%S')}")
+                # Run the check in a thread pool to avoid blocking the event loop
+                # since check_large_cap_drops is synchronous (uses yfinance)
+                await asyncio.to_thread(stock_service.check_large_cap_drops)
+                last_check_time = datetime.now().timestamp()
+            else:
+                next_check = datetime.fromtimestamp(last_check_time + check_interval)
+                time_remaining = next_check - datetime.now()
+                minutes_remaining = int(time_remaining.total_seconds() / 60)
+                # Handle potential negative remaining if we slightly overshot or logic drift, default to 0
+                minutes_remaining = max(0, minutes_remaining)
+                print(f"[Scheduler] Next Stock Drop Check in {minutes_remaining} minutes... ({next_check.strftime('%H:%M:%S')})")
         except Exception as e:
             print(f"Error in periodic check: {e}")
-        await asyncio.sleep(1800) # Check every 30 minutes
+        
+        await asyncio.sleep(log_interval)
 
 async def run_trade_report_update():
     """

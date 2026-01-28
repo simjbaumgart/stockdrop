@@ -1,0 +1,779 @@
+{
+  "data": {
+    "id": "4523689",
+    "type": "fullArticle",
+    "attributes": {
+      "publishOn": "2022-07-15T19:08:35-04:00",
+      "isLockedPro": false,
+      "commentCount": 9,
+      "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1346385641/image_1346385641.jpg",
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "investing-ideas": {
+          "id": 10727,
+          "slug": "investing-ideas",
+          "kind": "general",
+          "path": "/stock-ideas",
+          "title": "Stock Ideas",
+          "sasource": "theme_breadcrumb"
+        },
+        "long-ideas": {
+          "id": 1936,
+          "slug": "long-ideas",
+          "kind": "breadcrumb",
+          "path": "/stock-ideas/long-ideas",
+          "title": "Long Ideas",
+          "sasource": "theme_breadcrumb"
+        },
+        "value": {
+          "id": 115492,
+          "slug": "value",
+          "kind": "common",
+          "non_theme": true
+        },
+        "margin-expansion": {
+          "id": 142841,
+          "slug": "margin-expansion",
+          "kind": "common",
+          "non_theme": true
+        },
+        "high-quality-business-model": {
+          "id": 548906,
+          "slug": "high-quality-business-model",
+          "kind": "common",
+          "non_theme": true
+        },
+        "consumer-goods": {
+          "id": 17829,
+          "slug": "consumer-goods",
+          "kind": "common",
+          "path": "/stock-ideas/consumer-goods",
+          "title": "Consumer\u00a0",
+          "non_theme": true
+        },
+        "alpha-rich-investment-style": {
+          "id": 114682,
+          "slug": "alpha-rich-investment-style",
+          "kind": "general"
+        },
+        "alpha-rich-opportunity": {
+          "id": 114692,
+          "slug": "alpha-rich-opportunity",
+          "kind": "general"
+        },
+        "germany": {
+          "id": 18057,
+          "slug": "germany",
+          "kind": "country",
+          "path": "/market-outlook/global-investing/analysis/germany",
+          "title": "Germany"
+        },
+        "auto-manufacturers-major": {
+          "id": 17831,
+          "slug": "auto-manufacturers-major",
+          "kind": "common",
+          "non_theme": true
+        },
+        "consumer-discretionary": {
+          "id": 25,
+          "slug": "consumer-discretionary",
+          "kind": "sector",
+          "path": "/stock-ideas/consumer-goods",
+          "title": "Consumer\u00a0",
+          "sasource": "theme_breadcrumb"
+        }
+      },
+      "title": "Mercedes-Benz's Focus On Profitability Could Make It An Inflation Hedge",
+      "summary": [
+        "Mercedes-Benz started before the pandemic to focus more on margins than on volumes.",
+        "The company found itself ready to gain maximum advantage of the current auto market, where volumes are decreasing and pricing power is strong.",
+        "By focusing on direct sales to customers, the company doesn't rely as much as other competitors on leasing and financing."
+      ],
+      "isPaywalled": false,
+      "structuredInsights": null,
+      "lastModified": "2022-07-15T19:32:16-04:00",
+      "isModerated": false,
+      "availableTranslations": [],
+      "locale": "en",
+      "closestTradingDate": "2022-07-18",
+      "beforeOpeningHours": false,
+      "isEarningsSlides": false,
+      "isExclusive": true,
+      "isTranscript": false,
+      "excludedByTag": false,
+      "transcriptPath": null,
+      "likesCount": 5,
+      "disabledStatus": "allowed",
+      "disabledMessage": null,
+      "status": "published",
+      "disclosure": "<p id=\"a-disclosure\"><b>Analyst\u2019s Disclosure:</b><span>I/we have no stock, option or similar derivative position in any of the companies mentioned, but may initiate a beneficial Long position through a purchase of the stock, or the purchase of call options or similar derivatives in DMLRY over the next 72 hours.</span><span id=\"top-business-disclosure\"> I wrote this article myself, and it expresses my own opinions. I am not receiving compensation for it (other than from Seeking Alpha). I have no business relationship with any company whose stock is mentioned in this article. </span></p><p id='a-disclosure-more'><strong>Seeking Alpha's Disclosure:</strong> Past performance is no guarantee of future results. No recommendation or advice is being given as to whether any investment is suitable for a particular investor. Any views or opinions expressed above may not reflect those of Seeking Alpha as a whole. Seeking Alpha is not a licensed securities dealer, broker or US investment adviser or investment bank. Our analysts are third party authors that include both professional investors and individual investors who may not be licensed or certified by any institute or regulatory body.</p>",
+      "articleActionableItem": null,
+      "inEmbargo": false,
+      "isNoindex": false,
+      "isNoarchive": true,
+      "content": "<p data-eci=\"true\"><figure class=\"getty-figure\" data-type=\"getty-image\"><picture> <img src=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1346385641/image_1346385641.jpg?io=getty-c-w750\" alt='Edificio per uffici del dipartimento Mercedes Benz vicino all\"aeroporto di Stoccarda' data-id=\"1346385641\" data-type=\"getty-image\" width=\"1536px\" height=\"1027px\" srcset=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1346385641/image_1346385641.jpg?io=getty-c-w1536 1536w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1346385641/image_1346385641.jpg?io=getty-c-w1280 1280w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1346385641/image_1346385641.jpg?io=getty-c-w1080 1080w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1346385641/image_1346385641.jpg?io=getty-c-w750 750w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1346385641/image_1346385641.jpg?io=getty-c-w640 640w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1346385641/image_1346385641.jpg?io=getty-c-w480 480w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1346385641/image_1346385641.jpg?io=getty-c-w320 320w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1346385641/image_1346385641.jpg?io=getty-c-w240 240w\" sizes=\"(max-width: 768px) calc(100vw - 36px), (max-width: 1024px) calc(100vw - 132px), (max-width: 1200px) calc(66.6vw - 72px), 600px\" fetchpriority=\"high\"> </picture><figcaption><p class=\"item-caption\"> </p> <p>fotolinchen/iStock Unreleased via Getty Images</p></figcaption></figure></p> <div class=\"inline_ad_placeholder\"></div> <h2>Investment thesis</h2> <p>Mercedes-Benz Group AG (<a href=\"https://seekingalpha.com/symbol/MBGYY\" class=\"ticker-link\">DMLRY</a>, <a href=\"https://seekingalpha.com/symbol/MBGAF\" class=\"ticker-link\">DDAIF</a>) has been beaten down like many stocks in the current bear market, where automakers all have taken a huge hit as fears of a recession and<span class=\"paywall-full-content\"> soaring inflation worry investors. However, I think the selloff of the company opens up an interesting opportunity to start a position in the stock. Mercedes-Benz already had been reshaping its business model and its main focus before the pandemic in order to become a more profitable company. It seems like the undertaken efforts are already paying off, thus positioning the company to withstand any major market downturn with a solid position.</span></p> <h2 class=\"paywall-full-content\">The strategy shift</h2> <p class=\"paywall-full-content\">Between 2019 and 2020, Mercedes-Benz announced that it wanted to shift its business model from targeting volumes to focusing on moving its product portfolio towards higher tiers that ensure better profitability. Following this decision, the company completed in 2021 the de-merger of Daimler Trucks (DTRUY, DTGHF), which I recently covered in <a href=\"https://seekingalpha.com/article/4516801-trucks-spin-offs-n-1-daimler-trucks-relies-on-north-america-to-return-to-profitability-on-buses\">an article</a>. In this way, Mercedes-Benz turned away from a conglomerate structure in order to be clearly perceived as an automaker that aims at being one of the market leaders not in terms of sold cars, but in terms of profitability.</p> <p class=\"paywall-full-content\">This goal was stated once again during the last capital markets event, where Mercedes provided some interesting data.</p> <p class=\"paywall-full-content\"><figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><picture> <span><a href=\"https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578751068817923_origin.png\" rel=\"lightbox\" data-width=\"1240\" data-height=\"633\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578751068817923_origin.png?io=w640\" alt=\"Mercedes Benz portfolio, DMLRY, DDAIF\" width=\"640\" height=\"327\" contenteditable=\"false\" data-width=\"640\" data-height=\"327\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578751068817923_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578751068817923_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578751068817923_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578751068817923_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span> </picture><figcaption><p class=\"item-caption\"><span>Mercedes-Benz 2022 The Economics of Desire Presentation</span></p></figcaption></figure></p> <p class=\"paywall-full-content\">As we can see, the company is planning to decrease by -25% its entry luxury sales, reducing volumes from the 2019 680k units to around 510k, while changing the average sale price (ASP) up by 20%, in order to achieve by 2026 a double-digit margin. For the core luxury segment, sales volume is expected to remain flat around 1.2 million units, with an increasing ASP of 25%. This segment is already providing Mercedes with higher margins. The top-end luxury tier already sells more than 100k units and it is expected to grow by 60%, with an ASP increase of around 15%. When we speak of top-end-luxury we are talking about cars that have an ASP over \u20ac100,000.</p> <p class=\"paywall-full-content\">Now, Mercedes' strategy will clearly lead to an initial decrease in volumes, that will benefit margins and free cash flow. From 2019 to 2021 the company already saw its sales go down by about 400k units. Let's take a deeper look into Mercedes-Benz sales last year. Even though sales did decrease, we see that the low three segments went down, while the top three (S-Class, SUVs and Sport Cars) all saw increasing volumes.</p> <p class=\"paywall-full-content\">In particular, the S-Class was up by 56%, SUVs were up by 6.6% and sports cars were up by a staggering 63.6%, as shown in the graph below.</p> <p class=\"paywall-full-content\"><figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><picture> <img src=\"https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578752910055118.png?io=w640\" alt=\"Mercedes-Benz sales, DMLRY, DDAIF\" contenteditable=\"false\" loading=\"lazy\"> </picture><figcaption><p class=\"item-caption\"><span>Mercedes-Benz FY2021 Results Presentation</span></p></figcaption></figure></p> <p class=\"paywall-full-content\">True, after the pandemic many automakers have seen their volumes shrink as a result of supply chain constraints and semiconductor shortages. This gave all of them increased pricing power facing the huge surge in demand we saw. However, Mercedes-Benz had already started to shift towards a business plan that was perfect for the situation we faced because it enables the company to funnel up demand and lead it towards higher margins segments.</p> <p class=\"paywall-full-content\">In the <a href=\"https://group.mercedes-benz.com/dokumente/investoren/berichte/zwischenberichte/q1/mercedes-benz-ir-factsheet-q1-2022.pdf\" rel=\"noopener\">Q1 2022 Fact Sheet,</a> Mercedes showed that it was not immune from the general decrease in auto sales we are seeing, especially in Europe. However, it posted outstanding results for the S-Class, up 100%, and still positive results for the sports cars segment. SUVs were indeed down, but not as much as the lower segments. In other words, I see a strategy that is holding up well in a difficult environment and that is providing Mercedes Benz with the opportunity to enjoy higher profitability.</p> <p class=\"paywall-full-content\"><figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><picture> <span><a href=\"https://static.seekingalpha.com/uploads/2022/7/15/53230627-1657875790145943_origin.png\" rel=\"lightbox\" data-width=\"1019\" data-height=\"461\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2022/7/15/53230627-1657875790145943_origin.png?io=w640\" alt=\"DDAIF, DMLRY, Mercedes Q1 results\" width=\"640\" height=\"290\" contenteditable=\"false\" data-width=\"640\" data-height=\"290\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2022/7/15/53230627-1657875790145943_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2022/7/15/53230627-1657875790145943_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2022/7/15/53230627-1657875790145943_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2022/7/15/53230627-1657875790145943_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span> </picture><figcaption><p class=\"item-caption\"><span>Mercedes-Benz Q1 2022 Fact Sheet</span></p></figcaption></figure></p> <p class=\"paywall-full-content\">Mercedes' choice comes from an understanding of the market that I will quickly recall. The company stated that it expected the global car market to grow at a CAGR of 1.2% during this decade, while the premium segment will grow at a faster pace of 1.7% and the luxury segment, the real aim of Mercedes-Benz, will grow at a CAGR of 4.2%.</p> <p class=\"paywall-full-content\">The focus on the upper segments comes from a clear understanding of two main drivers. First of all, a car is one of the most emotionally-led purchased objects. This is even more true when the car is positioned among the top segments of the industry, thus being perceived as not only a vehicle, but a luxury item.</p> <p class=\"paywall-full-content\"><figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><picture> <span><a href=\"https://static.seekingalpha.com/uploads/2022/7/14/53230627-16577871839836836_origin.png\" rel=\"lightbox\" data-width=\"1202\" data-height=\"689\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2022/7/14/53230627-16577871839836836_origin.png?io=w640\" alt=\"Mercedes stock, DMLRY, DDAIF\" contenteditable=\"false\" loading=\"lazy\" width=\"1202\" height=\"689\" srcset=\"https://static.seekingalpha.com/uploads/2022/7/14/53230627-16577871839836836_origin.png?io=w1080 1080w,https://static.seekingalpha.com/uploads/2022/7/14/53230627-16577871839836836_origin.png?io=w750 750w,https://static.seekingalpha.com/uploads/2022/7/14/53230627-16577871839836836_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2022/7/14/53230627-16577871839836836_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2022/7/14/53230627-16577871839836836_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2022/7/14/53230627-16577871839836836_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span> </picture><figcaption><p class=\"item-caption\"><span>Mercedes-Benz 2022 The Economics of Desire Presentation</span></p></figcaption></figure></p> <p class=\"paywall-full-content\">The second driver Mercedes is aware of is that between 2020 and 2025, a 50% increase in adults with at least $1 million net worth is expected. This will bring the total addressable market (\"TAM\") to 84 million individuals. This will make the luxury segment resilient, as more and more individuals will have the wealth to purchase, maybe for their first time, a luxurious car.</p> <p class=\"paywall-full-content\"><figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><picture> <span><a href=\"https://static.seekingalpha.com/uploads/2022/7/14/53230627-16577876687955933_origin.png\" rel=\"lightbox\" data-width=\"1223\" data-height=\"700\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2022/7/14/53230627-16577876687955933_origin.png?io=w640\" alt=\"DMLRY, DDAIF\" width=\"640\" height=\"366\" contenteditable=\"false\" data-width=\"640\" data-height=\"366\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2022/7/14/53230627-16577876687955933_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2022/7/14/53230627-16577876687955933_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2022/7/14/53230627-16577876687955933_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2022/7/14/53230627-16577876687955933_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span> </picture><figcaption><p class=\"item-caption\"><span>Mercedes-Benz 2022 The Economics of Desire Presentation</span></p></figcaption></figure></p> <h2 class=\"paywall-full-content\">Mercedes-Benz vs. BMW: different sources of margins</h2> <p class=\"paywall-full-content\">The Mercedes-Benz Group sold a <a href=\"https://group.mercedes-benz.com/documents/investors/reports/annual-report/mercedes-benz/mercedes-benz-ir-annual-report-2021-incl-combined-management-report-mbg-ag.pdf\" rel=\"nofollow\">total of 2.75 million vehicles</a> in 2021, out of which approximately 2 million were cars, while the remaining were vans. Its revenue from the industrial division was \u20ac105.95 billion and an EBIT of \u20ac12.54 billion. This is an 11.83% margin. The revenue from the financial services (Mercedes-Benz Mobility) was \u20ac27.7 billion with an EBIT of \u20ac1.44 billion is a 5.2% margin. As we can see, Mercedes' margins come more from car sales, than from financial services.</p> <p class=\"paywall-full-content\">On the other hand, Mercedes-Benz's major competitor BMW (BMWYY) <a href=\"https://www.bmwgroup.com/content/dam/grpw/websites/bmwgroup_com/ir/downloads/en/2022/bericht/BMW-Group-Report-2021-en.pdf\" rel=\"nofollow\">sold in 2021</a> approximately 2.5 million cars, with a revenue of \u20ac 95.48 billion and an EBIT of \u20ac9.87 billion. The margin is here 10.33%. The revenue from the financial services was \u20ac32.87 billion with an EBIT of \u20ac3.7 billion, with a margin of 11.26%. As I already pointed out in a <a href=\"https://seekingalpha.com/article/4523299-bmw-interesting-valuation-leasing-headwinds\">recent article,</a> BMW has been focusing on growing its financial branch in order to expand volumes and revenues. Furthermore, it is from this branch that the company is making its margins, but, as I pointed out, this strategy may be at risk as it is linked to a pre-owned vehicle's value and to interest rates that may become too high, thus pushing customers to buy directly a car without being financed.</p> <h2 class=\"paywall-full-content\">Mercedes-Benz is seeing improved financials</h2> <p class=\"paywall-full-content\">So far we have seen two points: the strategy shift and the difference between Mercedes and BMW. Now we can see further how Mercedes' strategy is indeed being executed with interesting results.</p> <p class=\"paywall-full-content\">As we wait for the 1H 2022 results, which Mercedes will publish at the beginning of August, we can take a look at 1Q 2022 to notice that with volumes generally decreasing, EBIT was strong and growing, with an RoS that reached 16.5%, more than 1% point above BMW. This was well above the expected return on sales cars that in its previous guidance Mercedes planned to be between 11.5% and 13%.</p> <p class=\"paywall-full-content\"><figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><picture> <span><a href=\"https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578930441347973_origin.png\" rel=\"lightbox\" data-width=\"1070\" data-height=\"616\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578930441347973_origin.png?io=w640\" alt=\"DDAIF, DMLRY, Mercedes Q1 2022 results\" width=\"640\" height=\"368\" contenteditable=\"false\" data-width=\"640\" data-height=\"368\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578930441347973_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578930441347973_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578930441347973_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578930441347973_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span> </picture><figcaption><p class=\"item-caption\"><span>Mercedes Benz Q1 2022 Results Presentation</span></p></figcaption></figure></p> <p class=\"paywall-full-content\">Let's see where these results come from. As we can see from the slide below, Mercedes has increased its ASP by 40% in just two years. In the meantime, it has also managed well its fixed costs, reducing them by 16%, just like its investments as the EV production is starting to take off and is thus needing less money to grow. The result is an increasing RoS that moved up from 6.2% in 2019 to 16.4% in Q1 2022. This is really a big jump in a short period of time and I think it is the way Mercedes leveraged its strategy shift in a favorable environment.</p> <p class=\"paywall-full-content\"><figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><picture> <span><a href=\"https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578928342367804_origin.png\" rel=\"lightbox\" data-width=\"1233\" data-height=\"613\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578928342367804_origin.png?io=w640\" alt=\"Mercedes-Benz stock, DMLRY, DDAIF\" width=\"640\" height=\"318\" contenteditable=\"false\" data-width=\"640\" data-height=\"318\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578928342367804_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578928342367804_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578928342367804_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578928342367804_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span> </picture><figcaption><p class=\"item-caption\"><span>Mercedes-Benz 2022 The Economics of Desire Presentation</span></p></figcaption></figure></p> <p class=\"paywall-full-content\">Another result we can see from Mercedes' shift is that the company is turning free cash flow positive as we can see from the graph below showing the free cash flow per share. Please notice that Mercedes is not doing share buybacks, thus the free cash flow per share spike is all due to a real free cash flow increase.</p> <p class=\"paywall-full-content\"><figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><picture> <img src=\"https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578967315852988.png?io=w640\" alt=\"Mercedes free cash flow\" width=\"617\" height=\"193\" contenteditable=\"false\" data-width=\"617\" data-height=\"193\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578967315852988.png?io=w480 480w,https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578967315852988.png?io=w320 320w,https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578967315852988.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"> </picture><figcaption><p class=\"item-caption\"><span>Seeking Alpha</span></p></figcaption></figure></p> <h2 class=\"paywall-full-content\">Valuation</h2> <p class=\"paywall-full-content\">Here is my discounted cash flow model. I am being a bit conservative by expecting over the next five year a free cash flow (\"FCF\") growth rate of just 4%, even though I believe we will see it benefit more from the new strategy Mercedes has undertaken. The result is that Mercedes is currently undervalued by around 30%, which, in my case begins to be a good enough margin of safety. Furthermore, I think that even if a recession will take place, a company that is more focused on luxury should hold up better than others.</p> <p class=\"paywall-full-content\"><figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><picture> <span><a href=\"https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578974649471538_origin.png\" rel=\"lightbox\" data-width=\"1358\" data-height=\"440\" data-og-image-twitter_small_card=\"false\" data-og-image-twitter_large_card=\"false\" data-og-image-twitter_image_post=\"false\" data-og-image-msn=\"false\" data-og-image-facebook=\"false\" data-og-image-google_news=\"false\" data-og-image-google_plus=\"false\" data-og-image-linkdin=\"false\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578974649471538_origin.png?io=w640\" alt=\"Mercedes discounted cash flow, Mercedes valuation\" width=\"640\" height=\"207\" contenteditable=\"false\" data-width=\"640\" data-height=\"207\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578974649471538_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578974649471538_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578974649471538_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2022/7/15/53230627-16578974649471538_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span> </picture><figcaption><p class=\"item-caption\"><span>Author, with data from Seeking Alpha</span></p></figcaption></figure></p> <div class=\"before_last_paragraph-piano-placeholder paywall-full-content\"></div> <p class=\"paywall-full-content\">The stock is also beginning to trade around $50, which has been both a support and a resistance line over the past decade. For investors with a long-term mindset, this could be a good entry point to cautiously start a position that could be increased in case this bear market provides us with even better opportunities.</p>",
+      "quickInsights": null,
+      "twitContent": "Mercedes-Benz's Focus On Profitability Could Make It An Inflation Hedge $MBGYY $MBGAF #trading #stocks #investing https://seekingalpha.com/article/4523689-mercedes-benz-focus-on-profitability-could-make-it-an-inflation-hedge?source=tweet",
+      "innerMarketing": "",
+      "marketingBullet": "",
+      "isReit": false,
+      "videoData": null,
+      "marketingBulletVariant": null,
+      "marketingBio": null,
+      "audioDuration": null,
+      "originalTitle": "Mercedes-Benz's Focus On Profitability Could Make It An Inflation Hedge"
+    },
+    "relationships": {
+      "author": {
+        "data": {
+          "id": "106590",
+          "type": "author"
+        }
+      },
+      "sentiments": {
+        "data": [
+          {
+            "id": "382951",
+            "type": "sentiment"
+          },
+          {
+            "id": "382886",
+            "type": "sentiment"
+          }
+        ]
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "572172",
+            "type": "tag"
+          },
+          {
+            "id": "16071",
+            "type": "tag"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": [
+          {
+            "id": "570707",
+            "type": "tag"
+          },
+          {
+            "id": "578703",
+            "type": "tag"
+          },
+          {
+            "id": "599914",
+            "type": "tag"
+          },
+          {
+            "id": "581651",
+            "type": "tag"
+          },
+          {
+            "id": "14740",
+            "type": "tag"
+          },
+          {
+            "id": "614263",
+            "type": "tag"
+          },
+          {
+            "id": "625116",
+            "type": "tag"
+          }
+        ]
+      },
+      "otherTags": {
+        "data": [
+          {
+            "id": "615839",
+            "type": "tag"
+          },
+          {
+            "id": "1936",
+            "type": "tag"
+          },
+          {
+            "id": "115492",
+            "type": "tag"
+          },
+          {
+            "id": "142841",
+            "type": "tag"
+          },
+          {
+            "id": "548906",
+            "type": "tag"
+          },
+          {
+            "id": "570707",
+            "type": "tag"
+          },
+          {
+            "id": "578703",
+            "type": "tag"
+          },
+          {
+            "id": "599914",
+            "type": "tag"
+          },
+          {
+            "id": "581651",
+            "type": "tag"
+          },
+          {
+            "id": "14740",
+            "type": "tag"
+          },
+          {
+            "id": "614263",
+            "type": "tag"
+          },
+          {
+            "id": "625116",
+            "type": "tag"
+          },
+          {
+            "id": "572172",
+            "type": "tag"
+          },
+          {
+            "id": "16071",
+            "type": "tag"
+          },
+          {
+            "id": "17829",
+            "type": "tag"
+          },
+          {
+            "id": "17335",
+            "type": "tag"
+          },
+          {
+            "id": "10727",
+            "type": "tag"
+          },
+          {
+            "id": "114682",
+            "type": "tag"
+          },
+          {
+            "id": "114692",
+            "type": "tag"
+          },
+          {
+            "id": "18057",
+            "type": "tag"
+          },
+          {
+            "id": "17831",
+            "type": "tag"
+          }
+        ]
+      },
+      "coAuthors": {
+        "data": []
+      },
+      "presentations": {
+        "data": []
+      },
+      "updates": {
+        "data": []
+      },
+      "corrections": {
+        "data": []
+      }
+    },
+    "links": {
+      "self": "/article/4523689-mercedes-benz-focus-on-profitability-could-make-it-an-inflation-hedge",
+      "canonical": "https://seekingalpha.com/article/4523689-mercedes-benz-focus-on-profitability-could-make-it-an-inflation-hedge",
+      "uriImage": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1346385641/image_1346385641.jpg?io=getty-c-w1536",
+      "schemaImage": [
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1346385641/image_1346385641.jpg?io=getty-c-w1280",
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1346385641/image_1346385641.jpg?io=getty-c-crop-16-9",
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1346385641/image_1346385641.jpg?io=getty-c-crop-4-3"
+      ]
+    }
+  },
+  "included": [
+    {
+      "id": "106590",
+      "type": "author",
+      "attributes": {
+        "company": null,
+        "slug": "luca-socci",
+        "userId": 53230627,
+        "tagId": 615839,
+        "bio": "<p>I\u2019m a long-term investor focused on U.S. and European equities, with a dual emphasis on undervalued growth stocks and high-quality dividend growers. Through years of experience, I\u2019ve learned that sustained profitability\u2014evident in strong margins, stable and expanding free cash flow, and high returns on invested capital\u2014is a more reliable driver of returns than valuation alone. I manage one of my portfolios publicly on eToro, where I qualified as a Popular Investor, allowing others to copy my real-time investment decisions. My background spans Economics, Classical Philology, Philosophy and Theology. This interdisciplinary foundation sharpens both my quantitative analysis and my ability to interpret market narratives through a broader, long-term lens. I started investing when I became a father. By managing wisely what I received and earn, I aim to ensure for me and my children that we don't have so much that we don't have to do anything, but that we have enough assets to be free to do what we want. The goal is not to free myself from work, but to make sure I can work in the place and in a way where I can fully express myself.</p>",
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/053/230/627/small_pic.png",
+          "medium": "https://seekingalpha.com/images/users_profile/053/230/627/medium_pic.png",
+          "big": "https://seekingalpha.com/images/users_profile/053/230/627/big_pic.png",
+          "extra_large": "https://seekingalpha.com/images/users_profile/053/230/627/extra_large_pic.png"
+        },
+        "nick": "Luca Socci",
+        "deactivated": null,
+        "memberSince": 2021,
+        "isRss": false,
+        "contributorSince": 2022,
+        "followersCount": 5925
+      },
+      "relationships": {
+        "user": {
+          "data": {
+            "id": "53230627",
+            "type": "user"
+          }
+        },
+        "userBioTags": {
+          "data": [
+            {
+              "id": "1038211",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1038212",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1038213",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1038214",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1038215",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1038216",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1038217",
+              "type": "userBioTag"
+            }
+          ]
+        },
+        "authorResearch": {
+          "data": null
+        }
+      },
+      "links": {
+        "self": "/author/luca-socci",
+        "profileUrl": "/author/luca-socci",
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "id": "572172",
+      "type": "tag",
+      "attributes": {
+        "slug": "mbgyy",
+        "name": "MBGYY",
+        "company": "Mercedes-Benz Group AG",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "OTCMKTS",
+        "fundTypeId": 8,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/MBGYY"
+      }
+    },
+    {
+      "id": "16071",
+      "type": "tag",
+      "attributes": {
+        "slug": "mbgaf",
+        "name": "MBGAF",
+        "company": "Mercedes-Benz Group AG",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "OTCMKTS",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/MBGAF"
+      }
+    },
+    {
+      "id": "570707",
+      "type": "tag",
+      "attributes": {
+        "slug": "ftxr",
+        "name": "FTXR",
+        "company": "First Trust Nasdaq Transportation ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NASDAQ",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/FTXR"
+      }
+    },
+    {
+      "id": "578703",
+      "type": "tag",
+      "attributes": {
+        "slug": "kars",
+        "name": "KARS",
+        "company": "KraneShares Electric Vehicles and Future Mobility Index ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/KARS"
+      }
+    },
+    {
+      "id": "599914",
+      "type": "tag",
+      "attributes": {
+        "slug": "idrv",
+        "name": "IDRV",
+        "company": "iShares Self-Driving EV and Tech ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NYSEARCA",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/IDRV"
+      }
+    },
+    {
+      "id": "581651",
+      "type": "tag",
+      "attributes": {
+        "slug": "driv",
+        "name": "DRIV",
+        "company": "Global X Autonomous & Electric Vehicles ETF",
+        "tagKind": "Tags::Ticker",
+        "equityType": "etf",
+        "exchange": "NASDAQ",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/DRIV"
+      }
+    },
+    {
+      "id": "14740",
+      "type": "tag",
+      "attributes": {
+        "slug": "bmwyy-defunct-14740",
+        "name": "BMWYY",
+        "company": "Bayerische Motoren Werke Aktiengesellschaft",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "OTCMKTS",
+        "fundTypeId": 8,
+        "isDefunct": true,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/BMWYY-DEFUNCT-14740"
+      }
+    },
+    {
+      "id": "614263",
+      "type": "tag",
+      "attributes": {
+        "slug": "dtruy",
+        "name": "DTRUY",
+        "company": "Daimler Truck Holding AG",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "OTCMKTS",
+        "fundTypeId": 8,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/DTRUY"
+      }
+    },
+    {
+      "id": "625116",
+      "type": "tag",
+      "attributes": {
+        "slug": "dtghf",
+        "name": "DTGHF",
+        "company": "Daimler Truck Holding AG",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "OTCMKTS",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/DTGHF"
+      }
+    },
+    {
+      "id": "615839",
+      "type": "tag",
+      "attributes": {
+        "slug": "luca-socci",
+        "name": "Luca Socci",
+        "company": null,
+        "tagKind": "Tags::AuthorTag"
+      },
+      "links": {
+        "self": "/author/luca-socci"
+      }
+    },
+    {
+      "id": "1936",
+      "type": "tag",
+      "attributes": {
+        "slug": "long-ideas",
+        "name": "Long Ideas",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=long-ideas"
+      }
+    },
+    {
+      "id": "115492",
+      "type": "tag",
+      "attributes": {
+        "slug": "value",
+        "name": "Value",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=value"
+      }
+    },
+    {
+      "id": "142841",
+      "type": "tag",
+      "attributes": {
+        "slug": "margin-expansion",
+        "name": "Margin Expansion",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=margin-expansion"
+      }
+    },
+    {
+      "id": "548906",
+      "type": "tag",
+      "attributes": {
+        "slug": "high-quality-business-model",
+        "name": "High Quality Business Model",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=high-quality-business-model"
+      }
+    },
+    {
+      "id": "17829",
+      "type": "tag",
+      "attributes": {
+        "slug": "consumer-goods",
+        "name": "Consumer Goods",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/consumer-goods"
+      }
+    },
+    {
+      "id": "17335",
+      "type": "tag",
+      "attributes": {
+        "slug": "sa-exclusive",
+        "name": "SA Exclusive",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/sa-exclusive"
+      }
+    },
+    {
+      "id": "10727",
+      "type": "tag",
+      "attributes": {
+        "slug": "investing-ideas",
+        "name": "Investing Ideas",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/investing-ideas"
+      }
+    },
+    {
+      "id": "114682",
+      "type": "tag",
+      "attributes": {
+        "slug": "alpha-rich-investment-style",
+        "name": "Alpha-Rich Investment Style",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/alpha-rich-investment-style"
+      }
+    },
+    {
+      "id": "114692",
+      "type": "tag",
+      "attributes": {
+        "slug": "alpha-rich-opportunity",
+        "name": "Alpha-Rich Opportunity",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/alpha-rich-opportunity"
+      }
+    },
+    {
+      "id": "18057",
+      "type": "tag",
+      "attributes": {
+        "slug": "germany",
+        "name": "Germany",
+        "company": null,
+        "tagKind": "Tags::Country"
+      },
+      "links": {
+        "self": "/articles?filters=germany"
+      }
+    },
+    {
+      "id": "17831",
+      "type": "tag",
+      "attributes": {
+        "slug": "auto-manufacturers-major",
+        "name": "Auto Manufacturers - Major",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/auto-manufacturers-major"
+      }
+    },
+    {
+      "id": "382951",
+      "type": "sentiment",
+      "attributes": {
+        "articleId": 4523689,
+        "type": "bullish",
+        "createdAt": "2022-07-15T19:08:35.000-04:00",
+        "typeId": 1
+      },
+      "relationships": {
+        "article": {
+          "data": {
+            "id": "4523689",
+            "type": "article"
+          }
+        },
+        "tag": {
+          "data": {
+            "id": "16071",
+            "type": "tag"
+          }
+        }
+      }
+    },
+    {
+      "id": "382886",
+      "type": "sentiment",
+      "attributes": {
+        "articleId": 4523689,
+        "type": "bullish",
+        "createdAt": "2022-07-15T19:08:35.000-04:00",
+        "typeId": 1
+      },
+      "relationships": {
+        "article": {
+          "data": {
+            "id": "4523689",
+            "type": "article"
+          }
+        },
+        "tag": {
+          "data": {
+            "id": "572172",
+            "type": "tag"
+          }
+        }
+      }
+    }
+  ]
+}

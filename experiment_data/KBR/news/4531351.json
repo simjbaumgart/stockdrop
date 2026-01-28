@@ -1,0 +1,103 @@
+{
+  "data": {
+    "attributes": {
+      "publishOn": "2025-12-15T06:30:52-05:00",
+      "isLockedPro": false,
+      "commentCount": 0,
+      "gettyImageUrl": null,
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "us": {
+          "id": 326,
+          "title": null,
+          "non_theme": true
+        },
+        "mid-cap": {
+          "id": 115412,
+          "title": null,
+          "non_theme": true
+        },
+        "hidden-from-qp": {
+          "id": 578794,
+          "title": null,
+          "non_theme": true
+        },
+        "news-metered": {
+          "id": 614465,
+          "title": null,
+          "non_theme": true
+        },
+        "industrials": {
+          "id": 787628,
+          "title": null,
+          "non_theme": true
+        },
+        "research-and-consulting-services": {
+          "id": 787668,
+          "title": null,
+          "non_theme": true
+        }
+      },
+      "title": "KBR secures contract for IGNIS green ammonia facility in Spain",
+      "isPaywalled": false,
+      "lastModified": "2025-12-15T06:32:04-05:00",
+      "content": "<div class=\"signup_widget_placeholder\"></div><div id=\"more-links\"> <p data-path-to-node=\"1\" data-eci=\"true\">KBR (<span class=\"ticker-hover-wrapper\"><span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/KBR\" title=\"KBR, Inc.\">KBR</a></span></span>) has been <a title=\"awarded a technology and engineering contract\" href=\"https://seekingalpha.com/pr/20338915-kbr-awarded-green-ammonia-project-by-ignis-in-spain\" target=\"_blank\">awarded a technology and engineering contract</a> by IGNIS for a new green ammonia facility to be built in A Coru\u00f1a, Spain.</p> <p data-path-to-node=\"2\">Under the terms, KBR will provide proprietary engineering design and pre-Front End Engineering Design (pre-FEED) services for the<span class=\"paywall-full-content invisible\"> plant, which is designed to produce 200,000 tons of green ammonia per annum.</span></p> <p data-path-to-node=\"4\" class=\"paywall-full-content invisible\">The facility will utilize renewable energy to produce green hydrogen, which is then converted into green ammonia.</p> <p data-path-to-node=\"5\" class=\"paywall-full-content invisible\">Green ammonia is a critical component in the production of renewable fertilizers.</p> <div class=\"before_last_paragraph-piano-placeholder\"></div>\n<p data-path-to-node=\"5\" class=\"paywall-full-content invisible\">\u201cKBR\u2019s green ammonia solutions, along with complementary technologies such as H2ACT<sup>\u00ae</sup> ammonia cracking, make us a global leader in delivering reliable and energy-efficient ammonia technology at a lower capital cost,\u201d said Jay Ibrahim, President, KBR Sustainable Technology Solutions.</p> <h2 class=\"paywall-full-content invisible\">More on KBR, Inc</h2> <ul class=\"paywall-full-content invisible\"> <li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4844556-kbr-engineering-tomorrow-with-proprietary-decarbonization-and-circularity\">KBR: Engineering Tomorrow With Proprietary Decarbonization And Circularity</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4835531-kbr-inc-kbr-q3-2025-earnings-call-transcript\">KBR, Inc. (KBR) Q3 2025 Earnings Call Transcript</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4835604-kbr-inc-2025-q3-results-earnings-call-presentation\">KBR, Inc. 2025 Q3 - Results - Earnings Call Presentation</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/news/4517384-kbr-awarded-key-engineering-deal-for-huge-qatarenergy-project\">KBR awarded key engineering deal for huge QatarEnergy project</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/news/4511529-kbr-outlines-7_8b-revenue-guidance-and-advances-spin-off-strategy-as-cash-flow-outpaces\">KBR outlines $7.8B revenue guidance and advances spin-off strategy as cash flow outpaces expectations</a></li> </ul> </div>",
+      "disclosure": null,
+      "quickInsights": null,
+      "metered": true,
+      "availableTranslations": [],
+      "correctionReason": null,
+      "audioDuration": 57.504,
+      "originalTitle": "KBR secures contract for IGNIS green ammonia facility in Spain"
+    },
+    "relationships": {
+      "author": {
+        "data": {}
+      },
+      "sentiments": {
+        "data": []
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "2787"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": []
+      },
+      "ratingChangeNotice": {}
+    },
+    "links": {
+      "schemaImage": {}
+    }
+  },
+  "included": [
+    {
+      "attributes": {
+        "userId": 52365730,
+        "image": {},
+        "nick": "Meghavi Singh, SA News Editor",
+        "bio": "<p>Meghavi Singh is an editor on the India news team of Seeking Alpha, based in Pune.</p><p>Before joining Seeking Alpha in 2020, she worked with HSBC Bank for 12+ years in the wealth management and Regulatory Reporting departments. Prior to HSBC, she began her career with Gridstone Research, a financial research start-up, as a research associate for a period of 3 years, tracking company events and financial results for the US Consumer Sector.</p><p>She has two daughters and lives in Pune, India.</p><p> </p>"
+      },
+      "links": {}
+    },
+    {
+      "id": "2787",
+      "attributes": {
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    }
+  ]
+}

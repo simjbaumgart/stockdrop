@@ -1,0 +1,254 @@
+{
+  "data": [
+    {
+      "id": "20343861",
+      "type": "pressRelease",
+      "attributes": {
+        "publishOn": "2025-12-18T06:00:00-05:00",
+        "isLockedPro": false,
+        "commentCount": 0,
+        "gettyImageUrl": null,
+        "themes": {},
+        "title": "KBR Awarded Seat on $10 Billion Ceiling Readiness and Sustainment Support Contract with U.S. Naval Supply Systems Command",
+        "isPaywalled": false
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "id": "16",
+            "type": "pressReleaseAuthor"
+          }
+        },
+        "sentiments": {
+          "data": []
+        },
+        "primaryTickers": {
+          "data": [
+            {
+              "id": "2787",
+              "type": "tag"
+            }
+          ]
+        },
+        "secondaryTickers": {
+          "data": []
+        },
+        "otherTags": {
+          "data": []
+        }
+      },
+      "links": {
+        "self": "/pr/20343861-kbr-awarded-seat-on-10-billion-ceiling-readiness-and-sustainment-support-contract-with-u-s"
+      }
+    },
+    {
+      "id": "20340466",
+      "type": "pressRelease",
+      "attributes": {
+        "publishOn": "2025-12-16T06:00:00-05:00",
+        "isLockedPro": false,
+        "commentCount": 0,
+        "gettyImageUrl": null,
+        "themes": {},
+        "title": "KBR\u2019s Methanol Technology Selected by Fikrat Al-Tadweer for the First Biomethanol Plant in Saudi Arabia",
+        "isPaywalled": false
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "id": "16",
+            "type": "pressReleaseAuthor"
+          }
+        },
+        "sentiments": {
+          "data": []
+        },
+        "primaryTickers": {
+          "data": [
+            {
+              "id": "2787",
+              "type": "tag"
+            }
+          ]
+        },
+        "secondaryTickers": {
+          "data": []
+        },
+        "otherTags": {
+          "data": []
+        }
+      },
+      "links": {
+        "self": "/pr/20340466-kbr-s-methanol-technology-selected-by-fikrat-al-tadweer-for-the-first-biomethanol-plant-in"
+      }
+    },
+    {
+      "id": "20338915",
+      "type": "pressRelease",
+      "attributes": {
+        "publishOn": "2025-12-15T06:00:00-05:00",
+        "isLockedPro": false,
+        "commentCount": 0,
+        "gettyImageUrl": null,
+        "themes": {},
+        "title": "KBR Awarded Green Ammonia Project by IGNIS in Spain",
+        "isPaywalled": false
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "id": "16",
+            "type": "pressReleaseAuthor"
+          }
+        },
+        "sentiments": {
+          "data": []
+        },
+        "primaryTickers": {
+          "data": [
+            {
+              "id": "2787",
+              "type": "tag"
+            }
+          ]
+        },
+        "secondaryTickers": {
+          "data": []
+        },
+        "otherTags": {
+          "data": []
+        }
+      },
+      "links": {
+        "self": "/pr/20338915-kbr-awarded-green-ammonia-project-by-ignis-in-spain"
+      }
+    },
+    {
+      "id": "20328426",
+      "type": "pressRelease",
+      "attributes": {
+        "publishOn": "2025-12-04T06:00:00-05:00",
+        "isLockedPro": false,
+        "commentCount": 0,
+        "gettyImageUrl": null,
+        "themes": {},
+        "title": "KBR Enhancing F/A-18 Foreign Military Sales with Contract for NAVAIR",
+        "isPaywalled": false
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "id": "16",
+            "type": "pressReleaseAuthor"
+          }
+        },
+        "sentiments": {
+          "data": []
+        },
+        "primaryTickers": {
+          "data": [
+            {
+              "id": "2787",
+              "type": "tag"
+            }
+          ]
+        },
+        "secondaryTickers": {
+          "data": []
+        },
+        "otherTags": {
+          "data": []
+        }
+      },
+      "links": {
+        "self": "/pr/20328426-kbr-enhancing-f-aminus-18-foreign-military-sales-with-contract-for-navair"
+      }
+    },
+    {
+      "id": "20314899",
+      "type": "pressRelease",
+      "attributes": {
+        "publishOn": "2025-11-20T06:00:00-05:00",
+        "isLockedPro": false,
+        "commentCount": 0,
+        "gettyImageUrl": null,
+        "themes": {},
+        "title": "KBR and Axiom Space Successfully Test Next-Generation Spacesuit in Critical Step Toward Returning to the Moon",
+        "isPaywalled": false
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "id": "16",
+            "type": "pressReleaseAuthor"
+          }
+        },
+        "sentiments": {
+          "data": []
+        },
+        "primaryTickers": {
+          "data": [
+            {
+              "id": "2787",
+              "type": "tag"
+            }
+          ]
+        },
+        "secondaryTickers": {
+          "data": []
+        },
+        "otherTags": {
+          "data": []
+        }
+      },
+      "links": {
+        "self": "/pr/20314899-kbr-and-axiom-space-successfully-test-next-generation-spacesuit-in-critical-step-toward"
+      }
+    }
+  ],
+  "included": [
+    {
+      "id": "16",
+      "type": "pressReleaseAuthor",
+      "attributes": {
+        "nick": "GlobeNewswire"
+      }
+    },
+    {
+      "id": "2787",
+      "type": "tag",
+      "attributes": {
+        "slug": "kbr",
+        "name": "KBR",
+        "equityType": "stocks",
+        "company": "KBR, Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/KBR"
+      }
+    }
+  ],
+  "meta": {
+    "page": {
+      "title": "KBR, Inc. (KBR) Latest Press Releases",
+      "description": "Stay up to date with all latest press releases from KBR, Inc. (KBR).",
+      "listTitle": "Press Releases",
+      "listDescription": null,
+      "proStatus": 0,
+      "uriImage": "https://static.seekingalpha.com/assets/og_image_1200-29b2bfe1a595477db6826bd2126c63ac2091efb7ec76347a8e7f81ba17e3de6c.png",
+      "size": 5,
+      "totalPages": 41,
+      "total": 203,
+      "minmaxPublishOn": {
+        "min": 1763636400,
+        "max": 1766055600
+      }
+    },
+    "mone": {
+      "params": {
+        "pu": ""
+      }
+    }
+  }
+}

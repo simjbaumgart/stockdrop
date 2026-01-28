@@ -1,0 +1,530 @@
+{
+  "data": {
+    "id": "4108246",
+    "type": "fullArticle",
+    "attributes": {
+      "publishOn": "2017-09-20T10:13:37-04:00",
+      "isLockedPro": false,
+      "commentCount": 12,
+      "gettyImageUrl": null,
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "investing-strategy-main": {
+          "id": 39,
+          "slug": "investing-strategy-main",
+          "kind": "breadcrumb",
+          "path": "/investing-strategy",
+          "title": "Investing Strategy",
+          "sasource": "theme_breadcrumb"
+        },
+        "retirement": {
+          "id": 866,
+          "slug": "retirement",
+          "kind": "breadcrumb",
+          "path": "/investing-strategy/retirement",
+          "title": "Retirement Investing",
+          "sasource": "theme_breadcrumb"
+        },
+        "investing-income": {
+          "id": 16549,
+          "slug": "investing-income",
+          "kind": "general"
+        },
+        "us": {
+          "id": 326,
+          "slug": "us",
+          "kind": "common",
+          "non_theme": true
+        }
+      },
+      "title": "A Significant Drawback With 401(k)s That No One Talks About",
+      "summary": [
+        "Strategic investors face an obstacle in employer sponsored retirement plans that is not talked about.",
+        "I share two examples of this pitfall from my own professional experience.",
+        "Ignorant fund administrators can pull the rug out from under your thoughtful accumulation strategy."
+      ],
+      "isPaywalled": false,
+      "structuredInsights": null,
+      "lastModified": "2017-09-20T10:13:37-04:00",
+      "isModerated": false,
+      "availableTranslations": [],
+      "locale": "en",
+      "closestTradingDate": "2017-09-20",
+      "beforeOpeningHours": false,
+      "isEarningsSlides": false,
+      "isExclusive": true,
+      "isTranscript": false,
+      "excludedByTag": false,
+      "transcriptPath": null,
+      "likesCount": 0,
+      "disabledStatus": "allowed",
+      "disabledMessage": null,
+      "status": "published",
+      "disclosure": "<p id=\"a-disclosure\"><b>Analyst\u2019s Disclosure:</b><span>I/we have no positions in any stocks mentioned, and no plans to initiate any positions within the next 72 hours.</span><span id=\"top-business-disclosure\"> I wrote this article myself, and it expresses my own opinions. I am not receiving compensation for it (other than from Seeking Alpha). I have no business relationship with any company whose stock is mentioned in this article. </span></p><p id='a-disclosure-more'><strong>Seeking Alpha's Disclosure:</strong> Past performance is no guarantee of future results. No recommendation or advice is being given as to whether any investment is suitable for a particular investor. Any views or opinions expressed above may not reflect those of Seeking Alpha as a whole. Seeking Alpha is not a licensed securities dealer, broker or US investment adviser or investment bank. Our analysts are third party authors that include both professional investors and individual investors who may not be licensed or certified by any institute or regulatory body.</p>",
+      "articleActionableItem": null,
+      "inEmbargo": false,
+      "isNoindex": false,
+      "isNoarchive": true,
+      "content": "<p data-eci=\"true\">There is a significant drawback to 401k, 403b, and similar plans that I have never heard anyone talk about. I decided to write about it here for the community of Seeking Alpha readers since most tend to employ at least a minimum level of sophistication or strategy when it comes to investing. Because of this, they are the mostly likely to experience the pitfalls of this drawback.</p> <p>Anyone remember the 2014 oil price crash? A few of you I'm sure. This chart will help jog your memory:</p> <p><img src=\"https://static.seekingalpha.com/uploads/2017/9/19/saupload_f3272e38e9131a6f4cd613455067934c.png?io=w640\" class=\"sa-ycharts-img\" alt=\"Chart\" data-width=\"635\" data-height=\"366\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" fetchpriority=\"high\"><a href=\"https://ycharts.com/indicators/crude_oil_spot_price\" rel=\"nofollow\">WTI Crude Oil Spot Price</a> data by <a href=\"https://ycharts.com\" rel=\"nofollow\">YCharts</a></p> <p>For background, I advise some of my clients on how to allocate assets in their employer sponsored retirement plans. Based on my experience, I would venture to guess that about 1/3 of company sponsored retirement plans have at least one sector specific fund. At the time of the oil crash, I had a few clients with an energy sector fund in their plan, such as Vanguard Energy Fund (<a href=\"https://seekingalpha.com/symbol/VGELX\" title=\"Vanguard Energy Fund Admiral Shares\">VGELX</a>; <a href=\"https://seekingalpha.com/symbol/VGENX\" title=\"Vanguard Energy Fund Investor Shares\">VGENX</a>, <a href=\"https://seekingalpha.com/symbol/VENAX\" title=\"Vanguard Energy Index Fund Admiral Shares\">VENAX</a>) or Invesco Energy Fund (<a href=\"https://seekingalpha.com/symbol/IENAX\" title=\"Invesco Energy Fund Class A\">IENAX</a>; <a href=\"https://seekingalpha.com/symbol/IENSX\" title=\"Invesco Funds - Invesco Energy Fund Class R6\">IENSX</a>; <a href=\"https://seekingalpha.com/symbol/FSTEX\" title=\"Invesco Energy Fund Investor Class\">FSTEX</a>; <a href=\"https://seekingalpha.com/symbol/IENIX\" title=\"Invesco Energy Fund R5 Class\">IENIX</a>; <a href=\"https://seekingalpha.com/symbol/IENYX\" title=\"Invesco Energy Fund Class Y\">IENYX</a>).</p> <p>Knowing that oil &amp; gas are cyclical businesses I decided to start a program of dollar cost averaging for these clients into their energy funds. My thinking was that over the downturn they would be able to accumulate energy shares cheaply and then profit from the next upturn in oil prices. This strategy was going just fine until the wise guys administering the plan for one client decided to pull the energy fund from it <em>right at the very bottom</em>. (It always amazes me that selling assets at the very bottom is viewed by some to be a prudent fiduciary move.) This event stuck with me and I realized that if I was going to attempt this type of bottom of the cycle accumulation strategy again, I<span class=\"paywall-full-content\"> would have to really limit the size of it.</span></p> <p class=\"paywall-full-content\">Flash forward to July 2017 and a client I have with a natural resources equity fund. Some readers have probably already seen the following chart, courtesy of Incrementum's 2017 In Gold We Trust <a href=\"https://www.ingoldwetrust.report/en/gold-report/\" rel=\"nofollow\">Report</a>, which shows that commodities are historically very cheap compared to U.S. equities:</p> <p class=\"paywall-full-content\"><span><a href=\"https://static.seekingalpha.com/uploads/2017/9/19/816193-15058432157970724_origin.jpg\" rel=\"lightbox\" data-width=\"960\" data-height=\"662\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2017/9/19/816193-15058432157970724_origin.jpg?io=w640\" width=\"640\" height=\"441\" data-width=\"640\" data-height=\"441\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2017/9/19/816193-15058432157970724_origin.jpg?io=w640 640w,https://static.seekingalpha.com/uploads/2017/9/19/816193-15058432157970724_origin.jpg?io=w480 480w,https://static.seekingalpha.com/uploads/2017/9/19/816193-15058432157970724_origin.jpg?io=w320 320w,https://static.seekingalpha.com/uploads/2017/9/19/816193-15058432157970724_origin.jpg?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span></p> <p class=\"paywall-full-content\">My client's natural resources equity fund held some concentrated positions in base metals miners and natural gas producers that I viewed as attractive from a longer term perspective. In the past I had him avoid it because I thought it was too early for natural gas producers. In July 2017, I advised him to allocate a small portion of his account into the fund. Now here is the real kicker. I was actually getting ready to do a write-up on the fund for Seeking Alpha, but upon going to the fund company's website, <em>I discovered that the fund was going to be closed down in September 2017</em>.</p> <p class=\"paywall-full-content\">Here we are, at what is possibly an important historical low for commodities, and I was getting ready to recommend the fund to the public and the <em>investment company</em> decided to close it down. This particular plan was administered by an investment company. One would have thought they would have known better. Furthermore, this natural resources equity fund, sub-advised by two investment managers, held something like 7% of the fund in First Quantum Minerals. First Quantum is developing the 2nd largest, undeveloped copper deposit in the world at a time when copper looks to be in the early phase of a longer term bull market\u2014possibly influenced by a transition to electric vehicles. The following chart shows how First Quantum just put in a major, longer term double bottom (late 2015 / early 2016) and appears to have embarked on a new upward move.</p> <p class=\"paywall-full-content\"><img src=\"https://static.seekingalpha.com/uploads/2017/9/19/saupload_132be6f28456180326fbdee08ee82d58.png?io=w640\" class=\"sa-ycharts-img\" alt=\"Chart\" data-width=\"635\" data-height=\"366\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" loading=\"lazy\"><a href=\"https://ycharts.com/companies/FM.TO\" rel=\"nofollow\">FM</a> data by <a href=\"https://ycharts.com\" rel=\"nofollow\">YCharts</a></p> <p class=\"paywall-full-content\">This must have been frustrating to the underlying investment manager who was likely taking the longer term view with concentrated positions like this one.</p> <p class=\"paywall-full-content\">By now, readers can see what the significant drawback to employer sponsored retirement plans is to anyone wanting to employ any sort of investment strategy, or \"thought,\" if you will. Your typical employer sponsored plan likely has a group of fund selectors behind it that is totally backward looking. (Is it any wonder that passive indexes and robots have gained market share?) You might be making a wise investment decision, but a group of poor investment overseers just might pull the rug out from under you. Expressed succinctly: <em>you might have control over the funds you select within the plan, but you do not have any control over what those funds are and they often come and go</em>.</p> <p class=\"paywall-full-content\">In conclusion, if you decide to employ any sort of accumulation strategy in your employer sponsored retirement plan in a fund that is not a major, widely used index (e.g., the S&amp;P 500 or Russell 2000), tread lightly.</p> <h3 class=\"paywall-full-content\"><strong>Disclosure</strong></h3> <p class=\"paywall-full-content\"><em>I am an investment adviser and owner of True Vine Investments, a Registered Investment Advisor in the State of Pennsylvania (U.S.A.). I screen electronic communications from prospective clients in other states to ensure that I do not communicate directly with any prospect in another state where I have not met the registration requirements or do not have an applicable exemption.</em></p> <p class=\"paywall-full-content\"><em>Any investment advice or recommendations involving securities referenced in this article is general in nature and geared towards a readership of sophisticated investors. This article does not involve an attempt to effect transactions in a specific security nor constitute specific investment advice to any particular individual. It does not take into the account the specific financial situation, investment objectives, or particular needs of any specific person who may read this article. Individual investors are encouraged to independently evaluate specific investments and consult a licensed professional before making any investment decisions.</em></p> <p class=\"paywall-full-content\"><em>All data presented by the author is regarded as factual, however, its accuracy is not guaranteed. Investors are encouraged to conduct their own comprehensive analysis.</em></p> <div class=\"before_last_paragraph-piano-placeholder paywall-full-content\"></div> <p class=\"paywall-full-content\"><em>Positive comments made regarding this article should not be construed by readers to be an endorsement of my abilities to act as an investment adviser.</em></p>",
+      "quickInsights": null,
+      "twitContent": "A Significant Drawback With 401(k)s That No One Talks About $FSTEX $IENAX $IENIX #investing #business #stockmarket https://seekingalpha.com/article/4108246-a-significant-drawback-with-401-k-s-that-no-one-talks-about?source=tweet",
+      "innerMarketing": "",
+      "marketingBullet": "",
+      "isReit": false,
+      "videoData": null,
+      "marketingBulletVariant": null,
+      "marketingBio": null,
+      "audioDuration": null,
+      "originalTitle": "A Significant Drawback With 401(k)s That No One Talks About"
+    },
+    "relationships": {
+      "author": {
+        "data": {
+          "id": "71975",
+          "type": "author"
+        }
+      },
+      "sentiments": {
+        "data": []
+      },
+      "primaryTickers": {
+        "data": []
+      },
+      "secondaryTickers": {
+        "data": [
+          {
+            "id": "370675",
+            "type": "tag"
+          },
+          {
+            "id": "383645",
+            "type": "tag"
+          },
+          {
+            "id": "383665",
+            "type": "tag"
+          },
+          {
+            "id": "574163",
+            "type": "tag"
+          },
+          {
+            "id": "383685",
+            "type": "tag"
+          },
+          {
+            "id": "448435",
+            "type": "tag"
+          },
+          {
+            "id": "327955",
+            "type": "tag"
+          },
+          {
+            "id": "327965",
+            "type": "tag"
+          }
+        ]
+      },
+      "otherTags": {
+        "data": [
+          {
+            "id": "167515",
+            "type": "tag"
+          },
+          {
+            "id": "866",
+            "type": "tag"
+          },
+          {
+            "id": "370675",
+            "type": "tag"
+          },
+          {
+            "id": "383645",
+            "type": "tag"
+          },
+          {
+            "id": "383665",
+            "type": "tag"
+          },
+          {
+            "id": "574163",
+            "type": "tag"
+          },
+          {
+            "id": "383685",
+            "type": "tag"
+          },
+          {
+            "id": "448435",
+            "type": "tag"
+          },
+          {
+            "id": "327955",
+            "type": "tag"
+          },
+          {
+            "id": "327965",
+            "type": "tag"
+          },
+          {
+            "id": "17335",
+            "type": "tag"
+          },
+          {
+            "id": "162415",
+            "type": "tag"
+          },
+          {
+            "id": "16549",
+            "type": "tag"
+          },
+          {
+            "id": "326",
+            "type": "tag"
+          }
+        ]
+      },
+      "coAuthors": {
+        "data": []
+      },
+      "presentations": {
+        "data": []
+      },
+      "updates": {
+        "data": []
+      },
+      "corrections": {
+        "data": []
+      }
+    },
+    "links": {
+      "self": "/article/4108246-a-significant-drawback-with-401-k-s-that-no-one-talks-about",
+      "canonical": "https://seekingalpha.com/article/4108246-a-significant-drawback-with-401-k-s-that-no-one-talks-about",
+      "uriImage": "https://static.seekingalpha.com/uploads/2017/9/19/saupload_f3272e38e9131a6f4cd613455067934c.png?io=w640",
+      "schemaImage": {
+        "@type": "ImageObject",
+        "url": "https://static.seekingalpha.com/uploads/2017/9/19/saupload_f3272e38e9131a6f4cd613455067934c.png?io=w640"
+      }
+    }
+  },
+  "included": [
+    {
+      "id": "71975",
+      "type": "author",
+      "attributes": {
+        "company": null,
+        "slug": "joshua-hall",
+        "userId": 816193,
+        "tagId": 167515,
+        "bio": "Investment advisor - I manage custom portfolios for clients.<br>",
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/000/816/193/small_pic.png",
+          "medium": "https://seekingalpha.com/images/users_profile/000/816/193/medium_pic.png",
+          "big": "https://seekingalpha.com/images/users_profile/000/816/193/big_pic.png",
+          "extra_large": "https://seekingalpha.com/images/users_profile/000/816/193/extra_large_pic.png"
+        },
+        "nick": "Joshua Hall",
+        "deactivated": null,
+        "memberSince": 2011,
+        "isRss": false,
+        "contributorSince": 2014,
+        "followersCount": 3626
+      },
+      "relationships": {
+        "user": {
+          "data": {
+            "id": "816193",
+            "type": "user"
+          }
+        },
+        "userBioTags": {
+          "data": [
+            {
+              "id": "1037024",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1037025",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1037026",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1037027",
+              "type": "userBioTag"
+            }
+          ]
+        },
+        "authorResearch": {
+          "data": null
+        }
+      },
+      "links": {
+        "self": "/author/joshua-hall",
+        "profileUrl": "/author/joshua-hall",
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "id": "370675",
+      "type": "tag",
+      "attributes": {
+        "slug": "fstex",
+        "name": "FSTEX",
+        "company": "Invesco Energy Fund Investor Class",
+        "tagKind": "Tags::Ticker",
+        "equityType": "mutual-funds",
+        "exchange": "MUTF",
+        "fundTypeId": 2,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/FSTEX"
+      }
+    },
+    {
+      "id": "383645",
+      "type": "tag",
+      "attributes": {
+        "slug": "ienax",
+        "name": "IENAX",
+        "company": "Invesco Energy Fund Class A",
+        "tagKind": "Tags::Ticker",
+        "equityType": "mutual-funds",
+        "exchange": "MUTF",
+        "fundTypeId": 2,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/IENAX"
+      }
+    },
+    {
+      "id": "383665",
+      "type": "tag",
+      "attributes": {
+        "slug": "ienix",
+        "name": "IENIX",
+        "company": "Invesco Energy Fund R5 Class",
+        "tagKind": "Tags::Ticker",
+        "equityType": "mutual-funds",
+        "exchange": "MUTF",
+        "fundTypeId": 2,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/IENIX"
+      }
+    },
+    {
+      "id": "574163",
+      "type": "tag",
+      "attributes": {
+        "slug": "iensx",
+        "name": "IENSX",
+        "company": "Invesco Funds - Invesco Energy Fund Class R6",
+        "tagKind": "Tags::Ticker",
+        "equityType": "mutual-funds",
+        "exchange": "MUTF",
+        "fundTypeId": 2,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/IENSX"
+      }
+    },
+    {
+      "id": "383685",
+      "type": "tag",
+      "attributes": {
+        "slug": "ienyx",
+        "name": "IENYX",
+        "company": "Invesco Energy Fund Class Y",
+        "tagKind": "Tags::Ticker",
+        "equityType": "mutual-funds",
+        "exchange": "MUTF",
+        "fundTypeId": 2,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/IENYX"
+      }
+    },
+    {
+      "id": "448435",
+      "type": "tag",
+      "attributes": {
+        "slug": "venax",
+        "name": "VENAX",
+        "company": "Vanguard Energy Index Fund Admiral Shares",
+        "tagKind": "Tags::Ticker",
+        "equityType": "mutual-funds",
+        "exchange": "MUTF",
+        "fundTypeId": 2,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/VENAX"
+      }
+    },
+    {
+      "id": "327955",
+      "type": "tag",
+      "attributes": {
+        "slug": "vgelx",
+        "name": "VGELX",
+        "company": "Vanguard Energy Fund Admiral Shares",
+        "tagKind": "Tags::Ticker",
+        "equityType": "mutual-funds",
+        "exchange": "MUTF",
+        "fundTypeId": 2,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/VGELX"
+      }
+    },
+    {
+      "id": "327965",
+      "type": "tag",
+      "attributes": {
+        "slug": "vgenx",
+        "name": "VGENX",
+        "company": "Vanguard Energy Fund Investor Shares",
+        "tagKind": "Tags::Ticker",
+        "equityType": "mutual-funds",
+        "exchange": "MUTF",
+        "fundTypeId": 2,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/VGENX"
+      }
+    },
+    {
+      "id": "167515",
+      "type": "tag",
+      "attributes": {
+        "slug": "joshua-hall",
+        "name": "Joshua Hall",
+        "company": null,
+        "tagKind": "Tags::AuthorTag"
+      },
+      "links": {
+        "self": "/author/joshua-hall"
+      }
+    },
+    {
+      "id": "866",
+      "type": "tag",
+      "attributes": {
+        "slug": "retirement",
+        "name": "Retirement",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=retirement"
+      }
+    },
+    {
+      "id": "17335",
+      "type": "tag",
+      "attributes": {
+        "slug": "sa-exclusive",
+        "name": "SA Exclusive",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/sa-exclusive"
+      }
+    },
+    {
+      "id": "162415",
+      "type": "tag",
+      "attributes": {
+        "slug": "premium-base-payment",
+        "name": "",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/premium-base-payment"
+      }
+    },
+    {
+      "id": "16549",
+      "type": "tag",
+      "attributes": {
+        "slug": "investing-income",
+        "name": "Dividends & Income",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/investing-income"
+      }
+    },
+    {
+      "id": "326",
+      "type": "tag",
+      "attributes": {
+        "slug": "us",
+        "name": "United States",
+        "company": null,
+        "tagKind": "Tags::Country"
+      },
+      "links": {
+        "self": "/articles?filters=us"
+      }
+    }
+  ]
+}

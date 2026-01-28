@@ -214,6 +214,35 @@ def main():
         elif batch_id:
             batch_status = "Compared"
 
+        # Evidence Barometer Formatting
+        evidence_str = "-"
+        data_depth_raw = d.get('data_depth')
+        if data_depth_raw:
+            try:
+                import json
+                dd = json.loads(data_depth_raw)
+                
+                # News
+                news = dd.get('news', {})
+                n_count = news.get('total_count', 0)
+                providers = news.get('providers', {})
+                # Top 2 providers for brevity
+                top_provs = sorted(providers.items(), key=lambda x: x[1], reverse=True)[:2]
+                prov_str = ",".join([f"{k[:4]}:{v}" for k,v in top_provs]) # Abbreviate names
+                
+                # Transcript
+                fund = dd.get('fundamentals', {})
+                trans_avail = "Yes" if fund.get('transcript_available') else "No"
+                trans_len_k = int(fund.get('transcript_length', 0) / 1000)
+                
+                # Agents
+                agents = dd.get('agents', {})
+                total_k = int(sum(agents.values()) / 1000)
+                
+                evidence_str = f"N:{n_count}[{prov_str}] T:{trans_avail}({trans_len_k}k) A:{total_k}k"
+            except Exception as e:
+                evidence_str = "Error"
+
         row = {
             "Date": decision_dt.strftime("%Y-%m-%d"),
             "Symbol": symbol,
@@ -225,7 +254,8 @@ def main():
             "Performance": f"{perf_pct:+.2f}%" if price_at_decision and week_later_price else "-",
             "Verdict": deep_research_verdict if deep_research_verdict else "-",
             "Batch": batch_status,
-            "Status": status
+            "Status": status,
+            "Evidence": evidence_str
         }
         # Add benchmark data
         row.update(bench_data)
@@ -243,7 +273,7 @@ def main():
     LIMIT = 100
     shown_data = report_data[:LIMIT]
     
-    headers = ["Date", "Symbol", "Market", "Score", "Rec", "Price @ Dec", "Price +1W", "Performance", "SP500 1W", "Dow 1W", "DAX 1W", "Verdict", "Batch", "Status"]
+    headers = ["Date", "Symbol", "Market", "Score", "Rec", "Price @ Dec", "Price +1W", "Performance", "SP500 1W", "Dow 1W", "DAX 1W", "Verdict", "Batch", "Status", "Evidence"]
     widths = {h: len(h) for h in headers}
     for row in shown_data:
         for h in headers:

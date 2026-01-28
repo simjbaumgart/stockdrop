@@ -1,0 +1,49 @@
+{
+  "data": {
+    "attributes": {
+      "commentCount": 0,
+      "title": "Lamb Weston to Announce Fiscal Year 2026 Second Quarter Financial Results on December 19, 2025",
+      "publishOn": "2025-11-19T09:30:00.000-05:00",
+      "lastModified": "2025-11-19T09:30:08-05:00",
+      "widgetLinks": null,
+      "content": "<div>\n<p>    <span class=\"location\" value=\"LU/us.id.eagle\">EAGLE, Idaho</span>--(BUSINESS WIRE)--\nLamb Weston Holdings, Inc. (<a href=\"https://seekingalpha.com/symbol/LW\">LW</a>) announced today it will report fiscal 2026 second quarter financial results on December 19, 2025. The news release will be issued at approximately 8:30 a.m. ET, followed by a conference call at 10:00 a.m. ET.\n</p>\n<p>\nThe webcast and accompanying materials will be available on Lamb Weston\u2019s Investor Relations page at <a href=\"https://cts.businesswire.com/ct/CT?id=smartlink&amp;url=https%3A%2F%2Finvestors.lambweston.com%2Fevents-and-presentations&amp;esheet=54360253&amp;newsitemid=20251119447876&amp;lan=en-US&amp;anchor=https%3A%2F%2Finvestors.lambweston.com%2Fevents-and-presentations&amp;index=1&amp;md5=2494ec47adafd9e4280182bfe50c0de7\">https://investors.lambweston.com/events-and-presentations</a>.\n</p>\n<p>\nAlternatively, participants in the <span class=\"location\" value=\"LC/us\">U.S.</span> and <span class=\"location\" value=\"LC/ca\">Canada</span> may access the conference call by dialing 1-800-330-6710; participants outside the <span class=\"location\" value=\"LC/us\">U.S.</span> and <span class=\"location\" value=\"LC/ca\">Canada</span> should dial +1 213-279-1505. The conference ID is 1670388.\n</p>\n<p>\nA rebroadcast of the conference call will be available later in the day at the same location.\n</p>\n<p>\nAbout Lamb Weston\n</p>\n<p>\nLamb Weston is a leading supplier of frozen potato products to restaurants and retailers around the world. For 75 years, Lamb Weston has led the industry in innovation, introducing inventive products that simplify back-of-house management for its customers and make things more delicious for their customers. From the fields where Lamb Weston potatoes are grown to proactive customer partnerships, Lamb Weston always strives for more and never settles. Because, when we look at a potato, we see possibilities. Learn more about us at <a href=\"http://lambweston.com\">lambweston.com</a>.\n</p>\n<p><img src=\"https://cts.businesswire.com/ct/CT?id=bwnews&amp;sty=20251119447876r1&amp;sid=acqr8&amp;distro=nx&amp;lang=en\" alt=\"https://cts.businesswire.com/ct/CT?id=bwnews&amp;sty=20251119447876r1&amp;sid=acqr8&amp;distro=nx&amp;lang=en\"></p>\n<p>View source version on <a href=\"http://businesswire.com\">businesswire.com</a>: <a href=\"https://www.businesswire.com/news/home/20251119447876/en/\">https://www.businesswire.com/news/home/20251119447876/en/</a></p>\n<p>\nInvestors:\n<br><span class=\"person\" value=\"\">Debbie Hancock</span>\n<br>Investors@lambweston.com\n</p>\n<p>\nMedia:\n<br><span class=\"person\" value=\"\">Erin Gardiner</span>\n<br>Communication@lambweston.com\n</p>\n<p>Source: Lamb Weston Holdings, Inc.</p>\nCopyright Business Wire 2025\n</div>",
+      "widgetTitle": null
+    },
+    "relationships": {
+      "acquireService": {
+        "data": {
+          "id": "1"
+        }
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "571204"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": []
+      }
+    },
+    "links": {}
+  },
+  "included": [
+    {
+      "id": "1",
+      "attributes": {
+        "serviceName": "Press Releases - English"
+      }
+    },
+    {
+      "id": "571204",
+      "attributes": {
+        "company": "Lamb Weston Holdings, Inc."
+      },
+      "links": {}
+    }
+  ]
+}

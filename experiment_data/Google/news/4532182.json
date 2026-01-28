@@ -1,0 +1,100 @@
+{
+  "data": {
+    "attributes": {
+      "publishOn": "2025-12-16T12:14:13-05:00",
+      "isLockedPro": false,
+      "commentCount": 0,
+      "gettyImageUrl": null,
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "us": {
+          "id": 326,
+          "title": null,
+          "non_theme": true
+        },
+        "hidden-from-qp": {
+          "id": 578794,
+          "title": null,
+          "non_theme": true
+        },
+        "exclude-feed": {
+          "id": 586407,
+          "title": null,
+          "non_theme": true
+        },
+        "dividend-funds": {
+          "id": 612949,
+          "title": null,
+          "non_theme": true
+        },
+        "na-cap": {
+          "id": 614453,
+          "title": null,
+          "non_theme": true
+        },
+        "dividends": {
+          "id": 614464,
+          "non_theme": false
+        }
+      },
+      "title": "Kurv Yield Premium Strategy Google ETF declares monthly distribution of $0.4000",
+      "isPaywalled": false,
+      "lastModified": "2025-12-16T12:28:24-05:00",
+      "content": "<ul>\n<li>Kurv Yield Premium Strategy Google ETF (<span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/GOOP\" title=\"Kurv Yield Premium Strategy Google ETF\">GOOP</a></span>) - <a href=\"https://www.kurvinvest.com/etf/goop\" target=\"_blank\">$0.4000</a>.</li>\n<li>Payable Dec 18; for shareholders of record Dec 17; ex-div Dec 17.</li>\n</ul><div class=\"signup_widget_placeholder\"></div><div id=\"more-links\">\n<h2>More on Kurv Yield Premium Strategy Google ETF</h2>   <ul>     <li><a href=\"https://seekingalpha.com/symbol/GOOP/ratings/quant-ratings\" class=\"more-link\">Seeking Alpha\u2019s Quant Rating on Kurv Yield Premium Strategy Google ETF</a></li>     <li><a href=\"https://seekingalpha.com/symbol/GOOP/dividends/scorecard\" class=\"more-link\">Dividend scorecard for Kurv Yield Premium Strategy Google ETF</a></li>   </ul>\n</div>",
+      "disclosure": null,
+      "quickInsights": null,
+      "metered": false,
+      "availableTranslations": [],
+      "correctionReason": null,
+      "audioDuration": 20.664,
+      "originalTitle": "Kurv Yield Premium Strategy Google ETF declares monthly distribution of $0.4000"
+    },
+    "relationships": {
+      "author": {
+        "data": {}
+      },
+      "sentiments": {
+        "data": []
+      },
+      "primaryTickers": {
+        "data": [
+          {}
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": []
+      },
+      "ratingChangeNotice": {}
+    },
+    "links": {
+      "schemaImage": {}
+    }
+  },
+  "included": [
+    {
+      "attributes": {
+        "userId": 60812553,
+        "image": {},
+        "nick": "Akanksha Khushi, SA News Editor",
+        "bio": "<p>With over three years of experience as a dedicated breaking news reporter at Reuters, I have consistently delivered impactful coverage of critical financial stories. My experience spans high-profile mergers, bankruptcies, corporate litigations, and significant general news events, showcasing a proven track record of securing key insights and delivering timely, impactful reporting. </p><p>As Editor at Seeking Alpha, I write about the U.S markets and developments affecting significant share movements across various S&amp;P 500 sectors. </p>"
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": "Kurv Yield Premium Strategy Google ETF",
+        "fundTypeId": 1,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": true
+      },
+      "relationships": {},
+      "links": {}
+    }
+  ]
+}

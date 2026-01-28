@@ -1,0 +1,217 @@
+{
+  "data": [
+    {
+      "id": "4835531",
+      "type": "transcript",
+      "attributes": {
+        "publishOn": "2025-10-30T12:06:28-04:00",
+        "isLockedPro": false,
+        "commentCount": 0,
+        "gettyImageUrl": null,
+        "videoPreviewUrl": null,
+        "videoDuration": null,
+        "themes": {},
+        "title": "KBR, Inc. (KBR) Q3 2025 Earnings Call Transcript",
+        "isPaywalled": false,
+        "structuredInsights": null
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "id": "44211",
+            "type": "author"
+          }
+        },
+        "sentiments": {
+          "data": []
+        },
+        "primaryTickers": {
+          "data": [
+            {
+              "id": "2787",
+              "type": "tag"
+            }
+          ]
+        },
+        "secondaryTickers": {
+          "data": []
+        },
+        "otherTags": {
+          "data": [
+            {
+              "id": "49",
+              "type": "tag"
+            }
+          ]
+        }
+      },
+      "links": {
+        "self": "/article/4835531-kbr-inc-kbr-q3-2025-earnings-call-transcript"
+      }
+    },
+    {
+      "id": "4835604",
+      "type": "article",
+      "attributes": {
+        "publishOn": "2025-10-30T12:02:17-04:00",
+        "isLockedPro": false,
+        "commentCount": 0,
+        "gettyImageUrl": null,
+        "videoPreviewUrl": null,
+        "videoDuration": null,
+        "themes": {},
+        "title": "KBR, Inc. 2025 Q3 - Results - Earnings Call Presentation",
+        "isPaywalled": false,
+        "structuredInsights": null
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "id": "44211",
+            "type": "author"
+          }
+        },
+        "sentiments": {
+          "data": []
+        },
+        "primaryTickers": {
+          "data": [
+            {
+              "id": "2787",
+              "type": "tag"
+            }
+          ]
+        },
+        "secondaryTickers": {
+          "data": []
+        },
+        "otherTags": {
+          "data": []
+        }
+      },
+      "links": {
+        "self": "/article/4835604-kbr-inc-2025-q3-results-earnings-call-presentation"
+      }
+    },
+    {
+      "id": "4825525",
+      "type": "article",
+      "attributes": {
+        "publishOn": "2025-09-24T11:14:10-04:00",
+        "isLockedPro": false,
+        "commentCount": 0,
+        "gettyImageUrl": null,
+        "videoPreviewUrl": null,
+        "videoDuration": null,
+        "themes": {},
+        "title": "KBR, Inc. (KBR) Inc. - Special Call - Slideshow",
+        "isPaywalled": false,
+        "structuredInsights": null
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "id": "44211",
+            "type": "author"
+          }
+        },
+        "sentiments": {
+          "data": []
+        },
+        "primaryTickers": {
+          "data": [
+            {
+              "id": "2787",
+              "type": "tag"
+            }
+          ]
+        },
+        "secondaryTickers": {
+          "data": []
+        },
+        "otherTags": {
+          "data": []
+        }
+      },
+      "links": {
+        "self": "/article/4825525-kbr-inc-kbr-inc-special-call-slideshow"
+      }
+    }
+  ],
+  "included": [
+    {
+      "id": "44211",
+      "type": "author",
+      "attributes": {
+        "company": null,
+        "slug": "sa-transcripts",
+        "userId": 101639,
+        "tagId": 96991,
+        "bio": "Seeking Alpha's transcripts team is responsible for the development of all of our transcript-related projects. We currently publish thousands of quarterly earnings calls per quarter on our site and are continuing to grow and expand our coverage. The purpose of this profile is to allow us to share with our readers new transcript-related developments. Thanks, SA Transcripts Team",
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/000/101/639/small_pic.png",
+          "medium": "https://seekingalpha.com/images/users_profile/000/101/639/medium_pic.png",
+          "big": "https://seekingalpha.com/images/users_profile/000/101/639/big_pic.png",
+          "extra_large": "https://seekingalpha.com/images/users_profile/000/101/639/extra_large_pic.png"
+        },
+        "nick": "SA Transcripts",
+        "deactivated": null,
+        "memberSince": 2007,
+        "isRss": false,
+        "contributorSince": 2013,
+        "followersCount": 157480
+      },
+      "relationships": {
+        "user": {
+          "data": {
+            "id": "101639",
+            "type": "user"
+          }
+        }
+      },
+      "links": {
+        "self": "/author/sa-transcripts",
+        "profileUrl": "/author/sa-transcripts",
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "id": "2787",
+      "type": "tag",
+      "attributes": {
+        "slug": "kbr",
+        "name": "KBR",
+        "equityType": "stocks",
+        "company": "KBR, Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/KBR"
+      }
+    }
+  ],
+  "meta": {
+    "page": {
+      "title": "KBR, Inc. (KBR) Earnings Transcripts",
+      "description": "All earnings call transcripts on KBR, Inc. (KBR) stock. Read or listen to the conference call. Download the investor presentation - earnings call slides.",
+      "listTitle": "Transcripts",
+      "listDescription": null,
+      "proStatus": 1,
+      "uriImage": "https://static.seekingalpha.com/assets/og_image_1200-29b2bfe1a595477db6826bd2126c63ac2091efb7ec76347a8e7f81ba17e3de6c.png",
+      "size": 3,
+      "totalPages": 41,
+      "total": 121,
+      "minmaxPublishOn": {
+        "min": 1758726850,
+        "max": 1761840388
+      }
+    },
+    "mone": {
+      "params": {
+        "pu": ""
+      }
+    }
+  }
+}

@@ -1,0 +1,379 @@
+{
+  "data": {
+    "id": "4533715",
+    "type": "fullArticle",
+    "attributes": {
+      "publishOn": "2022-08-12T16:54:17-04:00",
+      "isLockedPro": false,
+      "commentCount": 7,
+      "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1339561543/image_1339561543.jpg",
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "dividends": {
+          "id": 22,
+          "slug": "dividends",
+          "kind": "breadcrumb",
+          "path": "/dividends",
+          "title": "Dividends Analysis",
+          "sasource": "theme_breadcrumb"
+        },
+        "dividend-ideas": {
+          "id": 156,
+          "slug": "dividend-ideas",
+          "kind": "breadcrumb",
+          "path": "/dividends/dividend-ideas",
+          "title": "Dividend Ideas",
+          "sasource": "theme_breadcrumb"
+        },
+        "investing-income": {
+          "id": 16549,
+          "slug": "investing-income",
+          "kind": "general"
+        },
+        "ireland": {
+          "id": 18063,
+          "slug": "ireland",
+          "kind": "country",
+          "path": "/market-outlook/global-investing/analysis/ireland",
+          "title": "Ireland"
+        },
+        "medical-appliances-equipment": {
+          "id": 17908,
+          "slug": "medical-appliances-equipment",
+          "kind": "common",
+          "non_theme": true
+        },
+        "health-care": {
+          "id": 35,
+          "slug": "health-care",
+          "kind": "sector",
+          "path": "/stock-ideas/healthcare",
+          "title": "Healthcare\u00a0",
+          "sasource": "theme_breadcrumb"
+        }
+      },
+      "title": "Undervalued Medtronic Sports Solid Dividend Growth Prospects",
+      "summary": [
+        "Medtronic is a global leader in medical technology. The company functions in four operating segments: Cardiac & Vascular, Minimally Invasive Therapies, Restorative Therapies, and Diabetes.",
+        "It is a stellar free cash flow generator with a strong Dividend Cushion ratio, though the outlook for the company\u2019s margin expansion opportunities has been diminished somewhat.",
+        "Medtronic is a Dividend Aristocrat that has grown its payout over the past 40+ consecutive years, and we forecast that it will continue to grow its payout.",
+        "Shares are trading at the low end of our fair value estimate range and boast a healthy 2.7% dividend yield supported by a 1.8 Dividend Cushion ratio.\u00a0We're fans of the company."
+      ],
+      "isPaywalled": false,
+      "structuredInsights": null,
+      "lastModified": "2022-08-12T16:54:27-04:00",
+      "isModerated": false,
+      "availableTranslations": [],
+      "locale": "en",
+      "closestTradingDate": "2022-08-15",
+      "beforeOpeningHours": false,
+      "isEarningsSlides": false,
+      "isExclusive": true,
+      "isTranscript": false,
+      "excludedByTag": false,
+      "transcriptPath": null,
+      "likesCount": 8,
+      "disabledStatus": "allowed",
+      "disabledMessage": null,
+      "status": "published",
+      "disclosure": "<p id=\"a-disclosure\"><b>Analyst\u2019s Disclosure:</b><span>I/we have no stock, option or similar derivative position in any of the companies mentioned, and no plans to initiate any such positions within the next 72 hours.</span><span id=\"top-business-disclosure\"> I wrote this article myself, and it expresses my own opinions. I am not receiving compensation for it (other than from Seeking Alpha). I have no business relationship with any company whose stock is mentioned in this article. </span><br /><br />Brian Nelson owns shares in SPY, SCHG, QQQ, DIA, VOT, BITO, and IWM. Valuentum owns SPY, SCHG, QQQ, VOO, and DIA. Brian Nelson&#39;s household owns shares in HON, DIS, HAS, NKE. Some of the other securities written about in this article may be included in Valuentum&#39;s simulated newsletter portfolios. Contact Valuentum for more information about its editorial policies.</p><p id='a-disclosure-more'><strong>Seeking Alpha's Disclosure:</strong> Past performance is no guarantee of future results. No recommendation or advice is being given as to whether any investment is suitable for a particular investor. Any views or opinions expressed above may not reflect those of Seeking Alpha as a whole. Seeking Alpha is not a licensed securities dealer, broker or US investment adviser or investment bank. Our analysts are third party authors that include both professional investors and individual investors who may not be licensed or certified by any institute or regulatory body.</p>",
+      "articleActionableItem": null,
+      "inEmbargo": false,
+      "isNoindex": false,
+      "isNoarchive": true,
+      "content": "<p data-eci=\"true\"><figure class=\"getty-figure\" data-type=\"getty-image\"><picture><img src=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1339561543/image_1339561543.jpg?io=getty-c-w750\" alt=\"Medtronic office in Pointe-Claire, QC, Canada.\" data-id=\"1339561543\" data-type=\"getty-image\" width=\"1536px\" height=\"1024px\" srcset=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1339561543/image_1339561543.jpg?io=getty-c-w1536 1536w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1339561543/image_1339561543.jpg?io=getty-c-w1280 1280w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1339561543/image_1339561543.jpg?io=getty-c-w1080 1080w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1339561543/image_1339561543.jpg?io=getty-c-w750 750w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1339561543/image_1339561543.jpg?io=getty-c-w640 640w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1339561543/image_1339561543.jpg?io=getty-c-w480 480w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1339561543/image_1339561543.jpg?io=getty-c-w320 320w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1339561543/image_1339561543.jpg?io=getty-c-w240 240w\" sizes=\"(max-width: 768px) calc(100vw - 36px), (max-width: 1024px) calc(100vw - 132px), (max-width: 1200px) calc(66.6vw - 72px), 600px\" fetchpriority=\"high\"></picture><figcaption><p>JHVEPhoto/iStock Editorial via Getty Images</p></figcaption></figure></p> <div class=\"inline_ad_placeholder\"></div> <p>By The Valuentum Team</p> <p>There is not much to dislike about Medtronic plc (<span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/MDT\" title=\"Medtronic plc\">MDT</a></span>), though recently, its business has faced headwinds in the form of supply chain hurdles, lackluster operational execution, and inflationary pressures. Medtronic remains a stellar<span class=\"paywall-full-content\"> free cash flow generator with a strong Dividend Cushion ratio, though the outlook for the company's margin expansion opportunities has been diminished somewhat. Share buybacks compete for capital against Medtronic's dividend obligations, and potential M&amp;A activity needs to be monitored (tuck-in acquisitions are a core part of Medtronic's business model). Medtronic has a sizable total debt load, though the firm generally keeps ample liquidity on hand. Shares are trading at the low end of our fair value estimate range and boast a healthy 2.7% dividend yield supported by a 1.8 Dividend Cushion ratio. We're fans of the company.</span></p> <p class=\"paywall-full-content\"><figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><picture><span><a href=\"https://static.seekingalpha.com/uploads/2022/8/12/933684-16603072878956409_origin.png\" rel=\"lightbox\" data-width=\"692\" data-height=\"571\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2022/8/12/933684-16603072878956409_origin.png?io=w640\" alt=\"Dividend Cushion Cash Flow Bridge\" contenteditable=\"false\" loading=\"lazy\" width=\"692\" height=\"571\" srcset=\"https://static.seekingalpha.com/uploads/2022/8/12/933684-16603072878956409_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2022/8/12/933684-16603072878956409_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2022/8/12/933684-16603072878956409_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2022/8/12/933684-16603072878956409_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span></picture><figcaption><p class=\"item-caption\">Dividend Cushion Cash Flow Bridge (Image Source: Valuentum)</p></figcaption></figure></p> <p class=\"paywall-full-content\">The Dividend Cushion Cash Flow Bridge, shown in the image above, illustrates the components of the Dividend Cushion ratio and highlights in detail the many drivers behind it. Medtronic's Dividend Cushion Cash Flow Bridge reveals that the sum of the company's 5-year expected cumulative free cash flow generation, as measured by cash flow from operations less all capital spending, plus its net cash/debt position on the balance sheet, as of the last fiscal year, is greater than the sum of the next 5 years of expected cash dividends paid. Because the Dividend Cushion ratio is forward-looking and captures the trajectory of the company's free cash flow generation and dividend growth, it reveals whether there will be a cash surplus or a cash shortfall at the end of the 5-year period, taking into consideration the leverage on the balance sheet, a key source of risk.</p> <p class=\"paywall-full-content\">On a fundamental basis, we believe companies that have a strong net cash position on the balance sheet and are generating a significant amount of free cash flow are better able to pay and grow their dividend over time. Firms that are buried under a mountain of debt and do not sufficiently cover their dividend with free cash flow are more at risk of a dividend cut or a suspension of growth, all else equal, in our opinion. Generally speaking, the greater the 'blue bar' to the right is in the positive, the more durable a company's dividend, and the greater the 'blue bar' to the right is in the negative, the less durable a company's dividend. In Medtronic's case, we view its dividend as quite healthy.</p> <h2 class=\"paywall-full-content\">Medtronic's Key Investment Considerations</h2> <p class=\"paywall-full-content\"><figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><img src=\"https://static.seekingalpha.com/uploads/2022/7/7/933684-16572487556581554.png?io=w640\" alt=\"Investment Considerations\" width=\"545\" height=\"427\" contenteditable=\"false\" data-width=\"545\" data-height=\"427\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2022/7/7/933684-16572487556581554.png?io=w480 480w,https://static.seekingalpha.com/uploads/2022/7/7/933684-16572487556581554.png?io=w320 320w,https://static.seekingalpha.com/uploads/2022/7/7/933684-16572487556581554.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"><figcaption><p class=\"item-caption\">Image Source: Valuentum</p></figcaption></figure></p> <p class=\"paywall-full-content\">Medtronic is a global leader in medical technology. The company functions in four operating segments: Cardiac &amp; Vascular, Minimally Invasive Therapies, Restorative Therapies, and Diabetes. Medtronic bought Covidien in a tax-inversion deal in 2015 through a cash-and-stock deal worth ~$42.9 billion. Medtronic traces its roots back to the late 1940s.</p> <p class=\"paywall-full-content\">Medtronic aims to grow its organic revenues by 5%+ per year and its adjusted EPS by 8%+ per year. Tuck-in acquisitions are a core part of its business model. Medtronic has over 49,000 patents in its portfolio and the firm continues to innovate.</p> <p class=\"paywall-full-content\">Medtronic's long-term free cash flow conversion target is 80%+ and historically, the company has been a stellar free cash flow generator in almost any operating environment. The firm's product pipeline remains robust, with an eye towards its 'Deep Brain Stimulation System,' pacemaker, atrial fibrillation, and pelvic health offerings.</p> <p class=\"paywall-full-content\">Medtronic sees emerging markets underpinning its long-term growth trajectory, which represented a relatively small but growing portion of its fiscal 2022 revenues. The firm identified three things to work on to improve its performance in these markets: channel optimization, functional capabilities, and localization.</p> <p class=\"paywall-full-content\">Recently, Medtronic has been facing headwinds in the form of supply chain hurdles, lackluster operational execution, and inflationary pressures. These factors, among others, weigh negatively on its ability to significantly expand its margins going forward.</p> <p class=\"paywall-full-content\">Though we like Medtronic's business model and competitive advantages, its most recently reported quarter in May left much to be desired as \"global supply chain and COVID-19 controls in China\" weighed on performance. Looking ahead, the company expects fiscal year 2023 organic revenue in the 4%-5% range and non-GAAP EPS in the range of $5.53-$5.65 per share, the latter weighed down by negative foreign currency translation.</p> <h2 class=\"paywall-full-content\">Medtronic's Economic Profit Analysis</h2> <p class=\"paywall-full-content\">The best measure of a company's ability to create value for shareholders is expressed by comparing its return on invested capital with its weighted average cost of capital. The gap or difference between ROIC and WACC is called the firm's economic profit spread. Medtronic's 3-year historical return on invested capital (without goodwill) is 22%, which is above the estimate of its cost of capital of 9.4%.</p> <p class=\"paywall-full-content\">As such, we assign the firm a ValueCreation rating of EXCELLENT. In the chart below, we show the probable path of ROIC in the years ahead based on the estimated volatility of key drivers behind the measure. The solid grey line reflects the most likely outcome, in our opinion, and represents the scenario that results in our fair value estimate. Medtronic is a strong economic-value generator.</p> <p class=\"paywall-full-content\"><figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><span><a href=\"https://static.seekingalpha.com/uploads/2022/7/7/933684-16572487810106647_origin.png\" rel=\"lightbox\" data-width=\"657\" data-height=\"568\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2022/7/7/933684-16572487810106647_origin.png?io=w640\" alt=\"Adjusted Return on Invested Capital\" width=\"640\" height=\"553\" contenteditable=\"false\" data-width=\"640\" data-height=\"553\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2022/7/7/933684-16572487810106647_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2022/7/7/933684-16572487810106647_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2022/7/7/933684-16572487810106647_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2022/7/7/933684-16572487810106647_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span><figcaption><p class=\"item-caption\">Image Source: Valuentum</p></figcaption></figure></p> <h2 class=\"paywall-full-content\">Medtronic's Cash Flow Valuation Analysis</h2> <p class=\"paywall-full-content\"><figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><span><a href=\"https://static.seekingalpha.com/uploads/2022/7/7/933684-1657248789794111_origin.png\" rel=\"lightbox\" data-width=\"671\" data-height=\"577\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2022/7/7/933684-1657248789794111_origin.png?io=w640\" alt=\"Cash Flow Generation\" width=\"640\" height=\"550\" contenteditable=\"false\" data-width=\"640\" data-height=\"550\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2022/7/7/933684-1657248789794111_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2022/7/7/933684-1657248789794111_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2022/7/7/933684-1657248789794111_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2022/7/7/933684-1657248789794111_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span><figcaption><p class=\"item-caption\">Image Source: Valuentum</p></figcaption></figure></p> <p class=\"paywall-full-content\">We think Medtronic is worth $103 per share with a fair value range of $82.00 - $124.00. The margin of safety around our fair value estimate is driven by the firm's LOW ValueRisk rating, which is derived from an evaluation of the historical volatility of key valuation drivers and a future assessment of them.</p> <p class=\"paywall-full-content\">Our near-term operating forecasts, including revenue and earnings, do not differ much from consensus estimates or management guidance. Our model reflects a compound annual revenue growth rate of 4.2% during the next five years, a pace that is higher than the firm's 3-year historical compound annual growth rate of 1.2%.</p> <p class=\"paywall-full-content\">Our valuation model reflects a 5-year projected average operating margin of 32.2%, which is above Medtronic's trailing 3-year average. Beyond year 5, we assume free cash flow will grow at an annual rate of 1.5% for the next 15 years and 3% in perpetuity. For Medtronic, we use a 9.4% weighted average cost of capital to discount future free cash flows.</p> <p class=\"paywall-full-content\"><figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><img src=\"https://static.seekingalpha.com/uploads/2022/7/7/933684-16572487981024504.png?io=w640\" alt=\"Valuation Assumptions\" width=\"634\" height=\"591\" contenteditable=\"false\" data-width=\"634\" data-height=\"591\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2022/7/7/933684-16572487981024504.png?io=w480 480w,https://static.seekingalpha.com/uploads/2022/7/7/933684-16572487981024504.png?io=w320 320w,https://static.seekingalpha.com/uploads/2022/7/7/933684-16572487981024504.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"><figcaption><p class=\"item-caption\">Image Source: Valuentum</p></figcaption></figure><figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><span><a href=\"https://static.seekingalpha.com/uploads/2022/7/7/933684-1657248806009152_origin.png\" rel=\"lightbox\" data-width=\"650\" data-height=\"604\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2022/7/7/933684-1657248806009152_origin.png?io=w640\" alt=\"Valuation Breakdown\" width=\"640\" height=\"595\" contenteditable=\"false\" data-width=\"640\" data-height=\"595\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2022/7/7/933684-1657248806009152_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2022/7/7/933684-1657248806009152_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2022/7/7/933684-1657248806009152_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2022/7/7/933684-1657248806009152_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span><figcaption><p class=\"item-caption\">Image Source: Valuentum</p></figcaption></figure></p> <h2 class=\"paywall-full-content\">Medtronic's Margin of Safety Analysis</h2> <p class=\"paywall-full-content\"><figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><span><a href=\"https://static.seekingalpha.com/uploads/2022/7/7/933684-16572488127021365_origin.png\" rel=\"lightbox\" data-width=\"669\" data-height=\"396\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2022/7/7/933684-16572488127021365_origin.png?io=w640\" alt=\"Range of Potential Outcomes\" width=\"640\" height=\"379\" contenteditable=\"false\" data-width=\"640\" data-height=\"379\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2022/7/7/933684-16572488127021365_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2022/7/7/933684-16572488127021365_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2022/7/7/933684-16572488127021365_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2022/7/7/933684-16572488127021365_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span><figcaption><p class=\"item-caption\">Image Source: Valuentum</p></figcaption></figure></p> <p class=\"paywall-full-content\">Our discounted cash flow process values each company on the basis of the present value of all future free cash flows. Although we estimate Medtronic's fair value at about $103 per share, every company has a range of probable fair values that's created by the uncertainty of key valuation drivers (like future revenue or earnings, for example). After all, if the future were known with certainty, we wouldn't see much volatility in the markets as stocks would trade precisely at their known fair values.</p> <p class=\"paywall-full-content\">This is an important way to view the markets as an iterative function of future expectations. As future expectations change, so should the company's value and its stock price. Stock prices are not a function of fixed historical data but rather act in such a way to capture future expectations within the enterprise valuation construct. This is a key part of our book <em>Value Trap: Theory of Universal Valuation</em>.</p> <p class=\"paywall-full-content\">Our ValueRisk rating sets the margin of safety or the fair value range we assign to each stock. In the graph above, we show this probable range of fair values for Medtronic. We think the firm is attractive below $82 per share (the green line), but quite expensive above $124 per share (the red line). The prices that fall along the yellow line, which includes our fair value estimate, represent a reasonable valuation for the firm, in our opinion.</p> <h2 class=\"paywall-full-content\">Concluding Thoughts</h2> <p class=\"paywall-full-content\">Medtronic aims to generate a long-term free cash flow conversion rate of 80% (or greater). In fiscal 2022, the company met its long-term free cash flow conversion goal. Medtronic is a Dividend Aristocrat that has grown its payout over the past 40+ consecutive years, and we forecast that it will continue to grow its payout at a brisk clip going forward.</p> <p class=\"paywall-full-content\">Medtronic aims to grow its organic revenues by 5%+ per year and its adjusted EPS by 8%+ per year over the long haul, supported by the launch of new offerings and by growing its presence in emerging markets. Medtronic's Dividend Cushion ratio is rock-solid and it aims to grow its dividend alongside its earnings. We think shares are looking cheap, and investors get paid a nice dividend yield to wait for price-to-estimated fair value convergence.</p> <div class=\"before_last_paragraph-piano-placeholder paywall-full-content\"></div> <p class=\"paywall-full-content\"><em>This article or report and any links within are for information purposes only and should not be considered a solicitation to buy or sell any security. Valuentum is not responsible for any errors or omissions or for results obtained from the use of this article and accepts no liability for how readers may choose to utilize the content. Assumptions, opinions, and estimates are based on our judgment as of the date of the article and are subject to change without notice.</em></p>",
+      "quickInsights": null,
+      "twitContent": "Undervalued Medtronic Sports Solid Dividend Growth Prospects $MDT #stocks #business #trading https://seekingalpha.com/article/4533715-undervalued-medtronic-sports-solid-dividend-growth-prospects?source=tweet",
+      "innerMarketing": "",
+      "marketingBullet": "",
+      "isReit": false,
+      "videoData": null,
+      "marketingBulletVariant": null,
+      "marketingBio": null,
+      "audioDuration": null,
+      "originalTitle": "Undervalued Medtronic Sports Solid Dividend Growth Prospects"
+    },
+    "relationships": {
+      "author": {
+        "data": {
+          "id": "24491",
+          "type": "author"
+        }
+      },
+      "sentiments": {
+        "data": [
+          {
+            "id": "387413",
+            "type": "sentiment"
+          }
+        ]
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "2291",
+            "type": "tag"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": [
+          {
+            "id": "34650",
+            "type": "tag"
+          },
+          {
+            "id": "156",
+            "type": "tag"
+          },
+          {
+            "id": "2291",
+            "type": "tag"
+          },
+          {
+            "id": "17335",
+            "type": "tag"
+          },
+          {
+            "id": "16549",
+            "type": "tag"
+          },
+          {
+            "id": "18063",
+            "type": "tag"
+          },
+          {
+            "id": "17908",
+            "type": "tag"
+          },
+          {
+            "id": "17896",
+            "type": "tag"
+          }
+        ]
+      },
+      "coAuthors": {
+        "data": []
+      },
+      "presentations": {
+        "data": []
+      },
+      "updates": {
+        "data": []
+      },
+      "corrections": {
+        "data": []
+      }
+    },
+    "links": {
+      "self": "/article/4533715-undervalued-medtronic-sports-solid-dividend-growth-prospects",
+      "canonical": "https://seekingalpha.com/article/4533715-undervalued-medtronic-sports-solid-dividend-growth-prospects",
+      "uriImage": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1339561543/image_1339561543.jpg?io=getty-c-w1536",
+      "schemaImage": [
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1339561543/image_1339561543.jpg?io=getty-c-w1280",
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1339561543/image_1339561543.jpg?io=getty-c-crop-16-9",
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1339561543/image_1339561543.jpg?io=getty-c-crop-4-3"
+      ]
+    }
+  },
+  "included": [
+    {
+      "id": "24491",
+      "type": "author",
+      "attributes": {
+        "company": null,
+        "slug": "valuentum",
+        "userId": 933684,
+        "tagId": 34650,
+        "bio": "<p>We offer subscriptions and exclusive newsletters. Visit our website at www.valuentum.com for more information. Valuentum is an independent investment research publisher, offering premium equity reports and dividend reports, as well as commentary across all sectors/companies, a Best Ideas Newsletter (spanning market caps, asset classes), a Dividend Growth Newsletter, modeling tools/products, and more. Valuentum is based in the Chicagoland area. Valuentum is not a money manager, broker, or financial advisor. Valuentum is a publisher of financial information. Please read our Disclaimer that applies to all articles published on Seeking Alpha: https://www.valuentum.com/categories/20110613. Follow us on Twitter: @Valuentum</p>",
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/000/933/684/small_pic.png",
+          "medium": "https://seekingalpha.com/images/users_profile/000/933/684/medium_pic.png",
+          "big": "https://seekingalpha.com/images/users_profile/000/933/684/big_pic.png",
+          "extra_large": "https://seekingalpha.com/images/users_profile/000/933/684/extra_large_pic.png"
+        },
+        "nick": "Valuentum",
+        "deactivated": null,
+        "memberSince": 2011,
+        "isRss": false,
+        "contributorSince": 2011,
+        "followersCount": 17846
+      },
+      "relationships": {
+        "user": {
+          "data": {
+            "id": "933684",
+            "type": "user"
+          }
+        },
+        "userBioTags": {
+          "data": [
+            {
+              "id": "956533",
+              "type": "userBioTag"
+            },
+            {
+              "id": "956534",
+              "type": "userBioTag"
+            },
+            {
+              "id": "956535",
+              "type": "userBioTag"
+            }
+          ]
+        },
+        "authorResearch": {
+          "data": null
+        }
+      },
+      "links": {
+        "self": "/author/valuentum",
+        "profileUrl": "/author/valuentum",
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "id": "2291",
+      "type": "tag",
+      "attributes": {
+        "slug": "mdt",
+        "name": "MDT",
+        "company": "Medtronic plc",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "NYSE",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/MDT"
+      }
+    },
+    {
+      "id": "34650",
+      "type": "tag",
+      "attributes": {
+        "slug": "valuentum",
+        "name": "Valuentum",
+        "company": null,
+        "tagKind": "Tags::AuthorTag"
+      },
+      "links": {
+        "self": "/author/valuentum"
+      }
+    },
+    {
+      "id": "156",
+      "type": "tag",
+      "attributes": {
+        "slug": "dividend-ideas",
+        "name": "Dividend Ideas",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=dividend-ideas"
+      }
+    },
+    {
+      "id": "17335",
+      "type": "tag",
+      "attributes": {
+        "slug": "sa-exclusive",
+        "name": "SA Exclusive",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/sa-exclusive"
+      }
+    },
+    {
+      "id": "16549",
+      "type": "tag",
+      "attributes": {
+        "slug": "investing-income",
+        "name": "Dividends & Income",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/investing-income"
+      }
+    },
+    {
+      "id": "18063",
+      "type": "tag",
+      "attributes": {
+        "slug": "ireland",
+        "name": "Ireland",
+        "company": null,
+        "tagKind": "Tags::Country"
+      },
+      "links": {
+        "self": "/articles?filters=ireland"
+      }
+    },
+    {
+      "id": "17908",
+      "type": "tag",
+      "attributes": {
+        "slug": "medical-appliances-equipment",
+        "name": "Medical Appliances & Equipment",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/medical-appliances-equipment"
+      }
+    },
+    {
+      "id": "17896",
+      "type": "tag",
+      "attributes": {
+        "slug": "health-care",
+        "name": "Health Care",
+        "company": null,
+        "tagKind": "Tags::GicsSector"
+      },
+      "links": {
+        "self": "/tag/health-care"
+      }
+    },
+    {
+      "id": "387413",
+      "type": "sentiment",
+      "attributes": {
+        "articleId": 4533715,
+        "type": "bullish",
+        "createdAt": "2022-08-12T16:54:17.000-04:00",
+        "typeId": 1
+      },
+      "relationships": {
+        "article": {
+          "data": {
+            "id": "4533715",
+            "type": "article"
+          }
+        },
+        "tag": {
+          "data": {
+            "id": "2291",
+            "type": "tag"
+          }
+        }
+      }
+    }
+  ]
+}

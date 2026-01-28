@@ -1,0 +1,96 @@
+{
+  "data": {
+    "attributes": {
+      "publishOn": "2025-11-06T09:57:30-05:00",
+      "isLockedPro": false,
+      "commentCount": 0,
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "us": {
+          "id": 326,
+          "title": null,
+          "non_theme": true
+        },
+        "mid-cap": {
+          "id": 115412,
+          "title": null,
+          "non_theme": true
+        },
+        "hidden-from-qp": {
+          "id": 578794,
+          "title": null,
+          "non_theme": true
+        },
+        "energy": {
+          "id": 614461,
+          "non_theme": false
+        },
+        "news-metered": {
+          "id": 614465,
+          "title": null,
+          "non_theme": true
+        }
+      },
+      "title": "KBR awarded key engineering deal for huge QatarEnergy project",
+      "isPaywalled": false,
+      "lastModified": "2025-11-06T10:00:52-05:00",
+      "content": "<figure class=\"getty-figure\" contenteditable=\"false\" data-show-to-all=\"false\" data-type=\"getty-image\"><picture><img src=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/76663695/image_76663695.jpg?io=getty-c-w630\" sizes=\"(max-width: 768px) calc(100vw - 36px), (max-width: 1024px) calc(100vw - 132px), (max-width: 1200px) calc(100vw - 666px), (max-width: 1308px) calc(100vw - 708px), 600px\" srcset=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/76663695/image_76663695.jpg?io=getty-c-w1536 1536w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/76663695/image_76663695.jpg?io=getty-c-w1280 1280w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/76663695/image_76663695.jpg?io=getty-c-w1080 1080w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/76663695/image_76663695.jpg?io=getty-c-w750 750w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/76663695/image_76663695.jpg?io=getty-c-w640 640w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/76663695/image_76663695.jpg?io=getty-c-w480 480w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/76663695/image_76663695.jpg?io=getty-c-w320 320w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/76663695/image_76663695.jpg?io=getty-c-w240 240w\" alt=\"Defence Systems International Exhibition\" width=\"3000\" height=\"1963\" data-caption=\"Daniel Berehulak/Getty Images News\" data-id=\"76663695\" data-image-type=\"Getty\" data-original-src=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/76663695/medium_image_76663695.jpg\" data-source=\"\" data-type=\"getty-image\" fetchpriority=\"high\"></picture><figcaption class=\"caption\" data-type=\"getty-image\"><p class=\"item-credits\">Daniel Berehulak/Getty Images News</p></figcaption></figure><p data-eci=\"true\">KBR (<span class=\"ticker-hover-wrapper\"><span class=\"ticker-hover-wrapper\"><span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/KBR\" title=\"KBR, Inc.\">KBR</a></span></span></span>) said Thursday it was <a title=\"awarded\" href=\"https://www.upstreamonline.com/field-development/us-contractor-wins-prized-engineering-deal-for-qatarenergy-megaproject/2-1-1896456\" target=\"_self\" rel=\"nofollow\">awarded</a> a contract to provide detailed engineering design services for further expansion of the Bul Hanine oil and gas field offshore Qatar, a project considered crucial to QatarEnergy's strategy of maintaining and expanding<span class=\"paywall-full-content\"> production at the country's largest offshore oilfield.</span></p> <p class=\"paywall-full-content\">The EPIC project 120 km east of Doha aims to extend the field's production life, increase its capacity, and integrate advanced technologies to maximize recovery, the companies said; financial terms were not disclosed.</p> <div class=\"before_last_paragraph-piano-placeholder\"></div><p class=\"paywall-full-content\">Separately, KBR (<a href=\"https://seekingalpha.com/symbol/KBR\" title=\"KBR, Inc.\">KBR</a>) said it was <a title=\"selected\" href=\"https://seekingalpha.com/pr/20296097-kbr-selected-to-deliver-detailed-engineering-design-for-the-gas-growth-integrated-project\" target=\"_self\">selected</a> to provide detailed engineering design services for the Associated Gas Upstreasm Project Phase 2 as part of the Gas Growth Integrated Project operated by TotalEnergies and partners BOC and Qatar Energy in Iraq; financial terms were not disclosed.</p> <div class=\"signup_widget_placeholder\"></div><div id=\"more-links\" class=\"paywall-full-content\"> <h2>More on KBR</h2> <ul> <li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4835604-kbr-inc-2025-q3-results-earnings-call-presentation\">KBR Q3 2025 Earnings Call Presentation</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4825525-kbr-inc-kbr-inc-special-call-slideshow\">KBR Special Call - Slideshow</a></li> <li><a title=\"KBR: Spin To Win\" href=\"https://seekingalpha.com/article/4808534-kbr-stock-q2-spin-to-win\" target=\"_self\">KBR: Spin To Win</a></li> </ul> </div>",
+      "disclosure": null,
+      "quickInsights": null,
+      "metered": true,
+      "availableTranslations": [],
+      "correctionReason": null,
+      "audioDuration": 63.48,
+      "originalTitle": "KBR awarded key engineering deal for huge QatarEnergy project"
+    },
+    "relationships": {
+      "author": {
+        "data": {}
+      },
+      "sentiments": {
+        "data": []
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "2787"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": []
+      },
+      "ratingChangeNotice": {}
+    },
+    "links": {
+      "schemaImage": []
+    }
+  },
+  "included": [
+    {
+      "attributes": {
+        "userId": 543215,
+        "image": {},
+        "nick": "Carl Surran, SA News Editor",
+        "bio": "<p>Carl Surran covers energy, utilities, and natural resources for Seeking Alpha. He joined the company in 2010 after writing about investment and personal finance topics for over 20 years. Carl has a BA from Duke University and an MBA from Rollins College. He is married with one daughter and lives in Florida.</p>"
+      },
+      "links": {}
+    },
+    {
+      "id": "2787",
+      "attributes": {
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    }
+  ]
+}

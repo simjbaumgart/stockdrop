@@ -447,93 +447,10 @@ class DeepResearchService:
 
     def _check_and_trigger_batch(self):
         """
-        Checks if there are at least 4 stocks with completed deep research that haven't been batched yet.
-        If so, creates a batch of 4 and queues a comparison.
+        Delegates to _scan_for_batches to ensure consistent logic (Same Date, Valid Count).
         """
-        try:
-            from app.database import get_unbatched_candidates, log_batch_run
-            
-            # 1. Get Unbatched Candidates (Limit 4, Sorted by Score Desc)
-            # We need to implement get_unbatched_candidates in database.py or do raw query here.
-            # Let's do raw query here for simplicity or assume helper exists.
-            # We will use raw sqlite3 here to be self-contained or import if we add it to database.py
-            # Let's use raw query to avoid touching database.py too much if we can.
-            
-            # Actually, better to keep DB logic in database.py? 
-            # Let's write the query here.
-            
-            conn = sqlite3.connect("subscribers.db")
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-            
-            # Query: Completed Deep Research, No Batch ID assigned
-            # Pick top 4 by AI Score (Quality first)
-            query = """
-                SELECT * FROM decision_points 
-                WHERE deep_research_verdict IS NOT NULL 
-                AND deep_research_verdict != '' 
-                AND deep_research_verdict != '-'
-                AND (batch_id IS NULL OR batch_id = '')
-                ORDER BY ai_score DESC
-                LIMIT 4
-            """
-            cursor.execute(query)
-            rows = cursor.fetchall()
-            conn.close()
-            
-            candidates = [dict(row) for row in rows]
-            
-            if len(candidates) >= 4:
-                logger.info(f"[Deep Research] Found {len(candidates)} unbatched candidates. Triggering Batch Comparison...")
-                
-                symbols = [c['symbol'] for c in candidates]
-                date_str = datetime.now().strftime("%Y-%m-%d")
-                
-                # 2. Log Batch Run & Get ID
-                # We need to update these rows with the new batch_id.
-                # log_batch_run usually creates a new batch entry. 
-                # We should also update the decision_points rows to link them.
-                
-                # Creating a new batch entry
-                # We reuse log_batch_run but we need to update the decision_points too.
-                # Let's do it manually here to ensure atomicity or proper linking.
-                
-                conn = sqlite3.connect("subscribers.db")
-                cursor = conn.cursor()
-                
-                # Create Batch Record (in batch_comparisons table)
-                cursor.execute("INSERT INTO batch_comparisons (candidates, status, timestamp) VALUES (?, ?, ?)", 
-                              (json.dumps(symbols), 'PENDING', datetime.now()))
-                batch_id = cursor.lastrowid
-                
-                # Update Decision Points with this batch_id
-                placeholders = ','.join(['?'] * len(symbols))
-                update_query = f"UPDATE decision_points SET batch_id = ? WHERE symbol IN ({placeholders}) AND date(timestamp) = date('now')" 
-                # Note: The candidate rows might be from different days if backlog? User said "backfill the ones from the same day".
-                # But queue priority logic implies we process backlog. 
-                # If we want to strictly batch same-day, we can filter by date in the select query.
-                # User request: "If this is empty, then the batch comparison report is run. This takes 4 stocks... and names the best... logic is that once 4 evaluations... a batch comparison is run."
-                # Doesn't explicitly say "same day" for the batch trigger, but likely implied. 
-                # However, usually we batch what we have. 
-                # Let's stick to the specific candidates we selected (by ID is safer).
-                
-                candidate_ids = [c['id'] for c in candidates]
-                ids_placeholders = ','.join(['?'] * len(candidate_ids))
-                
-                cursor.execute(f"UPDATE decision_points SET batch_id = ? WHERE id IN ({ids_placeholders})", (batch_id, *candidate_ids))
-                
-                conn.commit()
-                conn.close()
-                
-                logger.info(f"[Deep Research] Created Batch {batch_id} with candidates: {symbols}")
-                
-                 # 3. Queue Batch Task
-                self.queue_batch_comparison_task(candidates, batch_id)
-            else:
-                logger.info(f"[Deep Research] Checked for batch trigger. Found {len(candidates)}/4 candidates. Waiting for more.")
-                
-        except Exception as e:
-            logger.error(f"[Deep Research] Error checking/triggering batch: {e}")
+        logger.info("[Deep Research] Trigger checking for new batches...")
+        self._scan_for_batches()
 
     def _save_result_to_file(self, symbol, result):
         try:
@@ -1016,9 +933,17 @@ REPORT CONTENT:
 
             for cand in candidates:
                 sym = cand['symbol']
-                report = self._load_council_report(sym, date_str)
-                if report:
-                    context_data += f"\n--- SUPPLEMENTARY REPORT FOR {sym} ---\n{report}\n"
+                report_str = self._load_council_report(sym, date_str)
+                if report_str:
+                    summary = self._summarize_report_context(report_str)
+                    context_data += f"\n--- SUPPLEMENTARY REPORT FOR {sym} ---\n{summary}\n"
+                    
+                    # Console Output for User Verification
+                    print(f"\n[{sym}] SUMMARIZED CONTEXT (Token Optimization):")
+                    print("-" * 40)
+                    print(summary)
+                    print("-" * 40)
+
 
             prompt = f"""
 You are the **Lead Portfolio Manager**. You are tasked with researching and comparing the following stock candidates to find the single best buying opportunity for today.
@@ -1274,5 +1199,93 @@ A JSON object:
             
         except Exception as e:
             logger.error(f"[Deep Research] Error generating Batch PDF: {e}")
+
+    def _summarize_report_context(self, report_json_str: str) -> str:
+        """
+        Extracts only high-value signals from a full council report to save tokens.
+        Drops raw data, evidence dumps, and full transcripts.
+        """
+        try:
+            data = json.loads(report_json_str)
+            summary = []
+            
+            # 1. High-Level Verdicts
+            # In some reports, 'final_verdict' might be at root. In others, it's not present yet if this is Pre-Deep Research.
+            if 'final_verdict' in data:
+                summary.append(f"FINAL VERDICT: {data.get('final_verdict')}")
+            
+            # 2. Bull/Bear Debate
+            # If explicit key exists
+            if 'bull_bear_debate' in data:
+                 bb = data['bull_bear_debate']
+                 if isinstance(bb, str):
+                     summary.append(f"BULL/BEAR DEBATE: {bb[:1000]}...") 
+                 elif isinstance(bb, dict):
+                     summary.append(f"BULL CASE: {bb.get('bull_case', '')[:800]}")
+                     summary.append(f"BEAR CASE: {bb.get('bear_case', '')[:800]}")
+            
+            # 3. Agent Sub-Reports
+            # The keys in the JSON are simply 'technical', 'fundamental', etc.
+            # We need to map them or check both.
+            agent_keys = {
+                'technical': 'TECHNICAL',
+                'technical_analysis': 'TECHNICAL',
+                'fundamental': 'FUNDAMENTAL',
+                'fundamental_analysis': 'FUNDAMENTAL',
+                'sentiment': 'SENTIMENT',
+                'sentiment_analysis': 'SENTIMENT',
+                'quantitative': 'QUANT',
+                'quantitative_analysis': 'QUANT',
+                'valuation': 'VALUATION',
+                'valuation_analysis': 'VALUATION'
+            }
+            
+            for key, label in agent_keys.items():
+                if key in data:
+                    content = data[key]
+                    # The content is often a huge Markdown string (as seen in TRU report)
+                    if isinstance(content, str):
+                        # Try to extract the Verdict line
+                        first_line = content.split('\n')[0]
+                        # Look for "Verdict:" pattern
+                        import re
+                        match = re.search(r'\*\*Verdict:?\s*(.*?)\*\*', content)
+                        if match:
+                             verdict_text = match.group(1)
+                             summary.append(f"{label} VERDICT: {verdict_text}")
+                        else:
+                             # Fallback: First 200 chars
+                             summary.append(f"{label} SUMMARY: {content[:200]}...")
+                             
+                    elif isinstance(content, dict):
+                         # If structured info
+                         verdict = content.get('verdict') or content.get('conclusion')
+                         if verdict:
+                             summary.append(f"{label} VERDICT: {verdict}")
+                             
+            # 4. News / Seeking Alpha (EXTREME CONDENSATION)
+            # The TRU report shows 'news' as a markdown string.
+            if 'news' in data:
+                news_blob = data['news']
+                if isinstance(news_blob, str):
+                    # Just grab the "Reason for Drop" header if possible
+                    match = re.search(r'# Reason for Drop\s*(.*?)(?=#|\Z)', news_blob, re.DOTALL)
+                    if match:
+                        drop_reason = match.group(1).strip()[:500]
+                        summary.append(f"NEWS (DROP REASON): {drop_reason}")
+            
+            # 5. Deep Research (Previous)
+            if 'deep_research_output' in data:
+                 dr = data['deep_research_output']
+                 summary.append(f"DEEP RESEARCH (PREV): Verdict={dr.get('verdict', 'N/A')}")
+
+            result = "\n".join(summary)
+            if not result:
+                return "No structured summary available."
+            return result
+            
+        except Exception as e:
+            logger.warning(f"[Deep Research] Error summarizing report context: {e}")
+            return "Summary unavailable due to parse error."
 
 deep_research_service = DeepResearchService()

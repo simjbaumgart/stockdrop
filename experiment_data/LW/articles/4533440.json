@@ -1,0 +1,403 @@
+{
+  "data": {
+    "id": "4533440",
+    "type": "fullArticle",
+    "attributes": {
+      "publishOn": "2022-08-12T03:42:18-04:00",
+      "isLockedPro": false,
+      "commentCount": 10,
+      "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/529067008/image_529067008.jpg",
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "investing-ideas": {
+          "id": 10727,
+          "slug": "investing-ideas",
+          "kind": "general",
+          "path": "/stock-ideas",
+          "title": "Stock Ideas",
+          "sasource": "theme_breadcrumb"
+        },
+        "long-ideas": {
+          "id": 1936,
+          "slug": "long-ideas",
+          "kind": "breadcrumb",
+          "path": "/stock-ideas/long-ideas",
+          "title": "Long Ideas",
+          "sasource": "theme_breadcrumb"
+        },
+        "industrial-goods": {
+          "id": 17913,
+          "slug": "industrial-goods",
+          "kind": "common",
+          "path": "/stock-ideas/industrial-goods",
+          "title": "Industrial\u00a0",
+          "non_theme": true
+        },
+        "inbound-seo-optimization": {
+          "id": 608068,
+          "slug": "inbound-seo-optimization",
+          "kind": "general"
+        },
+        "us": {
+          "id": 326,
+          "slug": "us",
+          "kind": "common",
+          "non_theme": true
+        },
+        "metal-fabrication": {
+          "id": 17927,
+          "slug": "metal-fabrication",
+          "kind": "common",
+          "non_theme": true
+        },
+        "industrials": {
+          "id": 20,
+          "slug": "industrials",
+          "kind": "sector",
+          "path": "/stock-ideas/industrial-goods",
+          "title": "Industrial\u00a0",
+          "sasource": "theme_breadcrumb"
+        }
+      },
+      "title": "Mueller Industries: Boring Stock That Makes Money",
+      "summary": [
+        "Mueller Industries operates in a boring business industry but has stable operations.",
+        "Zero debt and untapped revolving credit facility.",
+        "Good cash flow generation.",
+        "Great growth in core business operations."
+      ],
+      "isPaywalled": false,
+      "structuredInsights": null,
+      "lastModified": "2022-08-12T03:42:30-04:00",
+      "isModerated": false,
+      "availableTranslations": [],
+      "locale": "en",
+      "closestTradingDate": "2022-08-12",
+      "beforeOpeningHours": true,
+      "isEarningsSlides": false,
+      "isExclusive": true,
+      "isTranscript": false,
+      "excludedByTag": false,
+      "transcriptPath": null,
+      "likesCount": 3,
+      "disabledStatus": "allowed",
+      "disabledMessage": null,
+      "status": "published",
+      "disclosure": "<p id=\"a-disclosure\"><b>Analyst\u2019s Disclosure:</b><span>I/we have no stock, option or similar derivative position in any of the companies mentioned, but may initiate a beneficial Long position through a purchase of the stock, or the purchase of call options or similar derivatives in MLI over the next 72 hours.</span><span id=\"top-business-disclosure\"> I wrote this article myself, and it expresses my own opinions. I am not receiving compensation for it (other than from Seeking Alpha). I have no business relationship with any company whose stock is mentioned in this article. </span></p><p id='a-disclosure-more'><strong>Seeking Alpha's Disclosure:</strong> Past performance is no guarantee of future results. No recommendation or advice is being given as to whether any investment is suitable for a particular investor. Any views or opinions expressed above may not reflect those of Seeking Alpha as a whole. Seeking Alpha is not a licensed securities dealer, broker or US investment adviser or investment bank. Our analysts are third party authors that include both professional investors and individual investors who may not be licensed or certified by any institute or regulatory body.</p>",
+      "articleActionableItem": null,
+      "inEmbargo": false,
+      "isNoindex": false,
+      "isNoarchive": true,
+      "content": "<p data-eci=\"true\"><figure class=\"getty-figure\" data-type=\"getty-image\"><picture><img src=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/529067008/image_529067008.jpg?io=getty-c-w750\" alt=\"industrial metalworking cutting process by milling cutter\" data-id=\"529067008\" data-type=\"getty-image\" width=\"1536px\" height=\"1022px\" srcset=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/529067008/image_529067008.jpg?io=getty-c-w1536 1536w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/529067008/image_529067008.jpg?io=getty-c-w1280 1280w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/529067008/image_529067008.jpg?io=getty-c-w1080 1080w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/529067008/image_529067008.jpg?io=getty-c-w750 750w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/529067008/image_529067008.jpg?io=getty-c-w640 640w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/529067008/image_529067008.jpg?io=getty-c-w480 480w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/529067008/image_529067008.jpg?io=getty-c-w320 320w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/529067008/image_529067008.jpg?io=getty-c-w240 240w\" sizes=\"(max-width: 768px) calc(100vw - 36px), (max-width: 1024px) calc(100vw - 132px), (max-width: 1200px) calc(66.6vw - 72px), 600px\" fetchpriority=\"high\"></picture><figcaption><p>kadmy/iStock via Getty Images</p></figcaption></figure></p> <div class=\"inline_ad_placeholder\"></div> <p>Mueller Industries Inc. (<span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/MLI\" title=\"Mueller Industries, Inc.\">MLI</a></span>) is a great company operating in the metal fabrication industry. The company operates in a market that does not elicit thoughts of great profits or growth and would be considered by many<span class=\"paywall-full-content\"> to be boring. But they do make money and have a predictable and steady business. These are the types of companies that I prefer, and you can be sure that some investors are not looking in this corner of the market. The company has been paying down their debt diligently, and now they have zero debt, and they have a completely untapped credit facility of $400M that leaves them very flexible if an acquisition target presents itself and the company can act quickly. Even without some kind of acquisition to kick-start growth, the company has great free cash flow and has been increasing that cash flow for many years, and that trend seems like it will continue into the future. The market does not seem to appreciate this company, and the recent growth in revenue and profits in the last few years seem to make an even more compelling case.</span></p> <h2 class=\"paywall-full-content\">Introduction</h2> <blockquote class=\"paywall-full-content\"><p>\"Mueller Industries, Inc. <a href=\"https://finance.yahoo.com/quote/MLI/profile?p=MLI\" rel=\"nofollow\">manufactures and sells copper</a>, brass, aluminum, and plastic products in the United States, the United Kingdom, Canada, South Korea, the Middle East, China, and Mexico. It operates through three segments: Piping Systems, Industrial Metals, and Climate. The Piping Systems segment offers copper tubes, fittings, line sets, and pipe nipples; PEX plumbing and radiant systems; and plumbing-related fittings and plastic injection tooling. It also resells steel pipes, brass and plastic plumbing valves, malleable iron fittings and faucets, and plumbing specialties; and supplies water tubes. This segment sells its products to wholesalers in the plumbing and refrigeration markets, distributors to the manufactured housing and recreational vehicle industries, building material retailers, and air-conditioning original equipment manufacturers (OEMs). The Industrial Metals segment manufactures brass, bronze, and copper alloy rods; plumbing brass, valves, and fittings; cold-form aluminum and copper products; machining of aluminum, steel, brass, and cast iron impacts and castings; brass and aluminum forgings; brass, aluminum, and stainless-steel valves; fluid control solutions; and gas train assembles to OEMs in the industrial, construction, HVAC, plumbing, and refrigeration markets. The Climate segment offers valves, protection devices, and brass fittings for various OEMs in the commercial HVAC and refrigeration markets; high-pressure components and accessories for the air-conditioning and refrigeration markets; coaxial heat exchangers and twisted tubes for the HVAC, geothermal, refrigeration, swimming pool heat pump, marine, ice machine, commercial boiler, and heat reclamation markets; insulated HVAC flexible duct systems; and brazed manifolds, headers, and distributor assemblies. The company was founded in 1917 and is headquartered in Collierville, Tennessee.\"</p></blockquote> <h3 class=\"paywall-full-content\">Numbers/Outlook</h3> <p class=\"paywall-full-content\">In 2021 Mueller Industries Inc had <a href=\"https://www.muellerindustries.com/investors/\" rel=\"nofollow\">full-year results of $3.8B in revenues and net income of $468.5M</a> which comes out to $8.25 EPS diluted. The company has also reported their first and second quarter earnings for 2022. For the first half of 2022 the company has had $2.16B in revenues and $364M in net income which is $6.43 EPS diluted. The company pays a current dividend of $1.00 per share, which is a 1.48% yield on the current share price.</p> <p class=\"paywall-full-content\">The outlook for the company's future growth is good. New housing starts and commercial construction are important factors that influence and help determine how the sales of the company will be because these areas make up a significant portion of demand for the company's products. According to the U.S. Census Bureau, <a href=\"https://ipropertymanagement.com/research/housing-starts\" rel=\"nofollow\">actual housing starts</a> in the U.S. were 1.60M in 2021 compared to 1.38M in 2020. Also, the value of private non-residential construction was 467.9B in 2021, 479B in 2020, and 500.1B in 2019. The demand in these areas is expected to remain high, and the company believes their business and financial results will benefit and remain stable because of these factors. The outlook for non-residential construction is <a href=\"https://www.aia.org/press-releases/6471469-nonresidential-construction-spending-proje\" rel=\"nofollow\">projected</a> to grow 5.4% in 2022 and 6.1% in 2023. This outlook in demand will help Mueller Industries, Inc. keep growing and operating at a high level.</p> <p class=\"paywall-full-content\"><figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><picture><span><a href=\"https://static.seekingalpha.com/uploads/2022/8/11/48812495-1660234606186738_origin.png\" rel=\"lightbox\" data-width=\"694\" data-height=\"234\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"false\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"false\" data-og-image-linkdin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2022/8/11/48812495-1660234606186738_origin.png?io=w640\" alt=\"Mueller Industries 2021 Gross Margin, FCF\" width=\"640\" height=\"216\" contenteditable=\"false\" data-width=\"640\" data-height=\"216\" vspace=\"6\" hspace=\"6\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2022/8/11/48812495-1660234606186738_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2022/8/11/48812495-1660234606186738_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2022/8/11/48812495-1660234606186738_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2022/8/11/48812495-1660234606186738_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span></picture><figcaption><p class=\"item-caption\">Mueller Industries Annual Report</p></figcaption></figure></p> <h2 class=\"paywall-full-content\">Potential Risks</h2> <p class=\"paywall-full-content\">A potential risk factor that can have an impact on the business is economic conditions regarding housing and commercial construction industries. The construction markets appear stable currently and have been good for the last several years, but in the future if there is a deterioration in those markets it could significantly impact the company's business.</p> <h2 class=\"paywall-full-content\">Valuation</h2> <p class=\"paywall-full-content\">Mueller Industries Inc. currently has a market capitalization of $3.8B and a price to earnings (P/E) ratio of 5.80. This P/E is actually quite a bit lower than most of Mueller's competitors. Other companies in the metal fabrication have P/E ratios currently that are closer to around 20. Based on the P/E ratio, it looks like the company is cheap compared to its competitors. The company appears to already be undervalued with the status of current operations. When you factor in growth of revenues and net income for the company, it appears to be a very attractive stock with unrecognized value.</p> <p class=\"paywall-full-content\">The company has been aggressive at paying down debt over the last couple of years, and now the company has zero debt. That is very positive for the company because right now it doesn't put a squeeze on any of the company's net income, and it makes them very flexible. The company has $202M of cash at the end of the second quarter, and they have a revolving credit facility of $400M that is untapped that could be used if needed for operations or if a strategic acquisition opportunity comes along.</p> <h2 class=\"paywall-full-content\">Investor Takeaway/Conclusion</h2> <div class=\"before_last_paragraph-piano-placeholder paywall-full-content\"></div> <p class=\"paywall-full-content\">Mueller Industries looks like a great company and a great stock. The company has historically been a steady performer and has experienced an explosion of demand in 2021 that has continued into 2022. The backlog is strong and the numbers the company has been hitting are great. The company has a low P/E multiple and appears to be very significantly undervalued compared to its competitors and just in general. If the company was at a more normal P/E ratio of 10-15 this stock would more than double from current levels. The company looks poised for more growth which makes the current undervaluation that much more attractive and even if they are not going to have amazing growth in their business if it will just remain steady, the company have prepared themselves for anything the market might throw at them.</p>",
+      "quickInsights": null,
+      "twitContent": "Mueller Industries: Boring Stock That Makes Money $MLI #investing #stocks #economy https://seekingalpha.com/article/4533440-mueller-industries-boring-stock-makes-money?source=tweet",
+      "innerMarketing": "",
+      "marketingBullet": "",
+      "isReit": false,
+      "videoData": null,
+      "marketingBulletVariant": null,
+      "marketingBio": null,
+      "audioDuration": null,
+      "originalTitle": "Mueller Industries: Boring Stock That Makes Money"
+    },
+    "relationships": {
+      "author": {
+        "data": {
+          "id": "103795",
+          "type": "author"
+        }
+      },
+      "sentiments": {
+        "data": [
+          {
+            "id": "387154",
+            "type": "sentiment"
+          }
+        ]
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "6693",
+            "type": "tag"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": [
+          {
+            "id": "577277",
+            "type": "tag"
+          },
+          {
+            "id": "1936",
+            "type": "tag"
+          },
+          {
+            "id": "6693",
+            "type": "tag"
+          },
+          {
+            "id": "17913",
+            "type": "tag"
+          },
+          {
+            "id": "17335",
+            "type": "tag"
+          },
+          {
+            "id": "608068",
+            "type": "tag"
+          },
+          {
+            "id": "10727",
+            "type": "tag"
+          },
+          {
+            "id": "326",
+            "type": "tag"
+          },
+          {
+            "id": "17927",
+            "type": "tag"
+          }
+        ]
+      },
+      "coAuthors": {
+        "data": []
+      },
+      "presentations": {
+        "data": []
+      },
+      "updates": {
+        "data": []
+      },
+      "corrections": {
+        "data": []
+      }
+    },
+    "links": {
+      "self": "/article/4533440-mueller-industries-boring-stock-makes-money",
+      "canonical": "https://seekingalpha.com/article/4533440-mueller-industries-boring-stock-makes-money",
+      "uriImage": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/529067008/image_529067008.jpg?io=getty-c-w1536",
+      "schemaImage": [
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/529067008/image_529067008.jpg?io=getty-c-w1280",
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/529067008/image_529067008.jpg?io=getty-c-crop-16-9",
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/529067008/image_529067008.jpg?io=getty-c-crop-4-3"
+      ]
+    }
+  },
+  "included": [
+    {
+      "id": "103795",
+      "type": "author",
+      "attributes": {
+        "company": null,
+        "slug": "fincap-investments",
+        "userId": 48812495,
+        "tagId": 577277,
+        "bio": "Just trying to provide information about potential investment opportunities.",
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/048/812/495/small_pic.png",
+          "medium": "https://seekingalpha.com/images/users_profile/048/812/495/medium_pic.png",
+          "big": "https://seekingalpha.com/images/users_profile/048/812/495/big_pic.png",
+          "extra_large": "https://seekingalpha.com/images/users_profile/048/812/495/extra_large_pic.png"
+        },
+        "nick": "FinCap Investments",
+        "deactivated": null,
+        "memberSince": 2017,
+        "isRss": false,
+        "contributorSince": 2017,
+        "followersCount": 148
+      },
+      "relationships": {
+        "user": {
+          "data": {
+            "id": "48812495",
+            "type": "user"
+          }
+        },
+        "userBioTags": {
+          "data": [
+            {
+              "id": "933036",
+              "type": "userBioTag"
+            },
+            {
+              "id": "933037",
+              "type": "userBioTag"
+            },
+            {
+              "id": "933038",
+              "type": "userBioTag"
+            }
+          ]
+        },
+        "authorResearch": {
+          "data": null
+        }
+      },
+      "links": {
+        "self": "/author/fincap-investments",
+        "profileUrl": "/author/fincap-investments",
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "id": "6693",
+      "type": "tag",
+      "attributes": {
+        "slug": "mli",
+        "name": "MLI",
+        "company": "Mueller Industries, Inc.",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "NYSE",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/MLI"
+      }
+    },
+    {
+      "id": "577277",
+      "type": "tag",
+      "attributes": {
+        "slug": "fincap-investments",
+        "name": "FinCap Investments",
+        "company": null,
+        "tagKind": "Tags::AuthorTag"
+      },
+      "links": {
+        "self": "/author/fincap-investments"
+      }
+    },
+    {
+      "id": "1936",
+      "type": "tag",
+      "attributes": {
+        "slug": "long-ideas",
+        "name": "Long Ideas",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=long-ideas"
+      }
+    },
+    {
+      "id": "17913",
+      "type": "tag",
+      "attributes": {
+        "slug": "industrial-goods",
+        "name": "Industrial Goods",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/industrial-goods"
+      }
+    },
+    {
+      "id": "17335",
+      "type": "tag",
+      "attributes": {
+        "slug": "sa-exclusive",
+        "name": "SA Exclusive",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/sa-exclusive"
+      }
+    },
+    {
+      "id": "608068",
+      "type": "tag",
+      "attributes": {
+        "slug": "inbound-seo-optimization",
+        "name": "Inbound SEO Optimization",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/inbound-seo-optimization"
+      }
+    },
+    {
+      "id": "10727",
+      "type": "tag",
+      "attributes": {
+        "slug": "investing-ideas",
+        "name": "Investing Ideas",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/investing-ideas"
+      }
+    },
+    {
+      "id": "326",
+      "type": "tag",
+      "attributes": {
+        "slug": "us",
+        "name": "United States",
+        "company": null,
+        "tagKind": "Tags::Country"
+      },
+      "links": {
+        "self": "/articles?filters=us"
+      }
+    },
+    {
+      "id": "17927",
+      "type": "tag",
+      "attributes": {
+        "slug": "metal-fabrication",
+        "name": "Metal Fabrication",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/metal-fabrication"
+      }
+    },
+    {
+      "id": "387154",
+      "type": "sentiment",
+      "attributes": {
+        "articleId": 4533440,
+        "type": "very_bullish",
+        "createdAt": "2022-08-12T03:42:18.000-04:00",
+        "typeId": 0
+      },
+      "relationships": {
+        "article": {
+          "data": {
+            "id": "4533440",
+            "type": "article"
+          }
+        },
+        "tag": {
+          "data": {
+            "id": "6693",
+            "type": "tag"
+          }
+        }
+      }
+    }
+  ]
+}

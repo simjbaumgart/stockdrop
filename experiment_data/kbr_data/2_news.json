@@ -1,0 +1,347 @@
+{
+  "data": [
+    {
+      "id": "4532844",
+      "type": "news",
+      "attributes": {
+        "publishOn": "2025-12-18T07:40:04-05:00",
+        "isLockedPro": false,
+        "commentCount": 0,
+        "gettyImageUrl": null,
+        "videoPreviewUrl": null,
+        "videoDuration": null,
+        "themes": {},
+        "title": "KBR bags $10B U.S. Navy support contract",
+        "isPaywalled": false,
+        "content": "<ul> <li>KBR (<span class=\"ticker-hover-wrapper\"><span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/KBR\" title=\"KBR, Inc.\">KBR</a></span></span>) <a title=\"awarded\" href=\"https://seekingalpha.com/pr/20343861-kbr-awarded-seat-on-10-billion-ceiling-readiness-and-sustainment-support-contract-with-u-s\" target=\"_blank\">awarded</a> a seat on a multiple award, IDIQ contract by the U.S. Naval Supply Systems Command.</li> <li>The contract spans a five-year base period with an additional five-year option period.</li> <li>The five-year option period would bring the ceiling amount<span class=\"paywall-full-content invisible\"> to $20 billion.</span> </li> <li class=\"paywall-full-content invisible\">Tasks may include a wide range of support services such as stability operations, civil support and supply chain and distribution services. WEXMAC 2.1 TITUS task orders are expected to be firm fixed price.</li> </ul> <div class=\"signup_widget_placeholder\"></div><div id=\"more-links\" class=\"paywall-full-content invisible\"> <h2>More on KBR, Inc</h2> <ul> <li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4844556-kbr-engineering-tomorrow-with-proprietary-decarbonization-and-circularity\">KBR: Engineering Tomorrow With Proprietary Decarbonization And Circularity</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4835531-kbr-inc-kbr-q3-2025-earnings-call-transcript\">KBR, Inc. (KBR) Q3 2025 Earnings Call Transcript</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4835604-kbr-inc-2025-q3-results-earnings-call-presentation\">KBR, Inc. 2025 Q3 - Results - Earnings Call Presentation</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/news/4531351-kbr-secures-contract-for-ignis-green-ammonia-facility-in-spain\">KBR secures contract for IGNIS green ammonia facility in Spain</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/news/4517384-kbr-awarded-key-engineering-deal-for-huge-qatarenergy-project\">KBR awarded key engineering deal for huge QatarEnergy project</a></li> </ul> </div>"
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "id": "51785401",
+            "type": "newsAuthorUser"
+          }
+        },
+        "sentiments": {
+          "data": []
+        },
+        "primaryTickers": {
+          "data": [
+            {
+              "id": "2787",
+              "type": "tag"
+            }
+          ]
+        },
+        "secondaryTickers": {
+          "data": []
+        },
+        "otherTags": {
+          "data": []
+        }
+      },
+      "links": {
+        "self": "/news/4532844-kbr-bags-10b-u-s-navy-support-contract"
+      }
+    },
+    {
+      "id": "4531351",
+      "type": "news",
+      "attributes": {
+        "publishOn": "2025-12-15T06:30:52-05:00",
+        "isLockedPro": false,
+        "commentCount": 0,
+        "gettyImageUrl": null,
+        "videoPreviewUrl": null,
+        "videoDuration": null,
+        "themes": {},
+        "title": "KBR secures contract for IGNIS green ammonia facility in Spain",
+        "isPaywalled": false,
+        "content": "<div class=\"signup_widget_placeholder\"></div><div id=\"more-links\"> <p data-path-to-node=\"1\" data-eci=\"true\">KBR (<span class=\"ticker-hover-wrapper\"><span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/KBR\" title=\"KBR, Inc.\">KBR</a></span></span>) has been <a title=\"awarded a technology and engineering contract\" href=\"https://seekingalpha.com/pr/20338915-kbr-awarded-green-ammonia-project-by-ignis-in-spain\" target=\"_blank\">awarded a technology and engineering contract</a> by IGNIS for a new green ammonia facility to be built in A Coru\u00f1a, Spain.</p> <p data-path-to-node=\"2\">Under the terms, KBR will provide proprietary engineering design and pre-Front End Engineering Design (pre-FEED) services for the<span class=\"paywall-full-content invisible\"> plant, which is designed to produce 200,000 tons of green ammonia per annum.</span></p> <p data-path-to-node=\"4\" class=\"paywall-full-content invisible\">The facility will utilize renewable energy to produce green hydrogen, which is then converted into green ammonia.</p> <p data-path-to-node=\"5\" class=\"paywall-full-content invisible\">Green ammonia is a critical component in the production of renewable fertilizers.</p> <p data-path-to-node=\"5\" class=\"paywall-full-content invisible\">\u201cKBR\u2019s green ammonia solutions, along with complementary technologies such as H2ACT<sup>\u00ae</sup> ammonia cracking, make us a global leader in delivering reliable and energy-efficient ammonia technology at a lower capital cost,\u201d said Jay Ibrahim, President, KBR Sustainable Technology Solutions.</p> <h2 class=\"paywall-full-content invisible\">More on KBR, Inc</h2> <ul class=\"paywall-full-content invisible\"> <li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4844556-kbr-engineering-tomorrow-with-proprietary-decarbonization-and-circularity\">KBR: Engineering Tomorrow With Proprietary Decarbonization And Circularity</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4835531-kbr-inc-kbr-q3-2025-earnings-call-transcript\">KBR, Inc. (KBR) Q3 2025 Earnings Call Transcript</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4835604-kbr-inc-2025-q3-results-earnings-call-presentation\">KBR, Inc. 2025 Q3 - Results - Earnings Call Presentation</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/news/4517384-kbr-awarded-key-engineering-deal-for-huge-qatarenergy-project\">KBR awarded key engineering deal for huge QatarEnergy project</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/news/4511529-kbr-outlines-7_8b-revenue-guidance-and-advances-spin-off-strategy-as-cash-flow-outpaces\">KBR outlines $7.8B revenue guidance and advances spin-off strategy as cash flow outpaces expectations</a></li> </ul> </div>"
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "id": "52365730",
+            "type": "newsAuthorUser"
+          }
+        },
+        "sentiments": {
+          "data": []
+        },
+        "primaryTickers": {
+          "data": [
+            {
+              "id": "2787",
+              "type": "tag"
+            }
+          ]
+        },
+        "secondaryTickers": {
+          "data": []
+        },
+        "otherTags": {
+          "data": []
+        }
+      },
+      "links": {
+        "self": "/news/4531351-kbr-secures-contract-for-ignis-green-ammonia-facility-in-spain"
+      }
+    },
+    {
+      "id": "4517384",
+      "type": "news",
+      "attributes": {
+        "publishOn": "2025-11-06T09:57:30-05:00",
+        "isLockedPro": false,
+        "commentCount": 0,
+        "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/76663695/image_76663695.jpg",
+        "videoPreviewUrl": null,
+        "videoDuration": null,
+        "themes": {},
+        "title": "KBR awarded key engineering deal for huge QatarEnergy project",
+        "isPaywalled": false,
+        "content": "<p data-eci=\"true\">KBR (<span class=\"ticker-hover-wrapper\"><span class=\"ticker-hover-wrapper\"><span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/KBR\" title=\"KBR, Inc.\">KBR</a></span></span></span>) said Thursday it was <a title=\"awarded\" href=\"https://www.upstreamonline.com/field-development/us-contractor-wins-prized-engineering-deal-for-qatarenergy-megaproject/2-1-1896456\" target=\"_self\" rel=\"nofollow\">awarded</a> a contract to provide detailed engineering design services for further expansion of the Bul Hanine oil and gas field offshore Qatar, a project considered crucial to QatarEnergy's strategy of maintaining and expanding<span class=\"paywall-full-content invisible\"> production at the country's largest offshore oilfield.</span></p> <p class=\"paywall-full-content invisible\">The EPIC project 120 km east of Doha aims to extend the field's production life, increase its capacity, and integrate advanced technologies to maximize recovery, the companies said; financial terms were not disclosed.</p> <p class=\"paywall-full-content invisible\">Separately, KBR (<a href=\"https://seekingalpha.com/symbol/KBR\" title=\"KBR, Inc.\">KBR</a>) said it was <a title=\"selected\" href=\"https://seekingalpha.com/pr/20296097-kbr-selected-to-deliver-detailed-engineering-design-for-the-gas-growth-integrated-project\" target=\"_self\">selected</a> to provide detailed engineering design services for the Associated Gas Upstreasm Project Phase 2 as part of the Gas Growth Integrated Project operated by TotalEnergies and partners BOC and Qatar Energy in Iraq; financial terms were not disclosed.</p> <div class=\"signup_widget_placeholder\"></div><div id=\"more-links\" class=\"paywall-full-content invisible\"> <h2>More on KBR</h2> <ul> <li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4835604-kbr-inc-2025-q3-results-earnings-call-presentation\">KBR Q3 2025 Earnings Call Presentation</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4825525-kbr-inc-kbr-inc-special-call-slideshow\">KBR Special Call - Slideshow</a></li> <li><a title=\"KBR: Spin To Win\" href=\"https://seekingalpha.com/article/4808534-kbr-stock-q2-spin-to-win\" target=\"_self\">KBR: Spin To Win</a></li> </ul> </div>"
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "id": "543215",
+            "type": "newsAuthorUser"
+          }
+        },
+        "sentiments": {
+          "data": []
+        },
+        "primaryTickers": {
+          "data": [
+            {
+              "id": "2787",
+              "type": "tag"
+            }
+          ]
+        },
+        "secondaryTickers": {
+          "data": []
+        },
+        "otherTags": {
+          "data": []
+        }
+      },
+      "links": {
+        "self": "/news/4517384-kbr-awarded-key-engineering-deal-for-huge-qatarenergy-project"
+      }
+    },
+    {
+      "id": "4511529",
+      "type": "news",
+      "attributes": {
+        "publishOn": "2025-10-30T12:07:24-04:00",
+        "isLockedPro": false,
+        "commentCount": 0,
+        "gettyImageUrl": null,
+        "videoPreviewUrl": null,
+        "videoDuration": null,
+        "themes": {},
+        "title": "KBR outlines $7.8B revenue guidance and advances spin-off strategy as cash flow outpaces expectations",
+        "isPaywalled": false,
+        "content": "<p data-eci=\"true\">Earnings Call Insights: KBR, Inc. (KBR) Q3 2025</p> <h3>Management View</h3> <ul> <li>CEO Stuart Bradie stated that \"revenue was flat in the quarter year-on-year and up 5% year-to-date from the prior year,\" with a \"strong book-to-bill of 1.4x for the quarter,\" though most of the conversion is<span class=\"paywall-full-content invisible\"> expected in future quarters. He outlined significant headwinds in the STS segment, including delayed LNG projects, oversupply in petrochemicals, Middle East unrest, and new tariffs, but emphasized that \"the STS business has proven remarkably resilient,\" having replaced lost revenue with geographical expansion and focus on LNG, ammonia, and energy affordability.</span> </li> <li class=\"paywall-full-content invisible\">Bradie highlighted that \"we delivered excellent bottom line performance in Q3 across all metrics. Adjusted EBITDA margins were up more than 100 basis points year-on-year at 12.4%, delivering an adjusted EBITDA of $240 million, up 10%. This translated into an adjusted EPS of $1.02, an increase of 21% year-over-year.\"</li> <li class=\"paywall-full-content invisible\">Operating cash flow stood out, with Bradie noting, \"cash was the standout in the quarter with conversion over 130% year-to-date, generating operating cash of $198 million in the quarter and $506 million year-to-date.\"</li> <li class=\"paywall-full-content invisible\">Bradie emphasized new contract wins, including a $2.5 billion ceiling value contract for astronaut health and human performance and several strategic contracts with the Air Force Research Laboratory and U.S. Space Force.</li> <li class=\"paywall-full-content invisible\">In STS, KBR extended a contract for the Majnoon oil field in Iraq, won a consultancy for Abu Dhabi's TAQA, a front-end engineering design contract for Kuwait Oil Company, and the FEED contract for Abadi LNG in Indonesia.</li> <li class=\"paywall-full-content invisible\">Bradie stated, \"backlog and options now stand at more than $23 billion, and this value represents a 13% increase since prior year-end.\"</li> <li class=\"paywall-full-content invisible\">CFO Mark Sopp stated, \"revenues in the quarter...were $1.9 billion, flat versus the prior year and up 5% on a year-to-date basis,\" with adjusted EBITDA \"quite healthy at $240 million, up 10%, with margins at 12.4%, an increase of over 100 basis points versus the prior year.\"</li> <li class=\"paywall-full-content invisible\">Sopp added that operating cash flow year-to-date was $506 million, \"an increase of 24% from the prior year,\" attributing strong cash performance to \"successful DSO reduction measures in both segments.\"</li> </ul> <h3 class=\"paywall-full-content invisible\">Outlook</h3> <ul class=\"paywall-full-content invisible\"> <li>Sopp updated revenue guidance for 2025 to a range of $7.75 billion to $7.85 billion, \"with an updated midpoint of $7.8 billion flat,\" and reaffirmed profit metrics: \"Adjusted EBITDA remains within the range of $960 million to $980 million. We're also reconfirming the corresponding adjusted EPS guidance of $3.78 to $3.88.\"</li> <li>Sopp explained that guidance assumes the government shutdown is resolved in November and noted, \"Other key assumptions in our guidance are unchanged, including tax, CapEx and interest expense.\"</li> <li>Bradie confirmed the spin-off of Mission Technologies is progressing, targeting completion by mid- to late 2026.</li> </ul> <h3 class=\"paywall-full-content invisible\">Financial Results</h3> <ul class=\"paywall-full-content invisible\"> <li>Sopp reported revenues of $1.9 billion for the quarter. Adjusted EBITDA was $240 million with margins at 12.4%. Adjusted EPS was $1.02, up 21% year-over-year. Operating cash flow was $198 million for the quarter and $506 million year-to-date.</li> <li>In MTS, revenues were $1.4 billion, with Defense and Intelligence growing 14%, offset by a 22% decline in Readiness and Sustainment. Science &amp; Space was down 5%. Adjusted EBITDA for MTS was $143 million, with margins over 10%.</li> <li>STS revenues were $525 million, down 1%, but adjusted EBITDA rose 13% to $123 million, with margins at roughly 23.5%.</li> <li>KBR returned over $120 million to shareholders this quarter and has repurchased over $300 million in shares year-to-date.</li> </ul> <h3 class=\"paywall-full-content invisible\">Q&amp;A</h3> <ul class=\"paywall-full-content invisible\"> <li>Andrew Kaplowitz, Citigroup: Asked about growth prospects for STS and MTS into 2026. Bradie responded that \"the book-to-bill in Q3 and the expected book-to-bill in Q4 gives us pretty good insight, and I think good momentum heading into 2026,\" reaffirming commitment to double-digit STS growth and confidence in MTS growth, especially in Defense &amp; Intel and international segments.</li> <li>Augie Smith, D.A. Davidson: Sought clarity on NASA exposure and budget cuts. Bradie responded that for the rest of the year, \"very little impact,\" and into next year, exposure is \"probably less material\" and under 25% of the portfolio.</li> <li>Michael Dudas, Vertical Research: Inquired about non-LNG STS opportunities. Bradie cited strong activity in the Middle East, especially in Iraq and Kuwait, and ongoing resilience in ammonia and Mura projects, noting commissioning delays but no major concerns.</li> <li>Tobey Sommer, Truist: Asked about spin-off interest and valuation comparables. Bradie declined to comment on acquisition interest, but described the spin-off as \"an amazing opportunity to relaunch the image of the company\" with plans for enhanced branding and business development.</li> <li>Mariana Perez Mora, BofA: Asked about STS margins and Plaquemines run rate. Sopp explained Q3 margin spike was due to milestone progression, but average run rate from first half expected to continue in 2026.</li> </ul> <h3 class=\"paywall-full-content invisible\">Sentiment Analysis</h3> <ul class=\"paywall-full-content invisible\"> <li>Analysts showed a neutral to slightly positive tone, focusing on growth visibility, margin sustainability, and strategic execution. Questions were probing but constructive.</li> <li>Management maintained a confident tone, particularly in reaffirming guidance and highlighting resilience. Bradie frequently referenced \"good momentum\" and \"confidence\" in growth targets. Sopp provided detailed explanations, supporting a slightly more cautious but still upbeat outlook.</li> <li>Compared to the previous quarter, management\u2019s tone was more focused on execution and resilience, while analysts' tone remained consistently focused on operational risks and growth.</li> </ul> <h3 class=\"paywall-full-content invisible\">Quarter-over-Quarter Comparison</h3> <ul class=\"paywall-full-content invisible\"> <li>The Q3 call reconfirmed adjusted EBITDA and EPS guidance, but lowered revenue guidance ($7.75B-$7.85B vs. prior $7.9B-$8.1B). Profitability and cash flow guidance remained unchanged.</li> <li>Management\u2019s confidence appeared stable, with increased emphasis on cash generation and backlog expansion.</li> <li>Strategic focus shifted to executing the upcoming spin-off and maintaining growth in STS and MTS despite conversion and award delays.</li> <li>Analysts continued to press on award timing, margin sustainability, and segment growth, similar to the previous quarter.</li> </ul> <h3 class=\"paywall-full-content invisible\">Risks and Concerns</h3> <ul class=\"paywall-full-content invisible\"> <li>Management highlighted continued delays in government awards and protests, noting $3 billion in contracts under protest, up 50% from last quarter.</li> <li>The government shutdown is delaying award conversion, particularly in MTS, and may further lower Q4 MTS revenue outlook.</li> <li>STS faces ongoing headwinds from delayed project awards and market uncertainties, but management is mitigating through geographic expansion and focus on robust end markets.</li> <li>Analysts raised concerns about NASA funding, Mura project commissioning delays, and timing of backlog conversion.</li> </ul> <h3 class=\"paywall-full-content invisible\">Final Takeaway</h3> <p class=\"paywall-full-content invisible\">KBR leadership emphasized strong bottom line results, robust cash flow, and resilient operational performance in the face of delayed awards and macro headwinds. The spin-off of Mission Technologies remains on track, with preparations advancing and a targeted completion by late 2026. Management reaffirmed full-year profit guidance and emphasized the company\u2019s strategic positioning, strong backlog, and confidence in continued value creation for shareholders as market conditions stabilize.</p> <p class=\"paywall-full-content invisible\"><a href=\"https://seekingalpha.com/symbol/kbr/earnings/transcripts\">Read the full Earnings Call Transcript</a></p> <div class=\"signup_widget_placeholder\"></div><div id=\"more-links\" class=\"paywall-full-content invisible\"> <h2>More on KBR, Inc</h2> <ul> <li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4835531-kbr-inc-kbr-q3-2025-earnings-call-transcript\">KBR, Inc. (KBR) Q3 2025 Earnings Call Transcript</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4835604-kbr-inc-2025-q3-results-earnings-call-presentation\">KBR, Inc. 2025 Q3 - Results - Earnings Call Presentation</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4825525-kbr-inc-kbr-inc-special-call-slideshow\">KBR, Inc. (KBR) Inc. - Special Call - Slideshow</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/news/4510277-kbr-inc-q3-2025-earnings-preview\">KBR, Inc Q3 2025 Earnings Preview</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/news/4504654-kbr-secures-987m-us-space-force-task-order\">KBR secures $98.7M U.S. Space Force task order</a></li> </ul> </div>"
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "id": "61525086",
+            "type": "newsAuthorUser"
+          }
+        },
+        "sentiments": {
+          "data": []
+        },
+        "primaryTickers": {
+          "data": [
+            {
+              "id": "2787",
+              "type": "tag"
+            }
+          ]
+        },
+        "secondaryTickers": {
+          "data": []
+        },
+        "otherTags": {
+          "data": [
+            {
+              "id": "780825",
+              "type": "tag"
+            }
+          ]
+        }
+      },
+      "links": {
+        "self": "/news/4511529-kbr-outlines-7_8b-revenue-guidance-and-advances-spin-off-strategy-as-cash-flow-outpaces"
+      }
+    },
+    {
+      "id": "4511083",
+      "type": "news",
+      "attributes": {
+        "publishOn": "2025-10-30T06:09:28-04:00",
+        "isLockedPro": false,
+        "commentCount": 0,
+        "gettyImageUrl": null,
+        "videoPreviewUrl": null,
+        "videoDuration": null,
+        "themes": {},
+        "title": "KBR Non-GAAP EPS of $1.02 beats by $0.07, revenue of $1.93B misses by $40M",
+        "isPaywalled": false,
+        "content": "<ul>\n<li>KBR, Inc <a href=\"https://seekingalpha.com/pr/20285752-kbr-reports-third-quarter-fiscal-2025-results\">press release</a>  (<span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/KBR\" title=\"KBR, Inc.\">KBR</a></span>): Q3  Non-GAAP EPS of $1.02 <font color=\"green\"> beats by $0.07</font>.</li>\n<li>Revenue of $1.93B (-0.5% Y/Y) <font color=\"red\"> misses by $40M</font>.</li>\n<li>Bookings and options<sup>1</sup>\u00a0of $4.2 billion with 1.4x book-to-bill.</li>\n<li>\n<p data-eci=\"true\"><strong>Revising Fiscal Year 2025 Guidance</strong></p>\n<ul><li>Revising previously provided outlook for the pace of awards across both segments and the resolution of bids won under protest, which will not be resolved during the U.S. Government shutdown.</li></ul>\n</li>\n</ul>\n<div class=\"signup_widget_placeholder\"></div><div id=\"more-links\">\n<h2>More on KBR, Inc</h2>   <ul>     <li><a href=\"https://seekingalpha.com/article/4825525-kbr-inc-kbr-inc-special-call-slideshow\" class=\"more-link\">KBR, Inc. (KBR) Inc. - Special Call - Slideshow</a></li>     <li><a href=\"https://seekingalpha.com/article/4825493-kbr-inc-kbr-special-investor-call-transcript\" class=\"more-link\">KBR, Inc. (KBR) Special Investor Call (Transcript)</a></li>     <li><a href=\"https://seekingalpha.com/article/4808534-kbr-stock-q2-spin-to-win\" class=\"more-link\">KBR: Spin To Win</a></li>     <li><a href=\"https://seekingalpha.com/news/4510277-kbr-inc-q3-2025-earnings-preview\" class=\"more-link\">KBR, Inc Q3 2025 Earnings Preview</a></li>     <li><a href=\"https://seekingalpha.com/news/4504654-kbr-secures-987m-us-space-force-task-order\" class=\"more-link\">KBR secures $98.7M U.S. Space Force task order</a></li>   </ul>\n</div>"
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "id": "52365730",
+            "type": "newsAuthorUser"
+          }
+        },
+        "sentiments": {
+          "data": []
+        },
+        "primaryTickers": {
+          "data": [
+            {
+              "id": "2787",
+              "type": "tag"
+            }
+          ]
+        },
+        "secondaryTickers": {
+          "data": []
+        },
+        "otherTags": {
+          "data": []
+        }
+      },
+      "links": {
+        "self": "/news/4511083-kbr-non-gaap-eps-of-102-beats-by-007-revenue-of-193b-misses-by-40m"
+      }
+    }
+  ],
+  "included": [
+    {
+      "id": "51785401",
+      "type": "newsAuthorUser",
+      "attributes": {
+        "userId": 51785401,
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/051/785/401/small_pic.png?t=14e62202e0",
+          "medium": "https://seekingalpha.com/images/users_profile/051/785/401/medium_pic.png?t=78210c2a95",
+          "big": "https://seekingalpha.com/images/users_profile/051/785/401/big_pic.png?t=32a8d17d4c",
+          "extra_large": "https://seekingalpha.com/images/users_profile/051/785/401/extra_large_pic.png?t=5aa9b3bb43"
+        },
+        "nick": "Manshi Mamtora, CFA, SA News Editor",
+        "bio": "<p>Manshi Mamtora is a news editor at Seeking Alpha and is based in Mumbai, India. She is a Chartered Financial Analyst and has 14 years of experience in the research and report-writing space. Her passion for markets and analysis both keep her hooked on the writing desk. She joined Seeking Alpha in June 2020, where she covers macro events, analyst ratings, fund letters, European market updates, dividends, earnings, and more. Precious metals, technology, cryptocurrencies, and derivatives are among a few other areas of expertise.</p>",
+        "slug": "sa-news-team"
+      },
+      "links": {
+        "self": "/user/51785401",
+        "profileUrl": "/user/51785401"
+      }
+    },
+    {
+      "id": "2787",
+      "type": "tag",
+      "attributes": {
+        "slug": "kbr",
+        "name": "KBR",
+        "equityType": "stocks",
+        "company": "KBR, Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/KBR"
+      }
+    },
+    {
+      "id": "52365730",
+      "type": "newsAuthorUser",
+      "attributes": {
+        "userId": 52365730,
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/052/365/730/small_pic.png?t=7b9b416bfc",
+          "medium": "https://seekingalpha.com/images/users_profile/052/365/730/medium_pic.png?t=2d668f1a4c",
+          "big": "https://seekingalpha.com/images/users_profile/052/365/730/big_pic.png?t=5f2a9566f6",
+          "extra_large": "https://seekingalpha.com/images/users_profile/052/365/730/extra_large_pic.png?t=08679c8391"
+        },
+        "nick": "Meghavi Singh, SA News Editor",
+        "bio": "<p>Meghavi Singh is an editor on the India news team of Seeking Alpha, based in Pune.</p><p>Before joining Seeking Alpha in 2020, she worked with HSBC Bank for 12+ years in the wealth management and Regulatory Reporting departments. Prior to HSBC, she began her career with Gridstone Research, a financial research start-up, as a research associate for a period of 3 years, tracking company events and financial results for the US Consumer Sector.</p><p>She has two daughters and lives in Pune, India.</p><p> </p>",
+        "slug": "sa-news-team"
+      },
+      "links": {
+        "self": "/user/52365730",
+        "profileUrl": "/user/52365730"
+      }
+    },
+    {
+      "id": "543215",
+      "type": "newsAuthorUser",
+      "attributes": {
+        "userId": 543215,
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/000/543/215/small_pic.png?t=cee3f1fd49",
+          "medium": "https://seekingalpha.com/images/users_profile/000/543/215/medium_pic.png?t=e26501ecc8",
+          "big": "https://seekingalpha.com/images/users_profile/000/543/215/big_pic.png?t=3b781bfea6",
+          "extra_large": "https://seekingalpha.com/images/users_profile/000/543/215/extra_large_pic.png?t=b5b4f02541"
+        },
+        "nick": "Carl Surran, SA News Editor",
+        "bio": "<p>Carl Surran covers energy, utilities, and natural resources for Seeking Alpha. He joined the company in 2010 after writing about investment and personal finance topics for over 20 years. Carl has a BA from Duke University and an MBA from Rollins College. He is married with one daughter and lives in Florida.</p>",
+        "slug": "sa-news-team"
+      },
+      "links": {
+        "self": "/user/543215",
+        "profileUrl": "/author/sa-editor-carl-surran"
+      }
+    },
+    {
+      "id": "61525086",
+      "type": "newsAuthorUser",
+      "attributes": {
+        "userId": 61525086,
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/061/525/086/small_pic.png?t=a54574cc7a",
+          "medium": "https://seekingalpha.com/images/users_profile/061/525/086/medium_pic.png?t=be7e8d2945",
+          "big": "https://seekingalpha.com/images/users_profile/061/525/086/big_pic.png?t=a4aa0081a7",
+          "extra_large": "https://seekingalpha.com/images/users_profile/061/525/086/extra_large_pic.png?t=97a1c05348"
+        },
+        "nick": "SA Transcript Insights Editor, SA News Editor",
+        "bio": "",
+        "slug": "sa-news-team"
+      },
+      "links": {
+        "self": "/user/61525086",
+        "profileUrl": "/user/61525086"
+      }
+    }
+  ],
+  "meta": {
+    "page": {
+      "title": "KBR, Inc. (KBR) Latest Stock News",
+      "description": "Get the latest news and real-time alerts from KBR, Inc. (KBR) stock at Seeking Alpha.",
+      "listTitle": "News",
+      "listDescription": null,
+      "proStatus": 1,
+      "uriImage": "https://static.seekingalpha.com/assets/og_image_1200-29b2bfe1a595477db6826bd2126c63ac2091efb7ec76347a8e7f81ba17e3de6c.png",
+      "size": 5,
+      "totalPages": 97,
+      "total": 484,
+      "minmaxPublishOn": {
+        "min": 1761818968,
+        "max": 1766061604
+      }
+    },
+    "mone": {
+      "params": {
+        "pu": ""
+      }
+    }
+  }
+}

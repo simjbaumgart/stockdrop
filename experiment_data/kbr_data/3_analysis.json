@@ -1,0 +1,401 @@
+{
+  "data": [
+    {
+      "id": "4844556",
+      "type": "article",
+      "attributes": {
+        "publishOn": "2025-11-17T08:07:41-05:00",
+        "isLockedPro": false,
+        "commentCount": 1,
+        "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2190620201/image_2190620201.jpg",
+        "videoPreviewUrl": null,
+        "videoDuration": null,
+        "themes": {},
+        "title": "KBR: Engineering Tomorrow With Proprietary Decarbonization And Circularity",
+        "isPaywalled": false,
+        "structuredInsights": null
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "id": "107990",
+            "type": "author"
+          }
+        },
+        "sentiments": {
+          "data": [
+            {
+              "id": "677308",
+              "type": "sentiment"
+            }
+          ]
+        },
+        "primaryTickers": {
+          "data": [
+            {
+              "id": "2787",
+              "type": "tag"
+            }
+          ]
+        },
+        "secondaryTickers": {
+          "data": []
+        },
+        "otherTags": {
+          "data": []
+        }
+      },
+      "links": {
+        "self": "/article/4844556-kbr-engineering-tomorrow-with-proprietary-decarbonization-and-circularity"
+      }
+    },
+    {
+      "id": "4808534",
+      "type": "article",
+      "attributes": {
+        "publishOn": "2025-08-04T22:54:06-04:00",
+        "isLockedPro": false,
+        "commentCount": 7,
+        "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2190620201/image_2190620201.jpg",
+        "videoPreviewUrl": null,
+        "videoDuration": null,
+        "themes": {},
+        "title": "KBR: Spin To Win",
+        "isPaywalled": false,
+        "structuredInsights": null
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "id": "106393",
+            "type": "author"
+          }
+        },
+        "sentiments": {
+          "data": [
+            {
+              "id": "648391",
+              "type": "sentiment"
+            }
+          ]
+        },
+        "primaryTickers": {
+          "data": [
+            {
+              "id": "2787",
+              "type": "tag"
+            }
+          ]
+        },
+        "secondaryTickers": {
+          "data": []
+        },
+        "otherTags": {
+          "data": []
+        }
+      },
+      "links": {
+        "self": "/article/4808534-kbr-stock-q2-spin-to-win"
+      }
+    },
+    {
+      "id": "4804939",
+      "type": "article",
+      "attributes": {
+        "publishOn": "2025-07-27T12:42:19-04:00",
+        "isLockedPro": false,
+        "commentCount": 3,
+        "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/519749080/image_519749080.jpg",
+        "videoPreviewUrl": null,
+        "videoDuration": null,
+        "themes": {},
+        "title": "KBR: Earnings Up, Share Price Down In Value Opportunity",
+        "isPaywalled": false,
+        "structuredInsights": null
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "id": "63563",
+            "type": "author"
+          }
+        },
+        "sentiments": {
+          "data": [
+            {
+              "id": "647750",
+              "type": "sentiment"
+            }
+          ]
+        },
+        "primaryTickers": {
+          "data": [
+            {
+              "id": "2787",
+              "type": "tag"
+            }
+          ]
+        },
+        "secondaryTickers": {
+          "data": []
+        },
+        "otherTags": {
+          "data": []
+        }
+      },
+      "links": {
+        "self": "/article/4804939-kbr-earnings-up-share-price-down-in-value-opportunity"
+      }
+    },
+    {
+      "id": "4779609",
+      "type": "article",
+      "attributes": {
+        "publishOn": "2025-04-30T05:54:51-04:00",
+        "isLockedPro": false,
+        "commentCount": 0,
+        "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1419250037/image_1419250037.jpg",
+        "videoPreviewUrl": null,
+        "videoDuration": null,
+        "themes": {},
+        "title": "KBR: Ignore The Drooping Share Price, Check Out The Earnings Potential",
+        "isPaywalled": false,
+        "structuredInsights": null
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "id": "63563",
+            "type": "author"
+          }
+        },
+        "sentiments": {
+          "data": [
+            {
+              "id": "624230",
+              "type": "sentiment"
+            }
+          ]
+        },
+        "primaryTickers": {
+          "data": [
+            {
+              "id": "2787",
+              "type": "tag"
+            }
+          ]
+        },
+        "secondaryTickers": {
+          "data": []
+        },
+        "otherTags": {
+          "data": []
+        }
+      },
+      "links": {
+        "self": "/article/4779609-kbr-ignore-the-drooping-share-price-check-out-the-earnings-potential"
+      }
+    },
+    {
+      "id": "4749824",
+      "type": "article",
+      "attributes": {
+        "publishOn": "2025-01-16T04:12:47-05:00",
+        "isLockedPro": false,
+        "commentCount": 2,
+        "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2190620201/image_2190620201.jpg",
+        "videoPreviewUrl": null,
+        "videoDuration": null,
+        "themes": {},
+        "title": "KBR: Uncertainty Over Activist Investor And Government Spending Cuts",
+        "isPaywalled": false,
+        "structuredInsights": null
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "id": "63563",
+            "type": "author"
+          }
+        },
+        "sentiments": {
+          "data": [
+            {
+              "id": "597542",
+              "type": "sentiment"
+            }
+          ]
+        },
+        "primaryTickers": {
+          "data": [
+            {
+              "id": "2787",
+              "type": "tag"
+            }
+          ]
+        },
+        "secondaryTickers": {
+          "data": []
+        },
+        "otherTags": {
+          "data": []
+        }
+      },
+      "links": {
+        "self": "/article/4749824-kbr-uncertainty-over-activist-investor-and-government-spending-cuts"
+      }
+    }
+  ],
+  "included": [
+    {
+      "id": "107990",
+      "type": "author",
+      "attributes": {
+        "company": null,
+        "slug": "quiet-alpha",
+        "userId": 54356026,
+        "tagId": 784424,
+        "bio": "I have over 13 years of diverse financial analysis experience across various sectors, including Auto, Industrials, and IT. Worked in a Ford and Caterpillar treasury, and managed Investor relations and Strategic finance of a listed IT company of market cap ~USD 2.5bn. My early background also includes equity research analyst, where I built strong expertise in market analysis, valuation models, and investment strategy. What ties my journey together is my ability to connect companies' strategy, industry-specific knowledge to understand business growth drivers.",
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/054/356/026/small_pic.png",
+          "medium": "https://seekingalpha.com/images/users_profile/054/356/026/medium_pic.png",
+          "big": "https://seekingalpha.com/images/users_profile/054/356/026/big_pic.png",
+          "extra_large": "https://seekingalpha.com/images/users_profile/054/356/026/extra_large_pic.png"
+        },
+        "nick": "Quiet Alpha",
+        "deactivated": null,
+        "memberSince": 2021,
+        "isRss": false,
+        "contributorSince": 2025,
+        "followersCount": 143
+      },
+      "relationships": {
+        "user": {
+          "data": {
+            "id": "54356026",
+            "type": "user"
+          }
+        }
+      },
+      "links": {
+        "self": "/author/quiet-alpha",
+        "profileUrl": "/author/quiet-alpha",
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "id": "2787",
+      "type": "tag",
+      "attributes": {
+        "slug": "kbr",
+        "name": "KBR",
+        "equityType": "stocks",
+        "company": "KBR, Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/KBR"
+      }
+    },
+    {
+      "id": "106393",
+      "type": "author",
+      "attributes": {
+        "company": null,
+        "slug": "kinix-research",
+        "userId": 51325246,
+        "tagId": 613701,
+        "bio": "<p>Background: 10+ years as research scientist in the defense, intelligence, and space industries. </p><p>Followed investment teachings: Peter Lynch, Dr. Michael Burry, Li Lu, Philip Fisher</p><p>Investing style: Value investor of future earnings.</p><p>- 60-75% in small-to-mid-cap growth companies</p><p>- 25-40% in road-kill businesses with turnaround or cycle inflection</p><p>U.S. based but with frequent exposure to companies abroad. </p><p>I only write articles on ideas that I believe are actionable (i.e., typically no HOLD ratings), and strive to bring new, edifying material to ideas.</p><p>Always do your own due diligence. Not a financial advisor.</p>",
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/051/325/246/small_pic.png",
+          "medium": "https://seekingalpha.com/images/users_profile/051/325/246/medium_pic.png",
+          "big": "https://seekingalpha.com/images/users_profile/051/325/246/big_pic.png",
+          "extra_large": "https://seekingalpha.com/images/users_profile/051/325/246/extra_large_pic.png"
+        },
+        "nick": "Kinix Research",
+        "deactivated": null,
+        "memberSince": 2020,
+        "isRss": false,
+        "contributorSince": 2021,
+        "followersCount": 402
+      },
+      "relationships": {
+        "user": {
+          "data": {
+            "id": "51325246",
+            "type": "user"
+          }
+        }
+      },
+      "links": {
+        "self": "/author/kinix-research",
+        "profileUrl": "/author/kinix-research",
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "id": "63563",
+      "type": "author",
+      "attributes": {
+        "company": null,
+        "slug": "robert-f-abbott",
+        "userId": 24320523,
+        "tagId": 148133,
+        "bio": "<p>Robert F. Abbott has been investing his family\u2019s accounts since 1995, and in 2010 added options, mainly covered calls and collars with long stocks. He is a freelance writer, and his projects include a website that provides information for new and intermediate-level mutual fund investors. A resident of Airdrie, Alberta, Canada, Robert has earned Bachelor of Arts and Master of Business Administration (MBA) degrees.</p>",
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/024/320/523/small_pic.png",
+          "medium": "https://seekingalpha.com/images/users_profile/024/320/523/medium_pic.png",
+          "big": "https://seekingalpha.com/images/users_profile/024/320/523/big_pic.png",
+          "extra_large": "https://seekingalpha.com/images/users_profile/024/320/523/extra_large_pic.png"
+        },
+        "nick": "Robert F. Abbott",
+        "deactivated": null,
+        "memberSince": 2014,
+        "isRss": false,
+        "contributorSince": 2014,
+        "followersCount": 1527
+      },
+      "relationships": {
+        "user": {
+          "data": {
+            "id": "24320523",
+            "type": "user"
+          }
+        }
+      },
+      "links": {
+        "self": "/author/robert-f-abbott",
+        "profileUrl": "/author/robert-f-abbott",
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    }
+  ],
+  "meta": {
+    "page": {
+      "title": "KBR, Inc. (KBR) Latest Stock Analysis",
+      "description": "Find the latest KBR, Inc. KBR stock analysis from Seeking Alpha\u2019s top analysts: exclusive research and insights from bulls and bears",
+      "listTitle": "Analysis",
+      "listDescription": null,
+      "proStatus": 1,
+      "uriImage": "https://static.seekingalpha.com/assets/og_image_1200-29b2bfe1a595477db6826bd2126c63ac2091efb7ec76347a8e7f81ba17e3de6c.png",
+      "size": 5,
+      "totalPages": 9,
+      "total": 44,
+      "minmaxPublishOn": {
+        "min": 1737018767,
+        "max": 1763384861
+      }
+    },
+    "mone": {
+      "params": {
+        "pu": ""
+      }
+    }
+  }
+}

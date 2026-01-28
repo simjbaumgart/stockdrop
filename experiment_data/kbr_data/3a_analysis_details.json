@@ -1,0 +1,807 @@
+{
+  "data": {
+    "id": "4844556",
+    "type": "fullArticle",
+    "attributes": {
+      "publishOn": "2025-11-17T08:07:41-05:00",
+      "isLockedPro": false,
+      "commentCount": 1,
+      "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2190620201/image_2190620201.jpg",
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "investing-ideas": {
+          "id": 10727,
+          "slug": "investing-ideas",
+          "kind": "general",
+          "path": "/stock-ideas",
+          "title": "Stock Ideas",
+          "sasource": "theme_breadcrumb"
+        },
+        "long-ideas": {
+          "id": 1936,
+          "slug": "long-ideas",
+          "kind": "breadcrumb",
+          "path": "/stock-ideas/long-ideas",
+          "title": "Long Ideas",
+          "sasource": "theme_breadcrumb"
+        },
+        "garp-theme": {
+          "id": 143031,
+          "slug": "garp-theme",
+          "kind": "common",
+          "non_theme": true
+        },
+        "relative-valuation": {
+          "id": 115332,
+          "slug": "relative-valuation",
+          "kind": "common",
+          "non_theme": true
+        },
+        "spin-off": {
+          "id": 115352,
+          "slug": "spin-off",
+          "kind": "common",
+          "non_theme": true
+        },
+        "sum-of-the-parts": {
+          "id": 142991,
+          "slug": "sum-of-the-parts",
+          "kind": "common",
+          "non_theme": true
+        },
+        "clean-energy-tech": {
+          "id": 786566,
+          "slug": "clean-energy-tech",
+          "kind": "general"
+        },
+        "alpha-rich-opportunity": {
+          "id": 114692,
+          "slug": "alpha-rich-opportunity",
+          "kind": "general"
+        },
+        "alpha-rich-investment-style": {
+          "id": 114682,
+          "slug": "alpha-rich-investment-style",
+          "kind": "general"
+        },
+        "more-tags": {
+          "id": 698258,
+          "slug": "more-tags",
+          "kind": "general"
+        },
+        "us": {
+          "id": 326,
+          "slug": "us",
+          "kind": "common",
+          "non_theme": true
+        },
+        "industrials": {
+          "id": 20,
+          "slug": "industrials",
+          "kind": "sector",
+          "path": "/stock-ideas/industrial-goods",
+          "title": "Industrial\u00a0",
+          "sasource": "theme_breadcrumb"
+        }
+      },
+      "title": "KBR: Engineering Tomorrow With Proprietary Decarbonization And Circularity",
+      "summary": [
+        "KBR (KBR) is transforming into a focused sustainability and technology platform, highlighted by the planned spin-off of its Mission Technology Solutions (MTS) segment.\n        ",
+        "Post spin-off, KBR will operate as a capital-light, high-margin Sustainable Technology Solutions (STS) business, leveraging decarbonization and clean-energy trends for structural growth.\n        ",
+        "Despite near-term revenue flatness, improving earnings quality, robust backlogs, and margin expansion position KBR for 5-6% annual growth and a structural rerating by FY27.\n        ",
+        "Valuation implies ~44% upside by FY27 as KBR's portfolio shift and spin-off unlock higher multiples, with execution risk seen as manageable and not structural.\n        "
+      ],
+      "isPaywalled": false,
+      "structuredInsights": null,
+      "lastModified": "2025-11-17T08:11:52-05:00",
+      "isModerated": false,
+      "availableTranslations": [
+        "ko",
+        "zh"
+      ],
+      "locale": "en",
+      "closestTradingDate": "2025-11-17",
+      "beforeOpeningHours": true,
+      "isEarningsSlides": false,
+      "isExclusive": true,
+      "isTranscript": false,
+      "excludedByTag": false,
+      "transcriptPath": null,
+      "likesCount": 0,
+      "disabledStatus": "allowed",
+      "disabledMessage": null,
+      "status": "published",
+      "disclosure": "<p id=\"a-disclosure\"><b>Analyst\u2019s Disclosure:</b><span>I/we have no stock, option or similar derivative position in any of the companies mentioned, and no plans to initiate any such positions within the next 72 hours.</span><span id=\"top-business-disclosure\"> I wrote this article myself, and it expresses my own opinions. I am not receiving compensation for it (other than from Seeking Alpha). I have no business relationship with any company whose stock is mentioned in this article. </span></p><p id='a-disclosure-more'><strong>Seeking Alpha's Disclosure:</strong> Past performance is no guarantee of future results. No recommendation or advice is being given as to whether any investment is suitable for a particular investor. Any views or opinions expressed above may not reflect those of Seeking Alpha as a whole. Seeking Alpha is not a licensed securities dealer, broker or US investment adviser or investment bank. Our analysts are third party authors that include both professional investors and individual investors who may not be licensed or certified by any institute or regulatory body.</p>",
+      "articleActionableItem": null,
+      "inEmbargo": false,
+      "isNoindex": false,
+      "isNoarchive": true,
+      "content": "<p data-eci=\"true\"><figure class=\"getty-figure\" data-type=\"getty-image\"><picture> <img src=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2190620201/image_2190620201.jpg?io=getty-c-w630\" alt=\"KBR headquarters in Houston, Texas, USA.\" data-id=\"2190620201\" data-type=\"getty-image\" width=\"1536\" height=\"1024\" srcset=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2190620201/image_2190620201.jpg?io=getty-c-w1536 1536w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2190620201/image_2190620201.jpg?io=getty-c-w1280 1280w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2190620201/image_2190620201.jpg?io=getty-c-w1080 1080w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2190620201/image_2190620201.jpg?io=getty-c-w750 750w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2190620201/image_2190620201.jpg?io=getty-c-w640 640w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2190620201/image_2190620201.jpg?io=getty-c-w480 480w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2190620201/image_2190620201.jpg?io=getty-c-w320 320w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2190620201/image_2190620201.jpg?io=getty-c-w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 132px), (max-width: 1199px) calc(100vw - 666px), (max-width: 1307px) calc(100vw - 708px), 600px\" fetchpriority=\"high\"> </picture><figcaption><p class=\"item-caption\"></p> <p class=\"item-credits\">JHVEPhoto/iStock Editorial via Getty Images</p></figcaption></figure></p> <div class=\"inline_ad_placeholder\"></div> <p><span>Investment Overview</span></p> <p>KBR (<span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/KBR\" title=\"KBR, Inc.\">KBR</a></span>) is gradually moving away from being a hybrid engineering and defense services mix to becoming a more focused sustainability and technology platform. KBR has recently announced the <a href=\"https://www.kbr.com/en/insights-news/press-release/kbr-announces-strategic-intent-spin-mission-technology-solutions\" rel=\"nofollow\">spin-off</a><span class=\"paywall-full-content\"> of its Mission Technology Solutions (MTS) segment, which represents the defining milestone in this important transition. Post spin-off, the remaining business \u201cSustainable Technology Solutions (STS)\u201d will operate as a capital-light, high-margin franchise that aligns directly with the decarbonization and clean-energy value chain. The clean ammonia, hydrogen, carbon capture, and circular plastics within the STS provide KBR with strong leverage to structural themes. The funnel of early-stage </span><a href=\"https://www.kbr.com/en/insights-news/press-release/kbr-awarded-feed-contract-abadi-onshore-lng-project-indonesia\" rel=\"nofollow\" class=\"paywall-full-content\">FEED</a><span class=\"paywall-full-content\"> and EPC opportunities has been widening, and some comfort is added by the </span><a href=\"https://seekingalpha.com/article/4835531-kbr-inc-kbr-q3-2025-earnings-call-transcript\" class=\"paywall-full-content\">~$4bn</a><span class=\"paywall-full-content\"> bid pipeline that conversion should pick up meaningfully into FY26-27. In the near term, headline growth may still look modest, but the quality of earnings keeps getting better.</span></p> <p class=\"paywall-full-content\">In the case of MTS, the spin-off is not a risk event, but rather a value unlock. It is a steady business characterized by a contract environment with a long-term view on funding, and I can envisage how it is becoming a stable cash generator on its own. Once it\u2019s separated, MTS should be easier to value more in line with defense peers like Leidos and CACI rather than combined with the technological business activities of KBR, which has long obscured its narrative.</p> <p class=\"paywall-full-content\">This is, in my opinion, a spin to focus and focus to compound strategy. STS will be a cleaner sustainability technology platform with margins of over 20%, and MTS will have the leeway to scale in defence modernization. The separation, in my view, will provide shareholders with a better view, increased capital efficiency, and a visible rerating when the market gets to know each business individually on its merits.</p> <h2 class=\"paywall-full-content\">Recent News (Spin-off)</h2> <p class=\"paywall-full-content\">On Sep\u201925, KBR announced its plans to spin off (expected to complete by mid-to-late 2026) its MTS business segment into a new, publicly traded business. In my view, the intended spin should sharpen the story. Post-transaction, the new KBR will fundamentally be a sustainability and energy-transition company with foundations in the STS segment. The retained portfolio will be biased towards high-margin licensing, proprietary processes, and carbon management-related digital services. It is the type of business where visibility is a more valuable variable than volume, and where long-cycle project timing can obscure what is actually solid underlying momentum.</p> <p class=\"paywall-full-content\">There\u2019s also a broader signal here. The move may suggest management believes STS would be better off as a pure-play sustainability platform in the long term in comparison to a mixed-portfolio contractor. And frankly, that makes sense. As MTS is on its own, its recurring program business with NASA and the U.S. defense ecosystem would be eligible for a more predictable range of defense services valuation, and KBR can focus entirely on its more lucrative, technology-oriented identity.</p> <p class=\"paywall-full-content\">Execution risk, of course, is something to watch, especially in the areas of transition costs and capital allocation between the two entities. But the direction of travel feels right to me. KBR is simplifying its narrative in a manner that would enable investors to understand what has been quietly growing within the STS business over the years.</p> <h2 class=\"paywall-full-content\">Topline Analysis &amp; Outlook</h2> <p class=\"paywall-full-content\">KBR reported on <a href=\"https://s23.q4cdn.com/238351756/files/doc_financials/2025/q3/KBR-Exhibit-99-1-10-03-2025-vFINAL-PDF.pdf\" rel=\"nofollow\">Q3</a> revenue of $1.93bn, roughly flat on a year-over-year basis. Growth in Defense &amp; Intelligence and Energy Transition technologies was balanced by a decrease in Readiness &amp; Sustainment. At first glance, the results were muted, but I liked the shift in mix - from legacy, low margin contracts towards high certainty, high margin work. In addition, the backlog and options of approximately <a href=\"https://s23.q4cdn.com/238351756/files/doc_financials/2025/q3/KBR-Exhibit-99-1-10-03-2025-vFINAL-PDF.pdf\" rel=\"nofollow\">$23.4bn</a>, or three years' worth of expected orders, for KBR indicate continued stability of revenues, despite the distortion of short-term visibility in award times and government protests. What also stands out to me is the fact that bookings and recompete wins continue to be steady confirms that the momentum of revenue is delayed, not vanished. Management reduced its revenue outlook for FY25 by $200bn (from $7.90bn to $8.10bn, to $7.75bn to $7.85bn) to account for near-term award delays and the U.S. government shutdown. Multi-year growth expectations have not changed.</p> <figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><span><a href=\"https://static.seekingalpha.com/uploads/2025/11/12/54356026-17629536681424503_origin.png\" rel=\"lightbox\" data-width=\"960\" data-height=\"235\" data-og-image-twitter_small_card=\"false\" data-og-image-twitter_large_card=\"false\" data-og-image-twitter_image_post=\"false\" data-og-image-msn=\"false\" data-og-image-facebook=\"false\" data-og-image-google_news=\"false\" data-og-image-google_plus=\"false\" data-og-image-linkedin=\"false\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2025/11/12/54356026-17629536681424503_origin.png?io=w640\" alt=\"Backlog Data\" width=\"640\" height=\"157\" contenteditable=\"false\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/11/12/54356026-17629536681424503_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2025/11/12/54356026-17629536681424503_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/11/12/54356026-17629536681424503_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/11/12/54356026-17629536681424503_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span><figcaption><p class=\"item-caption\">Backlog Data <span>(Company Presentation)</span></p></figcaption></figure><p class=\"paywall-full-content\">Mission Technology Solutions (MTS) posted $1.4bn in Q3 revenue and remains KBR's operational anchor, although experiencing a little bit of a dip in conversion. Year on year revenue was stagnant, although Defense &amp; Intelligence grew about <a href=\"https://seekingalpha.com/article/4835531-kbr-inc-kbr-q3-2025-earnings-call-transcript\">14%</a> from digital mission systems, cyber analytics, and classified work. This increase was offset by a <a href=\"https://seekingalpha.com/article/4835531-kbr-inc-kbr-q3-2025-earnings-call-transcript\">~22%</a> decrease in Readiness &amp; Sustainment and a <a href=\"https://seekingalpha.com/article/4835531-kbr-inc-kbr-q3-2025-earnings-call-transcript\">5%</a> decrease in Science &amp; Space (as legacy programs in the space and logistics were winding down at the space agency). Despite the drag, MTS is moving its mix towards higher-value defence modernisation and digital engineering programmes, putting it on a path for sustainable growth. MTS's bid pipeline comes to <a href=\"https://seekingalpha.com/article/4835531-kbr-inc-kbr-q3-2025-earnings-call-transcript\">$18bn</a>, nearly three-fourths new business. This provides clear visibility into FY26-27, with defence modernization, space resilience, and allied governments outsourcing, including the U.K., Australia, and NATO, being the next growth engines. In the near term, I do foresee a flat or slightly lower Q4 revenue, as contract protests of roughly <a href=\"https://seekingalpha.com/article/4835531-kbr-inc-kbr-q3-2025-earnings-call-transcript\">$3bn</a> and shutdown delays reduce conversions. But I believe the foundation for recovery is taking shape. As award flow returns to normal and new international wins flow in, I expect MTS to return to a low to mid single-digit growth rate per annum through FY27, driven by scale in cyber, autonomy, and next-generation propulsion systems, all important areas of defence digital transformation.</p> <p class=\"paywall-full-content\">STS produced $525bn in Q3 revenue, a small year-over-year decrease, where execution delays were outweighed primarily as a result of STS executing on its strategy for projects that are currently being phased. Although there were some EPC deferrals to 2026, the STS pipeline is solidly in place due to growing demand for low-carbon ammonia, hydrogen, carbon capture, and circular plastics. KBR's proprietary technologies continue to be successful throughout the world. There is a $4bn STS bid pipeline that consists of preliminary engineering studies for energy transition complexes in North America, the Middle East, and Asia. There has been recent success with the sale of licensing rights for green ammonia and sustainable fuels. There are industry fundamentals that support STS' trend: global LNG export capacity will <a href=\"https://www.eia.gov/todayinenergy/detail.php?id=66384\" rel=\"nofollow\">double</a> by 2029, and US power demand will grow at a rate of more than <a href=\"https://www.mckinsey.com/industries/public-sector/our-insights/powering-a-new-era-of-us-energy-demand\" rel=\"nofollow\">3%</a> per annum until 2040; both of which represent a long-term upcycle in the market for decarbonization and process design infrastructure. I expect mid-to-high single-digit growth rates for STS through FY27, supported by an increasing share of revenue derived from licensing of KBR's technologies, and consistent conversion of feasibility engineering development (\"FEED\") into execution revenue.</p> <p class=\"paywall-full-content\">That said, at the group level, the structure of revenues is shifting towards equilibrium: stable, secular defense business through MTS, and policy-led, technology-rich growth through STS. I expect FY25 to come in somewhere between flat to low single-digit growth, but With award protests behind us, accelerating energy transition capital spending, and the MTS spin off enabling greater focus, I see KBR coming into FY26-27 with 5-6% revenue growth per annum, with a leaner, more resilient portfolio that resonates with long-term themes of defence modernisation and de-carbonisation. The mix is improving, the quality of the backlog is strong, and the company\u2019s exposure to case studies with enduring structural themes creates more of a feeling that this is less of a cyclical recovery and instead more of a structural re-rate to a more resilient and higher-value business model.</p> <figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><span><a href=\"https://static.seekingalpha.com/uploads/2025/11/12/54356026-17629536682943082_origin.png\" rel=\"lightbox\" data-width=\"1021\" data-height=\"381\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkedin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2025/11/12/54356026-17629536682943082_origin.png?io=w640\" alt=\"Q3 Key Financial\" width=\"640\" height=\"239\" contenteditable=\"false\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/11/12/54356026-17629536682943082_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2025/11/12/54356026-17629536682943082_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/11/12/54356026-17629536682943082_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/11/12/54356026-17629536682943082_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span><figcaption><p class=\"item-caption\">Q3 Key Financial <span>(Company Data)</span></p></figcaption></figure><h2 class=\"paywall-full-content\">Margin Analysis &amp; Outlook</h2> <p class=\"paywall-full-content\">Q3 margins at KBR showed the underlying resiliency of KBR's portfolio, although top-line growth was slow. Group-level adjusted EBITDA margin was around 12.4% - an increase of l110 bps year-on-year, led by discipline cost control, a favourable mix and efficient execution. This stability is impressive in the face of flat revenue and government award delays, and speaks to the structural earnings de-risking of KBR. Both segments have shown strong underlying profitability during this period; however, each segment has shown different profitability trends based on the different business models they represent.</p> <p class=\"paywall-full-content\">In Mission Technology Solutions (MTS), adjusted EBITDA margin remained in the low to mid 8% range, consistent with prior years' levels, and reflects the Company's consistent operating results in high-value Defense and Intelligence programs. Though Readiness &amp; Sustainment softness and shutdown-linked delays constrained short-term conversion, MTS is moving its mix towards software, analytics,x and digital mission systems - areas that naturally have higher incremental margins. As award protests are settled and utilisation normalizes, I am looking at margin expansion of 30-50 bps till FY27, driven by a higher share of international work, better programme management, and scaling of digital defence offerings. The planned spin-off also provides scope for sharper cost discipline and capital allocation, which will see normalised EBITDA margins approaching the high-8% range by FY27.</p> <p class=\"paywall-full-content\">Meanwhile, the profit engine is still Sustainable Technology Solutions (STS). Segment EBITDA margin is higher than 20% confirming the strength of its IP and licensing-led model. The third quarter saw increased contributions from both proprietary technology revenues and beneficial joint venture income, partially offset by phasing issues related to EPC conversion. I see the trajectory of the margin as stable or slightly improving to an average of 20-21% through FY27. The ongoing mix shift to green ammonia, carbon capture, and circular plastics solutions should continue to allow for pricing power, and scale benefits from recent technology wins may mitigate the negative impact of inflationary cost increases.</p> <p class=\"paywall-full-content\">All in, I am expecting consolidated adjusted EBITDA margins will grow 75-100 bps over FY25-27 to the mid-12% range as the portfolio will be more technology-weighted and operational leverage will increase with the recovery of the revenue. The slight dilution by MTS near-term flatness should be more than compensated by its expansion in STS. Notably, the continued focus by the management on the capital-light, recurring-revenue model will place KBR in a position to maintain high levels of free cash flow conversion, which could be more than 90 percent of net income by FY27, which will provide it with the ability to reinvest and make shareholder returns once the spin is finalized.</p> <p class=\"paywall-full-content\">Overall, margin growth at this point will be less cyclical and more structural: the mix of more valuable IP work, disciplined cost structure, and portfolio separation will position the company to achieve a gradual increase in profitability in the next 12-24 months.</p> <h2 class=\"paywall-full-content\">Financial</h2> <figure class=\"regular-img-figure a-c paywall-full-content\" contenteditable=\"false\"><span><a href=\"https://static.seekingalpha.com/uploads/2025/11/12/54356026-1762953670713095_origin.png\" rel=\"lightbox\" data-width=\"940\" data-height=\"503\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkedin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2025/11/12/54356026-1762953670713095_origin.png?io=w640\" alt=\"Financial Forecast\" width=\"640\" height=\"342\" contenteditable=\"false\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/11/12/54356026-1762953670713095_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2025/11/12/54356026-1762953670713095_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/11/12/54356026-1762953670713095_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/11/12/54356026-1762953670713095_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span><figcaption><p class=\"item-caption\">Financial Forecast <span>(Company Historical and Author Estimate)</span></p></figcaption></figure><h2 class=\"paywall-full-content\">Peers &amp; Valuation</h2> <p class=\"paywall-full-content\">KBR trades at the forward EV/EBITDA of <a href=\"https://seekingalpha.com/symbol/KBR/valuation/metrics\">~7.9</a>x, which is significantly lower than KBR's historical average of <a href=\"https://seekingalpha.com/symbol/KBR/valuation/metrics\">~12.0</a>x and lower than the defense prime contractors and sustainability technology peers. To provide additional context, Defense prime contractors such as <a href=\"https://seekingalpha.com/symbol/BAH\" title=\"Booz Allen Hamilton Holding Corporation\">BAH</a> (11.6\u00d7), LDOS) (12.4\u00d7), <a href=\"https://seekingalpha.com/symbol/SAIC\" title=\"Science Applications International Corporation\">SAIC</a> (9.7\u00d7), <a href=\"https://seekingalpha.com/symbol/CACI\" title=\"CACI International Inc\">CACI</a> (14.3\u00d7), and <a href=\"https://seekingalpha.com/symbol/PSN\" title=\"Parsons Corporation\">PSN</a> (16.2\u00d7) are trading at an average of ~12.8\u00d7 forward EV/EBITDA. Sustainability-focused companies such as Jacobs Solutions (<a href=\"https://seekingalpha.com/symbol/J\" title=\"Jacobs Solutions Inc.\">J</a>) (17.5\u00d7), <a href=\"https://seekingalpha.com/symbol/ACM\" title=\"AECOM\">ACM</a> (16.2\u00d7), <a href=\"https://seekingalpha.com/symbol/WOR\" title=\"Worthington Enterprises, Inc.\">WOR</a> (9.9\u00d7), and <a href=\"https://seekingalpha.com/symbol/FLR\" title=\"Fluor Corporation\">FLR</a> (15.8\u00d7) trade around ~14.8\u00d7 forward EV/EBITDA.</p> <figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><span><a href=\"https://static.seekingalpha.com/uploads/2025/11/12/54356026-17629536685737486_origin.png\" rel=\"lightbox\" data-width=\"940\" data-height=\"602\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkedin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2025/11/12/54356026-17629536685737486_origin.png?io=w640\" alt=\"Peer Comparison\" width=\"640\" height=\"410\" contenteditable=\"false\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/11/12/54356026-17629536685737486_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2025/11/12/54356026-17629536685737486_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/11/12/54356026-17629536685737486_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/11/12/54356026-17629536685737486_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span><figcaption><p class=\"item-caption\">Peer Comparison <span>(Seeking Alpha)</span></p></figcaption></figure><p class=\"paywall-full-content\">Within my SOTP framework, I assigned ~9x EV / EBITDA to the MTS spin-off and ~11x EV / EBITDA to the retained STS platform. The multiples I assigned are less than the peers' averages to account for (i) the delay in converting awards in MTS due to U.S. budget uncertainty and (ii) the initial phase of scaling for STS in terms of revenue and profitability. These conservative multiples allow me to emphasize the need for disciplined execution, while providing room for a higher rating when visibility increases after the spin-off.</p> <figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><span><a href=\"https://static.seekingalpha.com/uploads/2025/11/12/54356026-17629536692228093_origin.png\" rel=\"lightbox\" data-width=\"940\" data-height=\"529\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkedin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2025/11/12/54356026-17629536692228093_origin.png?io=w640\" alt=\"SOTP Valuation\" width=\"640\" height=\"360\" contenteditable=\"false\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/11/12/54356026-17629536692228093_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2025/11/12/54356026-17629536692228093_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/11/12/54356026-17629536692228093_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/11/12/54356026-17629536692228093_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span><figcaption><p class=\"item-caption\">SOTP Valuation <span>(Author Estimate)</span></p></figcaption></figure><p class=\"paywall-full-content\">Taking the group level, these imply an implied equity value per share of ~$61 by FY27, which would represent ~44% upside from today's prices (including dividend), before considering any incremental buybacks or accretive bolt-on acquisitions. Based on normalized metrics, STS's technology intensity and mid-20s EBITDA margins justify a structural premium to traditional EPC companies, while MTS's strong cash conversion and low-risk cost-plus contracting structure support steady mid-single-digit compounded earnings growth.</p> <p class=\"paywall-full-content\">The current valuation discounts KBR's timing issues relative to the cycle; however, the structural shift that KBR is undergoing will be reflected in the gradual expansion of KBR's multiples towards those of the peer companies. Once the spin-off occurs, there will be clear comparable companies and more capital-efficient operating models for each segment, resulting in multiple expansions.</p> <h2 class=\"paywall-full-content\">Risks</h2> <p class=\"paywall-full-content\">Timing and execution uncertainty with regard to the spin-off, contract award delays or government funding, and defense spending cycles are some of the key risks. In STS, the loss of income in the near future may be experienced due to delays in the approval of hydrogen and carbon-capture projects. The margins can also be strained in the short term due to currency fluctuations and restructuring expenses.In addition, KBR is currently facing a putative shareholder class-action <a href=\"https://natlawreview.com/press-releases/kbr-inc-kbr-faces-securities-class-action-amid-transcom-contract-termination\" rel=\"nofollow\">lawsuit</a> relating to past disclosures. As this matter is still in early procedural <a href=\"https://www.morningstar.com/news/pr-newswire/20251113la24186/kbr-inc-kbr-shareholders-who-lost-money-have-opportunity-to-lead-securities-fraud-lawsuit\" rel=\"nofollow\">stages</a>, no findings have been made, and I am not drawing any conclusions about the merits. However, such legal proceedings can add a layer of uncertainty around headline sentiment and may require incremental management attention. To me, these risks appear to be short-lived and not structural.</p> <h2 class=\"paywall-full-content\">Conclusion</h2> <div class=\"before_last_paragraph-piano-placeholder paywall-full-content\"></div> <p class=\"paywall-full-content\">To me, KBR is at a critical juncture. The MTS spin-off does not represent a strategic retreat, but rather a fundamental structural realignment of the two business segments to allow them to show their true economic value. After the spin-off, the remaining Sustainable Technology Solutions (STS) business unit will be a capital-light business with high margins based on clean energy technologies, decarbonization, and circularity.Alongside this transition, the company is also navigating a recently filed shareholder class-action lawsuit. As the case is ongoing and no court has made any determination, I do not view it as altering the long-term investment narrative.With strong, long-term visibility regarding demand, improving margin trajectory, and balance sheet flexibility, I believe KBR has the opportunity to grow its earnings at a rate higher than the market and expand its multiples, as the market re-rates KBR from a pure engineering contractor to a pure-play technology-based sustainability franchise. In short, KBR\u2019s future success is dependent upon execution, not strategy.</p>",
+      "quickInsights": null,
+      "twitContent": "KBR: Engineering Tomorrow With Proprietary Decarbonization And Circularity $KBR #markets #economy #finance https://seekingalpha.com/article/4844556-kbr-engineering-tomorrow-with-proprietary-decarbonization-and-circularity?source=tweet",
+      "innerMarketing": "",
+      "marketingBullet": "",
+      "isReit": false,
+      "videoData": null,
+      "marketingBulletVariant": null,
+      "marketingBio": null,
+      "audioDuration": 1112.64,
+      "originalTitle": "KBR: Engineering Tomorrow With Proprietary Decarbonization And Circularity"
+    },
+    "relationships": {
+      "author": {
+        "data": {
+          "id": "107990",
+          "type": "author"
+        }
+      },
+      "sentiments": {
+        "data": [
+          {
+            "id": "677308",
+            "type": "sentiment"
+          }
+        ]
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "2787",
+            "type": "tag"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": [
+          {
+            "id": "16187",
+            "type": "tag"
+          },
+          {
+            "id": "113132",
+            "type": "tag"
+          },
+          {
+            "id": "14304",
+            "type": "tag"
+          },
+          {
+            "id": "598898",
+            "type": "tag"
+          },
+          {
+            "id": "4255",
+            "type": "tag"
+          },
+          {
+            "id": "7674",
+            "type": "tag"
+          },
+          {
+            "id": "958",
+            "type": "tag"
+          },
+          {
+            "id": "2851",
+            "type": "tag"
+          }
+        ]
+      },
+      "otherTags": {
+        "data": [
+          {
+            "id": "784424",
+            "type": "tag"
+          },
+          {
+            "id": "1936",
+            "type": "tag"
+          },
+          {
+            "id": "143031",
+            "type": "tag"
+          },
+          {
+            "id": "115332",
+            "type": "tag"
+          },
+          {
+            "id": "115352",
+            "type": "tag"
+          },
+          {
+            "id": "142991",
+            "type": "tag"
+          },
+          {
+            "id": "2787",
+            "type": "tag"
+          },
+          {
+            "id": "16187",
+            "type": "tag"
+          },
+          {
+            "id": "113132",
+            "type": "tag"
+          },
+          {
+            "id": "14304",
+            "type": "tag"
+          },
+          {
+            "id": "598898",
+            "type": "tag"
+          },
+          {
+            "id": "4255",
+            "type": "tag"
+          },
+          {
+            "id": "7674",
+            "type": "tag"
+          },
+          {
+            "id": "958",
+            "type": "tag"
+          },
+          {
+            "id": "2851",
+            "type": "tag"
+          },
+          {
+            "id": "764066",
+            "type": "tag"
+          },
+          {
+            "id": "786566",
+            "type": "tag"
+          },
+          {
+            "id": "17335",
+            "type": "tag"
+          },
+          {
+            "id": "606619",
+            "type": "tag"
+          },
+          {
+            "id": "10727",
+            "type": "tag"
+          },
+          {
+            "id": "114692",
+            "type": "tag"
+          },
+          {
+            "id": "114682",
+            "type": "tag"
+          },
+          {
+            "id": "698258",
+            "type": "tag"
+          },
+          {
+            "id": "326",
+            "type": "tag"
+          }
+        ]
+      },
+      "coAuthors": {
+        "data": []
+      },
+      "presentations": {
+        "data": []
+      },
+      "updates": {
+        "data": []
+      },
+      "corrections": {
+        "data": []
+      }
+    },
+    "links": {
+      "self": "/article/4844556-kbr-engineering-tomorrow-with-proprietary-decarbonization-and-circularity",
+      "canonical": "https://seekingalpha.com/article/4844556-kbr-engineering-tomorrow-with-proprietary-decarbonization-and-circularity",
+      "uriImage": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2190620201/image_2190620201.jpg?io=getty-c-w1536",
+      "schemaImage": [
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2190620201/image_2190620201.jpg?io=getty-c-w1280",
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2190620201/image_2190620201.jpg?io=getty-c-crop-16-9",
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2190620201/image_2190620201.jpg?io=getty-c-crop-4-3"
+      ]
+    }
+  },
+  "included": [
+    {
+      "id": "107990",
+      "type": "author",
+      "attributes": {
+        "company": null,
+        "slug": "quiet-alpha",
+        "userId": 54356026,
+        "tagId": 784424,
+        "bio": "I have over 13 years of diverse financial analysis experience across various sectors, including Auto, Industrials, and IT. Worked in a Ford and Caterpillar treasury, and managed Investor relations and Strategic finance of a listed IT company of market cap ~USD 2.5bn. My early background also includes equity research analyst, where I built strong expertise in market analysis, valuation models, and investment strategy. What ties my journey together is my ability to connect companies' strategy, industry-specific knowledge to understand business growth drivers.",
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/054/356/026/small_pic.png",
+          "medium": "https://seekingalpha.com/images/users_profile/054/356/026/medium_pic.png",
+          "big": "https://seekingalpha.com/images/users_profile/054/356/026/big_pic.png",
+          "extra_large": "https://seekingalpha.com/images/users_profile/054/356/026/extra_large_pic.png"
+        },
+        "nick": "Quiet Alpha",
+        "deactivated": null,
+        "memberSince": 2021,
+        "isRss": false,
+        "contributorSince": 2025,
+        "followersCount": 143
+      },
+      "relationships": {
+        "user": {
+          "data": {
+            "id": "54356026",
+            "type": "user"
+          }
+        },
+        "userBioTags": {
+          "data": [
+            {
+              "id": "1049621",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1049622",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1049623",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1049624",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1049625",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1049626",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1049627",
+              "type": "userBioTag"
+            }
+          ]
+        },
+        "authorResearch": {
+          "data": null
+        }
+      },
+      "links": {
+        "self": "/author/quiet-alpha",
+        "profileUrl": "/author/quiet-alpha",
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "id": "2787",
+      "type": "tag",
+      "attributes": {
+        "slug": "kbr",
+        "name": "KBR",
+        "company": "KBR, Inc.",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "NYSE",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/KBR"
+      }
+    },
+    {
+      "id": "16187",
+      "type": "tag",
+      "attributes": {
+        "slug": "bah",
+        "name": "BAH",
+        "company": "Booz Allen Hamilton Holding Corporation",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "NYSE",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/BAH"
+      }
+    },
+    {
+      "id": "113132",
+      "type": "tag",
+      "attributes": {
+        "slug": "saic",
+        "name": "SAIC",
+        "company": "Science Applications International Corporation",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "NASDAQ",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/SAIC"
+      }
+    },
+    {
+      "id": "14304",
+      "type": "tag",
+      "attributes": {
+        "slug": "caci",
+        "name": "CACI",
+        "company": "CACI International Inc",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "NYSE",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/CACI"
+      }
+    },
+    {
+      "id": "598898",
+      "type": "tag",
+      "attributes": {
+        "slug": "psn",
+        "name": "PSN",
+        "company": "Parsons Corporation",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "NYSE",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/PSN"
+      }
+    },
+    {
+      "id": "4255",
+      "type": "tag",
+      "attributes": {
+        "slug": "j",
+        "name": "J",
+        "company": "Jacobs Solutions Inc.",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "NYSE",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/J"
+      }
+    },
+    {
+      "id": "7674",
+      "type": "tag",
+      "attributes": {
+        "slug": "acm",
+        "name": "ACM",
+        "company": "AECOM",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "NYSE",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/ACM"
+      }
+    },
+    {
+      "id": "958",
+      "type": "tag",
+      "attributes": {
+        "slug": "wor",
+        "name": "WOR",
+        "company": "Worthington Enterprises, Inc.",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "NYSE",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/WOR"
+      }
+    },
+    {
+      "id": "2851",
+      "type": "tag",
+      "attributes": {
+        "slug": "flr",
+        "name": "FLR",
+        "company": "Fluor Corporation",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "NYSE",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/FLR"
+      }
+    },
+    {
+      "id": "784424",
+      "type": "tag",
+      "attributes": {
+        "slug": "quiet-alpha",
+        "name": "Quiet Alpha",
+        "company": null,
+        "tagKind": "Tags::AuthorTag"
+      },
+      "links": {
+        "self": "/author/quiet-alpha"
+      }
+    },
+    {
+      "id": "1936",
+      "type": "tag",
+      "attributes": {
+        "slug": "long-ideas",
+        "name": "Long Ideas",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=long-ideas"
+      }
+    },
+    {
+      "id": "143031",
+      "type": "tag",
+      "attributes": {
+        "slug": "garp-theme",
+        "name": "GARP-THEME",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=garp-theme"
+      }
+    },
+    {
+      "id": "115332",
+      "type": "tag",
+      "attributes": {
+        "slug": "relative-valuation",
+        "name": "Relative Valuation",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=relative-valuation"
+      }
+    },
+    {
+      "id": "115352",
+      "type": "tag",
+      "attributes": {
+        "slug": "spin-off",
+        "name": "Spin-Off",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=spin-off"
+      }
+    },
+    {
+      "id": "142991",
+      "type": "tag",
+      "attributes": {
+        "slug": "sum-of-the-parts",
+        "name": "Sum of the Parts",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=sum-of-the-parts"
+      }
+    },
+    {
+      "id": "764066",
+      "type": "tag",
+      "attributes": {
+        "slug": "undercovered",
+        "name": "undercovered",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/undercovered"
+      }
+    },
+    {
+      "id": "786566",
+      "type": "tag",
+      "attributes": {
+        "slug": "clean-energy-tech",
+        "name": "Clean Energy Tech",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/clean-energy-tech"
+      }
+    },
+    {
+      "id": "17335",
+      "type": "tag",
+      "attributes": {
+        "slug": "sa-exclusive",
+        "name": "SA Exclusive",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/sa-exclusive"
+      }
+    },
+    {
+      "id": "606619",
+      "type": "tag",
+      "attributes": {
+        "slug": "quality-multiplier",
+        "name": "Quality Multiplier",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/quality-multiplier"
+      }
+    },
+    {
+      "id": "10727",
+      "type": "tag",
+      "attributes": {
+        "slug": "investing-ideas",
+        "name": "Investing Ideas",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/investing-ideas"
+      }
+    },
+    {
+      "id": "114692",
+      "type": "tag",
+      "attributes": {
+        "slug": "alpha-rich-opportunity",
+        "name": "Alpha-Rich Opportunity",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/alpha-rich-opportunity"
+      }
+    },
+    {
+      "id": "114682",
+      "type": "tag",
+      "attributes": {
+        "slug": "alpha-rich-investment-style",
+        "name": "Alpha-Rich Investment Style",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/alpha-rich-investment-style"
+      }
+    },
+    {
+      "id": "698258",
+      "type": "tag",
+      "attributes": {
+        "slug": "more-tags",
+        "name": "More Tags",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/more-tags"
+      }
+    },
+    {
+      "id": "326",
+      "type": "tag",
+      "attributes": {
+        "slug": "us",
+        "name": "United States",
+        "company": null,
+        "tagKind": "Tags::Country"
+      },
+      "links": {
+        "self": "/articles?filters=us"
+      }
+    },
+    {
+      "id": "677308",
+      "type": "sentiment",
+      "attributes": {
+        "articleId": 4844556,
+        "type": "bullish",
+        "createdAt": "2025-11-17T08:07:41.000-05:00",
+        "typeId": 1
+      },
+      "relationships": {
+        "article": {
+          "data": {
+            "id": "4844556",
+            "type": "article"
+          }
+        },
+        "tag": {
+          "data": {
+            "id": "2787",
+            "type": "tag"
+          }
+        }
+      }
+    }
+  ]
+}

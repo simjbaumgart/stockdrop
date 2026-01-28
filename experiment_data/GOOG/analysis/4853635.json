@@ -1,0 +1,683 @@
+{
+  "data": {
+    "id": "4853635",
+    "type": "fullArticle",
+    "attributes": {
+      "publishOn": "2025-12-16T07:28:48-05:00",
+      "isLockedPro": false,
+      "commentCount": 0,
+      "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2233579000/image_2233579000.jpg",
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "growth": {
+          "id": 115472,
+          "slug": "growth",
+          "kind": "common",
+          "non_theme": true
+        },
+        "industry-leader": {
+          "id": 548926,
+          "slug": "industry-leader",
+          "kind": "common",
+          "non_theme": true
+        },
+        "relative-valuation": {
+          "id": 115332,
+          "slug": "relative-valuation",
+          "kind": "common",
+          "non_theme": true
+        },
+        "ai-tech": {
+          "id": 764439,
+          "slug": "ai-tech",
+          "kind": "general"
+        },
+        "downgrade": {
+          "id": 662816,
+          "slug": "downgrade",
+          "kind": "general"
+        },
+        "inbound-seo-optimization": {
+          "id": 608068,
+          "slug": "inbound-seo-optimization",
+          "kind": "general"
+        },
+        "alpha-rich-opportunity": {
+          "id": 114692,
+          "slug": "alpha-rich-opportunity",
+          "kind": "general"
+        },
+        "alpha-rich-investment-style": {
+          "id": 114682,
+          "slug": "alpha-rich-investment-style",
+          "kind": "general"
+        },
+        "more-tags": {
+          "id": 698258,
+          "slug": "more-tags",
+          "kind": "general"
+        },
+        "us": {
+          "id": 326,
+          "slug": "us",
+          "kind": "common",
+          "non_theme": true
+        },
+        "communication-services": {
+          "id": 50,
+          "slug": "communication-services",
+          "kind": "sector",
+          "path": "/sectors/communication-services",
+          "title": "Communication Services",
+          "sasource": "theme_breadcrumb"
+        }
+      },
+      "title": "Alphabet Emerging As The Winner In The AI Race, But Is Overvalued (Rating Downgrade)",
+      "summary": [
+        "The updated DCF price target is $258, significantly below the current market price of $310. The recommendation is now to Hold existing shares and wait for a pullback.",
+        "Sales accelerated in both Google Services and Cloud, driven by the successful integration and commercialization of the new Gemini AI model.",
+        "Growth requires a substantial increase in CapEx (revised to $91B-$93B in 2025), which negatively impacts near-term Free Cash Flow (FCF)."
+      ],
+      "isPaywalled": false,
+      "structuredInsights": null,
+      "lastModified": "2025-12-16T07:30:33-05:00",
+      "isModerated": false,
+      "availableTranslations": [],
+      "locale": "en",
+      "closestTradingDate": "2025-12-16",
+      "beforeOpeningHours": true,
+      "isEarningsSlides": false,
+      "isExclusive": true,
+      "isTranscript": false,
+      "excludedByTag": false,
+      "transcriptPath": null,
+      "likesCount": 0,
+      "disabledStatus": "allowed",
+      "disabledMessage": null,
+      "status": "published",
+      "disclosure": "<p id=\"a-disclosure\"><b>Analyst\u2019s Disclosure:</b><span>I/we have a beneficial long position in the shares of GOOG either through stock ownership, options, or other derivatives.</span><span id=\"top-business-disclosure\"> I wrote this article myself, and it expresses my own opinions. I am not receiving compensation for it (other than from Seeking Alpha). I have no business relationship with any company whose stock is mentioned in this article. </span></p><p id='a-disclosure-more'><strong>Seeking Alpha's Disclosure:</strong> Past performance is no guarantee of future results. No recommendation or advice is being given as to whether any investment is suitable for a particular investor. Any views or opinions expressed above may not reflect those of Seeking Alpha as a whole. Seeking Alpha is not a licensed securities dealer, broker or US investment adviser or investment bank. Our analysts are third party authors that include both professional investors and individual investors who may not be licensed or certified by any institute or regulatory body.</p>",
+      "articleActionableItem": null,
+      "inEmbargo": false,
+      "isNoindex": false,
+      "isNoarchive": true,
+      "content": "<p data-eci=\"true\"><figure class=\"getty-figure\" data-type=\"getty-image\"><picture> <img src=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2233579000/image_2233579000.jpg?io=getty-c-w630\" alt=\"AI Search Engine Technology Concept. Person using laptop with AI-powered search bar interface and digital icon representing chatbot, neural network, cloud computing, big data, global search technology\" data-id=\"2233579000\" data-type=\"getty-image\" width=\"1536\" height=\"1015\" srcset=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2233579000/image_2233579000.jpg?io=getty-c-w1536 1536w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2233579000/image_2233579000.jpg?io=getty-c-w1280 1280w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2233579000/image_2233579000.jpg?io=getty-c-w1080 1080w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2233579000/image_2233579000.jpg?io=getty-c-w750 750w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2233579000/image_2233579000.jpg?io=getty-c-w640 640w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2233579000/image_2233579000.jpg?io=getty-c-w480 480w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2233579000/image_2233579000.jpg?io=getty-c-w320 320w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2233579000/image_2233579000.jpg?io=getty-c-w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 132px), (max-width: 1199px) calc(100vw - 666px), (max-width: 1307px) calc(100vw - 708px), 600px\" fetchpriority=\"high\"> </picture><figcaption><p class=\"item-caption\"> </p> <p class=\"item-credits\">Supatman/iStock via Getty Images</p></figcaption></figure></p> <div class=\"inline_ad_placeholder\"></div> <p>In our latest SA <a href=\"https://seekingalpha.com/article/4816833-alphabet-momentum-keeps-building-and-the-stock-remains-a-buy\">article</a> published in August for Alphabet Inc. (<span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/GOOG\" title=\"Alphabet Inc.\">GOOG</a></span>)(<span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/GOOGL\" title=\"Alphabet Inc.\">GOOGL</a></span>)(<span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/GOOG:CA\" title=\"Alphabet Inc.\">GOOG:CA</a></span>), we recommended buy when the stock was trading at $200. The stock is now trading at $310, representing a total return<span class=\"paywall-full-content\"> of +55% in less than five months. As the stock has risen sharply in the past months, we are now reassessing our DCF valuation and updating our model with the latest </span><a href=\"https://s206.q4cdn.com/479360582/files/doc_financials/2025/q3/GOOG-10-Q-Q3-2025.pdf\" rel=\"nofollow\" class=\"paywall-full-content\">Q3 financial data</a><span class=\"paywall-full-content\">. Can we still recommend investors to buy the stock at $310?</span></p> <p class=\"paywall-full-content\"><figure class=\"sa-widget sa-ycharts paywall-full-content\"><img src=\"https://static.seekingalpha.com/uploads/2025/12/15/saupload_62341800075f4c6d2a9927d28fc25fa1.png?io=w640\" alt=\"Chart\" width=\"635\" height=\"366\" class=\"sa-ycharts-img\" data-width=\"635\" data-height=\"366\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/15/saupload_62341800075f4c6d2a9927d28fc25fa1.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/15/saupload_62341800075f4c6d2a9927d28fc25fa1.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/15/saupload_62341800075f4c6d2a9927d28fc25fa1.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"><figcaption>Data by <a href=\"https://ycharts.com\" rel=\"nofollow\">YCharts</a></figcaption></figure></p> <p class=\"paywall-full-content\">The reason for the recent sharp increase in Alphabet's stock price is twofold. The AI narrative is regaining significant momentum in the market, supported by strong sales figures from companies like NVIDIA Corporation (<a href=\"https://seekingalpha.com/symbol/NVDA\" title=\"NVIDIA Corporation\">NVDA</a>), Microsoft Corporation (<a href=\"https://seekingalpha.com/symbol/MSFT\" title=\"Microsoft Corporation\">MSFT</a>) and Meta Platforms, Inc. (<a href=\"https://seekingalpha.com/symbol/META\" title=\"Meta Platforms, Inc.\">META</a>). Alphabet has stayed steadfast in its commitment to AI, despite high CapEx and questions from investors if AI was eroding its core business. We are now starting to see the true commercial opportunity from these investments in the quarterly results. Alphabet's AI model <a href=\"https://www.cnbc.com/2025/11/18/google-announces-gemini-3-as-battle-with-openai-intensifies.html\" rel=\"nofollow\">Gemini</a> has become a worthy competitor to other leading AI models in the industry. As Gemini is being integrated into Alphabet's ecosystem, it provides better value and a stronger utility than many other models in the market.</p> <p class=\"paywall-full-content\">The future looks bright for Alphabet and its shareholders, but we want to quantify what this opportunity means in terms its overall valuation and stock price, using our DCF model. As always in our DCF model, we start by looking at the latest quarterly performance to see if our previous assumptions made in August need any calibration. We also looked to the latest guidance provided by the leadership team for Q4 and beyond in the latest earnings call <a href=\"https://seekingalpha.com/article/4835072-alphabet-inc-googl-q3-2025-earnings-call-transcript\">transcript</a>.</p> <h2 class=\"paywall-full-content\"><strong>Q3 2025 Results - Base For Projection</strong></h2> <div class=\"table-responsive paywall-full-content\"> <span class=\"sa-table-scroll-wrapper sa-hide-scrollbar\"><span data-intersection-boundary=\"start\" data-test-id=\"table-scroll-wrapper-boundary-start\"></span><table> <colgroup> <col> <col> <col span=\"4\"> </colgroup> <tr> <td><strong>Sales</strong></td> <td><strong>Q3 2024 </strong></td> <td><strong>Q3 2025 </strong></td> <td><strong>Abs.</strong></td> <td><strong>%</strong></td> </tr> <tr> <td>Google Services</td> <td>76,510</td> <td>87,052</td> <td>10,542</td> <td>13.8%</td> </tr> <tr> <td>Google Cloud</td> <td>11,353</td> <td>15,157</td> <td>3,804</td> <td>33.5%</td> </tr> <tr> <td>Other Bets</td> <td>388</td> <td>344</td> <td>(44)</td> <td>-11.3%</td> </tr> <tr> <td>Alphabet-level activities</td> <td>17</td> <td>-207</td> <td>(224)</td> <td>N/A</td> </tr> <tr> <td><strong>Recurring Sales</strong></td> <td><strong>88,268</strong></td> <td><strong>102,346</strong></td> <td><strong>14,078</strong></td> <td><strong>15.9%</strong></td> </tr> </table> <span data-intersection-boundary=\"end\" data-test-id=\"table-scroll-wrapper-boundary-end\"></span></span><button type=\"button\" class=\"sa-table-enlarge-button\">Click to enlarge</button> </div> <div class=\"table-responsive paywall-full-content\"> <span class=\"sa-table-scroll-wrapper sa-hide-scrollbar\"><span data-intersection-boundary=\"start\" data-test-id=\"table-scroll-wrapper-boundary-start\"></span><table> <colgroup><col span=\"6\"></colgroup> <tr> <td><strong>Sales</strong></td> <td><strong>YTD 2024 </strong></td> <td><strong>YTD 2025 </strong></td> <td><strong>Abs.</strong></td> <td><strong>%</strong></td> </tr> <tr> <td>Google Services</td> <td>220,836</td> <td>246,859</td> <td>26,023</td> <td>11.8%</td> </tr> <tr> <td>Google Cloud</td> <td>31,274</td> <td>41,041</td> <td>9,767</td> <td>31.2%</td> </tr> <tr> <td>Other Bets</td> <td>1,248</td> <td>1,167</td> <td>(81)</td> <td>-6.5%</td> </tr> <tr> <td>Alphabet-level activities</td> <td>191</td> <td>-60</td> <td>(251)</td> <td>N/A</td> </tr> <tr> <td><strong>Recurring Sales</strong></td> <td><strong>253,549</strong></td> <td><strong>289,007</strong></td> <td><strong>35,458</strong></td> <td><strong>14.0%</strong></td> </tr> </table> <span data-intersection-boundary=\"end\" data-test-id=\"table-scroll-wrapper-boundary-end\"></span></span><button type=\"button\" class=\"sa-table-enlarge-button\">Click to enlarge</button> </div> <p class=\"paywall-full-content\"><em>Table Source: Alphabet <a href=\"https://s206.q4cdn.com/479360582/files/doc_financials/2025/q3/2025q3-alphabet-earnings-release.pdf\" rel=\"nofollow\">Third Quarter</a> 2025 Results</em></p> <p class=\"paywall-full-content\">Based on the latest quarterly data, we are seeing a sales acceleration in both Services and Cloud in the Q3 2025 figures vs. previous quarters. Services are the most profitable segment for Alphabet with an operating margin of 40.2% YTD. A sales acceleration in this segment has a significant impact on the bottom line. The growth in Services is driven by continued AI investments in Gemini 3, which in the latest quarter had over 650 million monthly active <a href=\"https://blog.google/products/gemini/gemini-3/#note-from-ceo\" rel=\"nofollow\">users</a>. We also observed slightly lower operating margin in the Service segment in Q3 due to the <a href=\"https://ec.europa.eu/commission/presscorner/detail/en/ip_25_1992\" rel=\"nofollow\">EC fine,</a> fully reflected in this quarter. The EC fine is regarded as a one-off event in our DCF model.</p> <p class=\"paywall-full-content\">Google Cloud has consistently delivered strong top-line growth in the past quarters. We continue to see a positive trend in operating margin for Cloud, going from 12.9% YTD 2024 to 20.9% YTD 2025.</p> <p class=\"paywall-full-content\">Alphabet's accelerated growth does not come for free. The growth is fueled in parts by large CapEx investments which impact its FCF in the coming years. An updated guidance was provided by <a href=\"https://www.reuters.com/business/healthcare-pharmaceuticals/eli-lilly-finance-chief-leave-company-2024-06-05/\" rel=\"nofollow\">Ashkenazi</a> (CFO) in Q3, with an upward revision from previous guidance:</p> <p class=\"paywall-full-content\"><em>\u201cWe now expect CapEx to be in the range of $91 billion to $93 billion in 2025, up from our previous estimate of $85 billion\u2026 Looking out to 2026, we expect a significant increase in CapEx, and we'll provide more detail on our fourth quarter earnings call.\u201d</em></p> <h2 class=\"paywall-full-content\"><strong>DCF Model</strong></h2> <div class=\"table-responsive paywall-full-content\"> <span class=\"sa-table-scroll-wrapper sa-hide-scrollbar\"><span data-intersection-boundary=\"start\" data-test-id=\"table-scroll-wrapper-boundary-start\"></span><table> <tr> <td><strong>Label </strong></td> <td><strong>Q3 2025 - Base Scenario (New) </strong></td> <td><strong>Q2 2025 - Base scenario (Old) </strong></td> </tr> <tr> <td>Sales Growth - '25</td> <td>15.2%</td> <td>13.3%</td> </tr> <tr> <td>Sales Growth - '26</td> <td>14.7%</td> <td>13.0%</td> </tr> <tr> <td>Sales Growth - '34</td> <td>8.0%</td> <td>7.6%</td> </tr> <tr> <td>Operating Margin -25</td> <td>33.1%</td> <td>33.4%</td> </tr> <tr> <td>WACC</td> <td>8.8%</td> <td>8.6%</td> </tr> <tr> <td>TGR</td> <td>2.5%</td> <td>2.5%</td> </tr> <tr> <td>CapEx</td> <td>92 Billion</td> <td>85 Billion</td> </tr> </table> <span data-intersection-boundary=\"end\" data-test-id=\"table-scroll-wrapper-boundary-end\"></span></span><button type=\"button\" class=\"sa-table-enlarge-button\">Click to enlarge</button> </div> <p class=\"paywall-full-content\">The Q3 2025 base scenario reflects our latest assumptions and financial data compared with the base case scenario provided in our previous <a href=\"https://seekingalpha.com/article/4816833-alphabet-momentum-keeps-building-and-the-stock-remains-a-buy\">article</a> published in August 2025, using data from Q2 2025.</p> <p class=\"paywall-full-content\">Based on the latest quarterly data, we are revising up our sales projection for the two core business segments (Services and Cloud) and the margin contribution for Google Cloud in '25. Overall lower operating margin in the latest estimate (33.1% vs. 33.4%) is driven by the EC fine. The remaining business segments (Other bets, Alphabet-level activities) were left unchanged as they are progressing in line with previous forecast. Operating margin is assumed to improve sequentially over the years in line with historical trend.</p> <p class=\"paywall-full-content\">WACC, Terminal growth rate (TGR) and CapEx have been updated with the latest market data and company-provided outlook for CapEx.</p> <p class=\"paywall-full-content\">The orange bars represent the latest forecast and the grey bars our old forecast.</p> <p class=\"paywall-full-content\"><figure class=\"regular-img-figure a-c paywall-full-content\" contenteditable=\"false\"><span><a href=\"https://static.seekingalpha.com/uploads/2025/12/14/27340043-17657275414627008_origin.png\" rel=\"lightbox\" data-width=\"1280\" data-height=\"514\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkedin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2025/12/14/27340043-17657275414627008_origin.png?io=w640\" alt=\"Sales projection Alphabet\" width=\"640\" height=\"257\" contenteditable=\"false\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/14/27340043-17657275414627008_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2025/12/14/27340043-17657275414627008_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/14/27340043-17657275414627008_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/14/27340043-17657275414627008_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span><figcaption><p class=\"item-caption\"><span>FORM 10-K: '2020-2024, Q1-Q3 2025 </span></p></figcaption></figure><figure class=\"regular-img-figure a-c paywall-full-content\" contenteditable=\"false\"><span><a href=\"https://static.seekingalpha.com/uploads/2025/12/14/27340043-17657277204888828_origin.png\" rel=\"lightbox\" data-width=\"1314\" data-height=\"550\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkedin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2025/12/14/27340043-17657277204888828_origin.png?io=w640\" alt=\"Operating margin forecast Alphabet\" width=\"640\" height=\"268\" contenteditable=\"false\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/14/27340043-17657277204888828_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2025/12/14/27340043-17657277204888828_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/14/27340043-17657277204888828_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/14/27340043-17657277204888828_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span><figcaption><p class=\"item-caption\"><span>FORM 10-K: '2020-2024, Q1-Q3 2025 </span></p></figcaption></figure><figure class=\"regular-img-figure a-c paywall-full-content\" contenteditable=\"false\"><span><a href=\"https://static.seekingalpha.com/uploads/2025/12/14/27340043-17657279578182003_origin.png\" rel=\"lightbox\" data-width=\"1304\" data-height=\"530\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkedin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2025/12/14/27340043-17657279578182003_origin.png?io=w640\" alt=\"CapEx forecast Alphabet\" width=\"640\" height=\"260\" contenteditable=\"false\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/14/27340043-17657279578182003_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2025/12/14/27340043-17657279578182003_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/14/27340043-17657279578182003_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/14/27340043-17657279578182003_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span><figcaption><p class=\"item-caption\"><span>FORM 10-K: '2020-2024, Q1-Q3 2025 </span></p></figcaption></figure><figure class=\"regular-img-figure a-c paywall-full-content\" contenteditable=\"false\"><span><a href=\"https://static.seekingalpha.com/uploads/2025/12/14/27340043-17657280446117291_origin.png\" rel=\"lightbox\" data-width=\"1298\" data-height=\"546\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkedin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2025/12/14/27340043-17657280446117291_origin.png?io=w640\" alt=\"Free cashflow forecast Alphabet\" width=\"640\" height=\"269\" contenteditable=\"false\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/14/27340043-17657280446117291_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2025/12/14/27340043-17657280446117291_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/14/27340043-17657280446117291_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/14/27340043-17657280446117291_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span><figcaption><p class=\"item-caption\"><span>FORM 10-K: '2020-2024, Q1-Q3 2025 </span></p></figcaption></figure></p> <p class=\"paywall-full-content\">The sales acceleration and margin improvement in Cloud brings EBIT up above our last provided forecast. This supports a higher stock price valuation, however, we also need to consider the higher CapEx spend and its impact on FCF.</p> <p class=\"paywall-full-content\">CapEx growth is projected to slow down over the forecast period (% YoY), but the trend is building from a much higher base than before (92 billion vs. 85 billion). This spend has a negative impact on the FCF generation between 2025-2027, however, it improves the FCF generation above previous forecast in the outer years. In other words, Alphabet is ramping up investments now to harvest more cash in the future.</p> <p class=\"paywall-full-content\">All the future years' cashflows are discounted back to assign a valuation of the company today. Our model is also updated with the latest diluted share count, debt-to-equity ratio, cost of capital, etc. to reach a valuation of the company per share</p> <div class=\"table-responsive paywall-full-content\"> <span class=\"sa-table-scroll-wrapper sa-hide-scrollbar\"><span data-intersection-boundary=\"start\" data-test-id=\"table-scroll-wrapper-boundary-start\"></span><table> <tr> <td><strong>Label</strong></td> <td><strong>Q3 2025 Base.</strong></td> <td><strong>Q2 2025 Base </strong></td> <td><strong>Current Price</strong></td> </tr> <tr> <td>Price Target</td> <td>$258.1</td> <td>$242.6</td> <td>$310.10</td> </tr> </table> <span data-intersection-boundary=\"end\" data-test-id=\"table-scroll-wrapper-boundary-end\"></span></span><button type=\"button\" class=\"sa-table-enlarge-button\">Click to enlarge</button> </div> <h2 class=\"paywall-full-content\">Recommendation</h2> <p class=\"paywall-full-content\">With the acceleration in sales and improved operating margin from Alphabet's two core business segments, we are revising our price target upwards to $258 vs. $242 per share. The stock price has already exceeded this valuation and currently trading at $310.</p> <p class=\"paywall-full-content\">Factors that motivate a higher stock price valuation by the market could be higher growth and margin assumptions vs. our base case or macro factors like a lower projected interest rates.</p> <div class=\"before_last_paragraph-piano-placeholder paywall-full-content\"></div> <p class=\"paywall-full-content\">Picking a good stock to buy is a combination of a quantitative assessment and an evaluation a company's competitive advantages. Looking at how AI has evolved over the past years, we believe that Alphabet not only has maintained its historical strong competitive advantages but strengthen it with its AI integration in search and overall business stack. We don't see current stock price as an attractive point to buy, but we will be holding on to our shares as long-term investors. Current investors are recommended to continue to hold on to your shares and new investors to wait for a pullback in the market.</p>",
+      "quickInsights": [
+        {
+          "question": "Why did the DCF target rise, but the recommendation change to Hold?",
+          "answer": "The target rose due to stronger AI-led sales and margins, but the $310 stock price is now too high because of the increased CapEx (investments)"
+        }
+      ],
+      "twitContent": "Alphabet Emerging As The Winner In The AI Race, But Is Overvalued (Rating Downgrade) $GOOG $GOOGL $GOOG:CA #stockmarket #stocks #trading https://seekingalpha.com/article/4853635-alphabet-emerging-as-the-winner-in-the-ai-race?source=tweet",
+      "innerMarketing": "",
+      "marketingBullet": "",
+      "isReit": false,
+      "videoData": null,
+      "marketingBulletVariant": null,
+      "marketingBio": null,
+      "audioDuration": 484.8,
+      "originalTitle": "Alphabet Emerging As The Winner In The AI Race, But Is Overvalued (Rating Downgrade)"
+    },
+    "relationships": {
+      "author": {
+        "data": {
+          "id": "104084",
+          "type": "author"
+        }
+      },
+      "sentiments": {
+        "data": [
+          {
+            "id": "686557",
+            "type": "sentiment"
+          },
+          {
+            "id": "686559",
+            "type": "sentiment"
+          },
+          {
+            "id": "686558",
+            "type": "sentiment"
+          },
+          {
+            "id": "686925",
+            "type": "sentiment"
+          }
+        ]
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "544",
+            "type": "tag"
+          },
+          {
+            "id": "148893",
+            "type": "tag"
+          },
+          {
+            "id": "764529",
+            "type": "tag"
+          },
+          {
+            "id": "786481",
+            "type": "tag"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": [
+          {
+            "id": "578209",
+            "type": "tag"
+          },
+          {
+            "id": "115472",
+            "type": "tag"
+          },
+          {
+            "id": "548926",
+            "type": "tag"
+          },
+          {
+            "id": "115332",
+            "type": "tag"
+          },
+          {
+            "id": "544",
+            "type": "tag"
+          },
+          {
+            "id": "148893",
+            "type": "tag"
+          },
+          {
+            "id": "764529",
+            "type": "tag"
+          },
+          {
+            "id": "786481",
+            "type": "tag"
+          },
+          {
+            "id": "764439",
+            "type": "tag"
+          },
+          {
+            "id": "662816",
+            "type": "tag"
+          },
+          {
+            "id": "17335",
+            "type": "tag"
+          },
+          {
+            "id": "606619",
+            "type": "tag"
+          },
+          {
+            "id": "608068",
+            "type": "tag"
+          },
+          {
+            "id": "114692",
+            "type": "tag"
+          },
+          {
+            "id": "114682",
+            "type": "tag"
+          },
+          {
+            "id": "698258",
+            "type": "tag"
+          },
+          {
+            "id": "326",
+            "type": "tag"
+          }
+        ]
+      },
+      "coAuthors": {
+        "data": []
+      },
+      "presentations": {
+        "data": []
+      },
+      "updates": {
+        "data": []
+      },
+      "corrections": {
+        "data": []
+      }
+    },
+    "links": {
+      "self": "/article/4853635-alphabet-emerging-as-the-winner-in-the-ai-race",
+      "canonical": "https://seekingalpha.com/article/4853635-alphabet-emerging-as-the-winner-in-the-ai-race",
+      "uriImage": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2233579000/image_2233579000.jpg?io=getty-c-w1536",
+      "schemaImage": [
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2233579000/image_2233579000.jpg?io=getty-c-w1280",
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2233579000/image_2233579000.jpg?io=getty-c-crop-16-9",
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2233579000/image_2233579000.jpg?io=getty-c-crop-4-3"
+      ]
+    }
+  },
+  "included": [
+    {
+      "id": "104084",
+      "type": "author",
+      "attributes": {
+        "company": null,
+        "slug": "gravenhurst-capital",
+        "userId": 27340043,
+        "tagId": 578209,
+        "bio": "<p>We write about companies trading at attractive valuations with strong durable competitive advantages. </p><p><br></p><p><b>Investment Principles</b></p><p></p><p>- Invest in companies with consistent earning power and durable competitive advantages.</p><p>- Invest in companies where we can get a sufficient margin of safety.</p><p>- We prefer companies that generate substantial cash-flow and consistently earn above-average return on capital.</p><p>- We prefer companies with conservative leverage.\u00a0</p><p></p><p>- Always hold an appropriate level of cash in order to be able to capitalize on market volatility.<br></p>",
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/027/340/043/small_pic.png",
+          "medium": "https://seekingalpha.com/images/users_profile/027/340/043/medium_pic.png",
+          "big": "https://seekingalpha.com/images/users_profile/027/340/043/big_pic.png",
+          "extra_large": "https://seekingalpha.com/images/users_profile/027/340/043/extra_large_pic.png"
+        },
+        "nick": "Gravenhurst Capital",
+        "deactivated": null,
+        "memberSince": 2014,
+        "isRss": false,
+        "contributorSince": 2017,
+        "followersCount": 460
+      },
+      "relationships": {
+        "user": {
+          "data": {
+            "id": "27340043",
+            "type": "user"
+          }
+        },
+        "userBioTags": {
+          "data": [
+            {
+              "id": "936932",
+              "type": "userBioTag"
+            },
+            {
+              "id": "936933",
+              "type": "userBioTag"
+            },
+            {
+              "id": "936934",
+              "type": "userBioTag"
+            },
+            {
+              "id": "936935",
+              "type": "userBioTag"
+            }
+          ]
+        },
+        "authorResearch": {
+          "data": null
+        }
+      },
+      "links": {
+        "self": "/author/gravenhurst-capital",
+        "profileUrl": "/author/gravenhurst-capital",
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "id": "544",
+      "type": "tag",
+      "attributes": {
+        "slug": "goog",
+        "name": "GOOG",
+        "company": "Alphabet Inc.",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "NASDAQ",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/GOOG"
+      }
+    },
+    {
+      "id": "148893",
+      "type": "tag",
+      "attributes": {
+        "slug": "googl",
+        "name": "GOOGL",
+        "company": "Alphabet Inc.",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "NASDAQ",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/GOOGL"
+      }
+    },
+    {
+      "id": "764529",
+      "type": "tag",
+      "attributes": {
+        "slug": "goog:ca",
+        "name": "GOOG:CA",
+        "company": "Alphabet Inc.",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "TSX",
+        "fundTypeId": 8,
+        "isDefunct": false,
+        "currency": "CAD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/GOOG:CA"
+      }
+    },
+    {
+      "id": "786481",
+      "type": "tag",
+      "attributes": {
+        "slug": "zgoo:ca",
+        "name": "ZGOO:CA",
+        "company": "Alphabet Inc.",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "NEOE",
+        "fundTypeId": 8,
+        "isDefunct": false,
+        "currency": "CAD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/ZGOO:CA"
+      }
+    },
+    {
+      "id": "578209",
+      "type": "tag",
+      "attributes": {
+        "slug": "gravenhurst-capital",
+        "name": "Gravenhurst Capital",
+        "company": null,
+        "tagKind": "Tags::AuthorTag"
+      },
+      "links": {
+        "self": "/author/gravenhurst-capital"
+      }
+    },
+    {
+      "id": "115472",
+      "type": "tag",
+      "attributes": {
+        "slug": "growth",
+        "name": "Growth",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=growth"
+      }
+    },
+    {
+      "id": "548926",
+      "type": "tag",
+      "attributes": {
+        "slug": "industry-leader",
+        "name": "Industry Leader",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=industry-leader"
+      }
+    },
+    {
+      "id": "115332",
+      "type": "tag",
+      "attributes": {
+        "slug": "relative-valuation",
+        "name": "Relative Valuation",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=relative-valuation"
+      }
+    },
+    {
+      "id": "764439",
+      "type": "tag",
+      "attributes": {
+        "slug": "ai-tech",
+        "name": "AI Tech",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/ai-tech"
+      }
+    },
+    {
+      "id": "662816",
+      "type": "tag",
+      "attributes": {
+        "slug": "downgrade",
+        "name": "Downgrade",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/downgrade"
+      }
+    },
+    {
+      "id": "17335",
+      "type": "tag",
+      "attributes": {
+        "slug": "sa-exclusive",
+        "name": "SA Exclusive",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/sa-exclusive"
+      }
+    },
+    {
+      "id": "606619",
+      "type": "tag",
+      "attributes": {
+        "slug": "quality-multiplier",
+        "name": "Quality Multiplier",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/quality-multiplier"
+      }
+    },
+    {
+      "id": "608068",
+      "type": "tag",
+      "attributes": {
+        "slug": "inbound-seo-optimization",
+        "name": "Inbound SEO Optimization",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/inbound-seo-optimization"
+      }
+    },
+    {
+      "id": "114692",
+      "type": "tag",
+      "attributes": {
+        "slug": "alpha-rich-opportunity",
+        "name": "Alpha-Rich Opportunity",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/alpha-rich-opportunity"
+      }
+    },
+    {
+      "id": "114682",
+      "type": "tag",
+      "attributes": {
+        "slug": "alpha-rich-investment-style",
+        "name": "Alpha-Rich Investment Style",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/alpha-rich-investment-style"
+      }
+    },
+    {
+      "id": "698258",
+      "type": "tag",
+      "attributes": {
+        "slug": "more-tags",
+        "name": "More Tags",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/more-tags"
+      }
+    },
+    {
+      "id": "326",
+      "type": "tag",
+      "attributes": {
+        "slug": "us",
+        "name": "United States",
+        "company": null,
+        "tagKind": "Tags::Country"
+      },
+      "links": {
+        "self": "/articles?filters=us"
+      }
+    },
+    {
+      "id": "686557",
+      "type": "sentiment",
+      "attributes": {
+        "articleId": 4853635,
+        "type": "neutral",
+        "createdAt": "2025-12-16T07:28:48.000-05:00",
+        "typeId": 2
+      },
+      "relationships": {
+        "article": {
+          "data": {
+            "id": "4853635",
+            "type": "article"
+          }
+        },
+        "tag": {
+          "data": {
+            "id": "544",
+            "type": "tag"
+          }
+        }
+      }
+    },
+    {
+      "id": "686559",
+      "type": "sentiment",
+      "attributes": {
+        "articleId": 4853635,
+        "type": "neutral",
+        "createdAt": "2025-12-16T07:28:48.000-05:00",
+        "typeId": 2
+      },
+      "relationships": {
+        "article": {
+          "data": {
+            "id": "4853635",
+            "type": "article"
+          }
+        },
+        "tag": {
+          "data": {
+            "id": "764529",
+            "type": "tag"
+          }
+        }
+      }
+    },
+    {
+      "id": "686558",
+      "type": "sentiment",
+      "attributes": {
+        "articleId": 4853635,
+        "type": "neutral",
+        "createdAt": "2025-12-16T07:28:48.000-05:00",
+        "typeId": 2
+      },
+      "relationships": {
+        "article": {
+          "data": {
+            "id": "4853635",
+            "type": "article"
+          }
+        },
+        "tag": {
+          "data": {
+            "id": "148893",
+            "type": "tag"
+          }
+        }
+      }
+    },
+    {
+      "id": "686925",
+      "type": "sentiment",
+      "attributes": {
+        "articleId": 4853635,
+        "type": "neutral",
+        "createdAt": "2025-12-16T07:28:48.000-05:00",
+        "typeId": 2
+      },
+      "relationships": {
+        "article": {
+          "data": {
+            "id": "4853635",
+            "type": "article"
+          }
+        },
+        "tag": {
+          "data": {
+            "id": "786481",
+            "type": "tag"
+          }
+        }
+      }
+    }
+  ]
+}

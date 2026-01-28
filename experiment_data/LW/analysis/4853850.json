@@ -1,0 +1,413 @@
+{
+  "data": {
+    "attributes": {
+      "publishOn": "2025-12-16T18:05:50-05:00",
+      "isLockedPro": false,
+      "commentCount": 11,
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "increasing-competitive-threats": {
+          "id": 115152,
+          "non_theme": true
+        },
+        "relative-valuation": {
+          "id": 115332,
+          "non_theme": true
+        },
+        "margin-contraction": {
+          "id": 548966,
+          "non_theme": true
+        },
+        "earnings": {
+          "id": 10
+        },
+        "inbound-seo-optimization": {
+          "id": 608068
+        },
+        "downgrade": {
+          "id": 662816
+        },
+        "more-tags": {
+          "id": 698258
+        },
+        "alpha-rich-opportunity": {
+          "id": 114692
+        },
+        "us": {
+          "id": 326,
+          "non_theme": true
+        },
+        "consumer-staples": {
+          "id": 30
+        }
+      },
+      "title": "Lamb Weston's Plunge Doesn't Mean Shares Are Tasty Now (Rating Downgrade)",
+      "summary": [
+        "Lamb Weston Holdings, Inc. faces margin pressure from rising input costs and competitive pricing, prompting a Hold rating despite reasonable valuation.",
+        "LW's international segment growth was acquisition-driven; organic sales declined 9% due to weak demand and strategic exits from low-margin businesses.",
+        "North America revenue is flat as price cuts to defend market share offset only modest volume gains, reflecting a challenging environment.",
+        "LW management's \"Focus to Win\" plan targets $250M in cost savings by 2028, but near-term profitability remains under pressure, and analyst sentiment is cautious."
+      ],
+      "isPaywalled": false,
+      "structuredInsights": null,
+      "lastModified": "2025-12-16T18:09:28-05:00",
+      "isModerated": false,
+      "availableTranslations": [],
+      "closestTradingDate": "2025-12-17",
+      "beforeOpeningHours": false,
+      "isEarningsSlides": false,
+      "isExclusive": true,
+      "isTranscript": false,
+      "excludedByTag": false,
+      "transcriptPath": null,
+      "likesCount": 0,
+      "disabledMessage": null,
+      "disclosure": "<p id=\"a-disclosure\"><b>Analyst\u2019s Disclosure:</b><span>I/we have no stock, option or similar derivative position in any of the companies mentioned, and no plans to initiate any such positions within the next 72 hours.</span><span id=\"top-business-disclosure\"> I wrote this article myself, and it expresses my own opinions. I am not receiving compensation for it (other than from Seeking Alpha). I have no business relationship with any company whose stock is mentioned in this article. </span></p><p id='a-disclosure-more'><strong>Seeking Alpha's Disclosure:</strong> Past performance is no guarantee of future results. No recommendation or advice is being given as to whether any investment is suitable for a particular investor. Any views or opinions expressed above may not reflect those of Seeking Alpha as a whole. Seeking Alpha is not a licensed securities dealer, broker or US investment adviser or investment bank. Our analysts are third party authors that include both professional investors and individual investors who may not be licensed or certified by any institute or regulatory body.</p>",
+      "articleActionableItem": null,
+      "inEmbargo": false,
+      "isNoindex": false,
+      "isNoarchive": true,
+      "content": "<p data-eci=\"true\"><figure class=\"getty-figure\" data-type=\"getty-image\"><picture> <img src=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/489144282/image_489144282.jpg?io=getty-c-w630\" alt=\"Mc Donalds French Fries\" data-id=\"489144282\" data-type=\"getty-image\" width=\"1536\" height=\"1063\" srcset=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/489144282/image_489144282.jpg?io=getty-c-w1536 1536w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/489144282/image_489144282.jpg?io=getty-c-w1280 1280w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/489144282/image_489144282.jpg?io=getty-c-w1080 1080w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/489144282/image_489144282.jpg?io=getty-c-w750 750w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/489144282/image_489144282.jpg?io=getty-c-w640 640w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/489144282/image_489144282.jpg?io=getty-c-w480 480w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/489144282/image_489144282.jpg?io=getty-c-w320 320w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/489144282/image_489144282.jpg?io=getty-c-w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 132px), (max-width: 1199px) calc(100vw - 666px), (max-width: 1307px) calc(100vw - 708px), 600px\" fetchpriority=\"high\"> </picture><figcaption><p class=\"item-caption\"> </p> <p class=\"item-credits\">junce/iStock Editorial via Getty Images</p></figcaption></figure></p> <div class=\"inline_ad_placeholder\"></div> <p>Hopefully, you won't judge me, but I don't exactly have the healthiest diet. On my busy days, such as the day that I am writing this article, I tend to order food for delivery. And today, I ordered none other than<span class=\"paywall-full-content invisible\"> McDonald's (</span><a href=\"https://seekingalpha.com/symbol/MCD\" title=\"McDonald's Corporation\" class=\"paywall-full-content invisible\">MCD</a><span class=\"paywall-full-content invisible\">). McDonald's happens to be the single largest customer of a company that almost nobody knows about, but most people consume. And that is none other than Lamb Weston Holdings, Inc. (</span><span class=\"ticker-hover-wrapper paywall-full-content invisible\"><a href=\"https://seekingalpha.com/symbol/LW\" title=\"Lamb Weston Holdings, Inc.\">LW</a></span><span class=\"paywall-full-content invisible\">), a business that specializes in the production, distribution, and marketing, of value-added frozen potato products. In fact, it is one of the leading suppliers of French fries in the U.S. And about 15% of its revenue comes from McDonald's.</span></p> <p class=\"paywall-full-content invisible\">The last <a href=\"https://seekingalpha.com/article/4591457-lamb-weston-q3-2023-earnings-preview-rising-sales-profits\">article</a> that I wrote about the company was published in March of 2023. At that time, financial performance for the business had been robust. Since then, revenue has risen. But profitability has taken a hit because of rising input costs. Sadly, that has pushed the stock down 38.7% since then, which is far worse than the 68.5% jump that the S&amp;P 500 (<a href=\"https://seekingalpha.com/symbol/SP500\" title=\"S&amp;P 500 Index\">SP500</a>) saw over the same window of time.</p> <p class=\"paywall-full-content invisible\">Based on the data provided, I don't think we should expect any meaningful improvement from an operational standpoint any time soon. Fundamentally speaking, the business is not bad. But is certainly not great. LW shares are not ridiculously pricey, and some might even consider them to be attractively priced. But compared to other similar firms out there, the stock is just mediocre. Add on top of this the fact that analysts seem pessimistic as earnings near, with the release date for the second quarter of the 2026 fiscal year scheduled for December 19th, and I think that the best thing I can rate it is a Hold at this time.</p> <h2 class=\"paywall-full-content invisible\">Times Are Tough</h2> <p class=\"paywall-full-content invisible\"><figure class=\"regular-img-figure paywall-full-content invisible\" contenteditable=\"false\"><span><a href=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652328239871192_origin.png\" rel=\"lightbox\" data-width=\"2542\" data-height=\"1418\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkedin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652328239871192_origin.png?io=w640\" alt=\"Presentation\" width=\"640\" height=\"357\" contenteditable=\"false\" data-width=\"640\" data-height=\"357\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652328239871192_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652328239871192_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652328239871192_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652328239871192_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span><figcaption><p class=\"item-caption\"><span>Lamb Weston</span></p></figcaption></figure></p> <p class=\"paywall-full-content invisible\">In many ways, Lamb Weston is a remarkable company. Its <a href=\"https://investors.lambweston.com/~/media/Files/L/Lamb-Weston-IR/documents/fy26-q1-earnings-presentation.pdf\" rel=\"nofollow\">emphasis</a> on French fries makes it a niche food provider. This is a space that has significant global appeal. According to management, about 44% of all global menus have fries on them. That's up from 42% back in 2023. One out of every three restaurant operators consider French fries to be the single most profitable item on their menu. And they happen to be the most ordered food at us restaurants. What's more, demand for fries seems to be growing. From 2019 through 2025, global fry volume jumped 23%.</p> <p class=\"paywall-full-content invisible\"><figure class=\"regular-img-figure paywall-full-content invisible\" contenteditable=\"false\"><span><a href=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-1765232836956382_origin.png\" rel=\"lightbox\" data-width=\"2284\" data-height=\"852\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkedin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-1765232836956382_origin.png?io=w640\" alt=\"Financials\" width=\"640\" height=\"239\" contenteditable=\"false\" data-width=\"640\" data-height=\"239\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-1765232836956382_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-1765232836956382_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-1765232836956382_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-1765232836956382_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span><figcaption><p class=\"item-caption\"><span>Author - SEC EDGAR Data</span></p></figcaption></figure></p> <p class=\"paywall-full-content invisible\">With data like this, it comes as no surprise that revenue for the company has been rising. Between <a href=\"https://www.sec.gov/Archives/edgar/data/1679273/000167927325000049/0001679273-25-000049-index.htm\" rel=\"nofollow\">2023 and 2025</a>, revenue popped from $5.35 billion to $6.45 billion. Digging into the data, we can see that this top-line growth was driven almost entirely by the firm\u2019s International segment. From 2023 through 2024, revenue nearly doubled, from $1.10 billion to $2.10 billion. But this was only because of the consolidation of some of its operations that were previously reported differently. Specifically, the firm bought up LW EMEA and LWAMSA. These are its European and Argentinian, respectively, divisions that were previously structured as joint ventures that the firm now has a majority ownership of.</p> <p class=\"paywall-full-content invisible\"><figure class=\"regular-img-figure paywall-full-content invisible\" contenteditable=\"false\"><span><a href=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652328929599535_origin.png\" rel=\"lightbox\" data-width=\"2166\" data-height=\"900\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkedin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652328929599535_origin.png?io=w640\" alt=\"Financials\" width=\"640\" height=\"266\" contenteditable=\"false\" data-width=\"640\" data-height=\"266\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652328929599535_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652328929599535_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652328929599535_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652328929599535_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span><figcaption><p class=\"item-caption\"><span>Author - SEC EDGAR Data</span></p></figcaption></figure></p> <p class=\"paywall-full-content invisible\">In fact, it owns all of its European business and 90% of its Argentinian operation. Unfortunately, adjusting for these acquisitions, International segment sales would have fallen by 9%, with a lot of that being driven by a 15% drop in volume caused by weak demand at restaurants, some technical changes that the company has been making in order to boost long-term performance, and its decision to exit some of its lower priced and lower margin businesses. It was only because of higher prices and changes in product mix that revenue did not fall further on an organic basis.</p> <p class=\"paywall-full-content invisible\">International revenue then increased a bit more in 2025, rising from $2.10 billion to $2.19 billion. New customer wins and growth with existing customers in all of its regions boosted volumes by 5%. But pricing did have a slightly negative impact on overall results.</p> <p class=\"paywall-full-content invisible\">I wish I could say that performance has been as strong when it comes to its North America division. But I can't. After seeing revenue climb from $4.25 billion in 2023 to $4.36 billion in 2024, there was a dip in revenue to $4.27 billion in 2025. Management made the conscious decision here to cut prices because of what they described as a competitive environment. Most unfortunately, this did not offset volumes by much. In fact, a 3% hit to pricing helped volumes rise by only 1%, with management blaming matters on soft restaurant traffic in North America.</p> <p class=\"paywall-full-content invisible\"><figure class=\"regular-img-figure paywall-full-content invisible\" contenteditable=\"false\"><span><a href=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652329102479672_origin.png\" rel=\"lightbox\" data-width=\"2140\" data-height=\"918\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkedin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652329102479672_origin.png?io=w640\" alt=\"Financials\" width=\"640\" height=\"275\" contenteditable=\"false\" data-width=\"640\" data-height=\"275\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652329102479672_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652329102479672_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652329102479672_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652329102479672_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span><figcaption><p class=\"item-caption\"><span>Author - SEC EDGAR Data</span></p></figcaption></figure></p> <p class=\"paywall-full-content invisible\">As revenue for the company increased in recent years, profitability has taken a heck of a hit. Net income plummeted from $1.01 billion to $357.2 million. On an adjusted basis, the decline was from $696.7 million to $478.6 million. Other profitability metrics largely worsened. The one exception was operating cash flow, which grew from $761.7 million to $868.3 million. Meanwhile, EBITDA declined slightly from $811.3 million to $790.2 million. But it's worth noting that in 2024 it was substantially higher at $1.07 billion.</p> <p class=\"paywall-full-content invisible\"><figure class=\"regular-img-figure paywall-full-content invisible\" contenteditable=\"false\"><span><a href=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652328767032604_origin.png\" rel=\"lightbox\" data-width=\"2256\" data-height=\"884\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkedin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652328767032604_origin.png?io=w640\" alt=\"Financials\" width=\"640\" height=\"251\" contenteditable=\"false\" data-width=\"640\" data-height=\"251\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652328767032604_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652328767032604_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652328767032604_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652328767032604_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span><figcaption><p class=\"item-caption\"><span>Author - SEC EDGAR Data</span></p></figcaption></figure></p> <p class=\"paywall-full-content invisible\">This year, the picture is mixed. In North America, revenue for the <a href=\"https://www.sec.gov/ix?doc=/Archives/edgar/data/1679273/000167927325000070/lw-20250824.htm#i08cac1ac4060466fb4378537d74cb8f6_79\" rel=\"nofollow\">first quarter of 2026</a> dropped to $1.08 billion from $1.10 billion last year, with a 6% rise in volume offset by a 7% hit when it comes to pricing. In essence, management is competing for market share in a highly competitive market. So in order to keep up, it has to cut pricing to keep volumes afloat. At least in the international market, revenue did rise, climbing from $550.4 million to $574.6 million. According to management, this was only because of a favorable impact from foreign currency fluctuations. A 6% decline in pricing was met with a 6% increase in volume.</p> <p class=\"paywall-full-content invisible\">The revenue side of the picture is one thing. Just like what we saw from 2023 through 2025, net income and adjusted net income are both lower. The good news is that cash flows are up at least. But it would be nice to see profitability improve across the board. To put in context the impact that the company has seen from a profitability standpoint in recent years, we need only look at the chart below. In it, you can see certain costs in relation to revenue. Restructuring costs aimed at boosting long-term results have been part of the problem. But honestly, that's a good reason to see a decline. The bigger issue has been a surge in the cost of sales, from 73.23% of revenue in 2023 to 78.32% last year. And for the first quarter of 2026, it amounted to 79.36%.</p> <p class=\"paywall-full-content invisible\"><figure class=\"regular-img-figure paywall-full-content invisible\" contenteditable=\"false\"><span><a href=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652327651692638_origin.png\" rel=\"lightbox\" data-width=\"2066\" data-height=\"920\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkedin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652327651692638_origin.png?io=w640\" alt=\"Margins\" width=\"640\" height=\"285\" contenteditable=\"false\" data-width=\"640\" data-height=\"285\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652327651692638_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652327651692638_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652327651692638_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652327651692638_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span><figcaption><p class=\"item-caption\"><span>Author - SEC EDGAR Data</span></p></figcaption></figure></p> <p class=\"paywall-full-content invisible\">According to management, there has been some general pain when it comes to manufacturing costs on a per pound basis. Those have alleviated some this year, but overall, a rise in input costs, including those involving higher potato costs, the write-off of excess raw potatoes, higher transportation and warehousing costs caused by a surge in inventories, and higher packaging costs, have all proven problematic.</p> <p class=\"paywall-full-content invisible\">Tight labor markets have also negatively affected the bottom line for the business. To combat these issues, management has been working on a rather ambitious <a href=\"https://seekingalpha.com/article/4826966-lamb-weston-holdings-inc-lw-q1-2026-earnings-call-transcript\">strategic plan</a> called Focus to Win. In essence, this involves a big cost savings program aimed at reducing expenses by $250 million or more by the end of 2028. $200 million of this will come from cost cuts, while the firm is also targeting $120 million of favorable working capital improvements by the end of 2027.</p> <p class=\"paywall-full-content invisible\"><figure class=\"regular-img-figure paywall-full-content invisible\" contenteditable=\"false\"><span><a href=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652331084454448_origin.png\" rel=\"lightbox\" data-width=\"2158\" data-height=\"908\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkedin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652331084454448_origin.png?io=w640\" alt=\"Debt\" width=\"640\" height=\"269\" contenteditable=\"false\" data-width=\"640\" data-height=\"269\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652331084454448_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652331084454448_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652331084454448_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652331084454448_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span><figcaption><p class=\"item-caption\"><span>Author - SEC EDGAR Data</span></p></figcaption></figure></p> <p class=\"paywall-full-content invisible\">One thing that I will say that I am happy to see is that management seems to be taking a debt situation of the company more seriously. Paying off debt is an easy way to reduce costs. After seeing net debt balloon from $3.16 billion in 2023 to $4.06 billion in 2025, it has dropped slightly to $3.87 billion in the first quarter of 2026. The company continues to pay out a lot of cash in the form of dividends. But year over year compared to the first quarter of 2025, the firm reduced share buybacks from $92.2 million to $18.7 million. To be clear, share buybacks have been a meaningful source of the increase in overall debt in recent years. In fact, in 2024, 2025, and the first quarter of 2026, they amounted to $538.4 million. Hopefully, the firm will continue the trend of reducing these buybacks in order to prioritize debt reduction and other structural initiatives.</p> <p class=\"paywall-full-content invisible\"><figure class=\"regular-img-figure paywall-full-content invisible\" contenteditable=\"false\"><span><a href=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-1765232407642207_origin.png\" rel=\"lightbox\" data-width=\"1940\" data-height=\"900\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkedin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-1765232407642207_origin.png?io=w640\" alt=\"Trading Multiples\" width=\"640\" height=\"297\" contenteditable=\"false\" data-width=\"640\" data-height=\"297\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-1765232407642207_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-1765232407642207_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-1765232407642207_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-1765232407642207_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span><figcaption><p class=\"item-caption\"><span>Author - SEC EDGAR Data</span></p></figcaption></figure></p> <p class=\"paywall-full-content invisible\">So far, however, we aren't really seeing any positive impact here. Management expects revenue this year to be between $6.35 billion and $6.55 billion. They also expect from that between $1 billion and $1.20 billion worth of EBITDA. Furthermore, if we project out results based on what we have seen already for the year, we would expect net profits, on an adjusted basis, of $437.4 million and adjusted operating cash flow of $802.9 million. If we use these estimates, we can see in the chart above how the company is valued. Honestly, shares are not that expensive. But then again, companies in the food industry do have a tendency to trade at lower multiples than most other industries.</p> <p class=\"paywall-full-content invisible\">In the table below, you can see how the enterprise stacks up against five other similar firms. On a price to earnings basis, two of the companies ended up being cheaper than it is, while another one was tied with it. Three were cheaper on a price to operating cash flow basis. And four were cheaper when it came to the EV to EBITDA approach.</p> <div class=\"table-responsive paywall-full-content invisible\"> <span class=\"sa-table-scroll-wrapper sa-hide-scrollbar\"><span data-intersection-boundary=\"start\" data-test-id=\"table-scroll-wrapper-boundary-start\"></span><table> <tr> <td><strong>Company</strong></td> <td><strong>Price/Earnings</strong></td> <td><strong>Price/Operating Cash Flow</strong></td> <td><strong>EV/EBITDA</strong></td> </tr> <tr> <td><strong>Lamb Weston</strong></td> <td><strong>17.6</strong></td> <td><strong>10.7</strong></td> <td><strong>10.1</strong></td> </tr> <tr> <td><strong>Conagra Brands (<a href=\"https://seekingalpha.com/symbol/CAG\" title=\"Conagra Brands, Inc.\">CAG</a>)</strong></td> <td><strong>9.6</strong></td> <td><strong>5.3</strong></td> <td><strong>8.6</strong></td> </tr> <tr> <td><strong>Pilgrim's Pride Company (<a href=\"https://seekingalpha.com/symbol/PPC\" title=\"Pilgrim's Pride Corporation\">PPC</a>)</strong></td> <td><strong>7.7</strong></td> <td><strong>6.6</strong></td> <td><strong>5.2</strong></td> </tr> <tr> <td><strong>The J.M. Smucker Company (<a href=\"https://seekingalpha.com/symbol/SJM\" title=\"The J. M. Smucker Company\">SJM</a>)</strong></td> <td><strong>21.8</strong></td> <td><strong>11.0</strong></td> <td><strong>9.4</strong></td> </tr> <tr> <td><strong>Hormel Foods (<a href=\"https://seekingalpha.com/symbol/HRL\" title=\"Hormel Foods Corporation\">HRL</a>)</strong></td> <td><strong>17.6</strong></td> <td><strong>14.3</strong></td> <td><strong>12.7</strong></td> </tr> <tr> <td><strong>Tyson Foods (<a href=\"https://seekingalpha.com/symbol/TSN\" title=\"Tyson Foods, Inc.\">TSN</a>)</strong></td> <td><strong>41.4</strong></td> <td><strong>9.2</strong></td> <td><strong>9.5</strong></td> </tr> </table> <span data-intersection-boundary=\"end\" data-test-id=\"table-scroll-wrapper-boundary-end\"></span></span><button type=\"button\" class=\"sa-table-enlarge-button\">Click to enlarge</button> </div> <p class=\"paywall-full-content invisible\">Even though I am electing to rate the company a \u2018hold\u2019 right now, I am fully prepared to accept that my assessment could be wrong. However, analysts don't seem terribly optimistic right now either. On December 19th, management is expected to announce financial results for the second quarter of the 2026 fiscal year. Revenue is anticipated to fall from $1.60 billion last year to $1.59 billion this year. As the table below illustrates, actual earnings per share should improve. But adjusted earnings per share are forecasted to decline, which makes a lot of sense given the cost pressures that the company has exhibited. That table also shows certain cash flow metrics for the second quarter of the 2025 fiscal year. If revenue and adjusted profits do worsen, I expect these metrics to worsen also.</p> <p class=\"paywall-full-content invisible\"><figure class=\"regular-img-figure paywall-full-content invisible\" contenteditable=\"false\"><span><a href=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652327916814606_origin.png\" rel=\"lightbox\" data-width=\"1360\" data-height=\"464\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkedin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652327916814606_origin.png?io=w640\" alt=\"Estimates\" width=\"640\" height=\"218\" contenteditable=\"false\" data-width=\"640\" data-height=\"218\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652327916814606_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652327916814606_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652327916814606_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/8/9866571-17652327916814606_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span><figcaption><p class=\"item-caption\"><span>Author - SEC EDGAR Data</span></p></figcaption></figure></p> <h2 class=\"paywall-full-content invisible\">Takeaway</h2> <div class=\"before_last_paragraph-piano-placeholder paywall-full-content invisible\"></div> <p class=\"paywall-full-content invisible\">Based on the data provided, it seems to me as though Lamb Weston is not that appealing a prospect right now. The company is dealing with high costs and competitive pressures. Management has made some poor allocation decisions when it comes to capital in recent years, favoring share buybacks over a strong balance sheet. We are starting to see a change in that, which is encouraging. But until we see some stabilization of the business, especially on the bottom line, I think that a \u2018hold\u2019 rating is entirely generous.</p>",
+      "quickInsights": null,
+      "twitContent": "Lamb Weston's Plunge Doesn't Mean Shares Are Tasty Now (Rating Downgrade) $LW #economy #trading #stockmarket https://seekingalpha.com/article/4853850-lamb-weston-plunge-doesnt-mean-shares-are-tasty-now-rating-downgrade?source=tweet",
+      "innerMarketing": "<p><a href=\"https://seekingalpha.com/checkout?slug=daniel-jones&amp;service_id=mp_1209\">Crude Value Insights</a> offers you an investing service and community focused on oil and natural gas. We focus on cash flow and the companies that generate it, leading to value and growth prospects with real potential.</p><p>Subscribers get to use a 50+ stock model account, in-depth cash flow analyses of E&amp;P firms, and live chat discussion of the sector.</p><p><strong>Sign up today for your <a href=\"https://seekingalpha.com/checkout?slug=daniel-jones&amp;service_id=mp_1209\">two-week free tria</a>l and get a new lease on oil &amp; gas!</strong></p>",
+      "marketingBullet": "Looking for a helping hand in the market? Members of Crude Value Insights get exclusive ideas and guidance to navigate any climate.  <a href='/checkout/mp_1209&source=mp_marketing_text_top' sasource='mp_marketing_text_top'>Learn More \u00bb</a>",
+      "isReit": false,
+      "videoData": null,
+      "marketingBulletVariant": "My name is Dan Jones. I have degrees in accounting and economics, and ran a registered investment advisor for nine years. I lead the investing group <a href=\"/checkout/mp_1209?source=content_type%3Areact%7Curl_first_level%3Asa-source-first-level-url%7Csection%3Aauthor_bullets%3A9866571%7Csection_asset%3Aauthor_bullets%3A-crude-value-insights\" data-test-id=\"author-custom-template-link\">Crude Value Insights</a>.",
+      "marketingBio": "Dan Jones has degrees in accounting and economics, and ran a registered investment advisor for nine years.\n\nI run investment group <a href=\"/checkout/mp_1209?source=content_type%3Areact%7Curl_first_level%3Asa-source-first-level-url%7Csection%3Aauthor_bullets%3A9866571%7Csection_asset%3Aauthor_bullets%3A-crude-value-insights\" data-test-id=\"author-custom-template-link\">Crude Value Insights</a>, which offers unique actionable insights on O&G companies. It focuses on what matters most, cash flow. <a href=\"/checkout/mp_1209?source=content_type%3Areact%7Curl_first_level%3Asa-source-first-level-url%7Csection%3Aauthor_bullets%3A9866571%7Csection_asset%3Aauthor_bullets%3A-crude-value-insights\" data-test-id=\"author-custom-template-link\">Learn more.</a>\n<a href=\"/checkout/mp_1209?source=content_type%3Areact%7Curl_first_level%3Asa-source-first-level-url%7Csection%3Aauthor_root%3A9866571%7Csection_asset%3Aauthor_root%3A-crude-value-insights\" data-test-id=\"author-custom-template-link\">Crude Value Insights</a>.\nprovides a regular deep dive into 36 publicly traded oil and gas exploration and production companies. This slice of the market is volatile, but very rewarding when approached in the right way. It most certainly is not, however, for the faint of heart. <a href=\"/checkout/mp_1209?source=content_type%3Areact%7Curl_first_level%3Asa-source-first-level-url%7Csection%3Aauthor_root%3A9866571%7Csection_asset%3Aauthor_root%3A-crude-value-insights\" data-test-id=\"author-custom-template-link\">Learn more >></a>\n\nAfter graduating from Case Western Reserve University in 2013, I ran my own RIA for approximately 9 years before moving to manage my own assets. I have accumulated extensive experience researching various industries ranging from industrials, to banking, to oil, and more. I found myself particularly interested in the dynamics of the oil industry early on, turning that into my specialization for Crude Value Insights.",
+      "audioDuration": 799.68,
+      "originalTitle": "Lamb Weston's Plunge Doesn't Mean Shares Are Tasty Now (Rating Downgrade)"
+    },
+    "relationships": {
+      "author": {
+        "data": {}
+      },
+      "sentiments": {
+        "data": [
+          {}
+        ]
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "571204"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": [
+          {
+            "id": "2973"
+          },
+          {
+            "id": "2376"
+          },
+          {
+            "id": "4430"
+          },
+          {
+            "id": "2236"
+          },
+          {
+            "id": "2377"
+          }
+        ]
+      },
+      "otherTags": {
+        "data": [
+          {},
+          {},
+          {},
+          {},
+          {
+            "id": "2973"
+          },
+          {
+            "id": "2376"
+          },
+          {
+            "id": "4430"
+          },
+          {
+            "id": "2236"
+          },
+          {
+            "id": "2377"
+          },
+          {
+            "id": "571204"
+          },
+          {},
+          {
+            "id": "10"
+          },
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {
+            "id": "326"
+          }
+        ]
+      },
+      "coAuthors": {
+        "data": []
+      },
+      "presentations": {
+        "data": []
+      },
+      "updates": {
+        "data": []
+      },
+      "corrections": {
+        "data": []
+      }
+    },
+    "links": {
+      "schemaImage": []
+    }
+  },
+  "included": [
+    {
+      "id": "1209",
+      "attributes": {
+        "createdAt": "2017-09-22T10:49:22-04:00",
+        "reviewCount": 0,
+        "shortPitch": "Robust cash flow analyses of oil and gas companies",
+        "categories": [],
+        "serviceAssistantIds": [],
+        "inAppPurchasesAllowedInIos": false,
+        "inAppPurchasesAllowedInAndroid": false,
+        "activeSubscriptionsCount": -2,
+        "showPriceAlert": false,
+        "description": "Crude Value Insights is an exclusive community of investors who have a taste for oil and natural gas firms. Our main interest is on cash flow and the value and growth prospects that generate the strongest potential for investors. You get access to a 50+ stock model account, in-depth cash flow analyses of E&P firms.",
+        "landingPageColor": null,
+        "adUnits": [],
+        "tempData": {},
+        "price": 50.0,
+        "annualPriceWithDiscount": 499.0,
+        "monthlyPlanEnabled": false,
+        "chatEnabled": true,
+        "allowAffiliateDiscount": false,
+        "showHeadlines": true
+      },
+      "relationships": {
+        "author": {
+          "data": {}
+        }
+      }
+    },
+    {
+      "attributes": {
+        "company": null,
+        "userId": 9866571,
+        "tagId": 163495,
+        "bio": "<p>Daniel is an avid and active professional investor. </p>\r\nHe runs <a href=\"https://seekingalpha.com/checkout?service_id=mp_1209\">Crude Value Insights</a>, a value-oriented newsletter aimed at analyzing the cash flows and assessing the value of companies in the oil and gas space. His primary focus is on finding businesses that are trading at a significant discount to their intrinsic value by employing a combination of Benjamin Graham's investment philosophy and a contrarian approach to the market and the securities therein. <a href=\"https://seekingalpha.com/checkout?service_id=mp_1209\">Learn more</a>.",
+        "image": {},
+        "deactivated": null,
+        "memberSince": 2013,
+        "isRss": false,
+        "contributorSince": 2014,
+        "followersCount": 36114
+      },
+      "relationships": {
+        "user": {
+          "data": {}
+        },
+        "userBioTags": {
+          "data": [
+            {},
+            {},
+            {},
+            {}
+          ]
+        },
+        "authorResearch": {
+          "data": {
+            "id": "1209"
+          }
+        }
+      },
+      "links": {
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "id": "571204",
+      "attributes": {
+        "company": "Lamb Weston Holdings, Inc.",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "id": "2973",
+      "attributes": {
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "id": "2376",
+      "attributes": {
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "id": "4430",
+      "attributes": {
+        "company": "The J. M. Smucker Company",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "id": "2236",
+      "attributes": {
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "id": "2377",
+      "attributes": {
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "id": "10",
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "id": "326",
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "articleId": 4853850,
+        "createdAt": "2025-12-16T18:05:50.000-05:00",
+        "typeId": 2
+      },
+      "relationships": {
+        "article": {
+          "data": {}
+        },
+        "tag": {
+          "data": {
+            "id": "571204"
+          }
+        }
+      }
+    }
+  ]
+}

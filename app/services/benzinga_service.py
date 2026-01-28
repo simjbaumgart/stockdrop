@@ -117,6 +117,41 @@ class BenzingaService:
 
         return processed
 
+    def get_market_news(self, limit: int = 10) -> list:
+        """
+        Fetches broad market news using ETF proxies (SPY, DIA, QQQ).
+        Returns a deduplicated list of the most recent news items.
+        """
+        market_tickers = ["SPY", "DIA", "QQQ"]
+        all_news = []
+        
+        print(f"DEBUG: Fetching Market News for {market_tickers}...")
+        
+        for ticker in market_tickers:
+            try:
+                # Fetch recent news for each ticker
+                news = self.get_company_news(ticker)
+                if news:
+                    all_news.extend(news)
+            except Exception as e:
+                print(f"Error fetching market news for {ticker}: {e}")
+                
+        # Deduplicate by headline
+        unique_news = {}
+        for item in all_news:
+            headline = item.get('headline')
+            if headline and headline not in unique_news:
+                unique_news[headline] = item
+                
+        # Convert back to list
+        final_list = list(unique_news.values())
+        
+        # Sort by date descending
+        final_list.sort(key=lambda x: x.get('datetime', 0), reverse=True)
+        
+        # Limit result
+        return final_list[:limit]
+
     def _process_news(self, articles):
         """
         Normalizes Polygon/Massive news objects to our standard format.

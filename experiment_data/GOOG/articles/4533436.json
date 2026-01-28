@@ -1,0 +1,364 @@
+{
+  "data": {
+    "id": "4533436",
+    "type": "fullArticle",
+    "attributes": {
+      "publishOn": "2022-08-12T03:14:00-04:00",
+      "isLockedPro": false,
+      "commentCount": 0,
+      "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/157330500/image_157330500.jpg",
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "fund-holdings": {
+          "id": 937,
+          "slug": "fund-holdings",
+          "kind": "common",
+          "non_theme": true
+        },
+        "investing-strategy-main": {
+          "id": 39,
+          "slug": "investing-strategy-main",
+          "kind": "breadcrumb",
+          "path": "/investing-strategy",
+          "title": "Investing Strategy",
+          "sasource": "theme_breadcrumb"
+        },
+        "portfolio-strategy-asset-allocation": {
+          "id": 17190,
+          "slug": "portfolio-strategy-asset-allocation",
+          "kind": "breadcrumb",
+          "path": "/investing-strategy/portfolio-strategy",
+          "title": "Portfolio Strategy",
+          "sasource": "theme_breadcrumb"
+        },
+        "investing-ideas": {
+          "id": 10727,
+          "slug": "investing-ideas",
+          "kind": "general",
+          "path": "/stock-ideas",
+          "title": "Stock Ideas"
+        },
+        "etf-portfolio-strategy": {
+          "id": 17189,
+          "slug": "etf-portfolio-strategy",
+          "kind": "general"
+        },
+        "us": {
+          "id": 326,
+          "slug": "us",
+          "kind": "common",
+          "non_theme": true
+        }
+      },
+      "title": "Steel City Capital - Equitrans Midstream: Limited Downside, Attractive Returns",
+      "summary": [
+        "Equitrans Midstream Corp (ETRN) is a new long position for Steel City Capital.",
+        "ETRN stock has been a poor performer since its separation due to missed financial targets and increasing debt-levels.",
+        "Given our purchase price, I think it\u2019s highly unlikely that we end up losing money on our position."
+      ],
+      "isPaywalled": false,
+      "structuredInsights": null,
+      "lastModified": "2022-08-12T03:14:07-04:00",
+      "isModerated": false,
+      "availableTranslations": [],
+      "locale": "en",
+      "closestTradingDate": "2022-08-12",
+      "beforeOpeningHours": true,
+      "isEarningsSlides": false,
+      "isExclusive": false,
+      "isTranscript": false,
+      "excludedByTag": false,
+      "transcriptPath": null,
+      "likesCount": 1,
+      "disabledStatus": "allowed",
+      "disabledMessage": null,
+      "status": "published",
+      "disclosure": "<p id='a-disclosure-more'><strong>Seeking Alpha's Disclosure:</strong> Past performance is no guarantee of future results. No recommendation or advice is being given that any particular security, portfolio, transaction or investment strategy is suitable for any specific person. The author is not advising you personally concerning the nature, potential, value or suitability of any particular security or other matter. You alone are solely responsible for determining whether any investment, security or strategy, or any product or service, is appropriate or suitable for you based on your investment objectives and personal and financial situation. The author is an employee of Seeking Alpha. Any views or opinions expressed herein may not reflect those of Seeking Alpha as a whole. Seeking Alpha is not a licensed securities dealer, broker or US investment adviser or investment bank.</p>",
+      "articleActionableItem": null,
+      "inEmbargo": false,
+      "isNoindex": false,
+      "isNoarchive": true,
+      "content": "<p data-eci=\"true\"><figure class=\"getty-figure\" data-type=\"getty-image\"><picture> <img src=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/157330500/image_157330500.jpg?io=getty-c-w750\" alt=\"Valley Pipeline with Mountain Range\" data-id=\"157330500\" data-type=\"getty-image\" width=\"1536px\" height=\"1001px\" srcset=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/157330500/image_157330500.jpg?io=getty-c-w1536 1536w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/157330500/image_157330500.jpg?io=getty-c-w1280 1280w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/157330500/image_157330500.jpg?io=getty-c-w1080 1080w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/157330500/image_157330500.jpg?io=getty-c-w750 750w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/157330500/image_157330500.jpg?io=getty-c-w640 640w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/157330500/image_157330500.jpg?io=getty-c-w480 480w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/157330500/image_157330500.jpg?io=getty-c-w320 320w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/157330500/image_157330500.jpg?io=getty-c-w240 240w\" sizes=\"(max-width: 768px) calc(100vw - 36px), (max-width: 1024px) calc(100vw - 132px), (max-width: 1200px) calc(66.6vw - 72px), 600px\" fetchpriority=\"high\"> </picture><figcaption><p class=\"item-caption\"></p> <p>AvailableLight</p></figcaption></figure></p> <div class=\"inline_ad_placeholder\"></div> <p>The following segment was excerpted from <strong><a href=\"https://seekingalpha.com/article/4533424-steel-city-capital-q2-2022-partner-letter\">this fund letter</a></strong>.</p> <p></p> <hr> <h2> Equitrans Midstream Corp (<a href=\"https://seekingalpha.com/symbol/ETRN?source=content_type%3Areact%7Csection%3Amain_content%7Cbutton%3Abody_link\" title=\"Equitrans Midstream Corporation\">ETRN</a>) </h2> <p>Equitrans Midstream Corp. is a new long position for the Partnership. ETRN is the former midstream arm of Marcellus natural gas producer EQT. They own gathering assets (small<span class=\"paywall-full-content invisible\"> diameter pipelines that directly connect to the wellhead) and long-haul transportation assets (larger diameter pipelines that move gas over long distances, usually under take-or-pay contracts).</span></p> <p class=\"paywall-full-content invisible\">The company formally separated from EQT via spin-off in late 2018. At the time, the capital structure was pretty complicated \u2013 there was a collection of three (yes, THREE) publicly traded currencies that held various ownership interests in the core assets, but this was simplified in a combination of asset swaps over the years so that there is now only one publicly traded vehicle (<a href=\"https://seekingalpha.com/symbol/ETRN?source=content_type%3Areact%7Csection%3Amain_content%7Cbutton%3Abody_link\" title=\"Equitrans Midstream Corporation\">ETRN</a>).</p> <p class=\"paywall-full-content invisible\">The stock has been a poor performer since its separation due to missed financial targets and increasing debt-levels, both owing to the company\u2019s struggle to complete the Mountain Valley Pipeline (MVP). The MVP is intended to provide much needed takeaway capacity from the Appalachian Basin to markets in the U.S. Southeast (where there is growing gas demand for power generation) as well as the Gulf Coast (for eventual export). The project has been an utter disaster for the company because of continued opposition from the environmentalist community.</p> <p class=\"paywall-full-content invisible\">Originally targeted to come online in late 2018 at a total cost of $3.5 billion, today we're looking at a best-case scenario of mid2023 at a total cost of $6.2 billion. In support of the expanding price tag, ETRN has had to take on increasing amounts of debt. At the same time, the company has pulled the rug out from under dividend-oriented investors, first in the form of revised guidance for no growth vs. 8-12% at the time of separation, and second in the form of a (backdoor) dividend cut. So, it's sort of easy to see why investors have been sour on the stock.</p> <p class=\"paywall-full-content invisible\">The Partnership began acquiring shares in late June / early July when ETRN was trading around $6.00. As a general matter, I disdain using DCF for valuation purposes, as it\u2019s a silly exercise that involves a lot of bullshit guessing about the future. But there are exceptions to every rule, and ETRN is one of them. This is a business that is fairly simple to model. Certain volumes are contractually set.</p> <p class=\"paywall-full-content invisible\">Non-contractual volumes should continue flowing even in a depressed natural gas price environment (and today\u2019s price environment is anything but weak). And prices for volumes are known variables (again, with a significant portion being contractually set).</p> <p class=\"paywall-full-content invisible\">The way I went about modeling the business was as follows: First, there is a \u201ccore\u201d or \u201cbase\u201d business that will generate cash flows independent of MVP being placed into service. Second, there is a set of \u201ccontingent\u201d cash flows that will be generated in the event of MVP being placed into service. Applying a 10% (equity) discount rate to expected free cash flow from the base business yielded a price in the low-to-mid $6.00 range.</p> <p class=\"paywall-full-content invisible\">So, at our purchase price, I felt comfortable we were able to lock in an attractive return with limited downside. At this level, we also became the owners of an \u201coption\u201d on potential upside from the contingent cash flow stream. At the time, I estimated upside from this cash flow stream to be worth anywhere from $3.50-$4.00. Of course, the \u201coption\u201d is worth less than that (because of the probability tree associated with MVP), but at $6.00/share, we were getting the option for free. Who doesn\u2019t like a free option?</p> <p class=\"paywall-full-content invisible\">Since initially establishing a position, there has been a major development with respect to the prospects of MVP. In exchange for his support of the proposed \u201cInflation Reduction Act,\u201d West Virginia Senator Joe Manchin secured commitments from congressional leadership and the President to support a bill that would, among other things, clear a path for MVP to be completed. As it stands today, the market appears to be pricing in roughly 50/50 odds of completion, but I think the probability is much higher.</p> <p class=\"paywall-full-content invisible\">What could go wrong? The biggest risk to completion is no longer judicial, but political. The path forward for the legislation that would support MVP\u2019s completion is a \u201cside agreement\u201d to the reconciliation bill. This means it can\u2019t pass with a simple majority, and instead needs a filibuster-proof 60+ votes. Republicans are a tad salty about the Democrats\u2019 recent legislative success((es)) and I wouldn\u2019t put it outside the realm of possibilities that they thwart the legislation out of pure spite. Time will tell, but given our purchase price, I think it\u2019s highly unlikely that we end up losing money on our position even in the event of a \u201cworst case\u201d scenario.</p> <hr class=\"paywall-full-content invisible\"> <p class=\"paywall-full-content invisible\"></p> <p class=\"paywall-full-content invisible\"><strong>Editor's Note:</strong> The summary bullets for this article were chosen by Seeking Alpha editors.</p> <div class=\"before_last_paragraph-piano-placeholder paywall-full-content invisible\"></div> <p class=\"paywall-full-content invisible\">Editor's Note: This article discusses one or more securities that do not trade on a major U.S. exchange. Please be aware of the risks associated with these stocks.</p>",
+      "quickInsights": null,
+      "twitContent": "Steel City Capital - Equitrans Midstream: Limited Downside, Attractive Returns $EQTNP $ETRN-DEFUNCT-585924 #economy #markets #trading https://seekingalpha.com/article/4533436-equitrans-midstream-limited-downside-attractive-returns?source=tweet",
+      "innerMarketing": "",
+      "marketingBullet": "",
+      "isReit": false,
+      "videoData": null,
+      "marketingBulletVariant": null,
+      "marketingBio": null,
+      "audioDuration": null,
+      "originalTitle": "Steel City Capital - Equitrans Midstream: Limited Downside, Attractive Returns"
+    },
+    "relationships": {
+      "author": {
+        "data": {
+          "id": "105080",
+          "type": "author"
+        }
+      },
+      "sentiments": {
+        "data": []
+      },
+      "primaryTickers": {
+        "data": []
+      },
+      "secondaryTickers": {
+        "data": [
+          {
+            "id": "611134",
+            "type": "tag"
+          },
+          {
+            "id": "585924",
+            "type": "tag"
+          }
+        ]
+      },
+      "otherTags": {
+        "data": [
+          {
+            "id": "587156",
+            "type": "tag"
+          },
+          {
+            "id": "937",
+            "type": "tag"
+          },
+          {
+            "id": "17190",
+            "type": "tag"
+          },
+          {
+            "id": "611134",
+            "type": "tag"
+          },
+          {
+            "id": "585924",
+            "type": "tag"
+          },
+          {
+            "id": "9082",
+            "type": "tag"
+          },
+          {
+            "id": "10727",
+            "type": "tag"
+          },
+          {
+            "id": "17189",
+            "type": "tag"
+          },
+          {
+            "id": "326",
+            "type": "tag"
+          }
+        ]
+      },
+      "coAuthors": {
+        "data": []
+      },
+      "presentations": {
+        "data": []
+      },
+      "updates": {
+        "data": []
+      },
+      "corrections": {
+        "data": []
+      }
+    },
+    "links": {
+      "self": "/article/4533436-equitrans-midstream-limited-downside-attractive-returns",
+      "canonical": "https://seekingalpha.com/article/4533436-equitrans-midstream-limited-downside-attractive-returns",
+      "uriImage": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/157330500/image_157330500.jpg?io=getty-c-w1536",
+      "schemaImage": [
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/157330500/image_157330500.jpg?io=getty-c-w1280",
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/157330500/image_157330500.jpg?io=getty-c-crop-16-9",
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/157330500/image_157330500.jpg?io=getty-c-crop-4-3"
+      ]
+    }
+  },
+  "included": [
+    {
+      "id": "105080",
+      "type": "author",
+      "attributes": {
+        "company": null,
+        "slug": "fund-letter-stock-ideas",
+        "userId": 50054746,
+        "tagId": 587156,
+        "bio": "<p>Single stock ideas excerpted from fund letters published by Seeking Alpha.</p>",
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/050/054/746/small_pic.png",
+          "medium": "https://seekingalpha.com/images/users_profile/050/054/746/medium_pic.png",
+          "big": "https://seekingalpha.com/images/users_profile/050/054/746/big_pic.png",
+          "extra_large": "https://seekingalpha.com/images/users_profile/050/054/746/extra_large_pic.png"
+        },
+        "nick": "Fund Letter Stock Ideas",
+        "deactivated": null,
+        "memberSince": 2019,
+        "isRss": false,
+        "contributorSince": 2019,
+        "followersCount": 12660
+      },
+      "relationships": {
+        "user": {
+          "data": {
+            "id": "50054746",
+            "type": "user"
+          }
+        },
+        "userBioTags": {
+          "data": []
+        },
+        "authorResearch": {
+          "data": null
+        }
+      },
+      "links": {
+        "self": "/author/fund-letter-stock-ideas",
+        "profileUrl": "/author/fund-letter-stock-ideas",
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "id": "611134",
+      "type": "tag",
+      "attributes": {
+        "slug": "eqtnp",
+        "name": "EQTNP",
+        "company": "Equitrans Midstream Corporation PFD CONV SER A",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "OTCMKTS",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/EQTNP"
+      }
+    },
+    {
+      "id": "585924",
+      "type": "tag",
+      "attributes": {
+        "slug": "etrn-defunct-585924",
+        "name": "ETRN",
+        "company": "Equitrans Midstream Corporation",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "NYSE",
+        "fundTypeId": 0,
+        "isDefunct": true,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/ETRN-DEFUNCT-585924"
+      }
+    },
+    {
+      "id": "587156",
+      "type": "tag",
+      "attributes": {
+        "slug": "fund-letter-stock-ideas",
+        "name": "Fund Letter Stock Ideas",
+        "company": null,
+        "tagKind": "Tags::AuthorTag"
+      },
+      "links": {
+        "self": "/author/fund-letter-stock-ideas"
+      }
+    },
+    {
+      "id": "937",
+      "type": "tag",
+      "attributes": {
+        "slug": "fund-holdings",
+        "name": "Fund Holdings",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=fund-holdings"
+      }
+    },
+    {
+      "id": "17190",
+      "type": "tag",
+      "attributes": {
+        "slug": "portfolio-strategy-asset-allocation",
+        "name": "Portfolio Strategy & Asset Allocation",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=portfolio-strategy-asset-allocation"
+      }
+    },
+    {
+      "id": "9082",
+      "type": "tag",
+      "attributes": {
+        "slug": "sa-submit",
+        "name": "SA Submit",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/sa-submit"
+      }
+    },
+    {
+      "id": "10727",
+      "type": "tag",
+      "attributes": {
+        "slug": "investing-ideas",
+        "name": "Investing Ideas",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/investing-ideas"
+      }
+    },
+    {
+      "id": "17189",
+      "type": "tag",
+      "attributes": {
+        "slug": "etf-portfolio-strategy",
+        "name": "ETFs & Portfolio Strategy",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/etf-portfolio-strategy"
+      }
+    },
+    {
+      "id": "326",
+      "type": "tag",
+      "attributes": {
+        "slug": "us",
+        "name": "United States",
+        "company": null,
+        "tagKind": "Tags::Country"
+      },
+      "links": {
+        "self": "/articles?filters=us"
+      }
+    }
+  ]
+}

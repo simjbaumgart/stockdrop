@@ -1,0 +1,551 @@
+{
+  "data": {
+    "attributes": {
+      "publishOn": "2025-12-23T18:10:00-05:00",
+      "isLockedPro": false,
+      "commentCount": 0,
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "podcast": {
+          "id": 579361
+        },
+        "more-tags": {
+          "id": 698258
+        },
+        "us": {
+          "id": 326,
+          "non_theme": true
+        },
+        "communication-services": {
+          "id": 50
+        }
+      },
+      "title": "There Is No Streaming War",
+      "summary": [
+        "Netflix remains central in streaming headlines, with potential Warner Bros. Discovery and Paramount deals, but industry expert Dan Rayburn shares why investors should focus only if/when deals close.",
+        "Streaming is shifting from growth-at-all-costs to profitability, with ARPU, content spend, and ad revenue as critical investor metrics amid declining transparency.",
+        "Sports streaming is highly fragmented, with exclusive rights driving platform differentiation, but viewership data is inconsistent and often incomparable across providers.",
+        "Competition, not a 'streaming war,' defines the sector; investors must rely on hard numbers, SEC filings, and context rather than media speculation or headline-driven narratives."
+      ],
+      "isPaywalled": false,
+      "structuredInsights": null,
+      "lastModified": "2025-12-23T18:10:00-05:00",
+      "isModerated": false,
+      "availableTranslations": [],
+      "closestTradingDate": "2025-12-24",
+      "beforeOpeningHours": false,
+      "isEarningsSlides": false,
+      "isExclusive": false,
+      "isTranscript": false,
+      "excludedByTag": true,
+      "transcriptPath": null,
+      "likesCount": 0,
+      "disabledMessage": null,
+      "articleActionableItem": null,
+      "inEmbargo": false,
+      "isNoindex": false,
+      "isNoarchive": true,
+      "content": "<p data-eci=\"true\"><figure class=\"getty-figure\" data-type=\"getty-image\"><picture> <img src=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1552956894/image_1552956894.jpg?io=getty-c-w630\" alt=\"No War placard with peace sign on military army tank in protest against war.\" data-id=\"1552956894\" data-type=\"getty-image\" width=\"1536\" height=\"1024\" srcset=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1552956894/image_1552956894.jpg?io=getty-c-w1536 1536w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1552956894/image_1552956894.jpg?io=getty-c-w1280 1280w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1552956894/image_1552956894.jpg?io=getty-c-w1080 1080w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1552956894/image_1552956894.jpg?io=getty-c-w750 750w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1552956894/image_1552956894.jpg?io=getty-c-w640 640w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1552956894/image_1552956894.jpg?io=getty-c-w480 480w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1552956894/image_1552956894.jpg?io=getty-c-w320 320w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1552956894/image_1552956894.jpg?io=getty-c-w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 132px), (max-width: 1199px) calc(100vw - 666px), (max-width: 1307px) calc(100vw - 708px), 600px\" fetchpriority=\"high\"> </picture><figcaption><p class=\"item-caption\"> </p> <p class=\"item-credits\">Longfin Media/iStock via Getty Images</p></figcaption></figure><div class=\"inline_ad_placeholder\"></div></p> <p>Listen here or on the go via <a href=\"https://podcasts.apple.com/us/podcast/stock-market-live/id1653747327\" rel=\"nofollow noopener noopener\">Apple Podcasts</a> and <a href=\"https://open.spotify.com/show/30dUmqhaQJlW7qWiyltTNB?si=4cdae8002b3f492f\" rel=\"nofollow noopener\">Spotify</a></p> <p><div class=\"pcast hidden-print\">\n  <div class=\"pcast__section-1\">\n    <img alt=\"\" class=\"pcast__top-img pcast__marketing\" src=\"https://static.seekingalpha.com/uploads/2018/11/21/podcast_series_header.png?io=w640\" loading=\"lazy\">\n  </div>\n  <div class=\"pcast__section-2\"><iframe src=\"https://widget.spreaker.com/player?episode_id=69187373&amp;theme=light&amp;playlist=false&amp;playlist-continuous=false&amp;chapters-image=true&amp;episode_image_position=right&amp;hide-logo=true&amp;hide-likes=true&amp;hide-comments=true&amp;hide-sharing=true&amp;hide-download=true&amp;color=ff6900\" width=\"100%\" height=\"200px\" title=\"There is no streaming war\" frameborder=\"0\" sap-id=\"15\"></iframe></div>\n  <div class=\"pcast__section-3\">\n    <div class=\"pcast__ad-container\"></div>\n  </div>\n</div>\n</p> <p>Streaming and media expert <a href=\"https://seekingalpha.com/author/dan-rayburn\">Dan Rayburn</a> shares why investors should only care about the Warner Bros/Netflix/Paramount deal if it happens (0:40). NFL and NFLX; streaming and sports (11:00). Appropriate metrics to use in this space (18:40). Brand and revenue: Apple, Google, Amazon, Disney, Netflix (27:40). What is TV? (45:00)</p> <p><strong>Transcript</strong></p> <p><strong>Rena Sherbill: </strong>Dan Rayburn, an expert if there ever was one in the streaming space, in the media space, which encompasses so many things right now. Dan has been on a <a href=\"https://seekingalpha.com/article/4800212-netflix-is-still-king\">few times</a> before, he's been writing on, or we've been having his writing offered on Seeking Alpha for quite some time. He runs his own blog, <a href=\"https://www.streamingmediablog.com/\" rel=\"nofollow\">streamingmediablog</a>. He makes copious media appearances on various mainstream networks. Dan, welcome to the show.</p> <p>If you would start us off. What do you feel like is top of mind? Netflix (<span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/NFLX\" title=\"Netflix, Inc.\">NFLX</a></span>) is obviously in the headlines a bunch, vis-a-vis Warner Brothers (<span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/WBD\" title=\"Warner Bros. Discovery, Inc.\">WBD</a></span>), vis-a-vis <a href=\"https://seekingalpha.com/news/4533939-netflix-refinances-portion-of-59b-loan-backing-warner-bros-discovery-takeover\">the dance</a> with Paramount (<span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/PSKY\" title=\"Paramount Skydance Corporation\">PSKY</a></span>), vis-a-vis sports. What is top of mind for you or what are the few things that you're thinking about?</p> <p><strong>Dan Rayburn:</strong> There sure is a lot. Netflix is always top of mind and just thanks for having me again. We could do a podcast every single day based on the news that is put out in the industry just around sports streaming, let alone all the other types of streaming business models out there, bundling deals, pricing deals.</p> <p><a href=\"https://seekingalpha.com/article/4658865-exciting-time-for-streaming-sports-but-broadcast-plus-pay-tv-arent-dead\">Sports</a> is always an interesting one, especially because we've got in the last couple quarters, some new deals between Major League Baseball, Apple, naturally with the Formula One deal.</p> <p>Very interesting the fact that the NFL is really leveraging the streaming services in their global reach to expand their footprint as opposed to where the games always were, which were broadcasters, especially on Christmas when it has some of the highest viewing windows out there.</p> <p>All three games are going to be exclusively on Netflix and Prime Video, except in local markets for teams. I would say also for investors, focusing on the financials and what the numbers actually show.</p> <p>And that can be hard to do when there's so much speculation about what will happen with WBD, Paramount, Netflix. It seems to change every day. It's incredible how many headlines are wrong.</p> <p>I'm constantly pointing out on LinkedIn. I can't believe how many people are reporting the deal's already done. Or they say phrases like Netflix has acquired WBD.</p> <p>Like, what? How can you even create a graphic like that? It's mind boggling to me. So for investors, you also just have to understand what information is real and separate facts from opinions.</p> <p><strong>Rena Sherbill</strong> Let's get into the speculative deal between Warner Brothers and somebody. Maybe it's gonna be Paramount, maybe it's gonna be Netflix.</p> <p>Certainly some things that have developed since the initial deal with Netflix and Warner Brothers has <a href=\"https://seekingalpha.com/news/4533849-trump-allies-line-up-on-opposing-sides-in-warner-bros-takeover-fight\">happened</a> with these hostile offers from Paramount. But as you said, a lot of speculation.</p> <p>You may not be a betting man, but you're an expert in the field. You've been around a long time, 30 plus years perhaps, I think. What would you say may happen and what would you say given the various scenarios, what would you expect investors should have in mind given the various scenarios and possibilities?</p> <p><strong>Dan Rayburn:</strong> I think investors should only care about the deal if it happens. Not what could, should, might, would maybe happen because there's too many different scenarios there. I would look at what the facts are of the deals and there's two of them being discussed right now. Yes, they continue to change to some degree. They might change again based on what is offered.</p> <p>We already see where the money is coming from on the Paramount Sky Dan side. We see where Netflix has gotten the money. They've put out some regulatory filings already.</p> <p>I think if you're an investor, what you have to think about is what is the impact to consumers? And I find it fascinating that you have some large unions and others that have come out into the market and said that if Netflix acquires the portion of WBD they'd be acquiring, it's terrible because it takes a choice out of the market for consumers.</p> <p>And yet, isn't one of the biggest complaints we all have as consumers is that there's too many different streaming services? So, I don't think it's a problem as far as removing choice in the market. What we don't know is what would Netflix do from a packaging standpoint? Would Netflix roll that content into WBD content into Netflix? Would they keep HBO Max separate?</p> <p>A lot of what investors are not realizing though is also what's being proposed in this deal.</p> <p>Because as part of this deal, if it goes through with Netflix and WBD, Netflix would get live TV channels in the UK, they get TNT, they get sports rights, they get the Olympics in 2028. That's a very different business than what Netflix is in today. In addition, Netflix would be getting the platforms and systems internally that are currently providing the linear HBO channel to third party partners. MVPDs.</p> <p>Is that a business Netflix wants to be in?</p> <p>We don't know. So they're getting a bunch of assets here providing the deal goes through, that we really don't know what Netflix take on that is. However, this idea that just Netflix will acquire it and lay everybody off, they can't afford to do that. Netflix is not a studio. Only WBD is. They're still gonna have to rely on the people who produce this content, distribute it. Netflix has already said they want to continue what WBD is doing as far as releasing movies in theaters.</p> <p>Now, I understand when people say, well, that's not very specific. Maybe they shorten that window. They might. We don't know. But I think investors have to focus on this deal once it's actually done. And I should have just said in the beginning, too, to make this clear. I don't own stock in any of companies we're talking about. I'm not a financial analyst in terms of making bets.</p> <p>I don't give out investment advice. I talk to a lot of companies involved. I talk to distribution partners, studios, movie theater chains, broadcast or sports leagues, I look at the data and I try and make educated decisions based on that.</p> <p>And that's really what I think investors should be looking at. Now flip side to that, it's hard to only look at that because in the current US political environment, we know that politics plays a part of these large potential acquisitions more so than they did five or 10 years ago.</p> <p>So part of this is also going to be tied to politics. There's just no way around that. I don't hedge bets on which deal we'll go through or not go through, but it's very clear that WBD has assets that are extremely valuable from a content standpoint.</p> <p><strong>Rena Sherbill: </strong>Does the hostile offer from Paramount surprise you? Does the trajectory of this deal slash deals, does that surprise you? Does it inform any of your opinion in this realm or slightly outside of this realm?</p> <p><strong>Dan Rayburn: </strong>No, it doesn't to me because now you have people leaking text chats between two different CEOs. You have insiders talking who shouldn't be naturally, which we always have in this deal, any deal this size.</p> <p>You have rumors that are thrown out there that aren't actually based on facts or it's based on one person's opinion. So a deal of this size, it's really not surprising. We think about the industry tied to studios, streaming, sports. Yes, it often falls under media entertainment.</p> <p>We'd be hard pressed to find a deal that's being proposed that is this large and this significant over the last, call it 10 years. Yes, Amazon, MGM, Studios, different. That was just Studios only. You could think of the AT&amp;T (<a href=\"https://seekingalpha.com/symbol/T\" title=\"AT&amp;T Inc.\">T</a>) deal, DirecTV, which obviously didn't go well, but that's again, not quite the same here because AT&amp;T is a carrier. So this is just a really, really big deal as far as size, but also just the impact to the industry overall.</p> <p><strong>Rena Sherbill: </strong>I was going to say, is there any use to say, Netflix buys WBD, would you put it at like a 70% or there's truly no purpose in any of that? Let's all be patient.</p> <p><strong>Dan Rayburn: </strong>Nobody has an insight into any of that. And what happens if Paramount comes back and says, we'll now offer $35 a share?</p> <p>Changes everything overnight. I don't know that they're going to do that. There's speculation out there, but yeah, I don't make guesses. I make educated bets based on data. And right now it's just too early. The other thing we don't know is, is this going to pass regulatory scrutiny? We can talk all day long as an industry or as investors about why it should happen or why it would be great or not great, but the deal has to get done.</p> <p>The European Union is going have to look at this. The DOJ is going to look at it. Netflix own comments on the deal is 12 to 18 months to get done. They believe it will be. But remember WBD is not splitting out into two entities until the latest they've now said is Q3 of 2026.</p> <p>And then you have to go through the <a href=\"https://seekingalpha.com/news/4528995-sen-warner-says-netflix-buying-warner-bros-is-anti-monoply-nightmare\">regulatory process</a>. This potentially, if it closes, this could be two plus years. Easy. So a lot's going to change in the industry in the next two years, two and a half years. I think it's just too early to speculate on any of it.</p> <p><strong>Rena Sherbill: </strong>And why does the EU weigh in, can you explain that?</p> <p><strong>Dan Rayburn: </strong>Yeah, the EU has to weigh in based on the percentage of your revenue that comes from Europe. And in this case, it's a large enough percentage to where the EU would have to approve the deal.</p> <p>Historically, for listeners that don't know, the EU doesn't most times try and stop deals. Yeah, they do with iRobot (<a href=\"https://seekingalpha.com/symbol/IRBTQ\" title=\"iRobot Corporation\">IRBTQ</a>). There's been a couple cases here and there.</p> <p>In many cases, the EU simply says, OK, we're not going to stop it or try to stop it, but it comes with some sort of terms of some kind. And that's not uncommon at all.</p> <p>We saw that when Comcast (<a href=\"https://seekingalpha.com/symbol/CMCSA\" title=\"Comcast Corporation\">CMCSA</a>) acquired NBC. There were terms to that deal where it was approved by the DOJ, but you have to adhere to certain terms. that tends to be how the EU does looks at mergers like this, but it's it's another unknown of many unknowns.</p> <p><strong>Rena Sherbill: </strong>Yes, many unknowns across the board. Do you think it's of value to go when we're talking about streaming company by company or sport by sport?</p> <p><strong>Dan Rayburn: </strong>Ooh, that's a hard one. Because some of these tie into multiple naturally. It's up to you. I don't know how you want to do it. Maybe sport is easier.</p> <p><strong>Rena Sherbill: </strong>Let's start NFL as we are December 23rd. Christmas games about to happen.</p> <p><strong>Dan Rayburn: </strong>Okay. NFL. Well, everybody who's a listener, who's an NFL fan already knows just how fragmented NFL streaming is and viewership is. It's just, it's all over the place in terms of where you go to get what type of content, the quality of the content that it's in.</p> <p>There's a lot there to break down, but I would say the biggest thing that's fascinating right now about the NFL. We're recording this on Tuesday, December 23rd. And yesterday was an ESPN game, which brought additional data to the screen, which was interesting, a data enhanced game as they called it.</p> <p>The key thing here for listeners is between December 25th, 27th, there's five NFL games that are going to be played. None will be broadcast nationally on TV. Netflix has two games on Christmas. Amazon (<span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/AMZN\" title=\"Amazon.com, Inc.\">AMZN</a></span>) has one. It's a triple header. Peacock has an exclusive game on Saturday the 27th. And then the NFL network has one.</p> <p>So four of the five games are streaming exclusively on three different platforms. Now, of course, the games are OTA over the air. All NFL games are. And local NBC affiliates will show the exclusive game on. That's going to be on Peacock. But it just goes to show how much the NFL is relying on streaming services to get their games international and how the distribution model has changed over the last couple years.</p> <p>Because broadcasters used to have these games on the holidays. Christmas, Black Friday, wild card games. They used to have all these. And they've been stripped out of their packages to sell to, from the NFL, license, I should say, to streaming platforms because of what they're willing to pay for it. You and I don't like that.</p> <p>It makes consuming sports extremely difficult. But what consumers don't really understand is the sports leagues are not doing what's best for us They're not doing what's easy for us they're doing what makes them the most money for the league and the NFL has always been the most fragmented out there compared to say the NBA or Major League Baseball, although Major League Baseball with their new deals are gonna be fragmented as well</p> <p><strong>Rena Sherbill: </strong>And what are the numbers showing? Do we have that kind of data analysis to see if, well, for one, what are the numbers compared to regular broadcast games? Is that something that is an apples to apples comparison? Is that something that's done? And then B, is the sports coverage, is that leading to more subs? Is that leading to more revenue?</p> <p><strong>Dan Rayburn: </strong>Yeah, so you're asking the most important question here that we have in the industry, which is what is the impact of sports content on direct to consumer streaming services? And we don't have an answer.</p> <p>And the reason we don't have an answer is because none of the sports streaming outlets and almost all the, or I should say leagues and all of the direct to consumer streaming services, almost none of them break out viewership in any kind and if they do it's so high level and vague where they don't define what a viewer is that we don't know what the impact is they don't mention things on churn and retention they don't even publicly disclose Netflix as a company has never publicly disclosed its churn to Wall Street ever in history so things like churn we don't know.</p> <p><strong>Rena Sherbill: </strong>Is that by design? Like, one would think that if they had something to brag about, they'd brag about it.</p> <p><strong>Dan Rayburn: </strong>I don't think it's that. It's definitions in the streaming industry are very difficult because unlike broadcast TV where we have standards, we don't have any standard in the streaming world.</p> <p>There's nothing. We have for live events, simultaneous streams, AMA, average minute audience. You have monthly active users. No one defines it the same. Netflix just came out with a new metric they're calling monthly active viewers.</p> <p>There's all, you have concurrent streams, you have concurrent devices, you have unique streams. There's all these different metrics and the companies don't use the same methodology. And then on top of that, when they are using Nielsen, which has some of the worst data out there, you have sports leagues calling out Nielsen publicly because they don't trust their data and yet they still use them.</p> <p>And then Nielsen decided to change their methodology from what they used in previous years to something they call the big data plus panel measurement, which is not apples to apples, which everyone agrees. So how do you compare last year's viewership to this year's?</p> <p>You can't. So it makes it also very hard to figure out what has viewership been over a long period of time. That's an issue. And then you have Netflix, their monthly active viewers, the way they define a monthly active viewer on their platform is any person who watched at least one minute of ads monthly. One minute. That's it.</p> <p>And then they take that number and they multiply it by the estimated household of size. So basically how many people are on the couch? What's that reach? And that's their number. And that replaces what they call the MAU, monthly active viewers.</p> <p>So it's interesting to see how Netflix comes out with that metric, but then Amazon a month ago at their unboxed event came out and said that Prime Video now reaches 315 monthly viewers globally. But it didn't define what a viewer is. So is a viewer, you watch two seconds, 10 seconds, one second, there's any football on Prime Video, you go to amazon.com's homepage, it loads in the upper right hand corner. If I don't click on it, if I don't engage with it, am I a viewer?</p> <p>I don't know, Nielsen won't say. So part of the problem we have here and part of the problem investors have is it's very difficult to know what's actually being viewed and which platforms for what period of time.</p> <p>Outside of a few services, for instance, NBC Sports is really good breaking out viewership specifically for Peacock when they do games for NFL. Fox doesn't break it out, but Peacock does, which is nice.</p> <p>But what we don't get is, okay, that's how many AMA, average minute audience you had, but how long did people actually watch for? They won't say. So we have some pieces of data here and there, but ESPN won't break out what percentage is versus pay TV. So that causes an issue as well. So we have some numbers.</p> <p>But we don't have enough details to truly know what's going on and to your real question is, what is the impact? Is that making more people sign up? And if so, is it also making them stay longer?</p> <p><strong>Rena Sherbill: </strong>I know you're not a financial analyst, but do you have an opinion on what metrics investors should be focused on for a company like Netflix, even Amazon, if you want to weigh in, or any other companies in the space, and then also how that dovetails with the metrics that you're focused on?</p> <p><strong>Dan Rayburn: </strong>Absolutely. So while I'm not a financial analyst, what I mean by that is I'm not giving out stock recommendations. I'm not putting out reports. I'm not a buyer, sell side, institutional money manager analyst, but I am looking at financial information all day.</p> <p>I'm looking at SEC filings every single day. There's about 50 companies in my industry tied to sports media, entertainment, cloud infrastructure that I'm tracking that are public. And I'm reading every SEC filing that they put out. And the reason for that is there's a lot of really good information in the SEC filings that a lot of people just don't see because it's not in the press release. That includes cord cutting.</p> <p>Companies don't put how many cord cutters they had, take Verizon (<a href=\"https://seekingalpha.com/symbol/VZ\" title=\"Verizon Communications Inc.\">VZ</a>). Verizon doesn't put in its press release how many pay TV subscribers it lost for residential customers because they don't want to highlight it. So you got to look at the SEC document. So I am constantly looking at financial information. Anybody who's looking at this space as an investor by this space, mean, DTC, Direct to Consumer Streaming Services knows that profitability is the biggest thing over the last 18, 24 months that the industry has moved to.</p> <p>The whole get big FAST model that everybody had years ago and during COVID, that doesn't work anymore. There was a period of time where Disney's (<span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/DIS\" title=\"The Walt Disney Company\">DIS</a></span>) DTC service was losing $100 million a day. There was one quarter where they lost $1.1 billion.</p> <p>What happened over a couple of years was Wall Street then said, hey guys, forget growth at all costs, you got to get the profitability. Everybody's burning through too much money.</p> <p>And what happened? WBD over time, D2C, it achieved that. Paramount, it achieved it. Disney, it achieved it. Now, Peacock is still losing money in terms of its D2C business, but it's almost there in terms of profitability. They also all define profitability differently as well, so you have to look at their definition of that.</p> <p>But I would say the biggest thing investors want to look at, and one of the challenges is because it's being removed from most companies is ARPU, average revenue per user.</p> <p>As an investor, would you rather have more subscribers that quarter at a lower ARPU or fewer subscribers at a higher ARPU? Naturally, the higher ARPU. It's making more money on the way to profitability. What's interesting is that Netflix, Disney, and a couple of the others, Roku, have stopped announcing ARPU. They're not giving investors that data anymore.</p> <p>And part of the reasoning is, well, our business has changed so much because we now have subscription plus we have advertising. We have blended. We've got packages where we're bundling with other services where we're getting paid less in a wholesale rate.</p> <p>I understand that, but it makes it much harder to track these companies from a financial standpoint when you don't have average revenue per user. Cause one of the things you have to think about is how does offering Black Friday deals impact ARPU when you can get 12 months at three or four or five dollars a month for that service.</p> <p>Is the company actually making money on that? Chances are they're not. And that is part of the reason why this year, Peacock had no Black Friday deal. Smart. I know I saw online some consumers were like, man, that stinks. Like, where's the deal? It's smart for them because Peacock is still losing money.</p> <p>But it goes to show investors should watch how content is packaged, how it's bundled, the price increases, and then also how much money is spent on content. We do get from Netflix and a few others, the total amount of money that they'll spend on content creation and licensing every year.</p> <p>So for Netflix, it was about 18. It'll be about $18 billion this year. What you want to do is watch how that changes over time. What we don't get from Disney is a breakdown of their total content spend specific to streaming only versus broadcast.</p> <p>They just lump it up into one large number, which really isn't too helpful. But investors should look at when they can, ARPU. They should look at content spend. They, over time, should look more at ad revenue. So very few companies right now break out the percentage of total DTC revenue that comes from subscription versus advertising, but a few do.</p> <p>And over time, the demand is going to come from Wall Street to where even someone like Netflix is going to have to break that out. Because we know that's where the growth of revenue is coming over the next couple of years on the ad side, especially with Netflix with it being more targeted, owning their own ad stack.</p> <p>So I would just say as investors, you really have to look at those metrics as opposed to a lot of what I see people sharing online every day, which is, you know, this service is better than this because they have this piece of content. But we don't know that that piece of content you're referencing to actually keeps subscribers.</p> <p>Look how many shows get canceled after one season. Popularity doesn't always equal profitability. That is something I am telling investors all the time.</p> <p><strong>Rena Sherbill: </strong>And why not? Why isn't it an one to one? Because we just don't know enough of the specific numbers to extrapolate that correlation?</p> <p><strong>Dan Rayburn: </strong>We don't, but when Netflix comes out and says even though that show is popular or that series was popular, it didn't drive the engagement that we're looking to get based on the money it costs to produce it. What does that tell us? It's not a good investment of their dollars.</p> <p>Now, we don't know the numbers exactly, but streaming services come out and made that very clear over the years in reference to very specific shows or series.</p> <p>And what they're saying is the amount of money we spent on it simply doesn't warrant the feedback that we're getting as far as engagement. However, they define engagement.</p> <p>Maybe that's new signups. Maybe that's keeping people on the platform. That could also be the number of ads or what the CPM is. They measure it in lot of different ways. But a lot of it is just based on viewership. And what a lot of people in the industry don't know is just...</p> <p>What the actual viewership is for a lot of these events like world cup. Let's just use that for an instance. People talk about the world cup and how big it is and oh my God, it's this big streaming thing. It's not in 2022. The world cup streaming on Fox peaked at 1.28 million viewers. That's it. Now is the world cup huge on TV? Absolutely. It's one the largest things in the world on broadcast TV.</p> <p>Streaming in the US on Fox, 1.28 million. That's really, really small. All the talk about Apple and F1, we have numbers from ESPN. The largest US television audience on record for Formula One was 1.5 million viewers AMA. Largest, 1.5. Races this year on ABC, ESPN, ESPN2 averaged 1.3 million viewers.</p> <p>That's it. So, many don't know what is actually taking place. As far as viewership goes, they hear terms like F1 and Apple, NBA, right? And they assume that it's just huge, huge numbers out there. But the reality is a lot of these numbers are actually really, really low.</p> <p>And that's why you have to look at the numbers as an investor. What is that viewership? Now, again, comparing it year over year can be difficult based on the metrics. But I bet a lot of our listeners don't know that Fox's stream of the World Cup only did 1.2 million at peak.</p> <p>It's a low number. And then some companies don't put out anything. Now, the numbers thing too, super interesting here that we had a whole bunch of games during Thanksgiving holiday. None of the companies broke out who broadcast games during the Thanksgiving holiday. None of the companies broke out stats for streaming. None.</p> <p>And I thought that was really interesting this year that none of them wanted to give out any numbers whatsoever.</p> <p><strong>Rena Sherbill: </strong>We had an analyst on a few months ago, Jack Bowman, <a href=\"https://seekingalpha.com/article/4801156-high-conviction-ideas-with-next-gen-investors\">talking about</a> how Amazon Prime, everyone thinks that's a big money maker for Amazon, but it's actually a money loser, but a big brand amplifier for them. Is that this or is this that? Is, let's say YouTube TV and NBA and all of these things, F1 on Apple, are those brand amplifiers, but seems like not necessarily revenue boosters?</p> <p><strong>Dan Rayburn: </strong>In many cases it could be. I don't know the answer, neither does anybody else. You have to be at the company and be an insider to know. But I think the biggest question to ask here is, why does that matter?</p> <p>If you're Apple (<span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/AAPL\" title=\"Apple Inc.\">AAPL</a></span>), doesn't matter whether you lose a billion dollars or two billion dollars a year off of the Apple TV streaming service. No. It's irrelevant to your balance sheet. You can afford to. And you're not in the business of content. That's not their core business.</p> <p>So you have to look at their numbers very differently than Netflix because Netflix is in the business of content. They're not in the streaming business. Everybody says they're in a streaming business. They're not. Streaming is a technology.</p> <p>Netflix is a content business who's using streaming technology as the distribution mechanism to get it to you and me. Apple's core business is not content. Prime Video, their core business is not content. It's commerce and advertising.</p> <p>We would all love to know, industry analysts, Wall Street, everybody, we would love to know what is the actual cost to operate Prime Video and what does Amazon get in return either from advertising specifically inside Prime Video videos, all the additional potential revenue they get from people being Prime members that maybe keep the prime membership for the video.</p> <p>Do they order more products? Amazon has more data on us than I think anyone outside of Google. So they know exactly what's working and what's not.</p> <p>I think Wall Street gets too caught up on some of the companies where it's somebody had a report out I forget when saying that earlier in the year, well, Apple is losing $3 billion a year on Apple TV. So? That's a one-sided story.</p> <p>What you're not saying is what are they getting for that $3 billion they're losing here. Are they selling more hardware? Are they getting more from the services business? So you have to look at these companies and the entire ecosystem they play in, and some play in just one realm.</p> <p>Netflix does one thing. They're a content owner that distributes content via streaming technology. Now, okay, they're in the physical facilities business or whatever you want to call it because now they have a few physical locations you can go to.</p> <p>But that's a very different business than say Disney or Amazon. So I think that's the way you have to look at the businesses and the finances is what is their core business? As opposed to, it's incredible how many times the media and analysts just want to compare Netflix streaming to Apple and then they say Apple's doing a terrible job and they're losing to Netflix.</p> <p>They're not losing to Netflix. They've said, I don't know how many millions of times, we're not trying to be Netflix. It's not what we want to do.</p> <p>And to me, it's the same way when people say, well, Netflix is losing to YouTube because YouTube TV has NFL Sunday ticket and Netflix doesn't. Netflix co-CEO Greg Peters came out, it was about a month ago. Not the first time they said this, but on stage he said that bidding on an entire season of NFL games doesn't make sense for them because he said that Netflix, quote, doesn't have a way to figure out the math to know if spending so much money on a season of NFL games would make sense for the business.</p> <p>Investors should be listening to that because <a href=\"https://seekingalpha.com/symbol/NFLX/news\">Netflix</a> just said, we don't even know if we could measure the value of getting a full season NFL games at the cost we'd have to pay. They just said like, we don't know how to measure success or failure with that. Whether that's new subscribers, whether it's keeping people on the platform.</p> <p>And that's part of the problem we have to your question is, we don't have some of these companies are measuring success, whether it's short or long term. Companies like YouTube, Amazon, some of the larger ones, Apple, they're playing the long game here. So even if they're losing money for multiple years in a row, they can afford to.</p> <p><strong>Rena Sherbill:</strong> How would you lay out why Apple is investing in Apple TV?</p> <p><strong>Dan Rayburn: </strong>Apples made it pretty clear when it comes to their strategy that they want to tell stories. What they keep saying is we want to tell stories. And for them storytelling is part of what Apple is all about. It's part of the brand and the culture, how they tell a story. Whether they're telling that to their mind in hardware, software, content, services, music, whatever it may be.</p> <p>They very distinctively have called out the fact that they're cherry picking select stories that they can make that they feel they can add value to. They're not going for depth and breadth of catalog. And that has changed quite a lot over the industry.</p> <p>For listeners who remember when Netflix came to the market, at one point when Netflix really started to grow its streaming library, when you went to Netflix website, it would talk about the number of titles they had for viewing. We now have 50,000 or 80,000 titles.</p> <p>When Amazon launched in the market, it licensed a lot of the same content because back then there weren't a lot of exclusives, licensing deals. And then Amazon very quickly caught up to Netflix just in terms of depth and breadth of catalog. And you and I used to pick early on, most of us used to pick streaming services based on who had the most stuff, what options. Netflix then realized their differentiator was no longer going to be depth and breadth of content.</p> <p>It was going to be original content. And they came out and told consumers, actually going forward, we're going to have less content, but we're going to have series like House of Cards and others that we are actually creating ourselves. And we think you'll still be happy with the content we have, even though it's fewer choices in the market. And what Netflix ended up doing was actually changing consumers' consumption habits.</p> <p>Because today, do you know anyone who picks a streaming service based on whether they have 10,000, 50,000, or 100,000 hours of content, I doubt it. Maybe it's very niche, right? Some niche, know, crunchy roll, know, animation, things of that nature, makes sense. But consumer habits have changed over time.</p> <p>And so that's the other thing to watch is, from an investment standpoint, is catalog, catalog of content. Because as your catalog changes, what also changes is your cost, either produce it or license it.</p> <p><strong>Rena Sherbill: </strong>And also, is it a matter of the content fitting the personality of the brand, to your point?</p> <p><strong>Dan Rayburn: </strong>I think it is. With Apple and MLS, when that deal was first announced, Apple came out and said that they liked that a lot of MLS fans were women. It was a demographic that they really wanted to help support and target. It was a younger demographic as well. They also got rights to the content globally. There were no blackout restrictions. You could come to one place to see every single game.</p> <p>That's unheard of in today's market with the fragmentation of content. So that deal was very unique for them in a lot of ways. And yet, let's use that as an example. We now know in the last couple of months that the deal didn't work out between Apple and MLS as well as they thought it would. So MLS and Apple confirmed that they have changed their deal. The contract's gonna end three years earlier.</p> <p>Apple's giving up its option to terminate the deal after the 2027 season. And also the payment terms between the companies have been altered. Nobody has released what they are, but the terms have changed.</p> <p>In addition, you used to have to sign up for MLS season pass just to get the games. MLS season pass is no longer. It's gone. Starting next year, you're to be able to get all the games for free just through Apple TV. You don't have to have a second subscription.</p> <p>So that's a great example of where you take a brand like Apple and everyone assumes whatever Apple does, well, it'll just work. Well, the two companies after a couple of years, both changed the deal on the terms and shortened it and changed the money and changed how they packaged it and brought it to consumers because they weren't getting the results that they'd hoped for.</p> <p><strong>Rena Sherbill: </strong>What else would you say about Netflix, Amazon, Apple, anything else you would add for those companies?</p> <p><strong>Dan Rayburn: </strong>I would say when it comes to NBA, because we didn't cover them, they recently did a new deal on the market where Prime Video and Peacock have a lot of those games this year.</p> <p>And I would just say they've done a great job. The stream on Prime Video and Peacock has looked amazing. The video quality has been great. Some of the interactivity that they've done, the overlays. It's just been really, really good. I've been very impressed with them.</p> <p>The NBA returned to NBC for the first time since 2002. The company had 5.6 million viewers AMA and peaked at 7.1 million for Peacock, which was great for opening night. So, you know, interesting take here because the NBA came out and publicly said that we do believe we should be on a couple other platforms with the new deal that they were working to secure, which they have.</p> <p>But they actually called out the NFL to a degree and said, we don't think we should be on as many platforms as the NFL is.</p> <p>And what they're really saying is they believe there's a sweet spot of let's add distribution through streaming services, but let's not make it so difficult for consumers that they can't figure out on what night and what day you have what event.</p> <p>And I think the NAB has done a very good job in that regard. Whereas NFLs is fragmented as you can get and baseball is about the fragment again, because they just cut new deals.</p> <p>And sorry for anyone who's a New York Yankees fan, but next year, to watch every Yankees game, you're gonna have to have eight broadcast channels and streaming platforms. Eight. That's just ridiculous.</p> <p><strong>Rena Sherbill: </strong>I knew people that tried to watch the World Series this year and couldn't. They thought that they were gonna be able to and weren't able to.</p> <p><strong>Dan Rayburn: </strong>They can, but they don't know where to get it and that's part of the problem here because now also you have what? You have new services in the market. You have Fox One. What does it get you? What does it not get you? A price point. Consumers can't remember.</p> <p>And then you have ESPN. So you have the ESPN app, then you have ESPN Unlimited with a version of it, but then you have ESPN Plus. And then what do you get through authenticating if you're already a pay TV subscriber to ESPN?</p> <p>So the amount of services in the market continues to grow and we didn't even talk next year there's going to be another streaming service which is the TNT sports app because HBO Max which has live sports today is losing all live sports next year in the US only and they'll be going over the TNT sports app but outside the US they're not losing sports so you know I feel bad for consumers honestly because I eat sleep and breathe this industry every single day to your point for almost 30 years. This is all I do.</p> <p>And I pretty much know where everything is at any given time, but even I sometimes have to be like, man, what game is on what service tonight? But for the average consumer, it's frustrating. It's confusing. Sometimes it doesn't work. They can't log in. What are they paying for? Why is it not in high definition or 4k? Netflix, Christmas, NFL games will not be in HDR. Prime Video will be.</p> <p>Difference in quality on the same day with the NFL on two different services. And that's so different than what you and I are used to on broadcast and pay TV. When we turn it on, no matter what city we're in, no matter what pay TV service we're on, we all get the same quality.</p> <p>Streaming, that's not the case. So it's extremely confusing. The amount of text messages I get from friends and others of just, do I get this game on this date? I can't find it. It is extremely frustrating for sure.</p> <p><strong>Rena Sherbill: </strong>New frontiers, undoubtedly. Anything to say about Google (<span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/GOOG\" title=\"Alphabet Inc.\">GOOG</a></span>) (<span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/GOOGL\" title=\"Alphabet Inc.\">GOOGL</a></span>) and YouTube? YouTube seems to be making a real play in the space.</p> <p><strong>Dan Rayburn: </strong>I would say just a few things on YouTube. So YouTube TV has, in the last week, we're have to put out a blog post saying that they are gonna be rolling out 10 new YouTube TV bundles in the new year.</p> <p>Which was nice of them to tell us, but really not too helpful because they didn't tell us when they're rolling out, what the bundles are, or what they're gonna cost. I did see some of the media say, great, we can finally pay for only the channels we want.</p> <p>Wrong. I'm here to tell you that is not the way it's gonna work.</p> <p>I've already confirmed that with YouTube. You are not going to be able to pick just the four channels you want and pay for those four channels or what we call a la carte in the industry.</p> <p>That is not what's coming. So anyone who's writing about that doesn't have this right. These are going to be packages. Now, are some of them going to be cheaper, you know, what we call skinny bundles because it'll have less content, but maybe more focused content? Totally possible. YouTube TV did call out they're going to have some specific sports packages.</p> <p>But again, not knowing what it's going to be at what cost and what has blackout restrictions, it's really too hard to get excited. So I'm not sure why so many people in the media are just going crazy over this. Until we have the packages and the bundling, we really don't know much.</p> <p>Outside of that, what YouTube is doing is really very different than what others in the market are doing as far as content. And there's this whole debate right now and has been for quite some time, which is absolutely silly, is YouTube TV? Is it not YouTube TV? Who cares?</p> <p>TV is whatever the user defines. Whether it's a device or a service, it's whatever the user defines. And a lot of what people are getting wrong right now on YouTube is they're saying, well, YouTube is TV more so than ever because it recently got the exclusive rights for the Oscars. And, okay, that's cool and all, but you have to look at the entire deal in terms of what was actually announced.</p> <p>Because as part of that deal, YouTube, I shouldn't say YouTube TV, YouTube is getting the Oscars. YouTube is also getting at least 10 other events that come with it. The Governor Awards, Oscar nomination announcements, all these other events that are not on TV. This will be from 2029 to 2029.</p> <p>But in addition, this is a really big piece. There's something called the Google Arts and Culture Initiative. And this is a group at Google. And what they're going to do is they're going to help the Academy digitize components of their collection. And right now in the Academy, they say they more than 52 million items.</p> <p>So part of this deal also involved Google taking just the amazing resources it has and platforming to archive a lot of the Academy's content and provide it, you know, in one place and one portal to see all this amazing great content. Like that's a huge part of the deal.</p> <p>That's not something broadcast TV can do. So I also think for something like the Oscars and the content around the Academy, it's a great deal for YouTube as opposed to broadcast TV because when it comes to music, it crosses borders and genres and people and culture. Music resonates with lot of people around the world. There isn't a barrier.</p> <p>When it comes to specific pieces of content, especially sports, there's a lot of content that we watch in the US or vice versa that other countries have no interest in. So YouTube TV and YouTube are really doing something different, YouTube in particular.</p> <p>And then the final piece on YouTube, all the numbers people are throwing out, the Nielsen numbers, garbage, doesn't make sense because a lot of the numbers in terms of quote viewership, they're including reels or short pieces of content that are 10 or 15 seconds in length.</p> <p>Why are we comparing a 15 second video to a 90 minute video on Netflix or a four hour length NFL game on broadcast TV? So a lot of the metrics in the industry are comparing apples to bowling balls. It's just, it's not even in the ballpark.</p> <p><strong>Rena Sherbill: </strong>Yeah, as we start to understand or just slowly evolve these industries into whatever they're becoming, I think so many people still want to, well, what is this? What column do we throw this in? Is it television? Is this broadcast? Is this, know, re-dub broadcast? this?</p> <p>And it's just like, things are completely changing. We're breaking it down. They're being broken down. And I think what I'm starting to really understand throughout our conversations with you is how each company is bringing their own brand approach to it. The content, the approach, how they're servicing it, your point about the Oscars, like how many different tentacles they have as a part of that. It's super interesting if you don't want to get stuck in the old ways and put a box in a triangle.</p> <p>I think it is really interesting to understand how this is developing and evolving. What would you leave with investors? I mean, first of all, happy for you to share anything that you feel like we should have shared or could have shared. But what would you say are your final words? If not, what would you say are your final words for investors and also consumers?</p> <p><strong>Dan Rayburn: </strong>So for investors that focus on this, there is no streaming war. War is an armed conflict. It's bad. These companies that we have in the market that are competing, that's a good thing.</p> <p>Competition is good. It breeds different bundling and packaging and pricing, go-to-market strategies. All these headlines out there about Netflix won the streaming wars. Really? How do you figure that? And what are you measuring them on? Because Netflix is going to have more than $9 billion of free cash flow this year.</p> <p>This comes down to looking at numbers. Everybody has an opinion, but it seems nobody wants to separate opinions from facts these days. And of course, I'm not surprised the media, they love writing for headlines. There's no streaming war. It makes it sound like there's only one winner.</p> <p>There are multiple winners when it comes to the distribution of content. What they are all doing, whether it's music, podcasts, news, movies, they're all competing for our time, our eyeballs.</p> <p>That's the biggest thing they're competing for. We only have a certain amount of time in the day to consume as much content as we want. So they're all competing, but many of them are different forms of content, different lengths, different quality.</p> <p>You don't need a 4K video on your phone. So it comes down to the device. You ask the question of just TV and the way it's all bundled. There's no right or wrong answer, and people want to argue with each other about what is TV or what isn't.</p> <p>TV is how you view content, whatever you define as TV. Some people will say TV has to be long form, it has to be professionally produced. Younger generation doesn't think that way. There's, for investors to understand, there's not a right or wrong here. There's not a one winner takes all. And that's something that the media loves pushing because the media loves highlighting losers. And it's like, there's only one winner.</p> <p>That's not the reality in the market. We know that if you look at balance sheets. So I think that's really important to focus on. The second thing I would say is just listen to the number or look at the numbers.</p> <p>Watch who you trust. It's just incredible to the misinformation that's in my industry. Don't trust anybody, including me. Like vet my numbers. Now I always say where I got them, but it's incredible how I'll see the Wall Street Journal, the New York Times, pick whoever you want. And they'll say, well, you know, because Hulu has a hundred million subs. And it's like, no, Hulu has 54 million.</p> <p>Where'd you come up with 100? Oh, well that was an estimate someone gave. Why are you using estimates? Disney is a public company. They break out the number of subs they have for Hulu every quarter.</p> <p>So it's incredible how many times I see people writing comments on your website or just posts where just the actual factual numbers of how many subs exist or the ARPU or the fact that they don't realize in the SEC filing that Disney will say, the ARPU went down this year because of a wholesale deal with for instance, charter.</p> <p>What does that mean? Well, it's wholesale. They're getting paid less per sub. They just told you that in the SEC filing, but of course it's not in the press release. So if you really want to understand this business, it's about understanding the fundamentals that really drive the business. And that starts with better understanding the numbers because numbers don't lie. Numbers tell the story. And facts are really important.</p> <p>The amount of people who write content that say probably, likely, words that end in Y. What do they mean? Nothing. There's no concrete definition. So, it's part of the reason on LinkedIn I'm always pushing out content that says, here's the facts. These are the numbers. You can come argue if you want, but here's the link to the SEC filing. You can't argue with the numbers when it comes to the profitability.</p> <p>Now, how they measure it, of course it's different. EBITDA, some of the different ways they all do it. Okay, different accounting principles there that they all do a little bit differently. But that's also something you have to understand as well.</p> <p>If you're in the market, you have to understand the difference between how some of these numbers are reported, right? GAAP, non-GAAP, EBITDA, EPS, they don't mean the same thing. So I think for any investor, you just really need to educate yourself on the numbers.</p> <p><strong>Rena Sherbill: </strong>And the context of the industry, we just did a podcast <a href=\"https://seekingalpha.com/article/4854568-cannabis-investing-in-the-trump-era\">last week</a> about the cannabis rescheduling news and the importance of taking metrics in context in the cannabis industry. It's different than the numbers that are coming from the media industry. To your point, content is king and context also should be king.</p> <p><strong>Dan Rayburn: </strong>Context is key. And the thing I hate, obviously, as a former soldier too, is just the whole war thing. Like, just, it's not a war.</p> <p>What we have is competition. The industry is great. And 20 years ago, for people that don't know the industry, weren't in the industry, man, the amount of advancements that came out literally every quarter, because one company was looking to outdo one another with better video quality back then, which, you know, didn't exist. It was amazing. It was fun. It was awesome. And that's still what we have today.</p> <p>But it's not a war, it's just, really good, healthy competition.</p> <p><strong>Rena Sherbill: </strong>Yes, point taken and should be taken by all. Dan, where can people find your work, your thoughts?</p> <p><strong>Dan Rayburn: </strong>So I spend a lot of time, really all my time, just publishing free content on LinkedIn. So they can just search for me on LinkedIn. I'm pushing out, some days it's five to 10 pieces of content a day.</p> <p>All of it is tied to numbers, facts. I talk to a lot of companies who give me information behind the scenes that I can put out. Some of it obviously is technical, tied to how streams work, bit rates, formats, video quality. I spend a lot of time on TV as well. CNBC, Schwab Network, Bloomberg TV, BBC News. My blog, it's <a href=\"https://streammediablog.com\" rel=\"nofollow\">streammediablog.com</a>.</p> <p>I tend to do longer pieces. I speak at a lot of events as well. But my job is one thing and one thing only, to inform, educate, and empower others. So everything I'm doing is free. I give out information for free. My cell phone number is listed on my blog and LinkedIn. Anyone has any questions at any time in the industry, they can call me free of charge.</p> <p>So I talk to broadcasters, sports leagues, content owners, pay TV providers, institutional money managers, all the OTT platforms, vendors in the market. I'm fortunate to be in a position now where I can just spend all day just helping to educate people. That's my goal.</p> <p><strong>Rena Sherbill: </strong>Do you have a favorite audience to speak to?</p> <p><strong>Dan Rayburn: </strong>That's a good question. I would say I'd like talking to institutional money managers simply because the vast majority of them are not specialists.</p> <p>They're generalists. So they have to track 50 companies in their portfolio. And so you can really educate them very well when it comes to what a couple companies are doing with information they're just not aware of because they don't really have the time to find it. I would say the other would be sports leagues.</p> <p>Many of them give me an insight into what they're thinking. Not now, but what is the future of entertainment look like, whether it's on an airplane, getting a game, whether it's on mobile, and especially outside the US. We talk so much about streaming in the US, but it's incredible what the Zone and Fubo and some of these others are doing outside the US. There's amazing deployments and implementations.</p> <p>One thing to keep in mind is, streaming is global, it's not just US centric. So I love talking to the sports leagues because they're always looking at many different ways their businesses can and are disrupted and over what period of time.</p> <p><strong>Rena Sherbill: </strong>Appreciate this conversation, Dan. Happy New Year, happy holidays. Thanks for coming on and sharing so much insight. Thank you for being so generous with your time and thoughts.</p> <div class=\"before_last_paragraph-piano-placeholder\"></div><p><strong>Dan Rayburn: </strong>Thank you. Appreciate it. Always love talking about this. Appreciate everyone listening. Any questions, reach out anytime.</p>",
+      "quickInsights": [
+        {
+          "question": "How should investors approach the rumored NFLX/WBD/PSKY deal?",
+          "answer": "Investors should ignore speculation and only assess the deal if it closes, focusing on regulatory hurdles, asset integration, and the impact on Netflix\u2019s business model."
+        },
+        {
+          "question": "Which financial metrics are most critical for streaming sector analysis?",
+          "answer": "Profitability, ARPU, content spend, and ad revenue breakdowns are essential; however, many companies have reduced ARPU disclosure, complicating comparative analysis."
+        },
+        {
+          "question": "What is the forward outlook for sports streaming\u2019s impact on subscriber growth and retention?",
+          "answer": "The impact remains unclear due to inconsistent, non-standardized viewership and churn data; investors should monitor evolving metrics and packaging strategies for clarity."
+        }
+      ],
+      "twitContent": "There Is No Streaming War $NFLX $WBD $PSKY #business #trading #finance https://seekingalpha.com/article/4855483-there-is-no-streaming-war?source=tweet",
+      "isReit": false,
+      "videoData": null,
+      "marketingBulletVariant": null,
+      "marketingBio": null,
+      "audioDuration": null,
+      "originalTitle": "There Is No Streaming War"
+    },
+    "relationships": {
+      "author": {
+        "data": {}
+      },
+      "sentiments": {
+        "data": []
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "97"
+          },
+          {
+            "id": "5332"
+          },
+          {},
+          {
+            "id": "562"
+          },
+          {
+            "id": "86"
+          },
+          {
+            "id": "146"
+          },
+          {
+            "id": "544"
+          },
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      "secondaryTickers": {
+        "data": [
+          {
+            "id": "651"
+          },
+          {}
+        ]
+      },
+      "otherTags": {
+        "data": [
+          {},
+          {
+            "id": "8070"
+          },
+          {},
+          {},
+          {
+            "id": "97"
+          },
+          {
+            "id": "5332"
+          },
+          {},
+          {
+            "id": "562"
+          },
+          {
+            "id": "86"
+          },
+          {
+            "id": "146"
+          },
+          {
+            "id": "544"
+          },
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {
+            "id": "651"
+          },
+          {},
+          {
+            "id": "9082"
+          },
+          {},
+          {},
+          {
+            "id": "326"
+          }
+        ]
+      },
+      "coAuthors": {
+        "data": [
+          {},
+          {},
+          {}
+        ]
+      },
+      "presentations": {
+        "data": []
+      },
+      "updates": {
+        "data": []
+      },
+      "corrections": {
+        "data": []
+      }
+    },
+    "links": {
+      "schemaImage": []
+    }
+  },
+  "included": [
+    {
+      "attributes": {
+        "company": null,
+        "userId": 57095211,
+        "tagId": 634377,
+        "bio": "Seeking Alpha's deep dive stock analysis and topical takes on the market with top analysts and industry experts.<p>\r\n<p>Also available on all podcast platforms!",
+        "image": {},
+        "deactivated": null,
+        "memberSince": 2022,
+        "isRss": false,
+        "contributorSince": 2022,
+        "followersCount": 11444
+      },
+      "relationships": {
+        "user": {
+          "data": {}
+        },
+        "userBioTags": {
+          "data": []
+        },
+        "authorResearch": {
+          "data": null
+        }
+      },
+      "links": {
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "attributes": {
+        "company": null,
+        "userId": 148951,
+        "tagId": 8070,
+        "bio": "<p>Dan Rayburn is considered to be one of the foremost authorities, speakers, and writers on streaming media technology and online video business models. An avid blogger, author and analyst, Dan is often referred to as the \"voice of the industry\" and has been quoted in more than a thousand news items by nearly every major media outlet over the past twenty years. His blog (streamingmediablog.com) is one of the most widely read sites for broadcasters, content owners, Wall Street money managers and industry executives in the online video sector. His articles have been published by the WSJ, NYT, CNN, Huff Post, Fortune, Business Insider, Gizmodo and he has been interviewed on Bloomberg, FOX, CNN, CBS, CNBC, and NPR amongst others. Due to his expertise in the content delivery market, he has also received invitations to speak as a witness at hearings by both the U.S. Senate and U.S. House of Representatives on topics pertaining to net neutrality, telecom mergers and content delivery architectures. He is also the Chairman for the NAB Streaming Summit conferences that take place in Las Vegas and NY. nabstreamingsummit.com<br></p>",
+        "image": {},
+        "deactivated": null,
+        "memberSince": 2008,
+        "isRss": true,
+        "contributorSince": 2007,
+        "followersCount": 984
+      },
+      "relationships": {
+        "user": {
+          "data": {}
+        },
+        "authorResearch": {
+          "data": null
+        }
+      },
+      "links": {
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "attributes": {
+        "company": null,
+        "userId": 59076959,
+        "tagId": 762205,
+        "bio": "Investors' one stop source for all of Seeking Alpha's podcasts: </li> <li>Wall Street Breakfast</li> <li>Investing Experts </li> <li>The Cannabis Investing Podcast \r\n<p>Listen and read the transcript here or listen on any podcast platform!",
+        "image": {},
+        "deactivated": null,
+        "memberSince": 2023,
+        "isRss": false,
+        "contributorSince": 2023,
+        "followersCount": 1962
+      },
+      "relationships": {
+        "user": {
+          "data": {}
+        },
+        "authorResearch": {
+          "data": null
+        }
+      },
+      "links": {
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "attributes": {
+        "company": null,
+        "userId": 253705,
+        "tagId": 598534,
+        "bio": "<p>Rena Sherbill is the Director of Content Programming at Seeking Alpha. She is the host and producer of Investing Experts Podcast and Wall Street Roundup, published every Friday on our Wall Street Breakfast podcast, and is the creator of The Cannabis Investing Podcast. </p><p>Her goal is to bring investors insight through informed conversations. She has been with Seeking Alpha for over a decade and is passionate about bringing context to content.</p><p>Rena graduated from New York University with a degree in Journalism. She is currently based in California and Colorado. You can reach her at rena@seekingalpha.com.</p>",
+        "image": {},
+        "nick": "Rena Sherbill, SA Team",
+        "deactivated": null,
+        "memberSince": 2008,
+        "isRss": false,
+        "contributorSince": 2019,
+        "followersCount": 213
+      },
+      "relationships": {
+        "user": {
+          "data": {}
+        },
+        "authorResearch": {
+          "data": null
+        }
+      },
+      "links": {
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "id": "97",
+      "attributes": {
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "id": "5332",
+      "attributes": {
+        "company": "Warner Bros. Discovery, Inc.",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "id": "562",
+      "attributes": {
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "id": "86",
+      "attributes": {
+        "company": "The Walt Disney Company",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "id": "146",
+      "attributes": {
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "id": "544",
+      "attributes": {
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "fundTypeId": 8,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "fundTypeId": 8,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "fundTypeId": 8,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "fundTypeId": 8,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": "The Walt Disney Company",
+        "fundTypeId": 8,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "fundTypeId": 8,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "fundTypeId": 8,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "id": "651",
+      "attributes": {
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "id": "8070",
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "name": "Rena Sherbill, SA Team",
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "id": "9082",
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    },
+    {
+      "id": "326",
+      "attributes": {
+        "company": null
+      },
+      "links": {}
+    }
+  ]
+}

@@ -1,0 +1,2151 @@
+{
+  "data": [
+    {
+      "id": "4856051",
+      "type": "article",
+      "attributes": {
+        "publishOn": "2025-12-28T06:44:14-05:00",
+        "isLockedPro": false,
+        "commentCount": 0,
+        "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2234102068/image_2234102068.jpg",
+        "videoPreviewUrl": null,
+        "videoDuration": null,
+        "themes": {
+          "dividend-quick-picks-lists": {
+            "title": "Dividend Quick Picks & Lists",
+            "slug": "dividend-quick-picks-lists"
+          },
+          "value": {
+            "title": "Value",
+            "slug": "value"
+          },
+          "income": {
+            "title": "Income",
+            "slug": "income"
+          },
+          "dividend-increase": {
+            "title": "Dividend Increase",
+            "slug": "dividend-increase"
+          }
+        },
+        "title": "Best Dividend Kings: December 2025",
+        "isPaywalled": false,
+        "structuredInsights": null
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "id": "105081",
+            "type": "author"
+          }
+        },
+        "sentiments": {
+          "data": []
+        },
+        "primaryTickers": {
+          "data": []
+        },
+        "secondaryTickers": {
+          "data": [
+            {
+              "id": "54",
+              "type": "tag"
+            },
+            {
+              "id": "1135",
+              "type": "tag"
+            },
+            {
+              "id": "1749",
+              "type": "tag"
+            },
+            {
+              "id": "2660",
+              "type": "tag"
+            },
+            {
+              "id": "223",
+              "type": "tag"
+            },
+            {
+              "id": "9942",
+              "type": "tag"
+            },
+            {
+              "id": "21932",
+              "type": "tag"
+            },
+            {
+              "id": "92371",
+              "type": "tag"
+            },
+            {
+              "id": "570860",
+              "type": "tag"
+            },
+            {
+              "id": "56",
+              "type": "tag"
+            },
+            {
+              "id": "225",
+              "type": "tag"
+            },
+            {
+              "id": "159",
+              "type": "tag"
+            },
+            {
+              "id": "4522",
+              "type": "tag"
+            },
+            {
+              "id": "62",
+              "type": "tag"
+            },
+            {
+              "id": "9979",
+              "type": "tag"
+            },
+            {
+              "id": "2736",
+              "type": "tag"
+            },
+            {
+              "id": "4998",
+              "type": "tag"
+            },
+            {
+              "id": "5309",
+              "type": "tag"
+            },
+            {
+              "id": "1183",
+              "type": "tag"
+            },
+            {
+              "id": "3061",
+              "type": "tag"
+            },
+            {
+              "id": "6028",
+              "type": "tag"
+            },
+            {
+              "id": "4418",
+              "type": "tag"
+            },
+            {
+              "id": "891",
+              "type": "tag"
+            },
+            {
+              "id": "616921",
+              "type": "tag"
+            },
+            {
+              "id": "616800",
+              "type": "tag"
+            },
+            {
+              "id": "3367",
+              "type": "tag"
+            },
+            {
+              "id": "1200",
+              "type": "tag"
+            },
+            {
+              "id": "1953",
+              "type": "tag"
+            },
+            {
+              "id": "1313",
+              "type": "tag"
+            },
+            {
+              "id": "3449",
+              "type": "tag"
+            },
+            {
+              "id": "4140",
+              "type": "tag"
+            },
+            {
+              "id": "3781",
+              "type": "tag"
+            },
+            {
+              "id": "7527",
+              "type": "tag"
+            },
+            {
+              "id": "1565",
+              "type": "tag"
+            },
+            {
+              "id": "3448",
+              "type": "tag"
+            },
+            {
+              "id": "8501",
+              "type": "tag"
+            },
+            {
+              "id": "170",
+              "type": "tag"
+            },
+            {
+              "id": "3066",
+              "type": "tag"
+            },
+            {
+              "id": "19044",
+              "type": "tag"
+            },
+            {
+              "id": "5640",
+              "type": "tag"
+            },
+            {
+              "id": "2236",
+              "type": "tag"
+            },
+            {
+              "id": "2752",
+              "type": "tag"
+            },
+            {
+              "id": "2567",
+              "type": "tag"
+            },
+            {
+              "id": "791",
+              "type": "tag"
+            },
+            {
+              "id": "675014",
+              "type": "tag"
+            },
+            {
+              "id": "1433",
+              "type": "tag"
+            },
+            {
+              "id": "236",
+              "type": "tag"
+            },
+            {
+              "id": "2568",
+              "type": "tag"
+            },
+            {
+              "id": "4751",
+              "type": "tag"
+            },
+            {
+              "id": "4996",
+              "type": "tag"
+            },
+            {
+              "id": "4473",
+              "type": "tag"
+            },
+            {
+              "id": "1032",
+              "type": "tag"
+            },
+            {
+              "id": "6164",
+              "type": "tag"
+            },
+            {
+              "id": "4024",
+              "type": "tag"
+            },
+            {
+              "id": "4949",
+              "type": "tag"
+            },
+            {
+              "id": "2123",
+              "type": "tag"
+            },
+            {
+              "id": "9981",
+              "type": "tag"
+            },
+            {
+              "id": "9911",
+              "type": "tag"
+            },
+            {
+              "id": "2341",
+              "type": "tag"
+            }
+          ]
+        },
+        "otherTags": {
+          "data": [
+            {
+              "id": "587158",
+              "type": "tag"
+            },
+            {
+              "id": "17428",
+              "type": "tag"
+            },
+            {
+              "id": "115492",
+              "type": "tag"
+            },
+            {
+              "id": "601405",
+              "type": "tag"
+            },
+            {
+              "id": "115182",
+              "type": "tag"
+            },
+            {
+              "id": "17335",
+              "type": "tag"
+            },
+            {
+              "id": "16549",
+              "type": "tag"
+            },
+            {
+              "id": "114682",
+              "type": "tag"
+            },
+            {
+              "id": "114692",
+              "type": "tag"
+            }
+          ]
+        }
+      },
+      "links": {
+        "self": "/article/4856051-best-dividend-kings-december-2025"
+      }
+    },
+    {
+      "id": "4856050",
+      "type": "article",
+      "attributes": {
+        "publishOn": "2025-12-28T06:37:53-05:00",
+        "isLockedPro": false,
+        "commentCount": 0,
+        "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1173507717/image_1173507717.jpg",
+        "videoPreviewUrl": null,
+        "videoDuration": null,
+        "themes": {
+          "long-ideas": {
+            "title": "Long Ideas",
+            "slug": "long-ideas"
+          },
+          "growth": {
+            "title": "Growth",
+            "slug": "growth"
+          },
+          "momentum": {
+            "title": "Momentum",
+            "slug": "momentum"
+          },
+          "margin-expansion": {
+            "title": "Margin Expansion",
+            "slug": "margin-expansion"
+          },
+          "new-market-opportunity": {
+            "title": "New Market Opportunity",
+            "slug": "new-market-opportunity"
+          },
+          "new-operational-efficiencies-synergies": {
+            "title": "New Operational Efficiencies / Synergies",
+            "slug": "new-operational-efficiencies-synergies"
+          },
+          "secular-growth": {
+            "title": "Secular Growth",
+            "slug": "secular-growth"
+          },
+          "multiple-contraction": {
+            "title": "Multiple Contraction",
+            "slug": "multiple-contraction"
+          },
+          "new-earning-asset": {
+            "title": "New Earning Asset",
+            "slug": "new-earning-asset"
+          }
+        },
+        "title": "Broadcom: Aggressive Revisions Justify Strong Buy Upgrade",
+        "isPaywalled": false,
+        "structuredInsights": null
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "id": "107760",
+            "type": "author"
+          }
+        },
+        "sentiments": {
+          "data": []
+        },
+        "primaryTickers": {
+          "data": [
+            {
+              "id": "14539",
+              "type": "tag"
+            },
+            {
+              "id": "765193",
+              "type": "tag"
+            }
+          ]
+        },
+        "secondaryTickers": {
+          "data": []
+        },
+        "otherTags": {
+          "data": [
+            {
+              "id": "780980",
+              "type": "tag"
+            },
+            {
+              "id": "1936",
+              "type": "tag"
+            },
+            {
+              "id": "115472",
+              "type": "tag"
+            },
+            {
+              "id": "115482",
+              "type": "tag"
+            },
+            {
+              "id": "142841",
+              "type": "tag"
+            },
+            {
+              "id": "142871",
+              "type": "tag"
+            },
+            {
+              "id": "142881",
+              "type": "tag"
+            },
+            {
+              "id": "142971",
+              "type": "tag"
+            },
+            {
+              "id": "548976",
+              "type": "tag"
+            },
+            {
+              "id": "548986",
+              "type": "tag"
+            },
+            {
+              "id": "17335",
+              "type": "tag"
+            },
+            {
+              "id": "662815",
+              "type": "tag"
+            },
+            {
+              "id": "10727",
+              "type": "tag"
+            },
+            {
+              "id": "114682",
+              "type": "tag"
+            },
+            {
+              "id": "114692",
+              "type": "tag"
+            },
+            {
+              "id": "698258",
+              "type": "tag"
+            },
+            {
+              "id": "326",
+              "type": "tag"
+            }
+          ]
+        }
+      },
+      "links": {
+        "self": "/article/4856050-broadcom-aggressive-revisions-justify-strong-buy-upgrade"
+      }
+    },
+    {
+      "id": "4856048",
+      "type": "article",
+      "attributes": {
+        "publishOn": "2025-12-28T06:26:52-05:00",
+        "isLockedPro": false,
+        "commentCount": 0,
+        "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2169358315/image_2169358315.jpg",
+        "videoPreviewUrl": null,
+        "videoDuration": null,
+        "themes": {
+          "long-ideas": {
+            "title": "Long Ideas",
+            "slug": "long-ideas"
+          },
+          "relative-valuation": {
+            "title": "Relative Valuation",
+            "slug": "relative-valuation"
+          },
+          "turnaround": {
+            "title": "Turnaround",
+            "slug": "turnaround"
+          }
+        },
+        "title": "Nike: On A Long And Winding Road To Recovery - Buy",
+        "isPaywalled": false,
+        "structuredInsights": null
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "id": "106922",
+            "type": "author"
+          }
+        },
+        "sentiments": {
+          "data": []
+        },
+        "primaryTickers": {
+          "data": [
+            {
+              "id": "917",
+              "type": "tag"
+            },
+            {
+              "id": "764546",
+              "type": "tag"
+            }
+          ]
+        },
+        "secondaryTickers": {
+          "data": []
+        },
+        "otherTags": {
+          "data": [
+            {
+              "id": "684902",
+              "type": "tag"
+            },
+            {
+              "id": "1936",
+              "type": "tag"
+            },
+            {
+              "id": "115332",
+              "type": "tag"
+            },
+            {
+              "id": "115382",
+              "type": "tag"
+            },
+            {
+              "id": "17335",
+              "type": "tag"
+            },
+            {
+              "id": "608068",
+              "type": "tag"
+            },
+            {
+              "id": "10727",
+              "type": "tag"
+            },
+            {
+              "id": "114692",
+              "type": "tag"
+            },
+            {
+              "id": "698258",
+              "type": "tag"
+            },
+            {
+              "id": "326",
+              "type": "tag"
+            }
+          ]
+        }
+      },
+      "links": {
+        "self": "/article/4856048-nike-on-a-long-and-winding-road-to-recovery-buy"
+      }
+    },
+    {
+      "id": "4856047",
+      "type": "article",
+      "attributes": {
+        "publishOn": "2025-12-28T06:20:04-05:00",
+        "isLockedPro": false,
+        "commentCount": 3,
+        "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2241972160/image_2241972160.jpg",
+        "videoPreviewUrl": null,
+        "videoDuration": null,
+        "themes": {
+          "market-outlook": {
+            "title": "Market Outlook",
+            "slug": "market-outlook"
+          }
+        },
+        "title": "Brace For Volatile January, And The Likely Beginning Of A Bear Market",
+        "isPaywalled": false,
+        "structuredInsights": null
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "id": "44021",
+            "type": "author"
+          }
+        },
+        "sentiments": {
+          "data": []
+        },
+        "primaryTickers": {
+          "data": [
+            {
+              "id": "587766",
+              "type": "tag"
+            },
+            {
+              "id": "603998",
+              "type": "tag"
+            },
+            {
+              "id": "598187",
+              "type": "tag"
+            },
+            {
+              "id": "590407",
+              "type": "tag"
+            },
+            {
+              "id": "54",
+              "type": "tag"
+            },
+            {
+              "id": "55",
+              "type": "tag"
+            },
+            {
+              "id": "53",
+              "type": "tag"
+            },
+            {
+              "id": "338",
+              "type": "tag"
+            },
+            {
+              "id": "16503",
+              "type": "tag"
+            },
+            {
+              "id": "339",
+              "type": "tag"
+            }
+          ]
+        },
+        "secondaryTickers": {
+          "data": [
+            {
+              "id": "628303",
+              "type": "tag"
+            },
+            {
+              "id": "628298",
+              "type": "tag"
+            },
+            {
+              "id": "603962",
+              "type": "tag"
+            }
+          ]
+        },
+        "otherTags": {
+          "data": [
+            {
+              "id": "96731",
+              "type": "tag"
+            },
+            {
+              "id": "506",
+              "type": "tag"
+            },
+            {
+              "id": "17335",
+              "type": "tag"
+            },
+            {
+              "id": "569864",
+              "type": "tag"
+            },
+            {
+              "id": "781294",
+              "type": "tag"
+            },
+            {
+              "id": "606619",
+              "type": "tag"
+            },
+            {
+              "id": "608068",
+              "type": "tag"
+            },
+            {
+              "id": "603709",
+              "type": "tag"
+            },
+            {
+              "id": "12627",
+              "type": "tag"
+            },
+            {
+              "id": "698258",
+              "type": "tag"
+            },
+            {
+              "id": "326",
+              "type": "tag"
+            }
+          ]
+        }
+      },
+      "links": {
+        "self": "/article/4856047-brace-for-volatile-january-likely-beginning-of-bear-market"
+      }
+    },
+    {
+      "id": "4856046",
+      "type": "article",
+      "attributes": {
+        "publishOn": "2025-12-28T06:19:31-05:00",
+        "isLockedPro": false,
+        "commentCount": 0,
+        "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1367511149/image_1367511149.jpg",
+        "videoPreviewUrl": null,
+        "videoDuration": null,
+        "themes": {
+          "income": {
+            "title": "Income",
+            "slug": "income"
+          },
+          "overleveraged": {
+            "title": "Overleveraged",
+            "slug": "overleveraged"
+          },
+          "value-trap": {
+            "title": "Value Trap",
+            "slug": "value-trap"
+          }
+        },
+        "title": "FS KKR Capital: NAV Discount Reflects Hidden Portfolio Risks",
+        "isPaywalled": false,
+        "structuredInsights": null
+      },
+      "relationships": {
+        "author": {
+          "data": {
+            "id": "106208",
+            "type": "author"
+          }
+        },
+        "sentiments": {
+          "data": []
+        },
+        "primaryTickers": {
+          "data": [
+            {
+              "id": "586590",
+              "type": "tag"
+            }
+          ]
+        },
+        "secondaryTickers": {
+          "data": [
+            {
+              "id": "7109",
+              "type": "tag"
+            },
+            {
+              "id": "575086",
+              "type": "tag"
+            }
+          ]
+        },
+        "otherTags": {
+          "data": [
+            {
+              "id": "610386",
+              "type": "tag"
+            },
+            {
+              "id": "601405",
+              "type": "tag"
+            },
+            {
+              "id": "549006",
+              "type": "tag"
+            },
+            {
+              "id": "549076",
+              "type": "tag"
+            },
+            {
+              "id": "17335",
+              "type": "tag"
+            },
+            {
+              "id": "150933",
+              "type": "tag"
+            },
+            {
+              "id": "608068",
+              "type": "tag"
+            },
+            {
+              "id": "114692",
+              "type": "tag"
+            },
+            {
+              "id": "114682",
+              "type": "tag"
+            },
+            {
+              "id": "698258",
+              "type": "tag"
+            },
+            {
+              "id": "326",
+              "type": "tag"
+            }
+          ]
+        }
+      },
+      "links": {
+        "self": "/article/4856046-fs-kkr-capital-nav-discount-reflects-hidden-portfolio-risks"
+      }
+    }
+  ],
+  "included": [
+    {
+      "id": "105081",
+      "type": "author",
+      "attributes": {
+        "company": null,
+        "slug": "dividend-yield-theorist",
+        "userId": 18824771,
+        "tagId": 587158,
+        "bio": "I have a masters degree in Analytics from Northwestern University and a bachelors degree in Accounting. I have worked in the investment arena for over 10 years starting as an analyst and working my way up to a management role. Dividend investing is a personal hobby and I look forward to sharing my thoughts with the Seeking Alpha community.",
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/018/824/771/small_pic.png",
+          "medium": "https://seekingalpha.com/images/users_profile/018/824/771/medium_pic.png",
+          "big": "https://seekingalpha.com/images/users_profile/018/824/771/big_pic.png",
+          "extra_large": "https://seekingalpha.com/images/users_profile/018/824/771/extra_large_pic.png"
+        },
+        "nick": "Dividend Yield Theorist",
+        "deactivated": null,
+        "memberSince": 2013,
+        "isRss": false,
+        "contributorSince": 2019,
+        "followersCount": 9568
+      },
+      "relationships": {
+        "user": {
+          "data": {
+            "id": "18824771",
+            "type": "user"
+          }
+        }
+      },
+      "links": {
+        "self": "/author/dividend-yield-theorist",
+        "profileUrl": "/author/dividend-yield-theorist",
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "id": "54",
+      "type": "tag",
+      "attributes": {
+        "slug": "spy",
+        "name": "SPY",
+        "equityType": "etf",
+        "company": "SPDR\u00ae S&P 500\u00ae ETF",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/SPY"
+      }
+    },
+    {
+      "id": "1135",
+      "type": "tag",
+      "attributes": {
+        "slug": "jnj",
+        "name": "JNJ",
+        "equityType": "stocks",
+        "company": "Johnson & Johnson",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/JNJ"
+      }
+    },
+    {
+      "id": "1749",
+      "type": "tag",
+      "attributes": {
+        "slug": "nue",
+        "name": "NUE",
+        "equityType": "stocks",
+        "company": "Nucor Corporation",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/NUE"
+      }
+    },
+    {
+      "id": "2660",
+      "type": "tag",
+      "attributes": {
+        "slug": "ph",
+        "name": "PH",
+        "equityType": "stocks",
+        "company": "Parker-Hannifin Corporation",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/PH"
+      }
+    },
+    {
+      "id": "223",
+      "type": "tag",
+      "attributes": {
+        "slug": "nfg",
+        "name": "NFG",
+        "equityType": "stocks",
+        "company": "National Fuel Gas Company",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/NFG"
+      }
+    },
+    {
+      "id": "9942",
+      "type": "tag",
+      "attributes": {
+        "slug": "grc",
+        "name": "GRC",
+        "equityType": "stocks",
+        "company": "The Gorman-Rupp Company",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/GRC"
+      }
+    },
+    {
+      "id": "21932",
+      "type": "tag",
+      "attributes": {
+        "slug": "cduaf",
+        "name": "CDUAF",
+        "equityType": "stocks",
+        "company": "Canadian Utilities LimitedA",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/CDUAF"
+      }
+    },
+    {
+      "id": "92371",
+      "type": "tag",
+      "attributes": {
+        "slug": "abbv",
+        "name": "ABBV",
+        "equityType": "stocks",
+        "company": "AbbVie Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/ABBV"
+      }
+    },
+    {
+      "id": "570860",
+      "type": "tag",
+      "attributes": {
+        "slug": "fts",
+        "name": "FTS",
+        "equityType": "stocks",
+        "company": "Fortis Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/FTS"
+      }
+    },
+    {
+      "id": "56",
+      "type": "tag",
+      "attributes": {
+        "slug": "wmt",
+        "name": "WMT",
+        "equityType": "stocks",
+        "company": "Walmart Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/WMT"
+      }
+    },
+    {
+      "id": "225",
+      "type": "tag",
+      "attributes": {
+        "slug": "nwn",
+        "name": "NWN",
+        "equityType": "stocks",
+        "company": "Northwest Natural Holding Company",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/NWN"
+      }
+    },
+    {
+      "id": "159",
+      "type": "tag",
+      "attributes": {
+        "slug": "bkh",
+        "name": "BKH",
+        "equityType": "stocks",
+        "company": "Black Hills Corporation",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/BKH"
+      }
+    },
+    {
+      "id": "4522",
+      "type": "tag",
+      "attributes": {
+        "slug": "tr",
+        "name": "TR",
+        "equityType": "stocks",
+        "company": "Tootsie Roll Industries, Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/TR"
+      }
+    },
+    {
+      "id": "62",
+      "type": "tag",
+      "attributes": {
+        "slug": "tgt",
+        "name": "TGT",
+        "equityType": "stocks",
+        "company": "Target Corporation",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/TGT"
+      }
+    },
+    {
+      "id": "9979",
+      "type": "tag",
+      "attributes": {
+        "slug": "scl",
+        "name": "SCL",
+        "equityType": "stocks",
+        "company": "Stepan Company",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/SCL"
+      }
+    },
+    {
+      "id": "2736",
+      "type": "tag",
+      "attributes": {
+        "slug": "gww",
+        "name": "GWW",
+        "equityType": "stocks",
+        "company": "W.W. Grainger, Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/GWW"
+      }
+    },
+    {
+      "id": "4998",
+      "type": "tag",
+      "attributes": {
+        "slug": "hto",
+        "name": "HTO",
+        "equityType": "stocks",
+        "company": "H2O America",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/HTO"
+      }
+    },
+    {
+      "id": "5309",
+      "type": "tag",
+      "attributes": {
+        "slug": "ful",
+        "name": "FUL",
+        "equityType": "stocks",
+        "company": "H.B. Fuller Company",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/FUL"
+      }
+    },
+    {
+      "id": "1183",
+      "type": "tag",
+      "attributes": {
+        "slug": "spgi",
+        "name": "SPGI",
+        "equityType": "stocks",
+        "company": "S&P Global Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/SPGI"
+      }
+    },
+    {
+      "id": "3061",
+      "type": "tag",
+      "attributes": {
+        "slug": "swk",
+        "name": "SWK",
+        "equityType": "stocks",
+        "company": "Stanley Black & Decker, Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/SWK"
+      }
+    },
+    {
+      "id": "6028",
+      "type": "tag",
+      "attributes": {
+        "slug": "gpc",
+        "name": "GPC",
+        "equityType": "stocks",
+        "company": "Genuine Parts Company",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/GPC"
+      }
+    },
+    {
+      "id": "4418",
+      "type": "tag",
+      "attributes": {
+        "slug": "mzti",
+        "name": "MZTI",
+        "equityType": "stocks",
+        "company": "The Marzetti Company",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/MZTI"
+      }
+    },
+    {
+      "id": "891",
+      "type": "tag",
+      "attributes": {
+        "slug": "pg",
+        "name": "PG",
+        "equityType": "stocks",
+        "company": "The Procter & Gamble Company",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/PG"
+      }
+    },
+    {
+      "id": "616921",
+      "type": "tag",
+      "attributes": {
+        "slug": "fts:ca",
+        "name": "FTS:CA",
+        "equityType": "stocks",
+        "company": "Fortis Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/FTS:CA"
+      }
+    },
+    {
+      "id": "616800",
+      "type": "tag",
+      "attributes": {
+        "slug": "cu:ca",
+        "name": "CU:CA",
+        "equityType": "stocks",
+        "company": "Canadian Utilities Limited",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/CU:CA"
+      }
+    },
+    {
+      "id": "3367",
+      "type": "tag",
+      "attributes": {
+        "slug": "abm",
+        "name": "ABM",
+        "equityType": "stocks",
+        "company": "ABM Industries Incorporated",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/ABM"
+      }
+    },
+    {
+      "id": "1200",
+      "type": "tag",
+      "attributes": {
+        "slug": "abt",
+        "name": "ABT",
+        "equityType": "stocks",
+        "company": "Abbott Laboratories",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/ABT"
+      }
+    },
+    {
+      "id": "1953",
+      "type": "tag",
+      "attributes": {
+        "slug": "adm",
+        "name": "ADM",
+        "equityType": "stocks",
+        "company": "Archer-Daniels-Midland Company",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/ADM"
+      }
+    },
+    {
+      "id": "1313",
+      "type": "tag",
+      "attributes": {
+        "slug": "adp",
+        "name": "ADP",
+        "equityType": "stocks",
+        "company": "Automatic Data Processing, Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/ADP"
+      }
+    },
+    {
+      "id": "3449",
+      "type": "tag",
+      "attributes": {
+        "slug": "awr",
+        "name": "AWR",
+        "equityType": "stocks",
+        "company": "American States Water Company",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/AWR"
+      }
+    },
+    {
+      "id": "4140",
+      "type": "tag",
+      "attributes": {
+        "slug": "bdx",
+        "name": "BDX",
+        "equityType": "stocks",
+        "company": "Becton, Dickinson and Company",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/BDX"
+      }
+    },
+    {
+      "id": "3781",
+      "type": "tag",
+      "attributes": {
+        "slug": "cbsh",
+        "name": "CBSH",
+        "equityType": "stocks",
+        "company": "Commerce Bancshares, Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/CBSH"
+      }
+    },
+    {
+      "id": "7527",
+      "type": "tag",
+      "attributes": {
+        "slug": "cinf",
+        "name": "CINF",
+        "equityType": "stocks",
+        "company": "Cincinnati Financial Corporation",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/CINF"
+      }
+    },
+    {
+      "id": "1565",
+      "type": "tag",
+      "attributes": {
+        "slug": "cl",
+        "name": "CL",
+        "equityType": "stocks",
+        "company": "Colgate-Palmolive Company",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/CL"
+      }
+    },
+    {
+      "id": "3448",
+      "type": "tag",
+      "attributes": {
+        "slug": "cwt",
+        "name": "CWT",
+        "equityType": "stocks",
+        "company": "California Water Service Group",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/CWT"
+      }
+    },
+    {
+      "id": "8501",
+      "type": "tag",
+      "attributes": {
+        "slug": "dov",
+        "name": "DOV",
+        "equityType": "stocks",
+        "company": "Dover Corporation",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/DOV"
+      }
+    },
+    {
+      "id": "170",
+      "type": "tag",
+      "attributes": {
+        "slug": "ed",
+        "name": "ED",
+        "equityType": "stocks",
+        "company": "Consolidated Edison, Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/ED"
+      }
+    },
+    {
+      "id": "3066",
+      "type": "tag",
+      "attributes": {
+        "slug": "emr",
+        "name": "EMR",
+        "equityType": "stocks",
+        "company": "Emerson Electric Co.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/EMR"
+      }
+    },
+    {
+      "id": "19044",
+      "type": "tag",
+      "attributes": {
+        "slug": "fmcb",
+        "name": "FMCB",
+        "equityType": "stocks",
+        "company": "Farmers & Merchants Bancorp",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/FMCB"
+      }
+    },
+    {
+      "id": "5640",
+      "type": "tag",
+      "attributes": {
+        "slug": "frt",
+        "name": "FRT",
+        "equityType": "stocks",
+        "company": "Federal Realty Investment Trust",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/FRT"
+      }
+    },
+    {
+      "id": "2236",
+      "type": "tag",
+      "attributes": {
+        "slug": "hrl",
+        "name": "HRL",
+        "equityType": "stocks",
+        "company": "Hormel Foods Corporation",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/HRL"
+      }
+    },
+    {
+      "id": "2752",
+      "type": "tag",
+      "attributes": {
+        "slug": "itw",
+        "name": "ITW",
+        "equityType": "stocks",
+        "company": "Illinois Tool Works Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/ITW"
+      }
+    },
+    {
+      "id": "2567",
+      "type": "tag",
+      "attributes": {
+        "slug": "kmb",
+        "name": "KMB",
+        "equityType": "stocks",
+        "company": "Kimberly-Clark Corporation",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/KMB"
+      }
+    },
+    {
+      "id": "791",
+      "type": "tag",
+      "attributes": {
+        "slug": "ko",
+        "name": "KO",
+        "equityType": "stocks",
+        "company": "The Coca-Cola Company",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/KO"
+      }
+    },
+    {
+      "id": "675014",
+      "type": "tag",
+      "attributes": {
+        "slug": "kvue",
+        "name": "KVUE",
+        "equityType": "stocks",
+        "company": "Kenvue Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/KVUE"
+      }
+    },
+    {
+      "id": "1433",
+      "type": "tag",
+      "attributes": {
+        "slug": "low",
+        "name": "LOW",
+        "equityType": "stocks",
+        "company": "Lowe's Companies, Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/LOW"
+      }
+    },
+    {
+      "id": "236",
+      "type": "tag",
+      "attributes": {
+        "slug": "mgee",
+        "name": "MGEE",
+        "equityType": "stocks",
+        "company": "MGE Energy, Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/MGEE"
+      }
+    },
+    {
+      "id": "2568",
+      "type": "tag",
+      "attributes": {
+        "slug": "mo",
+        "name": "MO",
+        "equityType": "stocks",
+        "company": "Altria Group, Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/MO"
+      }
+    },
+    {
+      "id": "4751",
+      "type": "tag",
+      "attributes": {
+        "slug": "msa",
+        "name": "MSA",
+        "equityType": "stocks",
+        "company": "MSA Safety Incorporated",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/MSA"
+      }
+    },
+    {
+      "id": "4996",
+      "type": "tag",
+      "attributes": {
+        "slug": "msex",
+        "name": "MSEX",
+        "equityType": "stocks",
+        "company": "Middlesex Water Company",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/MSEX"
+      }
+    },
+    {
+      "id": "4473",
+      "type": "tag",
+      "attributes": {
+        "slug": "ndsn",
+        "name": "NDSN",
+        "equityType": "stocks",
+        "company": "Nordson Corporation",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/NDSN"
+      }
+    },
+    {
+      "id": "1032",
+      "type": "tag",
+      "attributes": {
+        "slug": "pep",
+        "name": "PEP",
+        "equityType": "stocks",
+        "company": "PepsiCo, Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/PEP"
+      }
+    },
+    {
+      "id": "6164",
+      "type": "tag",
+      "attributes": {
+        "slug": "ppg",
+        "name": "PPG",
+        "equityType": "stocks",
+        "company": "PPG Industries, Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/PPG"
+      }
+    },
+    {
+      "id": "4024",
+      "type": "tag",
+      "attributes": {
+        "slug": "rli",
+        "name": "RLI",
+        "equityType": "stocks",
+        "company": "RLI Corp.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/RLI"
+      }
+    },
+    {
+      "id": "4949",
+      "type": "tag",
+      "attributes": {
+        "slug": "rpm",
+        "name": "RPM",
+        "equityType": "stocks",
+        "company": "RPM International Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/RPM"
+      }
+    },
+    {
+      "id": "2123",
+      "type": "tag",
+      "attributes": {
+        "slug": "syy",
+        "name": "SYY",
+        "equityType": "stocks",
+        "company": "Sysco Corporation",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/SYY"
+      }
+    },
+    {
+      "id": "9981",
+      "type": "tag",
+      "attributes": {
+        "slug": "tnc",
+        "name": "TNC",
+        "equityType": "stocks",
+        "company": "Tennant Company",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/TNC"
+      }
+    },
+    {
+      "id": "9911",
+      "type": "tag",
+      "attributes": {
+        "slug": "ubsi",
+        "name": "UBSI",
+        "equityType": "stocks",
+        "company": "United Bankshares, Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/UBSI"
+      }
+    },
+    {
+      "id": "2341",
+      "type": "tag",
+      "attributes": {
+        "slug": "uvv",
+        "name": "UVV",
+        "equityType": "stocks",
+        "company": "Universal Corporation",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/UVV"
+      }
+    },
+    {
+      "id": "107760",
+      "type": "author",
+      "attributes": {
+        "company": null,
+        "slug": "ri-research",
+        "userId": 61592531,
+        "tagId": 780980,
+        "bio": "With a decade at a Big 4 audit firm specializing in the banking, mining, and energy sectors, I bring a strong foundation in finance and strategy. Currently, I serve as the Head of Finance for a leading owner and operator of retail real estate, where I oversee complex financial operations and strategy. I\u2019ve been an active investor in the U.S. stock market for 13 years, starting with my very first paycheck. Over time, my portfolio has evolved to reflect a balanced approach, with a growing focus on value stocks while maintaining solid exposure to growth opportunities. My investment philosophy is rooted in thorough research and a long-term perspective, which has helped me navigate various market cycles successfully. I aim to bring value to Seeking Alpha by uncovering promising under-the-radar stocks that may not yet be on the broader market\u2019s radar. My background in auditing and finance, combined with years of hands-on investing experience, allows me to provide unique insights and actionable ideas for fellow investors.",
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/061/592/531/small_pic.png",
+          "medium": "https://seekingalpha.com/images/users_profile/061/592/531/medium_pic.png",
+          "big": "https://seekingalpha.com/images/users_profile/061/592/531/big_pic.png",
+          "extra_large": "https://seekingalpha.com/images/users_profile/061/592/531/extra_large_pic.png"
+        },
+        "nick": "RI Research",
+        "deactivated": null,
+        "memberSince": 2024,
+        "isRss": false,
+        "contributorSince": 2024,
+        "followersCount": 1718
+      },
+      "relationships": {
+        "user": {
+          "data": {
+            "id": "61592531",
+            "type": "user"
+          }
+        }
+      },
+      "links": {
+        "self": "/author/ri-research",
+        "profileUrl": "/author/ri-research",
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "id": "14539",
+      "type": "tag",
+      "attributes": {
+        "slug": "avgo",
+        "name": "AVGO",
+        "equityType": "stocks",
+        "company": "Broadcom Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/AVGO"
+      }
+    },
+    {
+      "id": "765193",
+      "type": "tag",
+      "attributes": {
+        "slug": "avgo:ca",
+        "name": "AVGO:CA",
+        "equityType": "stocks",
+        "company": "Broadcom Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/AVGO:CA"
+      }
+    },
+    {
+      "id": "106922",
+      "type": "author",
+      "attributes": {
+        "company": null,
+        "slug": "smr-finance",
+        "userId": 47737185,
+        "tagId": 684902,
+        "bio": "I am an experienced investment analyst with a strong background in equity analysis across multiple industries. I enjoy identifying high-quality companies with solid growth potential, unique business models, and forward-looking management teams.",
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/047/737/185/small_pic.png",
+          "medium": "https://seekingalpha.com/images/users_profile/047/737/185/medium_pic.png",
+          "big": "https://seekingalpha.com/images/users_profile/047/737/185/big_pic.png",
+          "extra_large": "https://seekingalpha.com/images/users_profile/047/737/185/extra_large_pic.png"
+        },
+        "nick": "SMR Finance",
+        "deactivated": null,
+        "memberSince": 2016,
+        "isRss": false,
+        "contributorSince": 2023,
+        "followersCount": 57
+      },
+      "relationships": {
+        "user": {
+          "data": {
+            "id": "47737185",
+            "type": "user"
+          }
+        }
+      },
+      "links": {
+        "self": "/author/smr-finance",
+        "profileUrl": "/author/smr-finance",
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "id": "917",
+      "type": "tag",
+      "attributes": {
+        "slug": "nke",
+        "name": "NKE",
+        "equityType": "stocks",
+        "company": "NIKE, Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/NKE"
+      }
+    },
+    {
+      "id": "764546",
+      "type": "tag",
+      "attributes": {
+        "slug": "nke:ca",
+        "name": "NKE:CA",
+        "equityType": "stocks",
+        "company": "NIKE, Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/NKE:CA"
+      }
+    },
+    {
+      "id": "44021",
+      "type": "author",
+      "attributes": {
+        "company": null,
+        "slug": "damir-tokic",
+        "userId": 741147,
+        "tagId": 96731,
+        "bio": "<p>Commodity Trading Adviser (CTA), member of National Futures Association. Professor of Finance, research on Global-macro issues. Editor-in-Chief, Journal of Corporate Accounting and Finance. </p>",
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/000/741/147/small_pic.png",
+          "medium": "https://seekingalpha.com/images/users_profile/000/741/147/medium_pic.png",
+          "big": "https://seekingalpha.com/images/users_profile/000/741/147/big_pic.png",
+          "extra_large": "https://seekingalpha.com/images/users_profile/000/741/147/extra_large_pic.png"
+        },
+        "nick": "Damir Tokic",
+        "deactivated": null,
+        "memberSince": 2010,
+        "isRss": false,
+        "contributorSince": 2013,
+        "followersCount": 12754
+      },
+      "relationships": {
+        "user": {
+          "data": {
+            "id": "741147",
+            "type": "user"
+          }
+        }
+      },
+      "links": {
+        "self": "/author/damir-tokic",
+        "profileUrl": "/author/damir-tokic",
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "id": "587766",
+      "type": "tag",
+      "attributes": {
+        "slug": "sp500",
+        "name": "SP500",
+        "equityType": "index",
+        "company": "S&P 500 Index",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/SP500"
+      }
+    },
+    {
+      "id": "603998",
+      "type": "tag",
+      "attributes": {
+        "slug": "spx",
+        "name": "SPX",
+        "equityType": "index",
+        "company": "S&P 500 Futures",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/SPX"
+      }
+    },
+    {
+      "id": "598187",
+      "type": "tag",
+      "attributes": {
+        "slug": "dji",
+        "name": "DJI",
+        "equityType": "index",
+        "company": "Dow Jones Industrial Average Index",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/DJI"
+      }
+    },
+    {
+      "id": "590407",
+      "type": "tag",
+      "attributes": {
+        "slug": "ndx",
+        "name": "NDX",
+        "equityType": "index",
+        "company": "NASDAQ 100-Index",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/NDX"
+      }
+    },
+    {
+      "id": "55",
+      "type": "tag",
+      "attributes": {
+        "slug": "dia",
+        "name": "DIA",
+        "equityType": "etf",
+        "company": "SPDR\u00ae Dow Jones Industrial Average ETF Trust",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/DIA"
+      }
+    },
+    {
+      "id": "53",
+      "type": "tag",
+      "attributes": {
+        "slug": "qqq",
+        "name": "QQQ",
+        "equityType": "etf",
+        "company": "Invesco QQQ Trust ETF",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/QQQ"
+      }
+    },
+    {
+      "id": "338",
+      "type": "tag",
+      "attributes": {
+        "slug": "ivv",
+        "name": "IVV",
+        "equityType": "etf",
+        "company": "iShares Core S&P 500 ETF",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/IVV"
+      }
+    },
+    {
+      "id": "16503",
+      "type": "tag",
+      "attributes": {
+        "slug": "voo",
+        "name": "VOO",
+        "equityType": "etf",
+        "company": "Vanguard S&P 500 ETF",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/VOO"
+      }
+    },
+    {
+      "id": "339",
+      "type": "tag",
+      "attributes": {
+        "slug": "iwm",
+        "name": "IWM",
+        "equityType": "etf",
+        "company": "iShares Russell 2000 ETF",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/IWM"
+      }
+    },
+    {
+      "id": "628303",
+      "type": "tag",
+      "attributes": {
+        "slug": "us2y",
+        "name": "US2Y",
+        "equityType": "government_bond",
+        "company": "United States 2-Year Bond Yield",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/US2Y"
+      }
+    },
+    {
+      "id": "628298",
+      "type": "tag",
+      "attributes": {
+        "slug": "us10y",
+        "name": "US10Y",
+        "equityType": "government_bond",
+        "company": "United States 10-Year Bond Yield",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/US10Y"
+      }
+    },
+    {
+      "id": "603962",
+      "type": "tag",
+      "attributes": {
+        "slug": "vix",
+        "name": "VIX",
+        "equityType": "index",
+        "company": "S&P VIX Index",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/VIX"
+      }
+    },
+    {
+      "id": "106208",
+      "type": "author",
+      "attributes": {
+        "company": null,
+        "slug": "romil-patel",
+        "userId": 50323515,
+        "tagId": 610386,
+        "bio": "I focus on thematic investing, crisis investing, systematic options trading through both premium selling and long-vol positions, and discretionary global macro. I have experience with private M&A along with many years of publicly-traded equities and equity-based derivatives trading experience.",
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/050/323/515/small_pic.png",
+          "medium": "https://seekingalpha.com/images/users_profile/050/323/515/medium_pic.png",
+          "big": "https://seekingalpha.com/images/users_profile/050/323/515/big_pic.png",
+          "extra_large": "https://seekingalpha.com/images/users_profile/050/323/515/extra_large_pic.png"
+        },
+        "nick": "Romil Patel",
+        "deactivated": null,
+        "memberSince": 2019,
+        "isRss": false,
+        "contributorSince": 2021,
+        "followersCount": 1097
+      },
+      "relationships": {
+        "user": {
+          "data": {
+            "id": "50323515",
+            "type": "user"
+          }
+        }
+      },
+      "links": {
+        "self": "/author/romil-patel",
+        "profileUrl": "/author/romil-patel",
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "id": "586590",
+      "type": "tag",
+      "attributes": {
+        "slug": "fsk",
+        "name": "FSK",
+        "equityType": "cef",
+        "company": "FS KKR Capital Corp",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/FSK"
+      }
+    },
+    {
+      "id": "7109",
+      "type": "tag",
+      "attributes": {
+        "slug": "htgc",
+        "name": "HTGC",
+        "equityType": "cef",
+        "company": "Hercules Capital, Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/HTGC"
+      }
+    },
+    {
+      "id": "575086",
+      "type": "tag",
+      "attributes": {
+        "slug": "trin",
+        "name": "TRIN",
+        "equityType": "cef",
+        "company": "Trinity Capital Inc.",
+        "tagKind": "Tags::Ticker"
+      },
+      "links": {
+        "self": "/symbol/TRIN"
+      }
+    }
+  ],
+  "meta": {
+    "page": {
+      "title": "All Analysis Articles",
+      "description": "Seeking Alpha is the leading financial website for crowdsourced opinion and analysis of stocks, bonds and other investment analysis.",
+      "listTitle": "All Analysis Articles",
+      "listDescription": null,
+      "proStatus": 0,
+      "uriImage": "https://static.seekingalpha.com/assets/og_image_1200-29b2bfe1a595477db6826bd2126c63ac2091efb7ec76347a8e7f81ba17e3de6c.png",
+      "size": 5,
+      "totalPages": 1112,
+      "total": 5560,
+      "minmaxPublishOn": {
+        "min": 1766920771,
+        "max": 1766922254
+      }
+    },
+    "mone": {
+      "params": {
+        "pu": ""
+      }
+    },
+    "country": null
+  }
+}

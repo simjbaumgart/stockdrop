@@ -1,0 +1,633 @@
+{
+  "data": {
+    "id": "4854256",
+    "type": "fullArticle",
+    "attributes": {
+      "publishOn": "2025-12-18T02:30:01-05:00",
+      "isLockedPro": false,
+      "commentCount": 0,
+      "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2203181480/image_2203181480.jpg",
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "investing-ideas": {
+          "id": 10727,
+          "slug": "investing-ideas",
+          "kind": "general",
+          "path": "/stock-ideas",
+          "title": "Stock Ideas",
+          "sasource": "theme_breadcrumb"
+        },
+        "long-ideas": {
+          "id": 1936,
+          "slug": "long-ideas",
+          "kind": "breadcrumb",
+          "path": "/stock-ideas/long-ideas",
+          "title": "Long Ideas",
+          "sasource": "theme_breadcrumb"
+        },
+        "relative-valuation": {
+          "id": 115332,
+          "slug": "relative-valuation",
+          "kind": "common",
+          "non_theme": true
+        },
+        "ai-tech": {
+          "id": 764439,
+          "slug": "ai-tech",
+          "kind": "general"
+        },
+        "magnificent-7": {
+          "id": 777536,
+          "slug": "magnificent-7",
+          "kind": "general"
+        },
+        "inbound-seo-optimization": {
+          "id": 608068,
+          "slug": "inbound-seo-optimization",
+          "kind": "general"
+        },
+        "alpha-rich-opportunity": {
+          "id": 114692,
+          "slug": "alpha-rich-opportunity",
+          "kind": "general"
+        },
+        "more-tags": {
+          "id": 698258,
+          "slug": "more-tags",
+          "kind": "general"
+        },
+        "us": {
+          "id": 326,
+          "slug": "us",
+          "kind": "common",
+          "non_theme": true
+        },
+        "communication-services": {
+          "id": 50,
+          "slug": "communication-services",
+          "kind": "sector",
+          "path": "/sectors/communication-services",
+          "title": "Communication Services",
+          "sasource": "theme_breadcrumb"
+        }
+      },
+      "title": "Why I Am Buying Alphabet Over Microsoft",
+      "summary": [
+        "Alphabet is recommended as a buy over Microsoft due to superior revenue growth and investor tolerance for high capital expenditure.",
+        "GOOG\u2019s 2025 outperformance is driven by 34% YoY Google Cloud growth and a growth-sensitive profile favored in the current AI cycle.",
+        "MSFT\u2019s returns are more tightly linked to margin expansion, but aggressive CapEx is penalized by the market, threatening short-term margin growth.",
+        "GOOG trades at a 19% P/S discount, offering significant upside if AI-driven growth persists, while MSFT faces stricter capital allocation expectations."
+      ],
+      "isPaywalled": false,
+      "structuredInsights": null,
+      "lastModified": "2025-12-18T02:40:57-05:00",
+      "isModerated": false,
+      "availableTranslations": [
+        "ko",
+        "zh"
+      ],
+      "locale": "en",
+      "closestTradingDate": "2025-12-18",
+      "beforeOpeningHours": true,
+      "isEarningsSlides": false,
+      "isExclusive": true,
+      "isTranscript": false,
+      "excludedByTag": false,
+      "transcriptPath": null,
+      "likesCount": 0,
+      "disabledStatus": "allowed",
+      "disabledMessage": null,
+      "status": "published",
+      "disclosure": "<p id=\"a-disclosure\"><b>Analyst\u2019s Disclosure:</b><span>I/we have a beneficial long position in the shares of GOOG either through stock ownership, options, or other derivatives.</span><span id=\"top-business-disclosure\"> I wrote this article myself, and it expresses my own opinions. I am not receiving compensation for it (other than from Seeking Alpha). I have no business relationship with any company whose stock is mentioned in this article. </span></p><p id='a-disclosure-more'><strong>Seeking Alpha's Disclosure:</strong> Past performance is no guarantee of future results. No recommendation or advice is being given as to whether any investment is suitable for a particular investor. Any views or opinions expressed above may not reflect those of Seeking Alpha as a whole. Seeking Alpha is not a licensed securities dealer, broker or US investment adviser or investment bank. Our analysts are third party authors that include both professional investors and individual investors who may not be licensed or certified by any institute or regulatory body.</p>",
+      "articleActionableItem": null,
+      "inEmbargo": false,
+      "isNoindex": false,
+      "isNoarchive": true,
+      "content": "<figure class=\"getty-figure\" data-type=\"getty-image\"><picture> <img src=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2203181480/image_2203181480.jpg?io=getty-c-w630\" alt=\"AI and Developer Apps - Microsoft Copilot, GitHub, Google Gemini\" data-id=\"2203181480\" data-type=\"getty-image\" width=\"1536\" height=\"1025\" srcset=\"https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2203181480/image_2203181480.jpg?io=getty-c-w1536 1536w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2203181480/image_2203181480.jpg?io=getty-c-w1280 1280w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2203181480/image_2203181480.jpg?io=getty-c-w1080 1080w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2203181480/image_2203181480.jpg?io=getty-c-w750 750w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2203181480/image_2203181480.jpg?io=getty-c-w640 640w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2203181480/image_2203181480.jpg?io=getty-c-w480 480w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2203181480/image_2203181480.jpg?io=getty-c-w320 320w, https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2203181480/image_2203181480.jpg?io=getty-c-w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 132px), (max-width: 1199px) calc(100vw - 666px), (max-width: 1307px) calc(100vw - 708px), 600px\" fetchpriority=\"high\"> </picture><figcaption><p class=\"item-caption\"> </p> <p class=\"item-credits\">Kenneth Cheung/iStock Unreleased via Getty Images</p></figcaption></figure><div class=\"inline_ad_placeholder\"></div> <h2>Setting The Stage</h2> <p data-eci=\"true\">As of today (17<sup>th</sup> December, 2025), Microsoft Corporation (<span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/MSFT\" title=\"Microsoft Corporation\">MSFT</a></span>) and Alphabet Inc. (<span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/GOOG\" title=\"Alphabet Inc.\">GOOG</a></span>) are two of the most dominant forces in the technology arena. Both boast market caps above $3 trillion and are key<span class=\"paywall-full-content\"> players in AI and cloud computing. MSFT has been for a while viewed by several analysts as the premium AI compounder due to its early OpenAI partnerships and seamless integration of Copilot across its ecosystem. However, Alphabet has staged a remarkable comeback this year, with its stock surging more than 60% compared to MSFT\u2019s ~14%. This surge saw GOOG </span><a href=\"https://www.voronoiapp.com/markets/-Alphabet-Overtakes-Microsoft-to-Become-the-Third-Most-Valuable-US-Company-7213\" rel=\"nofollow\" title=\"https://www.voronoiapp.com/markets/-Alphabet-Overtakes-Microsoft-to-Become-the-Third-Most-Valuable-US-Company-7213\" target=\"_blank\" class=\"paywall-full-content\">overtake</a><span class=\"paywall-full-content\"> MSFT in market cap, a testament to its solid rise.</span></p> <p class=\"paywall-full-content\">To this end, some investors might wonder which of these two stocks offers a better risk-adjusted upside from their current levels. I will turn to an Ordinary Least Squares [OLS] regression to model relationships between key financial drivers (revenue growth, operating margins, and CapEx efficiency), being the independent variables, against the stock returns as the dependent variable. My analysis seeks to provide evidence-based insights into relative valuation and forward potential. Given this background, I am bullish on Alphabet given its tolerance to high capital expenditure amid its accelerated cloud growth.</p> <h2 class=\"paywall-full-content\">Recent Financial Highlights</h2> <p class=\"paywall-full-content\">In June this year, MSFT ended its 2025 financial year, delivering revenue of $281.7 billion, marking a YoY growth of 15%. This was primarily driven by <a href=\"https://news.microsoft.com/source/2025/07/30/microsoft-cloud-and-ai-strength-fuels-fourth-quarter-results/#:~:text=Microsoft%20Corp.%20today%20announced%20the%20following%20results,the%20corresponding%20period%20of%20last%20fiscal%20year:\" rel=\"nofollow\" title=\"https://news.microsoft.com/source/2025/07/30/microsoft-cloud-and-ai-strength-fuels-fourth-quarter-results/#:~:text=Microsoft%20Corp.%20today%20announced%20the%20following%20results,the%20corresponding%20period%20of%20last%20fiscal%20year:\" target=\"_blank\">Cloud business growth</a> with the total Microsoft cloud revenue growing by 25% YoY. On the other hand, Alphabet\u2019s trailing revenue stands at $385.5 billion, a YoY growth of 13.4%, which is close to MSFT\u2019s trailing revenue growth. This is also being fueled by its Google Cloud, which has accelerated growth to 34% YoY growth in Q3 2025.</p> <p class=\"paywall-full-content\">Given this financial snapshot, it\u2019s clear that Alphabet is edging MSFT in cloud growth, perhaps due to Azure\u2019s <a href=\"https://www.computerweekly.com/news/366633643/Microsoft-CEO-speaks-of-global-cloud-factory-as-Azure-stalls\" rel=\"nofollow\" title=\"https://www.computerweekly.com/news/366633643/Microsoft-CEO-speaks-of-global-cloud-factory-as-Azure-stalls\" target=\"_blank\">capacity constraints</a>. Taking this further, Microsoft has a higher operating margin, trailing at 46.27%, compared to GOOG\u2019s 33.1%. I think this signals MSFT\u2019s software moat (Office and Windows), which could be delivering this superior profitability. Further, I find both companies to be aggressive in capital expenditure, having a CapEx-to-revenue ratio of more than 20%. This shows their <a href=\"https://www.spglobal.com/market-intelligence/en/news-insights/research/2025/12/alphabet-amazon-and-microsoft-charge-ahead-on-ai-capacity-build-outs\" rel=\"nofollow\" title=\"https://www.spglobal.com/market-intelligence/en/news-insights/research/2025/12/alphabet-amazon-and-microsoft-charge-ahead-on-ai-capacity-build-outs\" target=\"_blank\">commitment</a> to funding AI infrastructure; therefore, this current race is likely to continue in the long run.</p> <figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><picture> <img src=\"https://static.seekingalpha.com/uploads/2025/12/17/58176392-17659652351407356.png?io=w640\" alt=\"Financials\" contenteditable=\"false\" width=\"578\" height=\"476\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/17/58176392-17659652351407356.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/17/58176392-17659652351407356.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/17/58176392-17659652351407356.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"> </picture><figcaption><p class=\"item-caption\"><span>YCharts</span></p></figcaption></figure><p class=\"paywall-full-content\">With this background, I will now delve into modeling these variables to get deeper insights into how they influence the stock direction.</p> <h2 class=\"paywall-full-content\">The OLS Model: Methodology</h2> <p class=\"paywall-full-content\">In this analysis, I used the quarterly data spanning 2020 to 2025 because this is when the AI race started <a href=\"https://medium.com/@gurvindersodhi45/the-ai-revolution-from-2020-to-2025-dc0ecdfec6c4\" rel=\"nofollow\" title=\"https://medium.com/@gurvindersodhi45/the-ai-revolution-from-2020-to-2025-dc0ecdfec6c4\" target=\"_blank\">gaining momentum</a>. This explains why my model doesn\u2019t extend to 10 years or more, as most people would expect. The current stock momentum is largely fueled by the AI boom, and it makes sense to focus on the relevant time period. As mentioned earlier, the dependent variable (Y-variable) is the quarterly stock return, while the independent variables (X-variables) are quarterly YoY revenue growth, operating margin growth, and CapEx-to-revenue ratio as a proxy for growth investment efficiency. Having defined my variables, my overall model for each stock\u2019s analysis is as follows.</p> <figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><picture> <img src=\"https://static.seekingalpha.com/uploads/2025/12/17/58176392-17659652352851229.png?io=w640\" alt=\"Overall Model\" contenteditable=\"false\" width=\"546\" height=\"226\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/17/58176392-17659652352851229.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/17/58176392-17659652352851229.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/17/58176392-17659652352851229.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"> </picture><figcaption><p class=\"item-caption\"><span>Author</span></p></figcaption></figure><p class=\"paywall-full-content\">From the results, it appears that margin expansion is the biggest driver to MSFT\u2019s return, reflecting its high-margin software. High CapEx could drag short term returns but it\u2019s a catalyst to long term growth. I will walk you through deeper insights as I discuss the results. Important to note, all data was obtained from Seeking Alpha and Yahoo Finance.</p> <h2 class=\"paywall-full-content\">The Output</h2> <p class=\"paywall-full-content\">The model results show that MSFT has an R-Squared value of 0.72 an indication that it explains 72% of the return\u2019s variance and this is a testament to the model\u2019s fit and reliability because a value above 50% is admissible.</p> <figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><picture> <img src=\"https://static.seekingalpha.com/uploads/2025/12/17/58176392-17659652353202565.png?io=w640\" alt=\"OLS Model\" contenteditable=\"false\" width=\"638\" height=\"432\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/17/58176392-17659652353202565.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/17/58176392-17659652353202565.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/17/58176392-17659652353202565.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"> </picture><figcaption><p class=\"item-caption\"><span>Author</span></p></figcaption></figure><p class=\"paywall-full-content\">As for Alphabet, its R-Squared is 0.68, meaning that the explanatory variables accounts for about 68% of the Y variable variance.</p> <figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><picture> <img src=\"https://static.seekingalpha.com/uploads/2025/12/17/58176392-17659652354908268.png?io=w640\" alt=\"OLS Model\" contenteditable=\"false\" width=\"618\" height=\"430\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/17/58176392-17659652354908268.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/17/58176392-17659652354908268.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/17/58176392-17659652354908268.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"> </picture><figcaption><p class=\"item-caption\"><span>Author</span></p></figcaption></figure><p class=\"paywall-full-content\">Comparing the two models, MSFT\u2019s higher R-square shows that its returns are more tied to its reported fundamentals. This aligns with the perception that it is a high-quality margin-focused compounder, as most of its analysts focus on its high margins as the core stock driver. On the contrary, GOOG\u2019s slightly lower R-squared suggest that its returns are more influenced by other factors outside these fundamentals compared to MSFT. This shows that factors like market sentiments and cycles play a bigger role in determining its stock direction than in MSFT.</p> <h2 class=\"paywall-full-content\">A Deeper Comparative Take</h2> <p class=\"paywall-full-content\">Having looked at the overall model fitness and its implications, I will now delve into the beta values and their implications. I will begin with Alphabet\u2019s higher revenue growth beta of 1.82 compared to MSFT\u2019s 1.45. This in my view, explains GOOG\u2019s outperformance in 2025 edging MSFT in cloud growth as previously mentioned. This is a sign of how powerful this outperformance is in catalyzing this stock\u2019s returns. Should Azure\u2019s capacity constraints continue, I wouldn\u2019t be surprised to see GOOG keeping its stock returns consistently above MSFT.</p> <p class=\"paywall-full-content\">Moving to the change in operating margin beta, MSFT has a higher value at 2.1 compared to 1.35 for GOOG. This indicates that the market has rewarded MSFT\u2019s operating margin expansion much more strongly than Alphabet. I see a clear distinction in these companies whereby the market attaches value on MSFT\u2019s margin while on the other hand rewarding Alphabet\u2019s revenue growth.</p> <p class=\"paywall-full-content\">With this dynamics, I draw you the two companies\u2019 <a href=\"https://www.cnbc.com/2025/02/08/tech-megacaps-to-spend-more-than-300-billion-in-2025-to-win-in-ai.html\" rel=\"nofollow\" title=\"https://www.cnbc.com/2025/02/08/tech-megacaps-to-spend-more-than-300-billion-in-2025-to-win-in-ai.html\" target=\"_blank\">heavy investment</a> in AI. It is understandable that this significant cash outlay could suppress margins in the short run. As such, this could weigh down MSFT\u2019s return with less punishment on GOOG as long as revenue growth remains strong. This underscores GOOG\u2019s stock resilience in 2025 rising above MSFT amid the high AI investment which I believe investors expect could compress margins.</p> <figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><picture> <img src=\"https://static.seekingalpha.com/uploads/2025/12/17/58176392-17659652355144.png?io=w640\" alt=\"Price Return\" contenteditable=\"false\" width=\"573\" height=\"403\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/17/58176392-17659652355144.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/17/58176392-17659652355144.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/17/58176392-17659652355144.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"> </picture><figcaption><p class=\"item-caption\"><span>YCharts</span></p></figcaption></figure><p class=\"paywall-full-content\">Lastly, on CapEx-to-revenue, Microsoft has a higher beta value of -0.65 with a P-value of below 0.05(0.045) meaning it\u2019s statistically significant. This is contrary to Alphabet\u2019s beta of -0.42 with a P-value above 0.05(0.248) which implies that it\u2019s not statistically significant. By having a higher negative coefficient, it signifies that the market has penalized MSFT more heavily for higher CapEx intensity relative to Alphabet.</p> <p class=\"paywall-full-content\">This is an indication that Alphabet enjoys a greater investor tolerance for investment cycles. To me, the implication here is that, maybe the market views MSFT as a mature, high-margin company and expects more disciplined capital allocation. On the other hand, Alphabet having a lower and statistically non-significant coefficient signifies that investors accept higher spending as a necessity for sustainable long-term growth. I think this further explains the difference in the two stocks\u2019 price returns YTD, a year where both have growing capital expenditures.</p> <figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><picture> <img src=\"https://static.seekingalpha.com/uploads/2025/12/17/58176392-1765965235481477.png?io=w640\" alt=\"CapEx\" contenteditable=\"false\" width=\"581\" height=\"402\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/17/58176392-1765965235481477.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/17/58176392-1765965235481477.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/17/58176392-1765965235481477.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"> </picture><figcaption><p class=\"item-caption\"><span>YCharts</span></p></figcaption></figure><h2 class=\"paywall-full-content\">My Investment Take</h2> <p class=\"paywall-full-content\">Currently, I find Alphabet to be the best pick between the two stocks. My model clearly shows its growth-sensitive profile, and this, in my view, aligns with the ongoing <a href=\"https://www.proactiveinvestors.com/companies/news/1083533/ai-monetization-set-to-accelerate-in-2026-as-enterprise-adoption-grows-analysts-say-1083533.html\" rel=\"nofollow\" title=\"https://www.proactiveinvestors.com/companies/news/1083533/ai-monetization-set-to-accelerate-in-2026-as-enterprise-adoption-grows-analysts-say-1083533.html\" target=\"_blank\">AI monetization cycle</a>. With a P/S ratio of 9.8x, which is a discount of about 19%, GOOG has a significant upside potential given its accelerating growth, particularly in Google Cloud, which has surpassed MSFT.</p> <figure class=\"regular-img-figure paywall-full-content\" contenteditable=\"false\"><picture> <img src=\"https://static.seekingalpha.com/uploads/2025/12/17/58176392-17659652355483346.png?io=w640\" alt=\"Valuation\" contenteditable=\"false\" width=\"572\" height=\"397\" loading=\"lazy\" srcset=\"https://static.seekingalpha.com/uploads/2025/12/17/58176392-17659652355483346.png?io=w480 480w,https://static.seekingalpha.com/uploads/2025/12/17/58176392-17659652355483346.png?io=w320 320w,https://static.seekingalpha.com/uploads/2025/12/17/58176392-17659652355483346.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"> </picture><figcaption><p class=\"item-caption\"><span>YCharts</span></p></figcaption></figure><p class=\"paywall-full-content\">While both a key players in the tech industry, GOOG is likely to continue outperforming in 2026 if the current aggressive AI outlay continues, which the market seems to attach value to Alphabet at the expense of Microsoft.</p> <h2 class=\"paywall-full-content\">Weaknesses Of My Analysis</h2> <p class=\"paywall-full-content\">I have two main risks attached to this analysis, the first one being the model assumption. The OLS model assumes a linear relationship between variables, which might not always hold. Nevertheless, the two models have shown high predictive power, with all R-squared being above 50%, making them reliable.</p> <p class=\"paywall-full-content\">The other possible risk is the possibility of an <a href=\"https://www.thecrimson.com/article/2025/12/12/ai-bubble-harvard-experts-weigh-in/#:~:text=Three%20Harvard%20faculty%20said%20they,to%20have%20a%20few%20failures.\" rel=\"nofollow\" title=\"https://www.thecrimson.com/article/2025/12/12/ai-bubble-harvard-experts-weigh-in/#:~:text=Three%20Harvard%20faculty%20said%20they,to%20have%20a%20few%20failures.\" target=\"_blank\">AI bubble burst</a>. While GOOG\u2019s value lies in its consistent strong growth, should the bubble burst, leading to low growth, the stock\u2019s value could tumble, leading to losses. Historically, when GOOG experiences low revenue growth, its stock performance is poor. For example, in 2022, when the stock experienced a single-digit revenue growth for the first time in over the last five years, its stock return dipped by 38.7%, the worst annual return performance in more than five years.</p> <h2 class=\"paywall-full-content\">Conclusion</h2> <div class=\"before_last_paragraph-piano-placeholder paywall-full-content\"></div> <p class=\"paywall-full-content\">I recommend buying GOOG over MSFT amid the ongoing heavy capital expenditure in the AI race. The OLS model shows that the market punishes MSFT for aggressive capital expenditure while attaching a high value to GOOG\u2019s revenue growth. While the biggest value driver for MSFT is margin growth, the ongoing capital outlay threatens its short term margin growth sustainability, but Alphabet shows higher investor tolerance. With these ongoing dynamics, I think Alphabet is an outright buy at a discount.</p>",
+      "quickInsights": null,
+      "twitContent": "Why I Am Buying Alphabet Over Microsoft $GOOG $MSFT:CA $MSFT #finance #stockmarket #trading https://seekingalpha.com/article/4854256-microsoft-vs-alphabet-buying-goog-stock-over-msft?source=tweet",
+      "innerMarketing": "",
+      "marketingBullet": "",
+      "isReit": false,
+      "videoData": null,
+      "marketingBulletVariant": null,
+      "marketingBio": null,
+      "audioDuration": 662.784,
+      "originalTitle": "Why I Am Buying Alphabet Over Microsoft"
+    },
+    "relationships": {
+      "author": {
+        "data": {
+          "id": "107188",
+          "type": "author"
+        }
+      },
+      "sentiments": {
+        "data": [
+          {
+            "id": "687211",
+            "type": "sentiment"
+          },
+          {
+            "id": "687541",
+            "type": "sentiment"
+          }
+        ]
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "544",
+            "type": "tag"
+          },
+          {
+            "id": "764527",
+            "type": "tag"
+          },
+          {
+            "id": "575",
+            "type": "tag"
+          },
+          {
+            "id": "148893",
+            "type": "tag"
+          },
+          {
+            "id": "764529",
+            "type": "tag"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": [
+          {
+            "id": "763924",
+            "type": "tag"
+          },
+          {
+            "id": "1936",
+            "type": "tag"
+          },
+          {
+            "id": "115332",
+            "type": "tag"
+          },
+          {
+            "id": "544",
+            "type": "tag"
+          },
+          {
+            "id": "764527",
+            "type": "tag"
+          },
+          {
+            "id": "575",
+            "type": "tag"
+          },
+          {
+            "id": "148893",
+            "type": "tag"
+          },
+          {
+            "id": "764529",
+            "type": "tag"
+          },
+          {
+            "id": "17335",
+            "type": "tag"
+          },
+          {
+            "id": "764439",
+            "type": "tag"
+          },
+          {
+            "id": "777536",
+            "type": "tag"
+          },
+          {
+            "id": "608068",
+            "type": "tag"
+          },
+          {
+            "id": "10727",
+            "type": "tag"
+          },
+          {
+            "id": "114692",
+            "type": "tag"
+          },
+          {
+            "id": "698258",
+            "type": "tag"
+          },
+          {
+            "id": "326",
+            "type": "tag"
+          }
+        ]
+      },
+      "coAuthors": {
+        "data": []
+      },
+      "presentations": {
+        "data": []
+      },
+      "updates": {
+        "data": []
+      },
+      "corrections": {
+        "data": []
+      }
+    },
+    "links": {
+      "self": "/article/4854256-microsoft-vs-alphabet-buying-goog-stock-over-msft",
+      "canonical": "https://seekingalpha.com/article/4854256-microsoft-vs-alphabet-buying-goog-stock-over-msft",
+      "uriImage": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2203181480/image_2203181480.jpg?io=getty-c-w1536",
+      "schemaImage": [
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2203181480/image_2203181480.jpg?io=getty-c-w1280",
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2203181480/image_2203181480.jpg?io=getty-c-crop-16-9",
+        "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2203181480/image_2203181480.jpg?io=getty-c-crop-4-3"
+      ]
+    }
+  },
+  "included": [
+    {
+      "id": "107188",
+      "type": "author",
+      "attributes": {
+        "company": null,
+        "slug": "forward-analytics",
+        "userId": 58176392,
+        "tagId": 763924,
+        "bio": "I'm a seasoned financial analyst with a passion for puzzling out the complexities of the financial world. As a former writer for Fade The Market on Seeking Alpha, I diligently worked to provide insightful analysis and well-researched articles on various investment opportunities. However, I am no longer involved in analyzing, submitting, or commenting on articles for Fade The Market. With a vast experience, I have honed my expertise in evaluating market trends, analyzing investment opportunities, and providing strategic recommendations to optimize financial portfolios.",
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/058/176/392/small_pic.png",
+          "medium": "https://seekingalpha.com/images/users_profile/058/176/392/medium_pic.png",
+          "big": "https://seekingalpha.com/images/users_profile/058/176/392/big_pic.png",
+          "extra_large": "https://seekingalpha.com/images/users_profile/058/176/392/extra_large_pic.png"
+        },
+        "nick": "Forward Analytics",
+        "deactivated": null,
+        "memberSince": 2023,
+        "isRss": false,
+        "contributorSince": 2023,
+        "followersCount": 170
+      },
+      "relationships": {
+        "user": {
+          "data": {
+            "id": "58176392",
+            "type": "user"
+          }
+        },
+        "userBioTags": {
+          "data": [
+            {
+              "id": "1021375",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1021376",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1021377",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1021378",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1021379",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1021380",
+              "type": "userBioTag"
+            },
+            {
+              "id": "1021381",
+              "type": "userBioTag"
+            }
+          ]
+        },
+        "authorResearch": {
+          "data": null
+        }
+      },
+      "links": {
+        "self": "/author/forward-analytics",
+        "profileUrl": "/author/forward-analytics",
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "id": "544",
+      "type": "tag",
+      "attributes": {
+        "slug": "goog",
+        "name": "GOOG",
+        "company": "Alphabet Inc.",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "NASDAQ",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/GOOG"
+      }
+    },
+    {
+      "id": "764527",
+      "type": "tag",
+      "attributes": {
+        "slug": "msft:ca",
+        "name": "MSFT:CA",
+        "company": "Microsoft Corporation",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "TSX",
+        "fundTypeId": 8,
+        "isDefunct": false,
+        "currency": "CAD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/MSFT:CA"
+      }
+    },
+    {
+      "id": "575",
+      "type": "tag",
+      "attributes": {
+        "slug": "msft",
+        "name": "MSFT",
+        "company": "Microsoft Corporation",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "NASDAQ",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/MSFT"
+      }
+    },
+    {
+      "id": "148893",
+      "type": "tag",
+      "attributes": {
+        "slug": "googl",
+        "name": "GOOGL",
+        "company": "Alphabet Inc.",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "NASDAQ",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/GOOGL"
+      }
+    },
+    {
+      "id": "764529",
+      "type": "tag",
+      "attributes": {
+        "slug": "goog:ca",
+        "name": "GOOG:CA",
+        "company": "Alphabet Inc.",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "TSX",
+        "fundTypeId": 8,
+        "isDefunct": false,
+        "currency": "CAD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/GOOG:CA"
+      }
+    },
+    {
+      "id": "763924",
+      "type": "tag",
+      "attributes": {
+        "slug": "forward-analytics",
+        "name": "Forward Analytics",
+        "company": null,
+        "tagKind": "Tags::AuthorTag"
+      },
+      "links": {
+        "self": "/author/forward-analytics"
+      }
+    },
+    {
+      "id": "1936",
+      "type": "tag",
+      "attributes": {
+        "slug": "long-ideas",
+        "name": "Long Ideas",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=long-ideas"
+      }
+    },
+    {
+      "id": "115332",
+      "type": "tag",
+      "attributes": {
+        "slug": "relative-valuation",
+        "name": "Relative Valuation",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=relative-valuation"
+      }
+    },
+    {
+      "id": "17335",
+      "type": "tag",
+      "attributes": {
+        "slug": "sa-exclusive",
+        "name": "SA Exclusive",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/sa-exclusive"
+      }
+    },
+    {
+      "id": "764439",
+      "type": "tag",
+      "attributes": {
+        "slug": "ai-tech",
+        "name": "AI Tech",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/ai-tech"
+      }
+    },
+    {
+      "id": "777536",
+      "type": "tag",
+      "attributes": {
+        "slug": "magnificent-7",
+        "name": "Magnificent 7",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/magnificent-7"
+      }
+    },
+    {
+      "id": "608068",
+      "type": "tag",
+      "attributes": {
+        "slug": "inbound-seo-optimization",
+        "name": "Inbound SEO Optimization",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/inbound-seo-optimization"
+      }
+    },
+    {
+      "id": "10727",
+      "type": "tag",
+      "attributes": {
+        "slug": "investing-ideas",
+        "name": "Investing Ideas",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/investing-ideas"
+      }
+    },
+    {
+      "id": "114692",
+      "type": "tag",
+      "attributes": {
+        "slug": "alpha-rich-opportunity",
+        "name": "Alpha-Rich Opportunity",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/alpha-rich-opportunity"
+      }
+    },
+    {
+      "id": "698258",
+      "type": "tag",
+      "attributes": {
+        "slug": "more-tags",
+        "name": "More Tags",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/more-tags"
+      }
+    },
+    {
+      "id": "326",
+      "type": "tag",
+      "attributes": {
+        "slug": "us",
+        "name": "United States",
+        "company": null,
+        "tagKind": "Tags::Country"
+      },
+      "links": {
+        "self": "/articles?filters=us"
+      }
+    },
+    {
+      "id": "687211",
+      "type": "sentiment",
+      "attributes": {
+        "articleId": 4854256,
+        "type": "bullish",
+        "createdAt": "2025-12-18T02:30:01.000-05:00",
+        "typeId": 1
+      },
+      "relationships": {
+        "article": {
+          "data": {
+            "id": "4854256",
+            "type": "article"
+          }
+        },
+        "tag": {
+          "data": {
+            "id": "544",
+            "type": "tag"
+          }
+        }
+      }
+    },
+    {
+      "id": "687541",
+      "type": "sentiment",
+      "attributes": {
+        "articleId": 4854256,
+        "type": "very_bullish",
+        "createdAt": "2025-12-18T02:30:01.000-05:00",
+        "typeId": 0
+      },
+      "relationships": {
+        "article": {
+          "data": {
+            "id": "4854256",
+            "type": "article"
+          }
+        },
+        "tag": {
+          "data": {
+            "id": "148893",
+            "type": "tag"
+          }
+        }
+      }
+    }
+  ]
+}

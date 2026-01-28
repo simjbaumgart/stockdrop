@@ -1,0 +1,167 @@
+{
+  "data": {
+    "id": "4532844",
+    "type": "news",
+    "attributes": {
+      "publishOn": "2025-12-18T07:40:04-05:00",
+      "isLockedPro": false,
+      "commentCount": 0,
+      "gettyImageUrl": null,
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "us": {
+          "id": 326,
+          "path": "/",
+          "slug": "us",
+          "title": null,
+          "sasource": "",
+          "non_theme": true
+        },
+        "mid-cap": {
+          "id": 115412,
+          "path": "/",
+          "slug": "mid-cap",
+          "title": null,
+          "sasource": "",
+          "non_theme": true
+        },
+        "hidden-from-qp": {
+          "id": 578794,
+          "path": "/",
+          "slug": "hidden-from-qp",
+          "title": null,
+          "sasource": "",
+          "non_theme": true
+        },
+        "news-metered": {
+          "id": 614465,
+          "path": "/",
+          "slug": "news-metered",
+          "title": null,
+          "sasource": "",
+          "non_theme": true
+        },
+        "war-and-defense": {
+          "id": 777533,
+          "path": "/",
+          "slug": "war-and-defense",
+          "title": null,
+          "sasource": "",
+          "non_theme": true
+        },
+        "industrials": {
+          "id": 787628,
+          "path": "/",
+          "slug": "industrials",
+          "title": null,
+          "sasource": "",
+          "non_theme": true
+        },
+        "research-and-consulting-services": {
+          "id": 787668,
+          "path": "/",
+          "slug": "research-and-consulting-services",
+          "title": null,
+          "sasource": "",
+          "non_theme": true
+        }
+      },
+      "title": "KBR bags $10B U.S. Navy support contract",
+      "isPaywalled": false,
+      "lastModified": "2025-12-18T07:40:41-05:00",
+      "status": "Active",
+      "content": "<ul> <li>KBR (<span class=\"ticker-hover-wrapper\"><span class=\"ticker-hover-wrapper\"><a href=\"https://seekingalpha.com/symbol/KBR\" title=\"KBR, Inc.\">KBR</a></span></span>) <a title=\"awarded\" href=\"https://seekingalpha.com/pr/20343861-kbr-awarded-seat-on-10-billion-ceiling-readiness-and-sustainment-support-contract-with-u-s\" target=\"_blank\">awarded</a> a seat on a multiple award, IDIQ contract by the U.S. Naval Supply Systems Command.</li> <li>The contract spans a five-year base period with an additional five-year option period.</li> <li>The five-year option period would bring the ceiling amount<span class=\"paywall-full-content\"> to $20 billion.</span> </li> <li class=\"paywall-full-content\">Tasks may include a wide range of support services such as stability operations, civil support and supply chain and distribution services. WEXMAC 2.1 TITUS task orders are expected to be firm fixed price.</li> </ul> <div class=\"signup_widget_placeholder\"></div><div id=\"more-links\" class=\"paywall-full-content\"> <h2>More on KBR, Inc</h2> <ul> <li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4844556-kbr-engineering-tomorrow-with-proprietary-decarbonization-and-circularity\">KBR: Engineering Tomorrow With Proprietary Decarbonization And Circularity</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4835531-kbr-inc-kbr-q3-2025-earnings-call-transcript\">KBR, Inc. (KBR) Q3 2025 Earnings Call Transcript</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/article/4835604-kbr-inc-2025-q3-results-earnings-call-presentation\">KBR, Inc. 2025 Q3 - Results - Earnings Call Presentation</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/news/4531351-kbr-secures-contract-for-ignis-green-ammonia-facility-in-spain\">KBR secures contract for IGNIS green ammonia facility in Spain</a></li> <li><a class=\"more-link\" href=\"https://seekingalpha.com/news/4517384-kbr-awarded-key-engineering-deal-for-huge-qatarenergy-project\">KBR awarded key engineering deal for huge QatarEnergy project</a></li> </ul> </div>",
+      "disclosure": null,
+      "quickInsights": null,
+      "metered": true,
+      "availableTranslations": [
+        "ko",
+        "zh"
+      ],
+      "locale": "en",
+      "correctionReason": null,
+      "audioDuration": 37.464,
+      "originalTitle": "KBR bags $10B U.S. Navy support contract"
+    },
+    "relationships": {
+      "author": {
+        "data": {
+          "id": "51785401",
+          "type": "newsAuthorUser"
+        }
+      },
+      "sentiments": {
+        "data": []
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "2787",
+            "type": "tag"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": []
+      },
+      "ratingChangeNotice": {}
+    },
+    "links": {
+      "self": "/news/4532844-kbr-bags-10b-u-s-navy-support-contract",
+      "canonical": "https://seekingalpha.com/news/4532844-kbr-bags-10b-u-s-navy-support-contract",
+      "uriImage": "https://static.seekingalpha.com/assets/og_image_1200-29b2bfe1a595477db6826bd2126c63ac2091efb7ec76347a8e7f81ba17e3de6c.png",
+      "schemaImage": {
+        "@type": "ImageObject",
+        "url": "https://static.seekingalpha.com/assets/og_image_1200-29b2bfe1a595477db6826bd2126c63ac2091efb7ec76347a8e7f81ba17e3de6c.png"
+      }
+    }
+  },
+  "included": [
+    {
+      "id": "51785401",
+      "type": "newsAuthorUser",
+      "attributes": {
+        "userId": 51785401,
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/051/785/401/small_pic.png?t=4a2df5bc62",
+          "medium": "https://seekingalpha.com/images/users_profile/051/785/401/medium_pic.png?t=12d05de8f0",
+          "big": "https://seekingalpha.com/images/users_profile/051/785/401/big_pic.png?t=5186f298ae",
+          "extra_large": "https://seekingalpha.com/images/users_profile/051/785/401/extra_large_pic.png?t=7fc1609fc5"
+        },
+        "nick": "Manshi Mamtora, CFA, SA News Editor",
+        "bio": "<p>Manshi Mamtora is a news editor at Seeking Alpha and is based in Mumbai, India. She is a Chartered Financial Analyst and has 14 years of experience in the research and report-writing space. Her passion for markets and analysis both keep her hooked on the writing desk. She joined Seeking Alpha in June 2020, where she covers macro events, analyst ratings, fund letters, European market updates, dividends, earnings, and more. Precious metals, technology, cryptocurrencies, and derivatives are among a few other areas of expertise.</p>",
+        "slug": "sa-news-team"
+      },
+      "links": {
+        "self": "/user/51785401",
+        "profileUrl": "/user/51785401"
+      }
+    },
+    {
+      "id": "2787",
+      "type": "tag",
+      "attributes": {
+        "slug": "kbr",
+        "name": "KBR",
+        "company": "KBR, Inc.",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "NYSE",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/KBR"
+      }
+    }
+  ]
+}

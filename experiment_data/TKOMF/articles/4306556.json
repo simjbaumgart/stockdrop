@@ -1,0 +1,501 @@
+{
+  "data": {
+    "id": "4306556",
+    "type": "fullArticle",
+    "attributes": {
+      "publishOn": "2019-11-14T07:23:49-05:00",
+      "isLockedPro": false,
+      "commentCount": 17,
+      "gettyImageUrl": null,
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "investing-ideas": {
+          "id": 10727,
+          "slug": "investing-ideas",
+          "kind": "general",
+          "path": "/stock-ideas",
+          "title": "Stock Ideas",
+          "sasource": "theme_breadcrumb"
+        },
+        "long-ideas": {
+          "id": 1936,
+          "slug": "long-ideas",
+          "kind": "breadcrumb",
+          "path": "/stock-ideas/long-ideas",
+          "title": "Long Ideas",
+          "sasource": "theme_breadcrumb"
+        },
+        "deep-value": {
+          "id": 115452,
+          "slug": "deep-value",
+          "kind": "common",
+          "non_theme": true
+        },
+        "sum-of-the-parts": {
+          "id": 142991,
+          "slug": "sum-of-the-parts",
+          "kind": "common",
+          "non_theme": true
+        },
+        "alpha-rich-investment-style": {
+          "id": 114682,
+          "slug": "alpha-rich-investment-style",
+          "kind": "general"
+        },
+        "alpha-rich-opportunity": {
+          "id": 114692,
+          "slug": "alpha-rich-opportunity",
+          "kind": "general"
+        },
+        "japan": {
+          "id": 18066,
+          "slug": "japan",
+          "kind": "country",
+          "path": "/market-outlook/global-investing/analysis/japan",
+          "title": "Japan"
+        },
+        "communication-services": {
+          "id": 50,
+          "slug": "communication-services",
+          "kind": "sector",
+          "path": "/sectors/communication-services",
+          "title": "Communication Services",
+          "sasource": "theme_breadcrumb"
+        }
+      },
+      "title": "SoftBank: Trading At A Deep Discount To The Sum Of Its Parts",
+      "summary": [
+        "SoftBank Group shares trade at an unusually wide discount (even by SoftBank's standards).",
+        "At current prices, Mr. Market is offering Softbank equity (ex-Alibaba stake) for free.",
+        "The 2Q20 reset could be the catalyst for a re-rating."
+      ],
+      "isPaywalled": false,
+      "structuredInsights": null,
+      "lastModified": "2019-11-14T07:32:42-05:00",
+      "isModerated": false,
+      "availableTranslations": [],
+      "locale": "en",
+      "closestTradingDate": "2019-11-14",
+      "beforeOpeningHours": true,
+      "isEarningsSlides": false,
+      "isExclusive": true,
+      "isTranscript": false,
+      "excludedByTag": false,
+      "transcriptPath": null,
+      "likesCount": 11,
+      "disabledStatus": "allowed",
+      "disabledMessage": null,
+      "status": "published",
+      "disclosure": "<p id=\"a-disclosure\"><b>Analyst\u2019s Disclosure:</b><span>I am/we are long SFTBY.</span><span id=\"top-business-disclosure\"> I wrote this article myself, and it expresses my own opinions. I am not receiving compensation for it (other than from Seeking Alpha). I have no business relationship with any company whose stock is mentioned in this article. </span></p><p id='a-disclosure-more'><strong>Seeking Alpha's Disclosure:</strong> Past performance is no guarantee of future results. No recommendation or advice is being given as to whether any investment is suitable for a particular investor. Any views or opinions expressed above may not reflect those of Seeking Alpha as a whole. Seeking Alpha is not a licensed securities dealer, broker or US investment adviser or investment bank. Our analysts are third party authors that include both professional investors and individual investors who may not be licensed or certified by any institute or regulatory body.</p>",
+      "articleActionableItem": null,
+      "inEmbargo": false,
+      "isNoindex": false,
+      "isNoarchive": true,
+      "content": "<p data-eci=\"true\">SoftBank Group (<a href=\"https://seekingalpha.com/symbol/SFTBY\">OTCPK:SFTBY</a>) shares have sunk to new lows of late, on negative news flow around its deteriorating investments (WeWork, Uber, etc). The severe pessimism on Softbank has, I believe, created an opportunity for investors - shares now trade at the largest disparity to underlying value I have seen since I first began following the stock post-GFC. While I do acknowledge the bear case around Softbank's investment process has merit, I believe shares currently offer more than enough margin of safety at these levels.</p> <p>Following the 2Q reset, analyst models have likely already reflected the decline in fair value for the three listed companies in which SoftBank Vision Fund (SVF) has stakes (Uber, Slack, Guardant Health), following the share price drop as of end-September. Digging into the valuation, even after factoring: a) increased risk posed by the investment fund via a higher conglomerate discount (25%) and b) valuing the investment funds at book (implying cumulative profits after tax are wiped out, in line with an extreme bear case scenario for the fair value of Softbank's unlisted investments), shares still offer ~54% upside. Softbank will probably always trade at a discount but these levels are unprecedented; the kitchen-sinking in 2Q20 may be the catalyst for a re-rating.</p> <h2><strong>The 2Q Reset</strong></h2> <p>For 1H20, SoftBank Group reported an operating loss of \u00a515.6 billion (-\u00a51.44 trillion YoY) on \u00a54,651.7 billion of sales (unchanged YoY).</p> <p><span><a href=\"https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736419328173792_origin.png\" rel=\"lightbox\" data-width=\"1285\" data-height=\"569\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736419328173792_origin.png?io=w640\" data-width=\"640\" data-height=\"283\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"false\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" fetchpriority=\"high\" width=\"1285\" height=\"569\" srcset=\"https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736419328173792_origin.png?io=w1280 1280w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736419328173792_origin.png?io=w1080 1080w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736419328173792_origin.png?io=w750 750w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736419328173792_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736419328173792_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736419328173792_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736419328173792_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span></p> <p>Source: <a href=\"https://cdn.group.softbank/en/corp/set/data/irinfo/presentations/results/pdf/2019/softbank_presentation_2019_002.pdf\" rel=\"nofollow\">Investor Presentation</a></p> <p>Operational profit grew in the SoftBank and Brightstar segments, but the SoftBank Vision Fund (SVF) segment contributed to most of the deterioration in 1H19 (-\u00a5572.6 billion).</p> <p><span><a href=\"https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736420676964474_origin.png\" rel=\"lightbox\" data-width=\"699\" data-height=\"588\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736420676964474_origin.png?io=w640\" data-width=\"640\" data-height=\"538\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" loading=\"lazy\" width=\"699\" height=\"588\" srcset=\"https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736420676964474_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736420676964474_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736420676964474_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736420676964474_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span></p> <p>Source: Investor Presentation</p> <p>Despite the large SVF loss, the overall equity value of the group's holdings rose versus 1Q (April-June), equating to a \u00a51.4 trillion increase in shareholder value, net of interest-bearing debt.</p> <p><span><a href=\"https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736422600369081_origin.png\" rel=\"lightbox\" data-width=\"1262\" data-height=\"701\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736422600369081_origin.png?io=w640\" data-width=\"640\" data-height=\"355\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" loading=\"lazy\" width=\"1262\" height=\"701\" srcset=\"https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736422600369081_origin.png?io=w1080 1080w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736422600369081_origin.png?io=w750 750w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736422600369081_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736422600369081_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736422600369081_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736422600369081_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span></p> <p>Source: Investor Presentation</p> <p>The acquisition value of the<span class=\"paywall-full-content\"> fund\u2019s 88 investment targets stood at $70.7 billion (+50% YoY), with fair value at $77.6 billion (unrealized gain of $6.9 billion). The cumulative investment uplift for SVF stands at +\u00a51.2 trillion (cumulative investment of \u00a58.2 trillion).</span></p> <p class=\"paywall-full-content\"><span><a href=\"https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736425986715991_origin.png\" rel=\"lightbox\" data-width=\"1049\" data-height=\"563\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736425986715991_origin.png?io=w640\" data-width=\"640\" data-height=\"343\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" loading=\"lazy\" width=\"1049\" height=\"563\" srcset=\"https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736425986715991_origin.png?io=w750 750w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736425986715991_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736425986715991_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736425986715991_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736425986715991_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span></p> <p class=\"paywall-full-content\">Source: Investor Presentation</p> <p class=\"paywall-full-content\">Going forward, Softbank will be sticking to its guns - there will be no changes to its AI growth vision or SVF investment strategy. CEO Masayoshi Son said at the <a href=\"https://seekingalpha.com/article/4303439-softbank-group-corp-sftby-ceo-masayoshi-son-q2-2020-results-earnings-call-transcript?part=single\">results briefing</a> that management had reflected long and hard about its overvaluation of the companies it invested in but insisted that SoftBank Group will not scale back future investment.</p> <blockquote class=\"paywall-full-content\"><p>\" From our perspective, no change in our journey. We don't see any storm, rough orders. It's just a soft order, to be honest. So some people, I hear you laughing. And Masa is always talking big, you may say. But from my perspective, no change in the journey, no vision change, no strategy change. All we will do is to just keep going, keep moving forward. That's Masa's commitment and our direction.\"</p></blockquote> <p class=\"paywall-full-content\">He also noted on the <a href=\"https://seekingalpha.com/article/4303439-softbank-group-corp-sftby-ceo-masayoshi-son-q2-2020-results-earnings-call-transcript?part=single\">call</a> that SVF\u2019s value remains intact despite recognizing a cumulative valuation loss of \u00a50.6tn, as it has generated valuation and realized gains of \u00a51.4tn, equating to strong returns overall.</p> <blockquote class=\"paywall-full-content\"><p>\"So all in all, we saw valuation loss by JPY 0.6 trillion, but we saw increase of value by 1.8 -- JPY 1.4 trillion, excuse me. So we can't win all the time. There are 5,000 venture capitals globally and average IRR is 13%, like I mentioned, and we are at least over 13%.\"</p></blockquote> <p class=\"paywall-full-content\">Going into 2Q, all eyes were on the SoftBank Vision Fund's (SVF) three main listed investments: Uber, Slack, and Guardant Health, as well as the We Company. The fair value of the fund's listed investments is calculated each quarter using share prices at the end of the quarter, and changes in fair value are booked as operating gains/losses. The three aforementioned companies' share prices at the end of September were down sharply from the end of June, and the drop in fair value for the investments has, as expected, been booked as an operating loss for the Jul-Sep period.</p> <p class=\"paywall-full-content\"><span><a href=\"https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736445255693467_origin.png\" rel=\"lightbox\" data-width=\"1117\" data-height=\"180\" data-og-image-twitter_small_card=\"false\" data-og-image-twitter_large_card=\"false\" data-og-image-twitter_image_post=\"false\" data-og-image-msn=\"false\" data-og-image-facebook=\"false\" data-og-image-google_news=\"false\" data-og-image-google_plus=\"false\" data-og-image-linkdin=\"false\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736445255693467_origin.png?io=w640\" data-width=\"640\" data-height=\"103\" data-og-image-twitter_small_card=\"false\" data-og-image-twitter_large_card=\"false\" data-og-image-twitter_image_post=\"false\" data-og-image-msn=\"false\" data-og-image-facebook=\"false\" data-og-image-google_news=\"false\" data-og-image-google_plus=\"false\" data-og-image-linkdin=\"false\" loading=\"lazy\" width=\"1117\" height=\"180\" srcset=\"https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736445255693467_origin.png?io=w1080 1080w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736445255693467_origin.png?io=w750 750w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736445255693467_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736445255693467_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736445255693467_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736445255693467_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span></p> <p class=\"paywall-full-content\">Source: <a href=\"https://cdn.group.softbank/en/corp/set/data/irinfo/presentations/analyst/pdf/2019/investor_20191108_01.pdf\" rel=\"nofollow\">Investor Presentation</a></p> <p class=\"paywall-full-content\">According to the We Company <a href=\"https://www.sec.gov/Archives/edgar/data/1533523/000119312519220499/d781982ds1.htm\" rel=\"nofollow\">prospectus</a> submitted in August this year, Softbank via its SVF affiliate SBWW Investments ($3.0bn in 2017 for both common and preferred) and SoftBank Group-affiliate SBWW Cayman ($4.5bn for both common and preferred, and a commitment to a $1.5bn investment in April 2020) has invested or committed to invest a combined total of $10.65bn in WeWork since 2017. The SVF/SoftBank Group affiliates are also tied up in the overseas JVs (China: $650mn, Japan: $500mn, Pacific: $500mn).</p> <p class=\"paywall-full-content\"><span><a href=\"https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736438968580108_origin.png\" rel=\"lightbox\" data-width=\"1292\" data-height=\"541\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736438968580108_origin.png?io=w640\" data-width=\"640\" data-height=\"268\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"false\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"false\" data-og-image-linkdin=\"true\" loading=\"lazy\" width=\"1292\" height=\"541\" srcset=\"https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736438968580108_origin.png?io=w1280 1280w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736438968580108_origin.png?io=w1080 1080w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736438968580108_origin.png?io=w750 750w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736438968580108_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736438968580108_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736438968580108_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736438968580108_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span></p> <p class=\"paywall-full-content\">Source: We Company <a href=\"https://www.sec.gov/Archives/edgar/data/1533523/000119312519220499/d781982ds1.htm\" rel=\"nofollow\">Prospectus</a></p> <p class=\"paywall-full-content\">According to these same materials, these SVF/SoftBank Group affiliates hold 113.99mn shares in WeWork when preferred shares are converted to common stock. Of these, the SVF affiliate holds roughly 63.65mn shares, and the SoftBank Group affiliate directly holds roughly 50.34mn shares.</p> <p class=\"paywall-full-content\"><span><a href=\"https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736436953621194_origin.png\" rel=\"lightbox\" data-width=\"1278\" data-height=\"587\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736436953621194_origin.png?io=w640\" data-width=\"640\" data-height=\"294\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"false\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" loading=\"lazy\" width=\"1278\" height=\"587\" srcset=\"https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736436953621194_origin.png?io=w1080 1080w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736436953621194_origin.png?io=w750 750w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736436953621194_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736436953621194_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736436953621194_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736436953621194_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span></p> <p class=\"paywall-full-content\">Source: We Company <a href=\"https://www.sec.gov/Archives/edgar/data/1533523/000119312519220499/d781982ds1.htm\" rel=\"nofollow\">Prospectus</a></p> <p class=\"paywall-full-content\">While WeWork withdrew its listing application at the end of September, under IFRS accounting, the change in WeWork's fair value as of end-September (as compared with end-June) has been recognized as (1) an operating gain/loss for the portion held by the SVF affiliate and (2) at the non-operating level as gains/losses for financial instruments valued at fair value through profits and losses (FVTPL) for the portion directly held by the SoftBank Group affiliate.</p> <p class=\"paywall-full-content\"><span><a href=\"https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736446086587167_origin.png\" rel=\"lightbox\" data-width=\"1267\" data-height=\"500\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"true\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"true\" data-og-image-linkdin=\"true\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736446086587167_origin.png?io=w640\" data-width=\"640\" data-height=\"253\" data-og-image-twitter_small_card=\"true\" data-og-image-twitter_large_card=\"true\" data-og-image-twitter_image_post=\"true\" data-og-image-msn=\"true\" data-og-image-facebook=\"false\" data-og-image-google_news=\"true\" data-og-image-google_plus=\"false\" data-og-image-linkdin=\"true\" loading=\"lazy\" width=\"1267\" height=\"500\" srcset=\"https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736446086587167_origin.png?io=w1080 1080w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736446086587167_origin.png?io=w750 750w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736446086587167_origin.png?io=w640 640w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736446086587167_origin.png?io=w480 480w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736446086587167_origin.png?io=w320 320w,https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736446086587167_origin.png?io=w240 240w\" sizes=\"(max-width: 767px) calc(100vw - 36px), (max-width: 1023px) calc(100vw - 180px), 552px\"></a></span></p> <p class=\"paywall-full-content\">Source: Investor Presentation</p> <h2 class=\"paywall-full-content\"><strong>Deep Discount to Sum-of-the-parts Valuation</strong></h2> <p class=\"paywall-full-content\">Using a sum-of-parts methodology, Softbank group is valued as follows: 1) Brightstar + other businesses, headquarters and eliminations (5x EV/EBITDA on fwd EBITDA); 2) 66.5% stake in SoftBank Corp; 3) 25.5% stake in Alibaba (post-capital gains tax); (4) 84.5% stake in Sprint; (5) 75.0% stake in Arm; (6) equity value of securities investments (post-capital gains tax); and (7) equity value of fund investments (applying a P/B of 1.0x; post-capital gains tax). To account for the inherent risk, a conglomerate discount of 25% is applied to the sum-of-parts.</p> <div class=\"table-responsive paywall-full-content\"> <span class=\"sa-table-scroll-wrapper sa-hide-scrollbar\"><span data-intersection-boundary=\"start\" data-test-id=\"table-scroll-wrapper-boundary-start\"></span><table> <tr> <td> </td> <td><p><strong>Basis</strong></p></td> <td><p><strong>Equity Value </strong></p></td> </tr> <tr> <td><p>Brightstar segment/Others(incl. Fortress and PayPay)/Headquarters (\u00a5bn)</p></td> <td><p>5x EV/EBITDA</p></td> <td><p><strong> 519.5 </strong></p></td> </tr> <tr> <td><p>Equity value for SoftBank Corp stake (\u00a5bn)</p></td> <td><p>66.50%</p></td> <td><p><strong> 4,730.3 </strong></p></td> </tr> <tr> <td><p>Equity value for Alibaba stake (after tax, \u00a5bn)</p></td> <td><p>25.50%</p></td> <td><p><strong> 9,465.2 </strong></p></td> </tr> <tr> <td><p>Equity value of Sprint stake (\u00a5bn)</p></td> <td><p>84.50%</p></td> <td><p><strong> 2,185.6 </strong></p></td> </tr> <tr> <td><p>ARM (\u00a5bn)</p></td> <td><p>75.00%</p></td> <td><p><strong> 652.5 </strong></p></td> </tr> <tr> <td><p>After tax equity value of investment securities (FY20E,\u00a5bn)</p></td> <td> </td> <td><p><strong> 45.0 </strong></p></td> </tr> <tr> <td><p>After tax equity value of fund investments (SoftBank's contribution only, FY20E, \u00a5bn)</p></td> <td><p>1x P/B</p></td> <td><p><strong> 617.0 </strong></p></td> </tr> <tr> <td><p>Conglomerate Discount (\u00a5bn)</p></td> <td><p>25.00%</p></td> <td><p><strong>- 4,553.8 </strong></p></td> </tr> <tr> <td><p><strong>Total Equity Value</strong></p></td> <td> </td> <td><p><strong> 13,661.3 </strong></p></td> </tr> <tr> <td><p><strong>No. of shares ('billions)</strong></p></td> <td> </td> <td><p><strong> 2.1 </strong></p></td> </tr> <tr> <td><p><strong>Target price (\u00a5/share)</strong></p></td> <td> </td> <td><p><strong> 6,599.7 </strong></p></td> </tr> </table> <span data-intersection-boundary=\"end\" data-test-id=\"table-scroll-wrapper-boundary-end\"></span></span><button type=\"button\" class=\"sa-table-enlarge-button\">Click to enlarge</button> </div> <p class=\"paywall-full-content\">Source: Author, Company Data</p> <p class=\"paywall-full-content\"><em>Note: 1) Brightstar et al segment valuation calculated based on a proportionate net cash position of \u00a5983bn, 2) ARM valued on a 75% ownership basis of acquisition premium, 3) after-tax equity value of investment securities calculated based on net debt of \u00a5591bn, 4) after-tax equity value of fund investments calculated based on net debt of \u00a52,848bn, 5) USD/JPY exchange rate of 108.</em></p> <p class=\"paywall-full-content\">Note that the valuation is conservative - the investment funds, for instance, at a P/B of 1.0x, would imply a severe deterioration in the fair value of unlisted investments.</p> <p class=\"paywall-full-content\">Also noteworthy is that the current valuation seems to imply zero value for, among others, Softbank's (~48%) stake in the ordinary shares of the Vision Fund. Yet, as Softbank receives dividends based on performance, it is important to emphasize that it will not bear all of the losses incurred by the Fund.</p> <p class=\"paywall-full-content\">For further context, the Alibaba stake (post-tax) alone, would more than adequately cover the current market cap, effectively implying that Softbank Group (ex-Alibaba) equity is being offered <em>for free</em>.</p> <div class=\"before_last_paragraph-piano-placeholder paywall-full-content\"></div> <p class=\"paywall-full-content\">Even in a conservative valuation scenario, the share price at \u00a54,277 offers 54% upside to fair value, which in my view, offers investors plenty of margin of safety. With the fair value of Softbank's unlisted investments now well accounted for and out in the open post-2Q20, I think we may have hit bottom.</p>",
+      "quickInsights": null,
+      "twitContent": "SoftBank: Trading At A Deep Discount To The Sum Of Its Parts $SFTBY $SFTBF #markets #economy #stocks https://seekingalpha.com/article/4306556-softbank-trading-at-a-deep-discount-to-the-sum-of-its-parts?source=tweet",
+      "innerMarketing": "",
+      "marketingBullet": "",
+      "isReit": false,
+      "videoData": null,
+      "marketingBulletVariant": null,
+      "marketingBio": null,
+      "audioDuration": null,
+      "originalTitle": "SoftBank: Trading At A Deep Discount To The Sum Of Its Parts"
+    },
+    "relationships": {
+      "author": {
+        "data": {
+          "id": "105387",
+          "type": "author"
+        }
+      },
+      "sentiments": {
+        "data": [
+          {
+            "id": "81109",
+            "type": "sentiment"
+          },
+          {
+            "id": "81108",
+            "type": "sentiment"
+          }
+        ]
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "31222",
+            "type": "tag"
+          },
+          {
+            "id": "2403",
+            "type": "tag"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": [
+          {
+            "id": "600074",
+            "type": "tag"
+          },
+          {
+            "id": "1936",
+            "type": "tag"
+          },
+          {
+            "id": "115452",
+            "type": "tag"
+          },
+          {
+            "id": "142991",
+            "type": "tag"
+          },
+          {
+            "id": "31222",
+            "type": "tag"
+          },
+          {
+            "id": "2403",
+            "type": "tag"
+          },
+          {
+            "id": "17335",
+            "type": "tag"
+          },
+          {
+            "id": "10727",
+            "type": "tag"
+          },
+          {
+            "id": "114682",
+            "type": "tag"
+          },
+          {
+            "id": "114692",
+            "type": "tag"
+          },
+          {
+            "id": "18066",
+            "type": "tag"
+          },
+          {
+            "id": "17994",
+            "type": "tag"
+          }
+        ]
+      },
+      "coAuthors": {
+        "data": []
+      },
+      "presentations": {
+        "data": []
+      },
+      "updates": {
+        "data": []
+      },
+      "corrections": {
+        "data": []
+      }
+    },
+    "links": {
+      "self": "/article/4306556-softbank-trading-at-a-deep-discount-to-the-sum-of-its-parts",
+      "canonical": "https://seekingalpha.com/article/4306556-softbank-trading-at-a-deep-discount-to-the-sum-of-its-parts",
+      "uriImage": "https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736419328173792_origin.png",
+      "schemaImage": {
+        "@type": "ImageObject",
+        "url": "https://static.seekingalpha.com/uploads/2019/11/13/50561280-15736419328173792_origin.png"
+      }
+    }
+  },
+  "included": [
+    {
+      "id": "105387",
+      "type": "author",
+      "attributes": {
+        "company": null,
+        "slug": "ryan-daniels",
+        "userId": 50561280,
+        "tagId": 600074,
+        "bio": "I have been a full time investor for 10 years now, with extensive experience in the field of investment management. I actively apply the principles of value investing to both my work as an analyst as well as to the management of my personal portfolio of investments. I also am an avid cyclist in my free time.",
+        "image": {
+          "small": "https://seekingalpha.com/images/users_profile/050/561/280/small_pic.png",
+          "medium": "https://seekingalpha.com/images/users_profile/050/561/280/medium_pic.png",
+          "big": "https://seekingalpha.com/images/users_profile/050/561/280/big_pic.png",
+          "extra_large": "https://seekingalpha.com/images/users_profile/050/561/280/extra_large_pic.png"
+        },
+        "nick": "Ryan Daniels",
+        "deactivated": null,
+        "memberSince": 2019,
+        "isRss": false,
+        "contributorSince": 2019,
+        "followersCount": 235
+      },
+      "relationships": {
+        "user": {
+          "data": {
+            "id": "50561280",
+            "type": "user"
+          }
+        },
+        "userBioTags": {
+          "data": [
+            {
+              "id": "960160",
+              "type": "userBioTag"
+            },
+            {
+              "id": "960161",
+              "type": "userBioTag"
+            },
+            {
+              "id": "960162",
+              "type": "userBioTag"
+            },
+            {
+              "id": "960163",
+              "type": "userBioTag"
+            }
+          ]
+        },
+        "authorResearch": {
+          "data": null
+        }
+      },
+      "links": {
+        "self": "/author/ryan-daniels",
+        "profileUrl": "/author/ryan-daniels",
+        "site": null,
+        "linkedinUrl": null,
+        "twitterUrl": null
+      }
+    },
+    {
+      "id": "31222",
+      "type": "tag",
+      "attributes": {
+        "slug": "sftby",
+        "name": "SFTBY",
+        "company": "SoftBank Group Corp.",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "OTCMKTS",
+        "fundTypeId": 8,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/SFTBY"
+      }
+    },
+    {
+      "id": "2403",
+      "type": "tag",
+      "attributes": {
+        "slug": "sftbf",
+        "name": "SFTBF",
+        "company": "SoftBank Group Corp.",
+        "tagKind": "Tags::Ticker",
+        "equityType": "stocks",
+        "exchange": "OTCMKTS",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "currency": "USD",
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "/symbol/SFTBF"
+      }
+    },
+    {
+      "id": "600074",
+      "type": "tag",
+      "attributes": {
+        "slug": "ryan-daniels",
+        "name": "Ryan Daniels",
+        "company": null,
+        "tagKind": "Tags::AuthorTag"
+      },
+      "links": {
+        "self": "/author/ryan-daniels"
+      }
+    },
+    {
+      "id": "1936",
+      "type": "tag",
+      "attributes": {
+        "slug": "long-ideas",
+        "name": "Long Ideas",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=long-ideas"
+      }
+    },
+    {
+      "id": "115452",
+      "type": "tag",
+      "attributes": {
+        "slug": "deep-value",
+        "name": "Deep value",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=deep-value"
+      }
+    },
+    {
+      "id": "142991",
+      "type": "tag",
+      "attributes": {
+        "slug": "sum-of-the-parts",
+        "name": "Sum of the Parts",
+        "company": null,
+        "tagKind": "Tags::Theme"
+      },
+      "links": {
+        "self": "/articles?filters=sum-of-the-parts"
+      }
+    },
+    {
+      "id": "17335",
+      "type": "tag",
+      "attributes": {
+        "slug": "sa-exclusive",
+        "name": "SA Exclusive",
+        "company": null,
+        "tagKind": "Tag"
+      },
+      "links": {
+        "self": "/tag/sa-exclusive"
+      }
+    },
+    {
+      "id": "10727",
+      "type": "tag",
+      "attributes": {
+        "slug": "investing-ideas",
+        "name": "Investing Ideas",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/investing-ideas"
+      }
+    },
+    {
+      "id": "114682",
+      "type": "tag",
+      "attributes": {
+        "slug": "alpha-rich-investment-style",
+        "name": "Alpha-Rich Investment Style",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/alpha-rich-investment-style"
+      }
+    },
+    {
+      "id": "114692",
+      "type": "tag",
+      "attributes": {
+        "slug": "alpha-rich-opportunity",
+        "name": "Alpha-Rich Opportunity",
+        "company": null,
+        "tagKind": "Tags::Dashboard"
+      },
+      "links": {
+        "self": "/tag/alpha-rich-opportunity"
+      }
+    },
+    {
+      "id": "18066",
+      "type": "tag",
+      "attributes": {
+        "slug": "japan",
+        "name": "Japan",
+        "company": null,
+        "tagKind": "Tags::Country"
+      },
+      "links": {
+        "self": "/articles?filters=japan"
+      }
+    },
+    {
+      "id": "17994",
+      "type": "tag",
+      "attributes": {
+        "slug": "information-technology",
+        "name": "Information Technology",
+        "company": null,
+        "tagKind": "Tags::GicsSector"
+      },
+      "links": {
+        "self": "/tag/information-technology"
+      }
+    },
+    {
+      "id": "81109",
+      "type": "sentiment",
+      "attributes": {
+        "articleId": 4306556,
+        "type": "very_bullish",
+        "createdAt": "2019-11-14T07:23:49.000-05:00",
+        "typeId": 0
+      },
+      "relationships": {
+        "article": {
+          "data": {
+            "id": "4306556",
+            "type": "article"
+          }
+        },
+        "tag": {
+          "data": {
+            "id": "2403",
+            "type": "tag"
+          }
+        }
+      }
+    },
+    {
+      "id": "81108",
+      "type": "sentiment",
+      "attributes": {
+        "articleId": 4306556,
+        "type": "very_bullish",
+        "createdAt": "2019-11-14T07:23:49.000-05:00",
+        "typeId": 0
+      },
+      "relationships": {
+        "article": {
+          "data": {
+            "id": "4306556",
+            "type": "article"
+          }
+        },
+        "tag": {
+          "data": {
+            "id": "31222",
+            "type": "tag"
+          }
+        }
+      }
+    }
+  ]
+}

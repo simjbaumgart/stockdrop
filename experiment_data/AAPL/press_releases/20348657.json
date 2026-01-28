@@ -1,0 +1,61 @@
+{
+  "data": {
+    "attributes": {
+      "commentCount": 0,
+      "title": "Trump administration moves to overhaul how H-1B visas are granted, ending lottery system",
+      "publishOn": "2025-12-23T17:17:00.000-05:00",
+      "lastModified": "2025-12-23T17:17:26-05:00",
+      "widgetLinks": null,
+      "content": "<div>\n<p>\n  </p>\n<p><span class=\"location\" value=\"LU/us.dc.wash\">WASHINGTON</span> (AP) \u2014 The Department of Homeland Security said Tuesday it was replacing its longstanding lottery system for <a href=\"https://apnews.com/article/h1b-visa-trump-immigration-explainer-7d5dae2c65b2fa27a7730be3c6833d32\">H-1B work visas</a> with a new approach that prioritizes skilled, higher-paid foreign workers.</p>\n  <p>The change follows a series of actions by the Trump administration aimed at reshaping a visa program that critics say has become a pipeline for overseas workers willing to work for lower pay, but supporters say drives innovation.</p>\n  <p>\u201cThe existing random selection process of H-1B registrations was exploited and abused by <span class=\"location\" value=\"LC/us\">U.S.</span> employers who were primarily seeking to import foreign workers at lower wages than they would pay American workers,\u201d said U.S. Citizenship and Immigration Services spokesman <span class=\"person\" value=\"\">Matthew Tragesser</span>. </p>\n  <p>Earlier this year, President <span class=\"person\" value=\"\">Donald Trump</span> <a href=\"https://apnews.com/article/h1b-visa-trump-immigration-8d39699d0b2de3d90936f8076357254e\">signed a proclamation</a> imposing a $100,000 annual H-1B visa fee on highly skilled workers, which is <a href=\"https://apnews.com/article/immigration-h1b-visa-trump-8afc10165ce911d43a4cd47ade4268e1\">being challenged</a> in court. The president also rolled out a $1 million \u201cgold card\u201d visa as a pathway to <span class=\"location\" value=\"LC/us\">U.S.</span> citizenship for wealthy individuals.</p>\n  <p>A press release announcing the new rule says it is \u201cin line with other key changes the administration has made, such as the <a href=\"https://www.whitehouse.gov/presidential-actions/2025/09/restriction-on-entry-of-certain-nonimmigrant-workers/\">Presidential Proclamation</a> that requires employers to pay an additional $100,000 per visa as a condition of eligibility.\u201d</p>\n  <p>Historically, H-1B visas have been awarded through a lottery system. This year, Amazon (<a href=\"https://seekingalpha.com/symbol/AMZN\">AMZN</a>) was by far the top recipient, with more than 10,000 visas approved, followed by Tata Consultancy Services, Microsoft (<a href=\"https://seekingalpha.com/symbol/MSFT\">MSFT</a>), Apple (<a href=\"https://seekingalpha.com/symbol/AAPL\">AAPL</a>) and Google. <span class=\"location\" value=\"LS/us.ca\">California</span> has the highest concentration of H-1B workers.</p>\n  <p>The new system will \u201cimplement a weighted selection process that will increase the probability that H-1B visas are allocated to higher-skilled and higher-paid\u201d foreign workers, according to Tuesday\u2019s press release. It will go into effect Feb. 27, 2026, and will apply to the upcoming H-1B cap registration season. </p>\n  <p>Supporters of the <a href=\"https://apnews.com/article/immigration-visa-h1b-rural-doctors-teachers-3a63095d603e405d08c496eb264d6100\">H-1B program</a> say it is an important pathway to hiring healthcare workers and educators. They say it drives innovation and economic growth in the <span class=\"location\" value=\"LC/us\">U.S.</span> and allows employers to fill jobs in specialized fields.</p>\n  <p>Critics argue that the visas often go to entry-level positions rather than senior roles requiring specialized skills. While the program is intended to prevent wage suppression or the displacement of <span class=\"location\" value=\"LC/us\">U.S.</span> workers, critics say companies can pay lower wages by classifying jobs at the lowest skill levels, even when the workers hired have more experience.</p>\n  <p>The number of new visas issued annually is capped at 65,000, plus an additional 20,000 for people with a master\u2019s degree or higher. </p>\n  \nCopyright 2025 The Associated Press. All rights reserved. This material may not be published, broadcast, rewritten or redistributed without permission.\n\n</div>",
+      "widgetTitle": null
+    },
+    "relationships": {
+      "acquireService": {
+        "data": {
+          "id": "68"
+        }
+      },
+      "primaryTickers": {
+        "data": [
+          {
+            "id": "146"
+          },
+          {
+            "id": "562"
+          },
+          {
+            "id": "575"
+          }
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": []
+      }
+    },
+    "links": {}
+  },
+  "included": [
+    {
+      "id": "68",
+      "attributes": {}
+    },
+    {
+      "id": "146",
+      "attributes": {},
+      "links": {}
+    },
+    {
+      "id": "562",
+      "attributes": {},
+      "links": {}
+    },
+    {
+      "id": "575",
+      "attributes": {},
+      "links": {}
+    }
+  ]
+}

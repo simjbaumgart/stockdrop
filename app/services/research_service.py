@@ -1,5 +1,5 @@
 import google.generativeai as genai # Existing SDK
-# from google.generativeai.types import RequestOptions
+from google.generativeai.types import RequestOptions
 from google import genai as new_genai # New SDK (Enabled)
 from google.genai import types as new_types
 import os
@@ -28,7 +28,7 @@ class ResearchService:
         if self.api_key:
             genai.configure(api_key=self.api_key)
             self.model = genai.GenerativeModel('gemini-3-pro-preview')
-            self.flash_model = genai.GenerativeModel('gemini-3.5-flash-preview')
+            self.flash_model = genai.GenerativeModel('gemini-3-flash-preview')
         else:
             logger.warning("GEMINI_API_KEY not found. Research service will use mock data.")
             self.model = None
@@ -88,7 +88,7 @@ class ResearchService:
         # Define wrapper for safe execution and result collection
         def run_agent(name, func, *args):
             try:
-                # print(f"    - Starting {name}...")
+                print(f"    - Starting {name}...")
                 return name, func(*args)
             except Exception as e:
                 logger.error(f"Error in {name}: {e}")
@@ -108,14 +108,14 @@ class ResearchService:
             futures = {
                 executor.submit(run_agent, "Technical Agent", self._call_agent, tech_prompt, "Technical Agent", state): "technical",
                 executor.submit(run_agent, "News Agent", self._call_agent, news_prompt, "News Agent", state): "news",
-                executor.submit(run_agent, "Market Sentiment Agent", self._call_market_sentiment_agent, state.ticker, state): "sentiment",
+                executor.submit(run_agent, "Market Sentiment Agent", self._call_market_sentiment_agent, state.ticker, state, raw_data): "sentiment",
                 executor.submit(run_agent, "Competitive Landscape Agent", self._call_agent, comp_prompt, "Competitive Landscape Agent", state): "competitive",
                 executor.submit(run_agent, "Seeking Alpha Agent", seeking_alpha_service.get_evidence, state.ticker): "seeking_alpha"
             }
             
             for future in concurrent.futures.as_completed(futures):
                 agent_name, result = future.result()
-                # print(f"    - {agent_name} Finished.")
+                print(f"    - {agent_name} Finished.")
                 
                 if agent_name == "Technical Agent":
                     tech_report = result
@@ -127,6 +127,32 @@ class ResearchService:
                     comp_report = result
                 elif agent_name == "Seeking Alpha Agent":
                     sa_report = result
+                    
+                    # Log Data Volume & Findings
+                    try:
+                        counts = seeking_alpha_service.get_counts(state.ticker)
+                        print(f"    [Seeking Alpha Summary]")
+                        print(f"      > Data Volume: {counts.get('total', 0)} items (Analysis: {counts.get('analysis')}, News: {counts.get('news')}, PR: {counts.get('pr')})")
+                        
+                        # Extract and print top Analysis headlines from the report
+                        lines = sa_report.split('\n')
+                        params_headlines = []
+                        capture = False
+                        for line in lines:
+                            if "## ANALYST SENTIMENT" in line:
+                                capture = True
+                            elif "## BREAKING NEWS" in line:
+                                capture = False
+                            
+                            if capture and line.startswith("### "):
+                                params_headlines.append(line.replace("### ", "").strip())
+                        
+                        if params_headlines:
+                            print(f"      > Top Analysis:")
+                            for h in params_headlines[:3]:
+                                print(f"       - {h}")
+                    except Exception as e:
+                        print(f"      (Error summarizing SA data: {e})")
 
         # Print Competitive Summary to Console (Post-Execution)
         print(f"\n  > [Competitive Landscape Agent] Analysis Complete.")
@@ -256,37 +282,16 @@ class ResearchService:
         drop_reason_identified = "REASON_FOR_DROP_IDENTIFIED: YES" in news_report
 
         
-        # --- Calculate Data Depth Metrics ---
-        news_items = raw_data.get('news_items', [])
-        news_count = len(news_items)
-        news_length = sum(len(n.get('content', '') or '') + len(n.get('summary', '') or '') for n in news_items)
-        
-        transcript_text = raw_data.get('transcript_text', "")
-        transcript_length = len(transcript_text)
-        
-        indicators = raw_data.get('indicators', {})
-        indicators_count = len(indicators)
-        
-        competitive_report_length = len(comp_report)
-        market_sentiment_report_length = len(sentiment_report)
-        economics_report_length = len(economics_report)
-        
-        data_depth = {
-            "news_count": news_count,
-            "news_length": news_length,
-            "transcript_length": transcript_length,
-            "indicators_count": indicators_count,
-            "competitive_report_length": competitive_report_length,
-            "market_sentiment_report_length": market_sentiment_report_length,
-            "economics_report_length": economics_report_length
-        }
+        # --- Calculate Data Depth Metrics (Evidence Barometer) ---
+        from app.services.evidence_service import evidence_service
+        data_depth = evidence_service.collect_barometer(raw_data, state.reports)
 
         return {
             "recommendation": recommendation,
             "score": final_decision.get("score", 50),
             "executive_summary": final_decision.get("reason", "No reason provided."),
             "deep_reasoning_report": deep_reasoning_report,
-            "detailed_report": self._format_full_report(state, deep_reasoning_report),
+            "detailed_report": self._format_full_report(state, deep_reasoning_report, evidence_barometer=data_depth),
             # Legacy compatibility fields
             "technician_report": state.reports.get('technical', ''),
             "bull_report": state.reports.get('bull', ''),
@@ -314,9 +319,11 @@ class ResearchService:
         
         bull_prompt = self._create_bull_prompt(state, drop_str)
         bear_prompt = self._create_bear_prompt(state, drop_str)
+        risk_prompt = self._create_risk_agent_prompt(state, drop_str)
 
         bull_report = ""
         bear_report = ""
+        risk_report = ""
 
         def run_agent(name, func, *args):
             try:
@@ -326,10 +333,11 @@ class ResearchService:
                 logger.error(f"Error in {name}: {e}")
                 return name, f"[Error in {name}: {e}]"
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
             futures = {
                 executor.submit(run_agent, "Bull Researcher", self._call_agent, bull_prompt, "Bull Researcher", state): "bull",
-                executor.submit(run_agent, "Bear Researcher", self._call_agent, bear_prompt, "Bear Researcher", state): "bear"
+                executor.submit(run_agent, "Bear Researcher", self._call_agent, bear_prompt, "Bear Researcher", state): "bear",
+                executor.submit(run_agent, "Risk Management Agent", self._call_agent, risk_prompt, "Risk Management Agent", state): "risk"
             }
             
             for future in concurrent.futures.as_completed(futures):
@@ -340,9 +348,13 @@ class ResearchService:
                 elif agent_name == "Bear Researcher":
                     bear_report = result
                     print(f"  > [Bear Researcher] Report Generated.")
+                elif agent_name == "Risk Management Agent":
+                    risk_report = result
+                    print(f"  > [Risk Management Agent] Report Generated.")
 
         state.reports['bull'] = bull_report
         state.reports['bear'] = bear_report
+        state.reports['risk'] = risk_report
 
     def _run_risk_council_and_decision(self, state: MarketState, drop_str: str) -> Dict:
         """
@@ -430,6 +442,10 @@ class ResearchService:
         # We assume 'indicators' contains what currently comes from TradingViewService:
         # RSI, Moving Averages, MACD, etc.
         
+        # Truncate Transcript for Technical Agent (Cost/Relevance Optimization)
+        # We only need the context/tone, not the full text.
+        transcript_snippet = transcript[:2000] + "..." if len(transcript) > 2000 else transcript
+
         return f"""
 You are the **Technical Analyst Agent**.
 Your goal is to analyze the price action and technical health of {state.ticker}.
@@ -441,8 +457,8 @@ INPUT DATA:
 1. TECHNICAL INDICATORS:
 {json.dumps(indicators, indent=2)}
 
-2. QUARTERLY REPORT SNIPPET (Transcript/Filing):
-{transcript}
+2. QUARTERLY REPORT SNIPPET (Transcript/Filing - Truncated):
+{transcript_snippet}
 
 TASK:
 - Analyze if this drop has pushed the stock into oversold territory (RSI, Bollinger Bands, %B, etc.) or into a key support zone favorable for a short-term bounce.
@@ -481,13 +497,19 @@ Use headers: "Technical Signal", "Oversold Status", "Context from Report", "Verd
         news_summary = ""
         
         # We might want a specific order (e.g. Benzinga first)
-        preferred_order = ["Benzinga/Massive", "Alpha Vantage", "Finnhub", "Yahoo Finance", "TradingView"]
+        preferred_order = ["Market News (Benzinga)", "Benzinga/Massive", "Alpha Vantage", "Finnhub", "Yahoo Finance", "TradingView"]
         
         # Process known providers first
         for prov in preferred_order:
             if prov in by_provider:
                 items = by_provider[prov]
-                news_summary += f"--- SOURCE: {prov} ---\n"
+                
+                # Custom Header for Market News
+                if prov == "Market News (Benzinga)":
+                    news_summary += f"--- BROAD MARKET CONTEXT (SPY/DIA/QQQ) ---\n"
+                else:
+                    news_summary += f"--- SOURCE: {prov} ---\n"
+                    
                 for n in items:
                     date_str = n.get('datetime_str', 'N/A')
                     headline = n.get('headline', 'No Headline')
@@ -688,18 +710,18 @@ Structure it as follows:
 
     def _create_bull_prompt(self, state: MarketState, drop_str: str) -> str:
         return f"""
-You are the **Bullish Researcher**. Your goal is to look optimistically at the given stock.
-CONTEXT: We are looking for a swing trade / short-term recovery opportunity on this {drop_str} drop.
+You are the **Bullish Researcher**. Your goal is to look rationally at the given stock with searching for upsides.
+CONTEXT: We are looking for a swing trade / short-term recovery opportunity on this {drop_str} drop. We want to know if the market reaction is too strong.
 You received additional data from an analysis team below.
 
 AGENT REPORTS:
 {json.dumps(state.reports, indent=2)}
 
 TASK:
-Construct a persuasive argument for a LONG position (The Bull Case).
+Construct a realistic argument for a LONG position (The Bull Case).
 1. Explain the "Narrative" for the bounce.
 2. Cite specific positive drivers from the **News Headlines** and **Earnings Transcript**.
-3. Do not rely solely on technicals; explain the FUNDAMENTAL reason for a reversal.
+3. Do not rely solely on technicals; explain the FUNDAMENTAL and market reason for a reversal.
 4. Remember that the Market often priced in information already but sometimes too much or too little.
 
 SAFETY:
@@ -709,20 +731,27 @@ DO NOT HALLUCINATE.
 
 OUTPUT:
 A comprehensive bullish playbook.
-Use headers: "Bullish Narrative", "Evidence from Report", "Catalysts", "Conclusion".
+Use headers: "Bullish Narrative", "Evidence from Report", "Catalysts", "Quantitative Estimation", "Conclusion".
+
+QUANTITATIVE ESTIMATION (The Bull Case Numbers):
+- **Revenue Stream**: Estimate the revenue impact in this Optimistic Scenario. Is the damage contained? (e.g. "0% impact", "-2% temporary hit").
+- **Valuation Impact**:
+    - **Current PE**: Identify the current PE.
+    - **Bull Case Forward PE**: Estimate the forward PE assuming your benign narrative holds true.
+    - **EPS Impact**: Provide a "% Impact on EPS" estimate (e.g. "-1% EPS impact").
 """
 
     def _create_bear_prompt(self, state: MarketState, drop_str: str) -> str:
         return f"""
 You are the **Bearish Researcher**. Your goal is to protect the firm's capital from risk.
 CONTEXT: The stock dropped {drop_str}.
-Review the Agent Reports (especially the "Extended Transcript Summary").
+Review the Agent Reports.
 
 AGENT REPORTS:
 {json.dumps(state.reports, indent=2)}
 
 TASK:
-Construct a persuasive but logical and rational argument for a NO TRADE or SHORT position (The Bear Case).
+Construct a rational and logical argument for a NO TRADE or SHORT position. Explain if the drop is realistically priced in by the market. 
 1. Explain why this drop is justified or could go deeper.
 2. Cite specific negative risks from the **News and Transcript** (guidance cuts, macro headwinds).
 3. Be skeptical of the "Dip Buy" mentality.
@@ -732,17 +761,26 @@ Answer primarily from the provided Agent Reports.
 However, you have access to Google Search to check for "Red Flags" that might be missing (e.g. lawsuits, fraud allegations, major analyst downgrades).
 DO NOT HALLUCINATE.
 
-OUTPUT:
 A comprehensive bearish playbook.
-Use headers: "Bearish Narrative", "Risks & Red Flags", "Fundamental Flaws", "Conclusion".
+Use headers: "Bearish Narrative", "Risks & Red Flags", "Fundamental Flaws", "Quantitative Estimation", "Conclusion".
+
+QUANTITATIVE ESTIMATION (The Bear Case Numbers):
+- **Revenue Stream**: Estimate the revenue impact in this Pessimistic Scenario. potential loss of contracts/customers? (e.g. "-15% permanent revenue loss").
+- **Valuation Impact**:
+    - **Current PE**: Identify the current PE.
+    - **Bear Case Forward PE**: Estimate the forward PE assuming the worst-case structural decline.
+    - **EPS Impact**: Provide a "% Impact on EPS" estimate (e.g. "-20% EPS impact").
 """
+
+
 
     def _create_fund_manager_prompt(self, state: MarketState, safe_concerns: List[str], risky_support: List[str], drop_str: str) -> str:
         bull_report = state.reports.get('bull', 'No Bull Report')
         bear_report = state.reports.get('bear', 'No Bear Report')
+        risk_report = state.reports.get('risk', 'No Risk Report')
         
         return f"""
-You are the **Portfolio Manager**. You have the final vote.
+You are the **Portfolio Manager**. You have the final vote. Take your time. You see a lot of requests to buy stocks every day.
 You must weigh the arguments from the Bull Agent and the Bear Agent, and Review the original Agent Reports.
 
 DECISION CONTEXT: This is a Swing Trade / Short-term Recovery play on a stock that dropped {drop_str}.
@@ -750,12 +788,16 @@ DECISION CONTEXT: This is a Swing Trade / Short-term Recovery play on a stock th
 RISK FACTORS (For Consideration):
 - Technical Flags: {safe_concerns}
 - News Flags: {risky_support}
+- **RISK AGENT ASSESSMENT**:
+{risk_report}
 
 BULL CASE:
 {bull_report}
 
 BEAR CASE:
 {bear_report}
+
+
 
 AGENT REPORTS (Data):
 {json.dumps(state.reports, indent=2)}
@@ -807,14 +849,17 @@ A strictly formatted JSON object:
                 "Economics Agent",
                 "Bull Researcher",
                 "Bear Researcher",
-                "Fund Manager"
+                "Bull Researcher",
+                "Bear Researcher",
+                "Fund Manager",
+                "Risk Management Agent"
             ]
 
             if agent_name in grounded_agents and self.grounding_client:
                  model_to_use = "gemini-3-flash-preview"
                  
                  # Bull, Bear, and Fund Manager should use Gemini 3 Pro
-                 if agent_name in ["Bull Researcher", "Bear Researcher", "Fund Manager", "News Agent","Technical Agent"]:
+                 if agent_name in ["Bull Researcher", "Bear Researcher", "Fund Manager", "Risk Management Agent"]:
                      model_to_use = "gemini-3-pro-preview"
                  
                  logger.info(f"Calling {agent_name} with {model_to_use} + Grounding...")
@@ -884,7 +929,8 @@ Process continuing but this agent's output is compromised.
             
             # RETRY ON EXCEPTION
             if retry_count < 1 and "pro" in model_name:
-                 logger.info("Exception with Pro. Retrying same model...")
+                 logger.info("Exception with Pro. Retrying same model after 2s delay...")
+                 time.sleep(2)
                  return self._call_grounded_model(prompt, model_name, agent_context, retry_count=1)
             
             print(f"\\n!!! GROUNDING EXCEPTION ({agent_context}): {e} !!!\\n")
@@ -1018,15 +1064,34 @@ Process continuing but this agent's output is compromised.
             logger.error(f"Grounding Call Failed: {e}")
             return f"[Grounding Error: {e}] - Falling back to standard model..."
 
-    def _call_market_sentiment_agent(self, ticker: str, state: MarketState) -> str:
+    def _call_market_sentiment_agent(self, ticker: str, state: MarketState, raw_data: Dict) -> str:
         """
-        Calls the Market Sentiment Agent using Gemini 2.5 Flash with Grounding.
+        Calls the Market Sentiment Agent using Gemini 3 Flash with Grounding.
         Analyzes Home Market, Business Markets, and US Market.
         """
         if not self.grounding_client:
             return "Market Sentiment Agent Unavailable (No Grounding Client)"
 
-        logger.info(f"Calling Market Sentiment Agent for {ticker}...")
+        logger.info(f"Calling Market Sentiment Agent with gemini-3-flash-preview + Grounding...")
+        
+        # --- MARKET NEWS INTEGRATION ---
+        # Extract broader market news (SPY, DIA, QQQ) if available
+        market_news_str = ""
+        news_items = raw_data.get('news_items', [])
+        found_market_news = False
+        
+        for n in news_items:
+            # We specifically look for the "Market News" provider tag we added in StockService
+            if n.get('provider') == 'Market News (Benzinga)':
+                 headline = n.get('headline', 'No Headline')
+                 date = n.get('datetime_str', 'N/A')
+                 summary = n.get('summary', '')
+                 market_news_str += f"- {date}: {headline}\n  Summary: {summary}\n"
+                 found_market_news = True
+        
+        if found_market_news:
+            market_news_str = f"\n        PROVIDED BROAD MARKET CONTEXT (Important):\n{market_news_str}\n"
+
         
         # 1. Determine Home Market / Business Context implicitly via LLM Prompt or Heuristic
         # We will let the LLM do the heavy lifting of identifying business regions to be more dynamic.
@@ -1038,6 +1103,7 @@ Process continuing but this agent's output is compromised.
         CONTEXT:
         - Date: {state.date}
         - Focus: TODAY and YESTERDAY only.
+        {market_news_str}
         
         TASK:
         1. **Identify Markets**:
@@ -1084,7 +1150,7 @@ Process continuing but this agent's output is compromised.
             }
             
             # Prioritize Gemini 3.5 Flash as requested
-            model_name = "gemini-3.5-flash-preview"
+            model_name = "gemini-3-flash-preview"
             
             response = self.grounding_client.models.generate_content(
                 model=model_name,
@@ -1181,17 +1247,37 @@ Process continuing but this agent's output is compromised.
             logger.error(f"Failed to extract JSON: {e}")
             return None
 
-    def _format_full_report(self, state: MarketState, deep_report: str = "") -> str:
+    def _format_full_report(self, state: MarketState, deep_report: str = "", evidence_barometer: Dict = None) -> str:
         debate_section = ''.join([f"\n{entry}\n" for entry in state.debate_transcript])
         
         deep_section = ""
         if deep_report:
             deep_section = f"\n## 0. DEEP REASONING VERDICT (Verification)\n{deep_report}\n"
+            
+        # Format Evidence Barometer
+        evidence_section = ""
+        if evidence_barometer:
+            news = evidence_barometer.get('news', {})
+            fund = evidence_barometer.get('fundamentals', {})
+            
+            # Helper to format providers
+            providers = news.get('providers', {})
+            prov_str = ", ".join([f"{k}: {v}" for k, v in providers.items()])
+            
+            evidence_section = f"""
+## 📊 EVIDENCE BAROMETER
+**Data Depth & Quality Analysis**
+- **News Coverage**: {news.get('total_count', 0)} Items ({news.get('total_length_chars', 0)} chars)
+  - *Sources*: {prov_str or "None"}
+  - *Range*: {news.get('time_range', {}).get('newest', 'N/A')} to {news.get('time_range', {}).get('oldest', 'N/A')}
+- **Fundamentals**: Transcript {'Available' if fund.get('transcript_available') else 'Missing'} ({fund.get('transcript_length', 0)} chars)
+  - *Date*: {fund.get('transcript_date', 'N/A')}
+"""
         
         return f"""
 # STOCKDROP INVESTMENT MEMO: {state.ticker}
 Date: {state.date}
-
+{evidence_section}
 {deep_section}
 ## 1. Risk Council & Decision
 **Action:** {state.final_decision.get('action')}
@@ -1220,6 +1306,28 @@ Date: {state.date}
             if side.upper() in entry[:20].upper():
                 return entry
         return ""
+
+    def _create_risk_agent_prompt(self, state: MarketState, drop_str: str) -> str:
+        return f"""
+You are the **Risk Management Agent**.
+Your goal is to be the "Devil's Advocate" and identify ALL potential risks associated with buying {state.ticker} on this dip.
+You operate alongside the Bull and Bear agents but do not see their work. Your job is to ensure the Fund Manager is aware of the "Tail Risks" and "Hidden Dangers" in the data.
+
+CONTEXT: The stock has dropped {drop_str}.
+COUNCIL 1 REPORTS (Data from News, Technicals, Sentiment, etc.):
+{json.dumps(state.reports, indent=2)}
+
+TASK:
+1. **Scrutinize the Data**: Look for inconsistencies between the News and the Financials (e.g. "Record Revenue" but "Lower Guidance").
+2. **Identify "Trap" Signals**: Is the "Dip" actually a "Falling Knife"? (e.g. Broken technical trend + Fundamental deterioration).
+3. **Anticipate the Bull Case**: A Bull might argue "It's oversold". Counter that argument: Why might it stay oversold?
+4. **List Top 3 Specific Risks**: (e.g. "Regulatory Investigation pending", "Sector rotation out of Tech", "Margin compression").
+
+OUTPUT:
+A dedicated Risk Assessment.
+We argue that contexts should function not as concise summaries, but as comprehensive, evolving playbooks—detailed, inclusive, and rich with domain insights.
+Use Headers: "Risk Assessment", "Trap Check", "Counter-Thesis", "Key Risks".
+"""
 
     def _check_and_increment_usage(self) -> bool:
         """

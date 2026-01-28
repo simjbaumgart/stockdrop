@@ -1,0 +1,118 @@
+{
+  "data": {
+    "attributes": {
+      "publishOn": "2024-11-19T08:19:16-05:00",
+      "isLockedPro": false,
+      "commentCount": 0,
+      "gettyImageUrl": null,
+      "videoPreviewUrl": null,
+      "videoDuration": null,
+      "themes": {
+        "earnings": {
+          "id": 10,
+          "non_theme": false
+        },
+        "japan": {
+          "id": 18066,
+          "title": null,
+          "non_theme": true
+        },
+        "large-cap": {
+          "id": 115402,
+          "title": null,
+          "non_theme": true
+        },
+        "guidance": {
+          "id": 601061,
+          "title": null,
+          "non_theme": true
+        },
+        "breaking-news": {
+          "id": 614459,
+          "title": null,
+          "non_theme": true
+        },
+        "news-metered": {
+          "id": 614465,
+          "title": null,
+          "non_theme": true
+        },
+        "templated": {
+          "id": 778493,
+          "title": null,
+          "non_theme": true
+        }
+      },
+      "title": "Tokio Marine Holdings GAAP EPS of \u00a5351.38, revenue of \u00a52697.94B; updates FY24 outlook",
+      "isPaywalled": false,
+      "lastModified": "2024-11-19T08:22:58-05:00",
+      "content": "<ul> <li>Tokio Marine Holdings <a href=\"https://www.tokiomarinehd.com/en/ir/event/presentation/2024/o1ckc9000000gcm8-att/2Q_FY2024_Summary_Report_e.pdf\" target=\"_blank\" rel=\"nofollow\">press release</a> (<a href=\"https://seekingalpha.com/symbol/TKOMY\" title=\"Tokio Marine Holdings, Inc.\">OTCPK:TKOMY</a>): 1H GAAP Basic EPS of \u00a5351.38.</li> <li>Revenue of \u00a52697.94B (+10.1% Y/Y).</li> <li>The company has revised its consolidated business forecasts for the fiscal year 2024. The revised consolidated business forecasts are 1,240.0 billion yen for Ordinary profit and<span class=\"paywall-full-content\"> 880.0 billion yen for Net income attributable to owners of the parent. The forecasts are based on the following assumptions: - Net premiums written and Life insurance premiums are projected to be 5,080.0 billion yen and 890.0 billion yen respectively. - Net incurred losses related to natural catastrophes occurring during the period are projected to be 116.0 billion yen in Japan and 85.0 billion yen outside Japan. - The Company assumes there will be no significant changes in interest rates, stock market conditions and currency exchange rates from those as of September 30, 2024. </span><span><a href=\"https://static.seekingalpha.com/uploads/2024/11/19/saupload_Screenshot_2024-11-19_184646.png\" rel=\"lightbox\" target=\"_blank\" class=\"paywall-full-content\" role=\"button\" aria-label=\"Expand image into lightbox view\"><img src=\"https://static.seekingalpha.com/uploads/2024/11/19/saupload_Screenshot_2024-11-19_184646.png?io=w640\" width=\"100%\" fetchpriority=\"high\" height=\"\"></a></span> </li> </ul> <div class=\"signup_widget_placeholder\"></div><div id=\"more-links\" class=\"paywall-full-content\"> <h2>More on Tokio Marine Holdings</h2> <ul> <li><a href=\"https://seekingalpha.com/article/4725786-tokio-marine-is-making-good-progress-with-roe-expansion-initiatives\" class=\"more-link\">Tokio Marine Is Making Good Progress With ROE Expansion Initiatives</a></li> <li><a href=\"https://seekingalpha.com/symbol/TKOMY/ratings/quant-ratings\" class=\"more-link\">Seeking Alpha\u2019s Quant Rating on Tokio Marine Holdings</a></li> <li><a href=\"https://seekingalpha.com/symbol/TKOMY/earnings\" class=\"more-link\">Historical earnings data for Tokio Marine Holdings</a></li> <li><a href=\"https://seekingalpha.com/symbol/TKOMY/income-statement\" class=\"more-link\">Financial information for Tokio Marine Holdings</a></li> </ul> </div>",
+      "disclosure": null,
+      "quickInsights": null,
+      "metered": true,
+      "availableTranslations": [],
+      "correctionReason": null,
+      "audioDuration": 71.136,
+      "originalTitle": "Tokio Marine Holdings GAAP EPS of \u00a5351.38, revenue of \u00a52697.94B; updates FY24 outlook"
+    },
+    "relationships": {
+      "author": {
+        "data": {}
+      },
+      "sentiments": {
+        "data": []
+      },
+      "primaryTickers": {
+        "data": [
+          {},
+          {}
+        ]
+      },
+      "secondaryTickers": {
+        "data": []
+      },
+      "otherTags": {
+        "data": []
+      },
+      "ratingChangeNotice": {}
+    },
+    "links": {
+      "schemaImage": {}
+    }
+  },
+  "included": [
+    {
+      "attributes": {
+        "userId": 52365730,
+        "image": {},
+        "nick": "Meghavi Singh, SA News Editor",
+        "bio": "<p>Meghavi Singh is an editor on the India news team of Seeking Alpha, based in Pune.</p><p>Before joining Seeking Alpha in 2020, she worked with HSBC Bank for 12+ years in the wealth management and Regulatory Reporting departments. Prior to HSBC, she began her career with Gridstone Research, a financial research start-up, as a research associate for a period of 3 years, tracking company events and financial results for the US Consumer Sector.</p><p>She has two daughters and lives in Pune, India.</p><p> </p>"
+      },
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": "Tokio Marine Holdings, Inc.",
+        "fundTypeId": 8,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "attributes": {
+        "company": "Tokio Marine Holdings, Inc.",
+        "fundTypeId": 0,
+        "isDefunct": false,
+        "isBdc": false,
+        "isReit": false,
+        "isEtf": false
+      },
+      "relationships": {},
+      "links": {}
+    }
+  ]
+}
