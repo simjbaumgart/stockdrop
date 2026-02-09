@@ -97,15 +97,22 @@
                             }}/10</span>
                         {% endif %}
                         {% else %}
-                        {# Legacy Text Support #}
-                        {% if dp.recommendation == 'STRONG BUY' %}
-                        <span class="badge badge-success">STRONG BUY</span>
-                        {% elif dp.recommendation == 'BUY' %}
-                        <span class="badge badge-success">BUY</span>
-                        {% elif dp.recommendation == 'SELL' %}
-                        <span class="badge badge-danger">SELL</span>
+                        {# Action badge rendering #}
+                        {% if dp.recommendation == 'BUY' %}
+                        <span class="badge badge-success" style="background-color: #064e3b; color: #34d399;">BUY</span>
+                        {% elif dp.recommendation == 'BUY_LIMIT' %}
+                        <span class="badge badge-info" style="background-color: #0c4a6e; color: #38bdf8;">BUY_LIMIT</span>
+                        {% elif dp.recommendation == 'WATCH' %}
+                        <span class="badge badge-warning" style="background-color: #451a03; color: #fbbf24;">WATCH</span>
+                        {% elif dp.recommendation == 'AVOID' %}
+                        <span class="badge badge-danger" style="background-color: #450a0a; color: #f87171;">AVOID</span>
+                        {# Legacy values for historical data #}
+                        {% elif dp.recommendation == 'STRONG BUY' %}
+                        <span class="badge badge-success" style="background-color: #064e3b; color: #34d399;">STRONG BUY</span>
+                        {% elif dp.recommendation == 'SELL' or dp.recommendation == 'STRONG SELL' %}
+                        <span class="badge badge-danger" style="background-color: #450a0a; color: #f87171;">{{ dp.recommendation }}</span>
                         {% else %}
-                        <span class="badge badge-warning">{{ dp.recommendation }}</span>
+                        <span class="badge badge-warning" style="background-color: #451a03; color: #fbbf24;">{{ dp.recommendation }}</span>
                         {% endif %}
                         {% endif %}
                         {% endif %}

@@ -88,7 +88,6 @@ class ResearchService:
         # Define wrapper for safe execution and result collection
         def run_agent(name, func, *args):
             try:
-                print(f"    - Starting {name}...")
                 return name, func(*args)
             except Exception as e:
                 logger.error(f"Error in {name}: {e}")
@@ -104,6 +103,16 @@ class ResearchService:
         comp_report = ""
         sa_report = ""
 
+        # Agent short names for compact progress display
+        agent_short_names = {
+            "Technical Agent": "Tech",
+            "News Agent": "News",
+            "Market Sentiment Agent": "Sentiment",
+            "Competitive Landscape Agent": "Competitive",
+            "Seeking Alpha Agent": "SA"
+        }
+        completed_agents = []
+
         with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
             futures = {
                 executor.submit(run_agent, "Technical Agent", self._call_agent, tech_prompt, "Technical Agent", state): "technical",
@@ -115,7 +124,7 @@ class ResearchService:
             
             for future in concurrent.futures.as_completed(futures):
                 agent_name, result = future.result()
-                print(f"    - {agent_name} Finished.")
+                completed_agents.append(agent_short_names.get(agent_name, agent_name))
                 
                 if agent_name == "Technical Agent":
                     tech_report = result
@@ -127,35 +136,28 @@ class ResearchService:
                     comp_report = result
                 elif agent_name == "Seeking Alpha Agent":
                     sa_report = result
-                    
-                    # Log Data Volume & Findings
-                    try:
-                        counts = seeking_alpha_service.get_counts(state.ticker)
-                        print(f"    [Seeking Alpha Summary]")
-                        print(f"      > Data Volume: {counts.get('total', 0)} items (Analysis: {counts.get('analysis')}, News: {counts.get('news')}, PR: {counts.get('pr')})")
-                        
-                        # Extract and print top Analysis headlines from the report
-                        lines = sa_report.split('\n')
-                        params_headlines = []
-                        capture = False
-                        for line in lines:
-                            if "## ANALYST SENTIMENT" in line:
-                                capture = True
-                            elif "## BREAKING NEWS" in line:
-                                capture = False
-                            
-                            if capture and line.startswith("### "):
-                                params_headlines.append(line.replace("### ", "").strip())
-                        
-                        if params_headlines:
-                            print(f"      > Top Analysis:")
-                            for h in params_headlines[:3]:
-                                print(f"       - {h}")
-                    except Exception as e:
-                        print(f"      (Error summarizing SA data: {e})")
+
+        # Print compact agent progress summary
+        agent_status = " ".join([f"[{name}✓]" for name in completed_agents])
+        print(f"  > Agents: {agent_status}")
+
+        # Print data depth summary
+        try:
+            news_items = raw_data.get("news_items", [])
+            transcript_text = raw_data.get("transcript_text", "")
+            sa_counts = seeking_alpha_service.get_counts(state.ticker)
+            sa_total = sa_counts.get('total', 0)
+            sa_analysis = sa_counts.get('analysis', 0)
+            sa_news = sa_counts.get('news', 0)
+            sa_pr = sa_counts.get('pr', 0)
+            has_transcript = "Yes" if transcript_text and len(transcript_text) > 100 else "No"
+            has_econ = "Yes" if "NEEDS_ECONOMICS: TRUE" in news_report else "No"
+            
+            print(f"  > Data Depth: {len(news_items)} news articles | SA: {sa_total} items (Analysis:{sa_analysis} News:{sa_news} PR:{sa_pr}) | Transcript: {has_transcript} | Econ: {has_econ}")
+        except Exception as e:
+            logger.debug(f"Error printing data depth: {e}")
 
         # Print Competitive Summary to Console (Post-Execution)
-        print(f"\n  > [Competitive Landscape Agent] Analysis Complete.")
         try:
             # Flexible matching for the header (handling potential markdown formatting like ##)
             if "Summary & Key Points" in comp_report:
@@ -238,22 +240,26 @@ class ResearchService:
         
         # --- Print Final Decision to Console ---
         print("\n" + "="*50)
-        print(f"  [PORTFOLIO MANAGER DECISION]: {final_decision.get('action')}")
-        print(f"  Score: {final_decision.get('score')}/100")
+        print(f"  [PORTFOLIO MANAGER DECISION]: {final_decision.get('action')} (Conviction: {final_decision.get('conviction', 'N/A')})")
+        print(f"  Drop Type: {final_decision.get('drop_type', 'N/A')}")
+        print(f"  Entry Zone: ${final_decision.get('entry_price_low', 'N/A')} - ${final_decision.get('entry_price_high', 'N/A')}")
+        print(f"  Stop Loss: ${final_decision.get('stop_loss', 'N/A')} | TP1: ${final_decision.get('take_profit_1', 'N/A')} | TP2: ${final_decision.get('take_profit_2', 'N/A')}")
+        print(f"  Upside: {final_decision.get('upside_percent', 'N/A')}% | Downside: {final_decision.get('downside_risk_percent', 'N/A')}% | R/R: {final_decision.get('risk_reward_ratio', 'N/A')}")
+        print(f"  Entry Trigger: {final_decision.get('entry_trigger', 'N/A')}")
+        print(f"  Reassess In: {final_decision.get('reassess_in_days', 'N/A')} trading days")
         print(f"  Reason: {final_decision.get('reason')}")
-        print("  Key Decision Points:")
-        for point in final_decision.get('key_decision_points', []):
-            print(f"   - {point}")
+        print("  Key Factors:")
+        for factor in final_decision.get('key_factors', []):
+            print(f"   - {factor}")
         print(f"  Total Agent Calls: {state.agent_calls}")
         print("="*50 + "\n")
         
-        # --- Phase 4: deep reasoning check for STRONG BUY ---
+        # --- Phase 4: deep reasoning check for BUY signals ---
         deep_reasoning_report = ""
-        action = final_decision.get('action', 'HOLD').upper()
+        action = final_decision.get('action', 'AVOID').upper()
         
-        # Trigger if Strong Buy, or plain Buy with high confidence (e.g. > 80)
-        # Trigger if Strong Buy, or plain Buy with high confidence (e.g. > 80)
-        is_strong_buy = action == "STRONG BUY" or (action == "BUY" and final_decision.get('score', 0) >= 75)
+        # Gate on recommendation text only — ai_score has no predictive signal
+        is_strong_buy = "BUY" in action.upper()
         
         # Override for testing if needed (User can request via flag, but for now we follow logic)
         # is_strong_buy = True 
@@ -274,8 +280,7 @@ class ResearchService:
         #          final_decision['reason'] += " [WARNING: Deep Reasoning Model suggests caution/downgrade - see report]"
         
         # Construct Final Output compatible with existing app expectations
-        recommendation = final_decision.get("action", "HOLD").upper()
-        # Map "BUY" with size to "STRONG BUY" if needed, or keep generic
+        recommendation = final_decision.get("action", "AVOID").upper()
         
         # Extract checklist metadata
         economics_run = "NEEDS_ECONOMICS: TRUE" in news_report and economics_report != "" and "failed to fetch" not in economics_report
@@ -288,10 +293,25 @@ class ResearchService:
 
         return {
             "recommendation": recommendation,
-            "score": final_decision.get("score", 50),
+            "score": final_decision.get("score", 50),  # Legacy — no longer in prompt, kept for backward compat
             "executive_summary": final_decision.get("reason", "No reason provided."),
             "deep_reasoning_report": deep_reasoning_report,
             "detailed_report": self._format_full_report(state, deep_reasoning_report, evidence_barometer=data_depth),
+            # PM trading-level fields (v0.9)
+            "conviction": final_decision.get("conviction", "LOW"),
+            "drop_type": final_decision.get("drop_type", "UNKNOWN"),
+            "entry_price_low": final_decision.get("entry_price_low"),
+            "entry_price_high": final_decision.get("entry_price_high"),
+            "stop_loss": final_decision.get("stop_loss"),
+            "take_profit_1": final_decision.get("take_profit_1"),
+            "take_profit_2": final_decision.get("take_profit_2"),
+            "upside_percent": final_decision.get("upside_percent"),
+            "downside_risk_percent": final_decision.get("downside_risk_percent"),
+            "risk_reward_ratio": final_decision.get("risk_reward_ratio"),
+            "pre_drop_price": final_decision.get("pre_drop_price"),
+            "entry_trigger": final_decision.get("entry_trigger"),
+            "reassess_in_days": final_decision.get("reassess_in_days"),
+            "key_factors": final_decision.get("key_factors", []),
             # Legacy compatibility fields
             "technician_report": state.reports.get('technical', ''),
             "bull_report": state.reports.get('bull', ''),
@@ -303,7 +323,7 @@ class ResearchService:
                 "economics_run": economics_run,
                 "drop_reason_identified": drop_reason_identified
             },
-            "key_decision_points": final_decision.get("key_decision_points", []),
+            "key_decision_points": final_decision.get("key_factors", []),  # Mapped for backward compat
             "market_sentiment_report": state.reports.get('market_sentiment', ''),
             "competitive_report": state.reports.get('competitive', ''),
             "data_depth": data_depth
@@ -333,6 +353,7 @@ class ResearchService:
                 logger.error(f"Error in {name}: {e}")
                 return name, f"[Error in {name}: {e}]"
 
+        phase2_completed = []
         with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
             futures = {
                 executor.submit(run_agent, "Bull Researcher", self._call_agent, bull_prompt, "Bull Researcher", state): "bull",
@@ -340,17 +361,18 @@ class ResearchService:
                 executor.submit(run_agent, "Risk Management Agent", self._call_agent, risk_prompt, "Risk Management Agent", state): "risk"
             }
             
+            agent_short = {"Bull Researcher": "Bull", "Bear Researcher": "Bear", "Risk Management Agent": "Risk"}
             for future in concurrent.futures.as_completed(futures):
                 agent_name, result = future.result()
+                phase2_completed.append(agent_short.get(agent_name, agent_name))
                 if agent_name == "Bull Researcher":
                     bull_report = result
-                    print(f"  > [Bull Researcher] Report Generated.")
                 elif agent_name == "Bear Researcher":
                     bear_report = result
-                    print(f"  > [Bear Researcher] Report Generated.")
                 elif agent_name == "Risk Management Agent":
                     risk_report = result
-                    print(f"  > [Risk Management Agent] Report Generated.")
+
+        print(f"  > Phase 2: {' '.join([f'[{n}✓]' for n in phase2_completed])}")
 
         state.reports['bull'] = bull_report
         state.reports['bear'] = bear_report
@@ -390,7 +412,7 @@ class ResearchService:
         decision = self._extract_json(decision_json_str)
         
         if not decision:
-            decision = {"action": "HOLD", "size": "0%", "reason": "Failed to generate decision JSON.", "score": 50}
+            decision = {"action": "AVOID", "conviction": "LOW", "reason": "Failed to generate decision JSON.", "drop_type": "UNKNOWN"}
             
         return decision
 
@@ -504,20 +526,24 @@ Use headers: "Technical Signal", "Oversold Status", "Context from Report", "Verd
             if prov in by_provider:
                 items = by_provider[prov]
                 
+                # Determine dominant source_type for header annotation
+                group_type = items[0].get('source_type', 'WIRE') if items else 'WIRE'
+                
                 # Custom Header for Market News
                 if prov == "Market News (Benzinga)":
-                    news_summary += f"--- BROAD MARKET CONTEXT (SPY/DIA/QQQ) ---\n"
+                    news_summary += f"--- BROAD MARKET CONTEXT (SPY/DIA/QQQ) [MARKET_CONTEXT] ---\n"
                 else:
-                    news_summary += f"--- SOURCE: {prov} ---\n"
+                    news_summary += f"--- SOURCE: {prov} [{group_type}] ---\n"
                     
                 for n in items:
                     date_str = n.get('datetime_str', 'N/A')
                     headline = n.get('headline', 'No Headline')
                     source = n.get('source', 'Unknown')
+                    source_type = n.get('source_type', 'WIRE')
                     content = n.get('content', '') # Full body/Insights
                     summary = n.get('summary', '') # Summary/Description
                     
-                    news_summary += f"- {date_str}: {headline} ({source})\n"
+                    news_summary += f"- {date_str}: [{source_type}] {headline} ({source})\n"
                     
                     # Display Content if available (Rich Data), else Summary
                     if content:
@@ -533,14 +559,16 @@ Use headers: "Technical Signal", "Oversold Status", "Context from Report", "Verd
         # Process any remaining "Other" providers
         for prov, items in by_provider.items():
             if prov not in preferred_order:
-                news_summary += f"--- SOURCE: {prov} ---\n"
+                group_type = items[0].get('source_type', 'WIRE') if items else 'WIRE'
+                news_summary += f"--- SOURCE: {prov} [{group_type}] ---\n"
                 for n in items:
                     date_str = n.get('datetime_str', 'N/A')
                     headline = n.get('headline', 'No Headline')
                     source = n.get('source', 'Unknown')
+                    source_type = n.get('source_type', 'WIRE')
                     summary = n.get('summary', '')
                     
-                    news_summary += f"- {date_str}: {headline} ({source})\n"
+                    news_summary += f"- {date_str}: [{source_type}] {headline} ({source})\n"
                     if summary:
                          news_summary += f"  SUMMARY: {summary}\n\n"
 
@@ -621,6 +649,15 @@ TASK:
 - Highlight specific events from news or the report that are driving sentiment.
 - Check for consistency: Do the headlines match the company's internal tone in the report?
 - **CRITICAL ASSESSMENT**: Assess the validity of the news. Is it "Hype" or "Fluff"? Be skeptical of clickbait or promotional content. If a source looks unreliable or the headline is sensationalist, note it. Distinguish between hard facts (earnings miss, lawsuit) and opinion pieces.
+
+SOURCE PRIORITY (when evidence conflicts):
+Each news item is tagged with a source_type — use this to judge credibility:
+1. OFFICIAL sources (press releases, SEC filings) — ground truth
+2. WIRE sources (Benzinga, Reuters, Finnhub) — factual reporting
+3. ANALYST sources (Seeking Alpha, Motley Fool) — informed opinion, check for bias
+4. MARKET_CONTEXT — broad signals, not company-specific
+When an ANALYST article contradicts a WIRE report, trust the WIRE source for facts
+but consider the ANALYST perspective for sentiment and thesis construction.
 
 OUTPUT:
 A comprehensive sentiment playbook.
@@ -778,12 +815,19 @@ QUANTITATIVE ESTIMATION (The Bear Case Numbers):
         bull_report = state.reports.get('bull', 'No Bull Report')
         bear_report = state.reports.get('bear', 'No Bear Report')
         risk_report = state.reports.get('risk', 'No Risk Report')
-        
-        return f"""
-You are the **Portfolio Manager**. You have the final vote. Take your time. You see a lot of requests to buy stocks every day.
-You must weigh the arguments from the Bull Agent and the Bear Agent, and Review the original Agent Reports.
 
-DECISION CONTEXT: This is a Swing Trade / Short-term Recovery play on a stock that dropped {drop_str}.
+        # Extract available technical levels for the PM to reference
+        indicators = state.reports.get('technical', '')
+
+        return f"""
+You are the **Portfolio Manager**. You have the final vote.
+You must weigh the arguments from the Bull Agent and the Bear Agent, cross-reference with the original Agent Reports, and produce a concrete, actionable trading plan.
+
+DECISION CONTEXT:
+- Stock: {state.ticker}
+- Drop: {drop_str} today
+- This is a "Buy the Dip" evaluation. We are looking for oversold large-cap stocks with recovery potential.
+- The investor holds positions until recovery (weeks to months), not day-trading.
 
 RISK FACTORS (For Consideration):
 - Technical Flags: {safe_concerns}
@@ -797,9 +841,7 @@ BULL CASE:
 BEAR CASE:
 {bear_report}
 
-
-
-AGENT REPORTS (Data):
+AGENT REPORTS (Raw Data):
 {json.dumps(state.reports, indent=2)}
 
 CRITICAL TASK:
@@ -807,22 +849,73 @@ CRITICAL TASK:
    - If the Bull claims "Earnings Beat", check if it was actually a beat or a mixed bag.
    - If the Bear claims "Lawsuit", verify the severity.
 2. Weigh the evidence. Who has the stronger case based on FACTS, not just rhetoric?
-3. Decide whether to BUY (Catch the bounce), HOLD (Wait for clarity), or SELL (Avoid/Short).
+3. **SOURCE QUALITY**: Agent reports reference source types — OFFICIAL (SEC/PR), WIRE (factual), ANALYST (opinion), MARKET_CONTEXT (broad). When claims conflict, OFFICIAL and WIRE sources carry more weight than ANALYST opinions.
+4. **CLASSIFY THE DROP**: Determine WHY the stock dropped. This is critical for predicting recovery.
+5. **CALCULATE TRADING LEVELS**: Using the technical data (ATR, Support, Resistance, Bollinger Bands) from the reports, determine concrete price levels.
 
-OBJECTIVE:
-Make a decision based on the Probability of Profit.
+AVAILABLE TECHNICAL DATA (use these exact fields from the reports):
+- Current price: `close` field in indicators
+- ATR: `atr` field (Average True Range — use for stop-loss distance)
+- RSI: `rsi` field (oversold < 30, overbought > 70)
+- Bollinger Band Lower: `bb_lower` (dynamic support proxy)
+- Bollinger Band Upper: `bb_upper` (dynamic resistance proxy)
+- SMA50: `sma50`, SMA200: `sma200` (trend context)
+- 52-Week High: `high52`, 52-Week Low: `low52` (historical range)
+- BB Middle (approximate): midpoint of bb_lower and bb_upper
+Note: No explicit support/resistance levels are provided. Use Bollinger Bands, SMA levels, and 52-week extremes as proxies.
+
+INSTRUCTIONS FOR TRADING LEVELS:
+- **entry_price_low / entry_price_high**: The price zone where buying makes sense. Use bb_lower and the current close price as guides. If "BUY" (immediate), set this to the current close price +/- 1%.
+- **stop_loss**: Set at 2x ATR below entry_price_low, or below the bb_lower if that is tighter. This is the "thesis is broken" level. Must be a concrete number.
+- **take_profit_1**: Conservative target. Typically the pre-drop price (calculate from close and drop_percent) or the BB middle (average of bb_lower and bb_upper). This is the recovery target.
+- **take_profit_2**: Optimistic target. bb_upper, SMA50, or SMA200 — whichever is above TP1 and realistic. Set to null if no clear upside beyond TP1.
+- **upside_percent**: Calculate from current close to take_profit_1. Example: close is $100, TP1 is $112 → upside is 12.0.
+- **downside_risk_percent**: Calculate from current close to stop_loss. Example: close is $100, SL is $90 → downside is 10.0.
+- **pre_drop_price**: Calculate from close and drop_percent. Formula: close / (1 + drop_percent/100). Example: close=$93, drop=-7% → pre_drop = 93 / 0.93 = $100. Include this for reference.
+
+INSTRUCTIONS FOR DROP CLASSIFICATION:
+Classify the `drop_type` as one of:
+- "EARNINGS_MISS" — Drop triggered by disappointing earnings or guidance
+- "ANALYST_DOWNGRADE" — Driven by analyst rating changes or price target cuts
+- "SECTOR_ROTATION" — Sector-wide selling, not company-specific
+- "MACRO_SELLOFF" — Broad market decline (rates, recession fears, geopolitics)
+- "COMPANY_SPECIFIC" — Lawsuit, management change, product failure, fraud
+- "TECHNICAL_BREAKDOWN" — No fundamental catalyst; purely technical selling
+- "UNKNOWN" — No clear catalyst identified
+
+INSTRUCTIONS FOR CONVICTION:
+- "HIGH": Bull case is verified, risk/reward ratio > 2:1, multiple catalysts align, and the drop type is recoverable (EARNINGS_MISS with beat, SECTOR_ROTATION, MACRO_SELLOFF).
+- "MODERATE": Mixed signals but favorable lean. Some unresolved risks. Risk/reward roughly 1.5:1.
+- "LOW": Too many unknowns, bear case has strong points, or drop type is structural (fraud, permanent competitive loss). Skip this trade.
+
+INSTRUCTIONS FOR ACTION:
+- "BUY": Enter now at current price. Conviction is HIGH. The evidence strongly supports recovery.
+- "BUY_LIMIT": Set a limit order at entry_price_low. Price needs to stabilize or dip slightly more before entry.
+- "WATCH": Add to watchlist with specific entry_trigger condition. Do NOT buy yet.
+- "AVOID": Do not trade. The bear case dominates or risk/reward is unfavorable.
 
 OUTPUT:
-A strictly formatted JSON object:
+A strictly formatted JSON object. All price fields must be numbers (not strings). All percentage fields must be numbers (e.g. 12.5 not "12.5%").
 {{
-  "action": "STRONG BUY" | "BUY" | "HOLD" | "SELL" | "STRONG SELL",
-  "size": "String (e.g. 'Standard', 'Half', 'Double')",
-  "score": Number (0-100),
-  "reason": "String (One sentence summary: 'Bull case verified strong with X catalyst' or 'Bear case dominates due to Y risk')",
-  "key_decision_points": [
-      "String (Point 1 - Verification result)",
-      "String (Point 2 - Winner of the argument)",
-      "String (Point 3 - Risk mitigation)"
+  "action": "BUY" | "BUY_LIMIT" | "WATCH" | "AVOID",
+  "conviction": "HIGH" | "MODERATE" | "LOW",
+  "drop_type": "EARNINGS_MISS" | "ANALYST_DOWNGRADE" | "SECTOR_ROTATION" | "MACRO_SELLOFF" | "COMPANY_SPECIFIC" | "TECHNICAL_BREAKDOWN" | "UNKNOWN",
+  "entry_price_low": <number>,
+  "entry_price_high": <number>,
+  "stop_loss": <number>,
+  "take_profit_1": <number>,
+  "take_profit_2": <number or null>,
+  "upside_percent": <number>,
+  "downside_risk_percent": <number>,
+  "risk_reward_ratio": <number (upside_percent / downside_risk_percent, rounded to 1 decimal)>,
+  "pre_drop_price": <number (calculated: close / (1 + drop_percent/100))>,
+  "entry_trigger": "String describing specific condition to enter. Examples: 'RSI crosses above 30', 'Price holds above $142 for 2 sessions', 'Volume returns to 20-day average'. For BUY action, use 'Immediate — current levels are attractive.'",
+  "reassess_in_days": <number (trading days before this analysis expires, typically 3-10)>,
+  "reason": "One sentence: why this is or isn't a good trade right now.",
+  "key_factors": [
+      "String (Factor 1 — most important evidence for/against)",
+      "String (Factor 2 — verification result from Google Search)",
+      "String (Factor 3 — technical or risk consideration)"
   ]
 }}
 """
@@ -1198,24 +1291,21 @@ Process continuing but this agent's output is compromised.
             for support in sorted_supports:
                 end_index = support.segment.end_index
                 if support.grounding_chunk_indices:
-                    citation_links = []
+                    citation_refs = []
                     for i in support.grounding_chunk_indices:
                         if i < len(chunks):
-                            web = chunks[i].web
-                            if web and web.uri:
-                                citation_links.append(f"[{i + 1}]({web.uri})")
+                            citation_refs.append(f"[Source {i + 1}]")
                     
-                    if citation_links:
-                        citation_string = " " + "".join(citation_links)
+                    if citation_refs:
+                        citation_string = " " + "".join(citation_refs)
                         text = text[:end_index] + citation_string + text[end_index:]
             
-            # Add a Source List at the bottom
-            text += "\n\n### Grounding Sources:\n"
+            # Add a clean Source List at the bottom (titles only, no raw URLs)
+            text += "\n\n### Sources:\n"
             for i, chunk in enumerate(chunks):
                 web = chunk.web
                 title = web.title if web.title else "Source"
-                uri = web.uri if web.uri else "#"
-                text += f"{i + 1}. [{title}]({uri})\n"
+                text += f"{i + 1}. {title}\n"
 
             return text
             

@@ -18,7 +18,7 @@ from app.services.deep_research_service import deep_research_service
 
 def get_todays_candidates() -> List[Dict]:
     """
-    Fetches today's candidates with Score >= 70.
+    Fetches today's candidates with a BUY recommendation.
     """
     try:
         conn = sqlite3.connect("subscribers.db")
@@ -27,11 +27,11 @@ def get_todays_candidates() -> List[Dict]:
         
         today_str = datetime.now().strftime("%Y-%m-%d")
         
-        # Query: Score >= 70, from Today
+        # Query: BUY recommendation, from Today (no score threshold)
         query = """
             SELECT * FROM decision_points 
             WHERE date(timestamp) = ? 
-            AND ai_score >= 70
+            AND recommendation LIKE '%BUY%'
         """
         cursor.execute(query, (today_str,))
         rows = cursor.fetchall()
@@ -40,15 +40,16 @@ def get_todays_candidates() -> List[Dict]:
         candidates = [dict(row) for row in rows]
         print(f"[Tournament] Found {len(candidates)} candidates for today ({today_str}).")
         
-        # Filter duplicates (keep highest score)
+        # Filter duplicates (keep latest by id)
         unique = {}
         for c in candidates:
             sym = c['symbol']
-            if sym not in unique or c['ai_score'] > unique[sym]['ai_score']:
+            if sym not in unique or c['id'] > unique[sym]['id']:
                 unique[sym] = c
                 
         final_list = list(unique.values())
-        return sorted(final_list, key=lambda x: x['ai_score'], reverse=True)
+        # Sort by deep_research_score (deterministic from verdict), falling back to 0
+        return sorted(final_list, key=lambda x: x.get('deep_research_score') or 0, reverse=True)
         
     except Exception as e:
         print(f"[Tournament] Error fetching candidates: {e}")
@@ -115,8 +116,7 @@ def run_tournament(candidates: List[Dict], round_num: int = 1) -> Dict:
                     print(f"  ⚠️ Winner {winner_sym} not found in chunk! Promoting first candidate as fallback.")
                     winners.append(chunk[0])
             else:
-                 print("  ❌ Batch Failed. Promoting highest score as fallback.")
-                 chunk.sort(key=lambda x: x['ai_score'], reverse=True)
+                 print("  ❌ Batch Failed. Promoting first candidate as fallback.")
                  winners.append(chunk[0])
 
             # Buffer Delay (Consecutive runs)
@@ -140,7 +140,7 @@ def main():
     candidates = get_todays_candidates()
     
     if not candidates:
-        print("No candidates found for today with Score >= 70.")
+        print("No candidates found for today with a BUY recommendation.")
         return
 
     print(f"Loaded {len(candidates)} candidates.")
@@ -151,8 +151,8 @@ def main():
         print(f"\n{'='*60}")
         print(f"🏆 STOCK OF THE DAY: {overall_winner['symbol']}")
         print(f"{'='*60}")
-        print(f"Score: {overall_winner['ai_score']}")
         print(f"Recommendation: {overall_winner.get('recommendation', 'N/A')}")
+        print(f"Deep Research Verdict: {overall_winner.get('deep_research_verdict', 'N/A')}")
         print(f"{'='*60}\n")
     else:
         print("Tournament finished without a clear winner.")

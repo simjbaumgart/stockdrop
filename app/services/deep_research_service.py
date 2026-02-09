@@ -29,6 +29,9 @@ class DeepResearchService:
         self.current_task_start_time = None
         self.current_task_name = None 
         self.cooldown_seconds = 60
+        
+        # Change-detection for file sync (avoid redundant re-syncs)
+        self._last_synced_files = set()
 
         if not self.api_key:
             logger.warning("GEMINI_API_KEY not found. Deep Research Service will be disabled.")
@@ -92,41 +95,35 @@ class DeepResearchService:
             output_dir = "data/comparisons"
             json_files = glob.glob(os.path.join(output_dir, "batch_comparison_*.json"))
             
-            logger.info(f"[Deep Research Sync] Found {len(json_files)} batch result files.")
+            # Change-detection: skip if file set hasn't changed since last sync
+            current_files = set(os.path.basename(f) for f in json_files)
+            if current_files == self._last_synced_files:
+                logger.debug("[Deep Research Sync] No changes detected, skipping.")
+                return
+            self._last_synced_files = current_files
+            
+            synced_winners = []
             
             for filepath in json_files:
                 try:
                     filename = os.path.basename(filepath)
-                    # format: batch_comparison_{date}_{prob_symbols}.json
-                    # But symbols might contain underscores, so parsing logic needs care.
-                    # Actually, we rely on the CONTENT for the winner.
-                    # DB link is harder if we don't know the batch_id directly.
-                    # But we can find the batch by (Date + Symbols) using SQL.
-                    # Let's read content first.
                     
                     with open(filepath, 'r') as f:
                          data = json.load(f)
                          
                     winner = data.get('winner_symbol')
-                    # We need the date from filename or content? 
-                    # filename: batch_comparison_YYYY-MM-DD_...
                     parts = filename.replace("batch_comparison_", "").split("_")
                     date_str = parts[0] # YYYY-MM-DD
                     
                     if winner:
-                        # Mark Winner
                         mark_batch_winner(winner, date_str)
-                        logger.info(f"[Deep Research Sync] Synced winner {winner} from file.")
-                        
-                        # Find and Mark Batch as COMPLETED
-                        # We need to find the batch_id that matches this file.
-                        # Symbols are in the filename (rest of parts), but order matters.
-                        # Actually, we can search by status 'STARTED' and date? 
-                        # Or just find any batch with this date/symbols.
-                        pass # For now, winner update is key.
+                        synced_winners.append(winner)
                         
                 except Exception as e:
                     logger.error(f"[Deep Research Sync] Error processing file {filepath}: {e}")
+            
+            if synced_winners:
+                logger.info(f"[Deep Research Sync] Synced {len(synced_winners)} winners from batch files.")
                     
             # Cleanup Stuck Batches (Before Dec 22)
             # Query DB for STARTED batches before Dec 22
@@ -322,21 +319,15 @@ class DeepResearchService:
                 with self.lock:
                     self.active_tasks_count = 0
 
-    def queue_research_task(self, symbol, raw_news, technical_data, drop_percent, decision_id, transcript_text="", transcript_date=None, transcript_warning=None, market_sentiment_report=None, competitive_report=None):
+    def queue_research_task(self, symbol: str, context: dict, decision_id: int):
         """
         Queues an individual deep research task (HIGH PRIORITY).
+        context: Pre-built context dict from StockService._build_deep_research_context()
         """
         payload = {
             'symbol': symbol,
-            'raw_news': raw_news,
-            'technical_data': technical_data,
-            'drop_percent': drop_percent,
+            'context': context,
             'decision_id': decision_id,
-            'transcript_text': transcript_text,
-            'transcript_date': transcript_date,
-            'transcript_warning': transcript_warning,
-            'market_sentiment_report': market_sentiment_report,
-            'competitive_report': competitive_report
         }
         self.individual_queue.put({'type': 'individual', 'payload': payload})
         logger.info(f"[Deep Research] Queued INDIVIDUAL task for {symbol} (Priority: High)")
@@ -361,21 +352,13 @@ class DeepResearchService:
         """
         symbol = payload['symbol']
         try:
-             result = self.execute_deep_research(
-                symbol, 
-                payload['raw_news'], 
-                payload['technical_data'], 
-                payload['drop_percent'], 
-                payload['transcript_text'], 
-                payload['transcript_date'], 
-                payload['transcript_warning'],
-                payload.get('market_sentiment_report'),
-                payload.get('competitive_report'),
-                payload.get('summary_report'), # Support for Backfill
-                payload.get('decision_id')     # Pass decision_id for DB update
+            result = self.execute_deep_research(
+                symbol=symbol,
+                context=payload['context'],
+                decision_id=payload.get('decision_id')
             )
-             if result:
-                 self._handle_completion(payload, result)
+            if result:
+                self._handle_completion(payload, result)
         except Exception as e:
             logger.error(f"[Deep Research] Individual Task Failed for {symbol}: {e}")
 
@@ -391,51 +374,115 @@ class DeepResearchService:
                  from app.database import update_batch_status
                  update_batch_status(payload['batch_id'], 'FAILED')
 
+    def _calculate_deep_research_score(self, result: dict) -> int:
+        """
+        Composite scoring for deep research results.
+        Components:
+          - Verdict weight (40 pts max)
+          - Conviction (25 pts max)
+          - Risk/Reward bonus (20 pts max)
+          - Knife catch penalty (-15)
+          - Dispute penalty (-5 per disputed claim)
+        """
+        score = 0
+
+        # Verdict weight (review_verdict)
+        verdict_map = {
+            "UPGRADED": 40,
+            "CONFIRMED": 35,
+            "ADJUSTED": 20,
+            "OVERRIDDEN": 5,
+            "ERROR_PARSING": 0,
+        }
+        review_verdict = result.get("review_verdict", "ERROR_PARSING")
+        score += verdict_map.get(review_verdict, 0)
+
+        # Conviction
+        conviction_map = {"HIGH": 25, "MODERATE": 15, "LOW": 5}
+        score += conviction_map.get(result.get("conviction", "LOW"), 5)
+
+        # Risk/Reward bonus
+        try:
+            rr = float(result.get("risk_reward_ratio", 0))
+            if rr >= 2.0:
+                score += 20
+            elif rr >= 1.5:
+                score += 15
+            elif rr >= 1.0:
+                score += 10
+        except (TypeError, ValueError):
+            pass
+
+        # Knife catch penalty
+        if result.get("knife_catch_warning") in (True, "True", "true"):
+            score -= 15
+
+        # Dispute penalty: -5 per DISPUTED claim in verification_results
+        for v in result.get("verification_results", []):
+            if isinstance(v, str) and "DISPUTED" in v.upper():
+                score -= 5
+
+        return max(0, min(100, score))
+
     def _handle_completion(self, task, result):
         """
-        Handles the completed research result (DB update, PDF save).
+        Handles the completed research result (DB update, file save).
         """
         symbol = task['symbol']
         decision_id = task.get('decision_id')
-        verdict = result.get('verdict', 'UNKNOWN')
-        logger.info(f"[Deep Research] Task Completed for {symbol}. Verdict: {verdict}")
+        review_verdict = result.get('review_verdict', 'UNKNOWN')
+        action = result.get('action', 'AVOID')
+        logger.info(f"[Deep Research] Task Completed for {symbol}. Review Verdict: {review_verdict}, Action: {action}")
         
         try:
             from app.database import update_deep_research_data
             
-            # Calculate Score
-            score_map = {
-                "STRONG_BUY": 90,
-                "SPECULATIVE_BUY": 75,
-                "WAIT_FOR_STABILIZATION": 50,
-                "HARD_AVOID": 10
-            }
-            score = score_map.get(verdict, 0)
+            # Calculate composite score
+            score = self._calculate_deep_research_score(result)
             
-            # Extract new fields
+            # Extract fields
             swot = json.dumps(result.get('swot_analysis', {}))
             global_analysis = result.get('global_market_analysis', '')
             local_analysis = result.get('local_market_analysis', '')
+            verification = json.dumps(result.get('verification_results', []))
+            blindspots = json.dumps(result.get('council_blindspots', []))
             
-            # Update DB
+            # Map review_verdict to the legacy verdict field for backward compat
+            # CONFIRMED/UPGRADED -> action value, ADJUSTED -> action, OVERRIDDEN -> AVOID
+            verdict_for_db = action  # Use the action as the verdict
+            
+            # Update DB with all new fields
             success = update_deep_research_data(
                 decision_id=decision_id,
-                verdict=verdict,
+                verdict=verdict_for_db,
                 risk=result.get('risk_level', 'Unknown'),
                 catalyst=result.get('catalyst_type', 'Unknown'),
-                knife_catch=str(result.get('knife_catch_warning', 'False')),
+                knife_catch=str(result.get('knife_catch_warning', False)),
                 score=score,
                 swot=swot,
                 global_analysis=global_analysis,
-                local_analysis=local_analysis
+                local_analysis=local_analysis,
+                # New fields
+                review_verdict=review_verdict,
+                action=action,
+                conviction=result.get('conviction', 'LOW'),
+                entry_low=result.get('entry_price_low'),
+                entry_high=result.get('entry_price_high'),
+                stop_loss=result.get('stop_loss'),
+                tp1=result.get('take_profit_1'),
+                tp2=result.get('take_profit_2'),
+                upside=result.get('upside_percent'),
+                downside=result.get('downside_risk_percent'),
+                rr_ratio=result.get('risk_reward_ratio'),
+                drop_type=result.get('drop_type'),
+                entry_trigger=result.get('entry_trigger'),
+                verification=verification,
+                blindspots=blindspots,
+                reason=result.get('reason', ''),
             )
             
             if success:
-                logger.info(f"[Deep Research] Successfully updated DB for {symbol} (Score: {score})")
-                
-                # --- AUTO-TRIGGER BATCH COMPARISON ---
-                # Logic: Once 4 evaluations are completed, trigger a batch comparison.
-                self._check_and_trigger_batch()
+                logger.info(f"[Deep Research] Successfully updated DB for {symbol} (Score: {score}, Verdict: {review_verdict})")
             else:
                 logger.error(f"[Deep Research] Failed to update DB for {symbol}")
 
@@ -564,12 +611,12 @@ class DeepResearchService:
         except Exception as e:
             logger.error(f"[Deep Research] Error generating PDF: {e}")
 
-    def execute_deep_research(self, symbol, raw_news, technical_data, drop_percent, transcript_text, transcript_date=None, transcript_warning=None, market_sentiment_report=None, competitive_report=None, summary_report=None, decision_id=None) -> Optional[Dict]:
+    def execute_deep_research(self, symbol: str, context: dict, decision_id: int = None) -> Optional[Dict]:
         """
-        The synchronous execution logic.
+        The synchronous execution logic. Takes a pre-built context dict.
         """
         # 1. Construct the Prompt
-        prompt = self._construct_prompt(symbol, raw_news, technical_data, drop_percent, transcript_text, transcript_date, transcript_warning, market_sentiment_report, competitive_report, summary_report)
+        prompt = self._construct_prompt(symbol, context)
         
         # 2. Start Interaction
         headers = {
@@ -632,94 +679,187 @@ class DeepResearchService:
             logger.error(f"[Deep Research] Execution Exception: {e}")
             return None
 
-    def _construct_prompt(self, symbol, raw_news, technical_data, drop_percent, transcript_text="", transcript_date=None, transcript_warning=None, market_sentiment_report=None, competitive_report=None, summary_report=None) -> str:
-        # Format News List
+    def _construct_prompt(self, symbol: str, context: dict) -> str:
+        """
+        Deep Research prompt — acts as a SENIOR REVIEWER
+        of the council's decision, not a redo of the analysis.
+        """
+        pm_decision = context.get("pm_decision", {})
+        bull_case = context.get("bull_case", "Not available")
+        bear_case = context.get("bear_case", "Not available")
+        tech_data = context.get("technical_data", {})
+        drop_percent = context.get("drop_percent", 0)
+        raw_news = context.get("raw_news", [])
+        transcript_summary = context.get("transcript_summary", "")
+        transcript_date = context.get("transcript_date", "Unknown")
+        data_depth = context.get("data_depth", {})
+
+        # Format PM decision compactly
+        pm_summary = json.dumps(pm_decision, indent=2)
+        tech_str = json.dumps(tech_data, indent=2) if tech_data else "No technical data."
+
+        # Format news (paywalled — deep research can't access these via Google Search)
         news_str = ""
         if raw_news:
-            for n in raw_news[:15]: 
+            for n in raw_news[:20]:
                 date = n.get('datetime_str', 'N/A')
                 source = n.get('source', 'Unknown')
+                source_type = n.get('source_type', 'WIRE')
                 headline = n.get('headline', 'No Headline')
-                news_str += f"- {date} [{source}]: {headline}\n"
+                summary = n.get('summary', '')
+                content = n.get('content', '')
+                news_str += f"- {date} [{source_type}] [{source}]: {headline}\n"
+                if content:
+                    news_str += f"  {content[:1500]}\n\n"
+                elif summary:
+                    news_str += f"  {summary[:500]}\n\n"
 
-        # Format Technical Data
-        tech_str = json.dumps(technical_data, indent=2) if technical_data else "No specific technical data available."
-        
-        # Format Transcript (Full)
+        # Evidence quality note
+        news_count = data_depth.get("news", {}).get("total_count", 0) if isinstance(data_depth, dict) else 0
+        evidence_note = f"Council analyzed {news_count} news articles. {len(raw_news)} articles provided below (paywalled sources — not available via Google Search)."
+
         transcript_section = ""
-        if transcript_text:
-             header = "You receive the latest Earnings Call Transcript"
-             if transcript_date:
-                 header += f" (Dated: {transcript_date})"
-             
-             warning_msg = ""
-             if transcript_warning:
-                 warning_msg = f"\nWARNING: {transcript_warning}\n"
-
-             transcript_section = f"{header}:{warning_msg}\n{transcript_text}..." 
-
-        # Context Section (News/Tech OR Summary Report)
-        context_section = ""
-        if summary_report:
-            context_section = f"""
-You receive a consolidated preliminary analysis report from other agents (News, Technical, Sentiment):
-{summary_report}
-"""
-        else:
-             context_section = f"""
-You receive a recent news summary of the stock:
-{news_str}
-
-You receive technical data on the stock:
-{tech_str}
-
-You receive a Market Sentiment Report (from a dedicated agent):
-{market_sentiment_report or "No Sentiment Report Available."}
-
-You receive a Competitive Landscape Report (from a dedicated agent):
-{competitive_report or "No Competitive Report Available."}
+        if transcript_summary and transcript_summary != "No transcript summary available from council." and transcript_summary != "No transcript summary available from backfill.":
+            transcript_section = f"""
+EARNINGS TRANSCRIPT SUMMARY (Date: {transcript_date}):
+(Condensed by the News Agent from the full earnings call — key points preserved)
+{transcript_summary}
 """
 
         return f"""
-You are a Senior Market Analyst specializing in event-driven equities. Your goal is to determine if this drop is a temporary overreaction (Buy) or the start of a structural decline (Trap).
+You are a **Senior Investment Reviewer** at a hedge fund. An internal AI council
+has already analyzed stock {symbol} which dropped {drop_percent:.2f}% today
+and recommends it as a potential "buy the dip" opportunity.
 
-As you see in the report stock {symbol} dropped {drop_percent:.2f}% today.
+Your job is NOT to redo the analysis. Your job is to:
+1. **CHALLENGE** the council's recommendation — find what they might have missed
+2. **VERIFY** their key claims using fresh Google Search data
+3. **REFINE** the trading levels (entry, stop-loss, take-profit) if the council got them wrong
+4. **CONFIRM or OVERRIDE** the final verdict
 
-{context_section}
+You are the last line of defense before real money is deployed.
+
+═══════════════════════════════════════════════════════
+COUNCIL DECISION (This is what you are reviewing):
+═══════════════════════════════════════════════════════
+{pm_summary}
+
+═══════════════════════════════════════════════════════
+BULL CASE (Constructed by Council's Bull Researcher):
+═══════════════════════════════════════════════════════
+{bull_case[:4000]}
+
+═══════════════════════════════════════════════════════
+BEAR CASE (Constructed by Council's Bear Researcher):
+═══════════════════════════════════════════════════════
+{bear_case[:4000]}
+
+═══════════════════════════════════════════════════════
+TECHNICAL DATA (Raw Indicators):
+═══════════════════════════════════════════════════════
+{tech_str}
 
 {transcript_section}
 
-> **Philosophical Context (The "Tomorrow's News" Paradox):**
-> Remember the lesson of the Elm Partners study: Even traders with tomorrow's news often fail because they misjudge what is *already priced in*.
-> - **Markets Anticipate:** A strong earnings report might cause a drop if the market expected *perfect* earnings.
-> - **Size Matters:** Overconfidence kills. Do not recommend "STRONG_BUY" unless the edge is asymmetric and clear.
-> - **Skepticism:** If the news is obvious (e.g., "Profits up"), assume the market knows. Look for the *reaction* to the news, not just the news itself.
-> - **Humility:** Acknowledge unknowns. If the "Why" is murky, the risk is higher.
+═══════════════════════════════════════════════════════
+NEWS ARTICLES (Paywalled Sources — NOT available via Google Search):
+═══════════════════════════════════════════════════════
+These articles are from Benzinga/Polygon, Alpha Vantage, Finnhub, and other
+premium sources. You CANNOT access these via Google Search. Use this data
+as primary evidence and verify/supplement with your own Google Search.
 
-> **Directives:**
-> 1. **Identify the Catalyst:** Using the provided analysis, identify the single most probable cause for the current price action. Explicitly state if there is NO clear news (a "Silent Mover").
-> 2. **Global & Local Market Context:** Analyze the broader market conditions. Is the selling pressure specific to this stock, its sector, or the entire market? Consider global macro factors and local market sentiment.
-> 3. **SWOT Analysis:** Perform a concise Strength, Weakness, Opportunity, and Threat analysis based on the provided data.
-> 4. **Verify the Magnitude:** Apply the "Tomorrow's News" skepticism. Does the severity of the news (e.g., "Earnings down 50%") truly justify the drop, or was it priced in? If news is minor but reaction is massive, flag as "Speculative Sell".
-> 5. **Technical Cross-Check:** Reference the TradingView RSI and MACD (if available in the report). Is the technical reaction proportionate to the fundamental news?
-> 6. **Verdict:** Classify the setup as "Fundamental Drop," "Technical Drop," or "Unverified Volatility." Base your final decision on the synthesis of the Catalyst, Market Context, SWOT, Technicals, and Philosophical Context.
+SOURCE PRIORITY (each article is tagged with a source_type):
+1. OFFICIAL (press releases, SEC filings) — ground truth
+2. WIRE (Benzinga, Reuters, Finnhub) — factual reporting
+3. ANALYST (Seeking Alpha, Motley Fool) — informed opinion, check for bias
+4. MARKET_CONTEXT — broad signals, not company-specific
+When an ANALYST article contradicts a WIRE report, trust the WIRE source for facts.
 
-> **Output Format:**
-A structured report including your verdict if the stock is currently a sell/hold/buy. The output must be valid JSON:
+{news_str if news_str else "No paywalled news articles available."}
+
+═══════════════════════════════════════════════════════
+DATA QUALITY NOTE:
+═══════════════════════════════════════════════════════
+{evidence_note}
+
+═══════════════════════════════════════════════════════
+YOUR TASK:
+═══════════════════════════════════════════════════════
+
+STEP 1: VERIFY KEY CLAIMS
+Use Google Search to independently verify the top 3 claims from the council:
+- Is the drop reason accurate? Search for the actual news.
+- Is the earnings data correct? Check the actual numbers.
+- Are there NEW developments since the council ran (breaking news, analyst notes, insider trades)?
+
+STEP 2: CHALLENGE THE THESIS
+Play devil's advocate against the council's BUY recommendation:
+- What's the worst-case scenario they didn't consider?
+- Is there a liquidity risk, delisting risk, or regulatory action pending?
+- Did they misjudge what's "priced in"?
+
+STEP 3: VALIDATE TRADING LEVELS
+Review the council's entry zone, stop-loss, and take-profit:
+- Is the stop-loss realistic? (Too tight = will get stopped out on noise. Too wide = too much risk.)
+- Is the take-profit achievable? (Pre-drop price may not be realistic if the fundamental story changed.)
+- Would YOU adjust any of these levels based on your research?
+
+STEP 4: SWOT ANALYSIS
+Based on your independent research, construct a SWOT:
+- Strengths: What competitive advantages protect this company?
+- Weaknesses: What structural problems exist?
+- Opportunities: What catalysts could drive recovery?
+- Threats: What risks could prevent recovery?
+
+STEP 5: FINAL VERDICT
+After your review, decide:
+- **CONFIRMED**: Council's recommendation stands. You agree with the setup.
+- **UPGRADED**: You found additional positive evidence the council missed. Even better than they thought.
+- **ADJUSTED**: The thesis is okay but trading levels need correction. Provide corrected levels.
+- **OVERRIDDEN**: You found critical issues the council missed. Do NOT buy this stock.
+
+> **Philosophical Reminder (Elm Partners Paradox):**
+> Even traders with tomorrow's news often lose because they misjudge what's priced in.
+> If the news driving this drop is obvious to everyone, the recovery may already be priced in.
+> Look for the REACTION to the news, not just the news itself.
+> Humility: If you can't verify the "why," the risk is higher than the council thinks.
+
+OUTPUT FORMAT:
+Your output must be valid JSON. All price fields must be numbers. All percentage fields must be numbers.
 {{
-  "verdict": "[STRONG_BUY | SPECULATIVE_BUY | WAIT_FOR_STABILIZATION | HARD_AVOID]",
-  "risk_level": "[Low/Medium/Extreme]",
-  "catalyst_type": "[Structural/Temporary/Noise]",
-  "global_market_analysis": "Brief analysis of global market conditions affecting this stock.",
-  "local_market_analysis": "Brief analysis of local market/sector conditions.",
+  "review_verdict": "CONFIRMED" | "UPGRADED" | "ADJUSTED" | "OVERRIDDEN",
+  "action": "BUY" | "BUY_LIMIT" | "WATCH" | "AVOID",
+  "conviction": "HIGH" | "MODERATE" | "LOW",
+  "drop_type": "EARNINGS_MISS" | "ANALYST_DOWNGRADE" | "SECTOR_ROTATION" | "MACRO_SELLOFF" | "COMPANY_SPECIFIC" | "TECHNICAL_BREAKDOWN" | "UNKNOWN",
+  "risk_level": "Low" | "Medium" | "High" | "Extreme",
+  "catalyst_type": "Structural" | "Temporary" | "Noise",
+  "entry_price_low": <number>,
+  "entry_price_high": <number>,
+  "stop_loss": <number>,
+  "take_profit_1": <number>,
+  "take_profit_2": <number or null>,
+  "upside_percent": <number>,
+  "downside_risk_percent": <number>,
+  "risk_reward_ratio": <number>,
+  "pre_drop_price": <number>,
+  "entry_trigger": "Specific condition for entry",
+  "reassess_in_days": <number>,
+  "global_market_analysis": "Brief analysis of global market conditions",
+  "local_market_analysis": "Brief analysis of local/sector conditions",
   "swot_analysis": {{
     "strengths": ["point 1", "point 2"],
     "weaknesses": ["point 1", "point 2"],
     "opportunities": ["point 1", "point 2"],
     "threats": ["point 1", "point 2"]
   }},
-  "reasoning_bullet_points": [ "Point 1", "Point 2", "Point 3" ],
-  "knife_catch_warning": "True/False"
+  "verification_results": [
+    "Claim 1: [VERIFIED/DISPUTED] — explanation",
+    "Claim 2: [VERIFIED/DISPUTED] — explanation",
+    "Claim 3: [VERIFIED/DISPUTED] — explanation"
+  ],
+  "council_blindspots": ["Issue 1 the council missed", "Issue 2"],
+  "knife_catch_warning": true | false,
+  "reason": "One sentence: your final assessment as the senior reviewer."
 }}
 """
 
@@ -744,12 +884,26 @@ A structured report including your verdict if the stock is currently a sell/hold
 }
 """
             else:
-                # Individual Stock Schema
+                # Individual Stock Schema — Senior Reviewer output
                 schema_def = """
 {
-  "verdict": "[STRONG_BUY | SPECULATIVE_BUY | WAIT_FOR_STABILIZATION | HARD_AVOID]",
-  "risk_level": "[Low/Medium/Extreme]",
-  "catalyst_type": "[Structural/Temporary/Noise]",
+  "review_verdict": "CONFIRMED | UPGRADED | ADJUSTED | OVERRIDDEN",
+  "action": "BUY | BUY_LIMIT | WATCH | AVOID",
+  "conviction": "HIGH | MODERATE | LOW",
+  "drop_type": "EARNINGS_MISS | ANALYST_DOWNGRADE | SECTOR_ROTATION | MACRO_SELLOFF | COMPANY_SPECIFIC | TECHNICAL_BREAKDOWN | UNKNOWN",
+  "risk_level": "Low | Medium | High | Extreme",
+  "catalyst_type": "Structural | Temporary | Noise",
+  "entry_price_low": 0.0,
+  "entry_price_high": 0.0,
+  "stop_loss": 0.0,
+  "take_profit_1": 0.0,
+  "take_profit_2": null,
+  "upside_percent": 0.0,
+  "downside_risk_percent": 0.0,
+  "risk_reward_ratio": 0.0,
+  "pre_drop_price": 0.0,
+  "entry_trigger": "string",
+  "reassess_in_days": 5,
   "global_market_analysis": "Brief analysis string",
   "local_market_analysis": "Brief analysis string",
   "swot_analysis": {
@@ -758,8 +912,10 @@ A structured report including your verdict if the stock is currently a sell/hold
     "opportunities": ["list", "of", "strings"],
     "threats": ["list", "of", "strings"]
   },
-  "reasoning_bullet_points": [ "list", "of", "strings" ],
-  "knife_catch_warning": "True/False"
+  "verification_results": ["list", "of", "strings"],
+  "council_blindspots": ["list", "of", "strings"],
+  "knife_catch_warning": true,
+  "reason": "string"
 }
 """
 
@@ -861,22 +1017,38 @@ REPORT CONTENT:
             
             logger.warning(f"[Deep Research] JSON Parse & Repair failed. Using Raw Fallback. Length: {len(final_text)}")
             
-            # Construct a dummy JSON so the system doesn't crash and user can read the text
+            # Construct a fallback JSON matching the new schema
             return {
-                "verdict": "ERROR_PARSING",
+                "review_verdict": "ERROR_PARSING",
+                "action": "AVOID",
+                "conviction": "LOW",
+                "drop_type": "UNKNOWN",
                 "risk_level": "Unknown",
                 "catalyst_type": "Parse Error",
+                "entry_price_low": None,
+                "entry_price_high": None,
+                "stop_loss": None,
+                "take_profit_1": None,
+                "take_profit_2": None,
+                "upside_percent": None,
+                "downside_risk_percent": None,
+                "risk_reward_ratio": None,
+                "pre_drop_price": None,
+                "entry_trigger": None,
+                "reassess_in_days": None,
                 "global_market_analysis": "See Raw Report",
                 "local_market_analysis": "See Raw Report",
                 "swot_analysis": {
                     "strengths": [], "weaknesses": [], "opportunities": [], "threats": []
                 },
-                "reasoning_bullet_points": [
+                "verification_results": [
                     "JSON Parsing Failed.",
                     "Raw Output Below:",
-                    final_text[:3000] # Truncate if too huge, but usually fine
+                    final_text[:3000]
                 ],
-                "knife_catch_warning": "True",
+                "council_blindspots": [],
+                "knife_catch_warning": True,
+                "reason": "Deep research output could not be parsed.",
                 "raw_report_full": final_text
             }
             
@@ -1035,11 +1207,8 @@ A JSON object:
                 if status in ['completed', 'COMPLETED']:
                     logger.info("[Deep Research] Batch Comparison Completed.")
                     outputs = poll_data.get('outputs', [])
-                    if outputs:
-                        print(f"DEBUG: Poll Data Outputs Found: {len(outputs)} items")
-                    else:
-                        print(f"DEBUG: NO OUTPUTS in Poll Data. Keys available: {list(poll_data.keys())}")
-                        print(f"DEBUG: Full Poll Data: {json.dumps(poll_data, indent=2)}")
+                    if not outputs:
+                        logger.debug(f"[Deep Research] No outputs in poll data. Keys: {list(poll_data.keys())}")
                     
                     
                     # Parse Output using existing helper

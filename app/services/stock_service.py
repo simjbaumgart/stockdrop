@@ -32,6 +32,13 @@ except AttributeError:
 else:
     ssl._create_default_https_context = _create_unverified_https_context
 
+# Pre-download NLTK data silently so DefeatBeta doesn't trigger it at runtime
+try:
+    import nltk
+    nltk.download('punkt_tab', quiet=True)
+except Exception:
+    pass
+
 try:
     from defeatbeta_api.data.ticker import Ticker
 except ImportError:
@@ -576,9 +583,8 @@ class StockService:
                     
                     if res:
                         rec = res.get('recommendation', 'HOLD')
-                        score = res.get('ai_score', 0)
-                        if "STRONG BUY" in rec.upper() or ("BUY" in rec.upper() and score >= 75):
-                            print(f"[Batch Comparison] Adding {symbol} to candidate list (Score: {score})")
+                        if "BUY" in rec.upper():
+                            print(f"[Batch Comparison] Adding {symbol} to candidate list (Rec: {rec})")
                             potential_batch_candidates.append(res)
                     
         # Process Deferred Tasks
@@ -601,10 +607,110 @@ class StockService:
         # Run backfill for any high-scoring stocks from today that are missing a verdict
         self._process_deep_research_backfill(today_str)
 
+    def _should_trigger_deep_research(self, report_data: dict) -> bool:
+        """
+        Gate deep research on HIGH-PROBABILITY candidates only.
+        Deep research is expensive — only trigger when the council
+        has already identified a strong setup.
+        """
+        action = report_data.get("recommendation", "AVOID").upper()
+        conviction = report_data.get("conviction", "LOW").upper()
+        risk_reward = report_data.get("risk_reward_ratio", 0)
+        drop_type = report_data.get("drop_type", "UNKNOWN")
+
+        # RULE 1: Must be a BUY or BUY_LIMIT action
+        if action not in ("BUY", "BUY_LIMIT"):
+            return False
+
+        # RULE 2: Must have at least MODERATE conviction
+        if conviction == "LOW":
+            return False
+
+        # RULE 3: Risk/reward must be favorable (> 1.5)
+        try:
+            if float(risk_reward) < 1.5:
+                return False
+        except (TypeError, ValueError):
+            return False  # If we can't parse R/R, don't trigger
+
+        # RULE 4: Drop type must be recoverable
+        # Structural company-specific issues (fraud, permanent loss) rarely recover
+        non_recoverable = ("COMPANY_SPECIFIC",)
+        if drop_type in non_recoverable and conviction != "HIGH":
+            return False
+
+        return True
+
+    def _build_deep_research_context(self, report_data: dict, raw_data: dict) -> dict:
+        """
+        Builds a condensed but complete context package for deep research.
+        Passes SYNTHESIZED council output, not raw data.
+        """
+        return {
+            # PM Decision (new structured output)
+            "pm_decision": {
+                "action": report_data.get("recommendation"),
+                "conviction": report_data.get("conviction"),
+                "drop_type": report_data.get("drop_type"),
+                "entry_price_low": report_data.get("entry_price_low"),
+                "entry_price_high": report_data.get("entry_price_high"),
+                "stop_loss": report_data.get("stop_loss"),
+                "take_profit_1": report_data.get("take_profit_1"),
+                "take_profit_2": report_data.get("take_profit_2"),
+                "upside_percent": report_data.get("upside_percent"),
+                "downside_risk_percent": report_data.get("downside_risk_percent"),
+                "risk_reward_ratio": report_data.get("risk_reward_ratio"),
+                "pre_drop_price": report_data.get("pre_drop_price"),
+                "entry_trigger": report_data.get("entry_trigger"),
+                "reason": report_data.get("executive_summary"),
+                "key_factors": report_data.get("key_factors", []),
+            },
+            # Synthesized agent reports (not raw data)
+            "bull_case": report_data.get("bull_report", ""),
+            "bear_case": report_data.get("bear_report", ""),
+            # Technical indicators (compact — already processed)
+            "technical_data": raw_data.get("indicators", {}),
+            # Drop context
+            "drop_percent": raw_data.get("change_percent", 0),
+            # Paywalled news — deep research can't access via Google Search
+            "raw_news": raw_data.get("news_items", []),
+            # Transcript summary instead of full raw transcript (~95% cheaper)
+            "transcript_summary": self._extract_transcript_summary(report_data),
+            "transcript_date": raw_data.get("transcript_date"),
+            # Evidence quality
+            "data_depth": report_data.get("data_depth", {}),
+        }
+
+    def _extract_transcript_summary(self, report_data: dict) -> str:
+        """
+        Extracts the 'Extended Transcript Summary' section from the News Agent's output.
+        Falls back to a short message if the summary can't be found.
+        """
+        news_report = report_data.get("macro_report", "")
+
+        marker = "Extended Transcript Summary"
+        if marker in news_report:
+            start = news_report.index(marker)
+            rest = news_report[start + len(marker):]
+            end_markers = ["## Key Drivers", "### Key Drivers", "## Narrative Check",
+                           "### Narrative Check", "## Top 5 Sources", "### Top 5 Sources",
+                           "## MACRO CHECK", "NEEDS_ECONOMICS"]
+            end_pos = len(rest)
+            for em in end_markers:
+                if em in rest:
+                    pos = rest.index(em)
+                    end_pos = min(end_pos, pos)
+
+            summary = rest[:end_pos].strip()
+            if len(summary) > 100:
+                return summary
+
+        return "No transcript summary available from council."
+
     def _process_deep_research_backfill(self, date_str: str):
         """
-        Checks for stocks analyzed TODAY (or date_str) that have a high AI score (>=70)
-        but are missing a Deep Research Verdict. Triggers Deep Research using the Summary Report.
+        Checks for stocks analyzed TODAY (or date_str) that have qualifying recommendations
+        but are missing a Deep Research Verdict. Triggers Deep Research using saved council context.
         """
         print("\n[Backfill] Checking for outstanding Deep Research candidates...")
         try:
@@ -612,13 +718,14 @@ class StockService:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             
-            # Query candidates: Same Date, Score >= 70, Verdict is NULL/Empty/Unknown/Dash
+            # Query candidates: Same Date, BUY/BUY_LIMIT with MODERATE+ conviction and R/R >= 1.5
             query = """
                 SELECT * FROM decision_points 
                 WHERE date(timestamp) = ? 
-                AND ai_score >= 70 
-                AND (recommendation LIKE '%BUY%' OR recommendation LIKE '%STRONG BUY%')
-                AND (deep_research_verdict IS NULL OR deep_research_verdict = '' OR deep_research_verdict = '-' OR deep_research_verdict LIKE 'UNKNOWN%')
+                AND recommendation IN ('BUY', 'BUY_LIMIT')
+                AND conviction IN ('MODERATE', 'HIGH')
+                AND risk_reward_ratio >= 1.5
+                AND (deep_research_verdict IS NULL OR deep_research_verdict = '' OR deep_research_verdict = '-' OR deep_research_verdict LIKE 'UNKNOWN%' OR deep_research_verdict = 'ERROR_PARSING')
             """
             cursor.execute(query, (date_str,))
             rows = cursor.fetchall()
@@ -632,80 +739,58 @@ class StockService:
 
             print(f"[Backfill] Found {len(candidates)} candidates needing Deep Research: {[c['symbol'] for c in candidates]}")
             
-            # Use DeepResearchService to queue them
-            # We use the existing service instance
-            
             for c in candidates:
                 symbol = c['symbol']
                 decision_id = c['id']
-                detailed_report = c.get('detailed_report', '')
                 drop_percent = c.get('drop_percent', 0.0)
                 
-                # Try to load from file first (Preferred source)
-                # Format: data/council_reports/{ticker}_{date}_council1.json
+                # Try to load council report from file
                 report_file_path = f"data/council_reports/{symbol}_{date_str}_council1.json"
-                file_report_content = None
+                council_reports = {}
                 
                 if os.path.exists(report_file_path):
                     try:
                         with open(report_file_path, 'r') as f:
-                            file_content = f.read()
-                            # Check length
-                            if len(file_content) > 100:
-                                file_report_content = file_content
-                                print(f"  > Loaded council report from file: {report_file_path} (Length: {len(file_content)})")
-                            else:
-                                print(f"  > Council report file found but too short ({len(file_content)} chars). Skipping file.")
+                            council_reports = json.loads(f.read())
+                            print(f"  > Loaded council report from file: {report_file_path}")
                     except Exception as e:
                         print(f"  > Error reading council report file: {e}")
                 
-                # Use file content if available, otherwise DB
-                summary_report = file_report_content if file_report_content else detailed_report
-                
-                if not summary_report:
-                    print(f"  > Skipping {symbol}: No detailed_report available (File or DB).")
-                    continue
-                
-                # Final length check safety
-                if len(str(summary_report)) < 50:
-                     print(f"  > Skipping {symbol}: Report content too short.")
-                     continue
-                    
-                print(f"  > Triggering Backfill for {symbol} (Score: {c['ai_score']})...")
-                
-                # We need to construct the payload for the queue.
-                # Since 'summary_report' is a new concept in execute_deep_research, 
-                # we need to make sure the worker handles it.
-                # However, the worker calls 'execute_deep_research' using kwargs unpacked from payload.
-                # We updated 'execute_deep_research' signature, but we also need to update
-                # 'queue_research_task' or manually put into queue if we want it async.
-                # Or we can just call execute_deep_research SYNCHRONOUSLY here if we want to ensure it runs now?
-                # User said: "run the deep research reports, once a cycle is complete".
-                # If we queue them, the single worker will pick them up. This is safer for rate limits.
-                
-                # Let's extend 'queue_research_task' or generic 'queue' put.
-                # Since we modified the signature of execute_deep_research, we can add 'summary_report' field to payload.
-                
-                payload = {
-                    'symbol': symbol,
-                    'raw_news': None, # Not available
-                    'technical_data': None, # Not available
-                    'drop_percent': drop_percent,
-                    'decision_id': decision_id,
-                    'transcript_text': "",
-                    'transcript_date': None,
-                    'transcript_warning': None,
-                    'summary_report': summary_report # This needs to be passed to execute_deep_research
+                # Build context from DB row + file data
+                context = {
+                    "pm_decision": {
+                        "action": c.get("recommendation"),
+                        "conviction": c.get("conviction"),
+                        "drop_type": c.get("drop_type"),
+                        "entry_price_low": c.get("entry_price_low"),
+                        "entry_price_high": c.get("entry_price_high"),
+                        "stop_loss": c.get("stop_loss"),
+                        "take_profit_1": c.get("take_profit_1"),
+                        "take_profit_2": c.get("take_profit_2"),
+                        "upside_percent": c.get("upside_percent"),
+                        "downside_risk_percent": c.get("downside_risk_percent"),
+                        "risk_reward_ratio": c.get("risk_reward_ratio"),
+                        "pre_drop_price": c.get("pre_drop_price"),
+                        "entry_trigger": c.get("entry_trigger"),
+                        "reason": c.get("reasoning", "")[:500],
+                        "key_factors": [],
+                    },
+                    "bull_case": council_reports.get("bull", "Not available from backfill."),
+                    "bear_case": council_reports.get("bear", "Not available from backfill."),
+                    "technical_data": council_reports.get("technical", {}),
+                    "drop_percent": drop_percent,
+                    "raw_news": [],  # Not available in backfill
+                    "transcript_summary": "No transcript summary available from backfill.",
+                    "transcript_date": None,
+                    "data_depth": {},
                 }
                 
-                # We need to ensure _process_individual_task passes 'summary_report' to execute_deep_research
-                # The worker code:
-                # self._process_individual_task(task_payload)
-                #   -> execute_deep_research(..., payload['transcript_warning'])
-                # It likely doesn't pass 'summary_report' yet. We need to update that too.
-                # But first let's queue it.
-                
-                deep_research_service.individual_queue.put({'type': 'individual', 'payload': payload})
+                print(f"  > Triggering Backfill for {symbol} (Conviction: {c.get('conviction')}, R/R: {c.get('risk_reward_ratio')})...")
+                deep_research_service.queue_research_task(
+                    symbol=symbol,
+                    context=context,
+                    decision_id=decision_id
+                )
                 print(f"  > Queued backfill task for {symbol}")
                 
         except Exception as e:
@@ -852,6 +937,37 @@ class StockService:
             print(f"Resolver Error: {e}. Falling back to symbol {symbol}")
             return symbol
 
+    # --- Source Type Classification ---
+    # Maps known publisher names to source types for news quality assessment.
+    SOURCE_TYPE_OFFICIAL_KEYWORDS = [
+        "SEC", "PR Newswire", "GlobeNewsWire", "Globe Newswire",
+        "Business Wire", "AccessWire", "EIN Presswire",
+    ]
+    SOURCE_TYPE_ANALYST_KEYWORDS = [
+        "Seeking Alpha", "Motley Fool", "InvestorPlace", "Zacks",
+    ]
+
+    @staticmethod
+    def _classify_source_type(provider: str, source: str) -> str:
+        """
+        Classify a news item into one of four source types based on provider and
+        original publisher name:
+          WIRE           — factual reporting (Benzinga, Reuters, Finnhub, etc.)
+          ANALYST        — opinion / thesis (Seeking Alpha, Motley Fool, etc.)
+          OFFICIAL       — press releases, SEC filings (primary source)
+          MARKET_CONTEXT — broad market news (Wall Street Breakfast, SPY/DIA/QQQ)
+        """
+        if provider == "Market News (Benzinga)":
+            return "MARKET_CONTEXT"
+        source_lower = source.lower()
+        for kw in StockService.SOURCE_TYPE_OFFICIAL_KEYWORDS:
+            if kw.lower() in source_lower:
+                return "OFFICIAL"
+        for kw in StockService.SOURCE_TYPE_ANALYST_KEYWORDS:
+            if kw.lower() in source_lower:
+                return "ANALYST"
+        return "WIRE"
+
     def get_aggregated_news(self, symbol: str, region: str = "US", exchange: str = "", company_name: str = "") -> List[Dict]:
         """
         Fetches and aggregates news from Benzinga (Primary), Alpha Vantage, Finnhub, and yfinance.
@@ -860,6 +976,8 @@ class StockService:
         Standard Object:
         {
             "source": str,
+            "provider": str,
+            "source_type": str,  # WIRE | ANALYST | OFFICIAL | MARKET_CONTEXT
             "headline": str,
             "summary": str,
             "content": str, # Full article body (optional)
@@ -904,6 +1022,7 @@ class StockService:
                     massive_items.append({
                         "source": f"Massive ({original_source})",
                         "provider": "Benzinga/Massive",
+                        "source_type": self._classify_source_type("Benzinga/Massive", original_source),
                         "headline": item.get('headline'),
                         "summary": item.get('summary'),
                         "content": item.get('content'), # Full HTML body
@@ -929,6 +1048,7 @@ class StockService:
                      for item in market_news:
                          # Tag as Market News so ResearchService knows
                          item['provider'] = 'Market News (Benzinga)'
+                         item['source_type'] = 'MARKET_CONTEXT'
                          massive_items.append(item)
              except Exception as e:
                  print(f"Error fetching market news: {e}")
@@ -958,6 +1078,7 @@ class StockService:
                 print(f"  > Alpha Vantage: {len(av_news)} articles")
                 for item in av_news:
                     item['provider'] = 'Alpha Vantage'
+                    item['source_type'] = self._classify_source_type('Alpha Vantage', item.get('source', ''))
                 other_items.extend(av_news)
             else:
                 print(f"  > Alpha Vantage: 0 articles")
@@ -978,9 +1099,11 @@ class StockService:
                         if any(n['headline'] == item.get('headline') for n in massive_items + other_items):
                             continue
                             
+                        fh_source = item.get('source', 'Finnhub')
                         other_items.append({
-                            "source": item.get('source', 'Finnhub'),
+                            "source": fh_source,
                             "provider": "Finnhub",
+                            "source_type": self._classify_source_type("Finnhub", fh_source),
                             "headline": item.get('headline', 'No Title'),
                             "summary": item.get('summary'),
                             "url": item.get('url'),
@@ -1041,9 +1164,11 @@ class StockService:
                              
                     url = (content.get('clickThroughUrl') or {}).get('url', '') if content.get('clickThroughUrl') else (content.get('link', '') or '')
                     
+                    yf_source = content.get('provider', {}).get('displayName', 'Yahoo Finance')
                     other_items.append({
-                        "source": content.get('provider', {}).get('displayName', 'Yahoo Finance'),
+                        "source": yf_source,
                         "provider": "Yahoo Finance",
+                        "source_type": self._classify_source_type("Yahoo Finance", yf_source),
                         "headline": title,
                         "summary": content.get('summary', ''), # Often empty in simple list
                         "url": url,
@@ -1083,9 +1208,11 @@ class StockService:
                     ts = item.get('published', 0)
                     dt_str = datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
                     
+                    tv_source = item.get('source', 'TradingView')
                     other_items.append({
-                        "source": item.get('source', 'TradingView'),
+                        "source": tv_source,
                         "provider": "TradingView",
+                        "source_type": self._classify_source_type("TradingView", tv_source),
                         "headline": title,
                         "summary": item.get('description', ''), # Description often empty in headlines, checks details?
                         "url": f"https://www.tradingview.com{item.get('storyPath', '')}",
@@ -1484,20 +1611,11 @@ class StockService:
         
         self.research_reports[symbol] = reasoning
         
-        # Update Status
-        status = "Owned" if recommendation == "BUY" else "Not Owned"
-        try:
-            float_score = float(score)
-            
-            if float_score >= 7.0:
-                status = "Owned"
-            else:
-                status = "Not Owned"
-        except:
-            if recommendation == "BUY":
-                status = "Owned"
-            else:
-                status = "Not Owned"
+        # Update Status — gate on recommendation text, not score
+        if "BUY" in recommendation.upper():
+            status = "Owned"
+        else:
+            status = "Not Owned"
 
         if decision_id:
             import json
@@ -1509,62 +1627,51 @@ class StockService:
                 reasoning, 
                 status, 
                 ai_score=float(score) if isinstance(score, (int, float)) else None,
-                data_depth=data_depth_str
+                data_depth=data_depth_str,
+                # PM trading-level fields (v0.9)
+                conviction=report_data.get("conviction"),
+                drop_type=report_data.get("drop_type"),
+                entry_price_low=report_data.get("entry_price_low"),
+                entry_price_high=report_data.get("entry_price_high"),
+                stop_loss=report_data.get("stop_loss"),
+                take_profit_1=report_data.get("take_profit_1"),
+                take_profit_2=report_data.get("take_profit_2"),
+                pre_drop_price=report_data.get("pre_drop_price"),
+                upside_percent=report_data.get("upside_percent"),
+                downside_risk_percent=report_data.get("downside_risk_percent"),
+                risk_reward_ratio=report_data.get("risk_reward_ratio"),
+                entry_trigger=report_data.get("entry_trigger"),
+                reassess_in_days=report_data.get("reassess_in_days"),
             )
-            print(f"Updated decision point for {symbol}: {recommendation} -> {status} (Score: {score})")
-            print(f"  > Saved Data Depth metrics to DB.")
+            print(f"Updated decision point for {symbol}: {recommendation} -> {status} (Conviction: {report_data.get('conviction', 'N/A')})")
+            print(f"  > Saved trading levels and Data Depth metrics to DB.")
             
-            # Print Fund Manager Rationale
-            key_points = report_data.get("key_decision_points", [])
-            if key_points:
-                print("Fund Manager Rationale:")
-                for point in key_points:
-                     print(f" - {point}")
+            # Print Fund Manager Key Factors
+            key_factors = report_data.get("key_factors", [])
+            if key_factors:
+                print("Fund Manager Key Factors:")
+                for factor in key_factors:
+                     print(f" - {factor}")
             print("") # Newline for spacing
 
         try:
-            float_score = float(score)
-            
             # --- DEEP RESEARCH TRIGGER ---
-            # Criteria: 
-            # 1. Recommendation is BUY with Score >= 70
-            # 2. OR Recommendation is STRONG BUY (No score cutoff)
-            
-            is_buy = "BUY" == recommendation.upper()
-            is_strong_buy = "STRONG BUY" in recommendation.upper() # Covers STRONG BUY
-            
-            should_trigger = False
-            
-            if is_strong_buy:
-                should_trigger = True
-                print(f"[StockService] Deep Research Triggered: STRONG BUY detected.")
-            elif is_buy and float_score >= 70.0:
-                should_trigger = True
-                print(f"[StockService] Deep Research Triggered: BUY with Score {float_score} >= 70.")
+            # Multi-condition gate: only high-probability candidates
+            should_trigger = self._should_trigger_deep_research(report_data)
             
             if should_trigger:
+                print(f"[StockService] Deep Research Triggered: {recommendation} (Conviction: {report_data.get('conviction')}, R/R: {report_data.get('risk_reward_ratio')})")
                 print(f"[StockService] Queuing Deep Research for {symbol}...")
                 
-                # Extract additional reports
-                market_sentiment_report = report_data.get('market_sentiment_report', '')
-                competitive_report = report_data.get('competitive_report', '')
-                
+                context = self._build_deep_research_context(report_data, raw_data)
                 deep_research_service.queue_research_task(
                     symbol=symbol,
-                    raw_news=news_data,
-                    technical_data=technical_analysis,
-                    drop_percent=change_percent,
-                    decision_id=decision_id,
-                    transcript_text=transcript_text or "",
-                    transcript_date=transcript_date,
-                    transcript_warning=transcript_warning,
-                    market_sentiment_report=market_sentiment_report,
-                    competitive_report=competitive_report
+                    context=context,
+                    decision_id=decision_id
                 )
+            else:
+                print(f"[StockService] Deep Research NOT triggered for {symbol} (Action: {recommendation}, Conviction: {report_data.get('conviction')}, R/R: {report_data.get('risk_reward_ratio')})")
                 
-        except Exception as e:
-            print(f"Error checking Deep Research trigger: {e}")
-                        
         except Exception as e:
             print(f"Error checking Deep Research trigger: {e}")
         
@@ -1603,12 +1710,12 @@ class StockService:
             sector_ticker = self.sector_tickers[sector]
             stock_context[f"Sector ({sector})"] = market_context.get(sector_ticker, 0.0)
 
-        # Conditional Email Notification
-        if "STRONG BUY" in recommendation.upper():
+        # Conditional Email Notification — trigger on BUY (immediate entry signal)
+        if recommendation.upper() == "BUY":
             print(f"Verdict is {recommendation}. Sending email notification.")
             email_service.send_notification(symbol, change_percent, price, report_data, stock_context)
         else:
-            print(f"Verdict is {recommendation}. Skipping email notification (Logic: Strong Buy only).")
+            print(f"Verdict is {recommendation}. Skipping email notification (Logic: BUY only).")
             
         today_str = datetime.now().strftime("%Y-%m-%d")
         self.sent_notifications.add((symbol, today_str))

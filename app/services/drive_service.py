@@ -13,6 +13,7 @@ class GoogleDriveService:
         self.creds = None
         self.sheets_service = None
         self.drive_service = None
+        self._quota_exceeded = False
         self._authenticate()
 
     def _authenticate(self):
@@ -64,6 +65,8 @@ class GoogleDriveService:
         Appends data to the Google Sheet.
         data_dict: { "Index Name": { "price": float, ... }, ... }
         """
+        if self._quota_exceeded:
+            return
         if not self.sheets_service:
             print("Sheets service not initialized. Skipping upload.")
             return
@@ -107,7 +110,8 @@ class GoogleDriveService:
             print(f"{result.get('updates').get('updatedCells')} cells appended.")
         except Exception as e:
             if "storageQuotaExceeded" in str(e):
-                print("Drive storage quota exceeded. Skipping upload.")
+                self._quota_exceeded = True
+                print("[Google Drive] Storage quota exceeded. All Drive uploads disabled for this session.")
             else:
                 print(f"Error appending data to sheet: {e}")
 
@@ -126,6 +130,8 @@ class GoogleDriveService:
             "region": str
         }
         """
+        if self._quota_exceeded:
+            return
         if not self.sheets_service:
             print("Sheets service not initialized. Skipping save_decision.")
             return
@@ -137,7 +143,6 @@ class GoogleDriveService:
 
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-        # Prepare row values in specific order
         values = [
             timestamp,
             decision_data.get("symbol", ""),
@@ -157,20 +162,14 @@ class GoogleDriveService:
         }
         
         try:
-            # Append to a specific sheet for decisions, e.g., "Decisions"
-            # For now, we'll append to the first sheet "Sheet1" or create a new one if we could.
-            # To keep it simple and avoid overwriting the "Stock Tracker Data" (which might be indices),
-            # let's try to append to "Sheet1". If the user wants separate sheets, we can add that later.
-            # Or better: Check if we can append to a "Decisions" tab. 
-            # Creating tabs is complex. Let's stick to appending to the default range.
-            
             result = self.sheets_service.spreadsheets().values().append(
                 spreadsheetId=spreadsheet_id, range="Sheet1!A1",
                 valueInputOption="USER_ENTERED", body=body).execute()
             print(f"Saved decision for {decision_data.get('symbol')} to Drive.")
         except Exception as e:
             if "storageQuotaExceeded" in str(e):
-                print("Drive storage quota exceeded. Skipping save_decision.")
+                self._quota_exceeded = True
+                print("[Google Drive] Storage quota exceeded. All Drive uploads disabled for this session.")
             else:
                 print(f"Error saving decision to Drive: {e}")
 

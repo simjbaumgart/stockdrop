@@ -1,12 +1,20 @@
 import os
 import sys
 import time
+import math
+import logging
+import warnings
 import sqlite3
 import pandas as pd
 import yfinance as yf
 from datetime import datetime, timedelta
 from dateutil import parser
 import pytz
+
+# Suppress yfinance's verbose error logging (failed tickers, etc.)
+logging.getLogger('yfinance').setLevel(logging.CRITICAL)
+# Suppress FutureWarning from pandas/yfinance internals
+warnings.filterwarnings('ignore', category=FutureWarning)
 
 DB_PATH = os.getenv("DB_PATH", "subscribers.db")
 
@@ -60,24 +68,17 @@ def main():
     
     if not cache_valid:
         # 1. Batch Download History (1 Year should cover recent decisions)
-        print(f"Cache miss or expired. Batch fetching data for {len(all_symbols)} symbols (including benchmarks)...")
-        
-        # Chunking symbols to avoid URL length issues or API limits
         chunk_size = 100
+        num_chunks = math.ceil(len(all_symbols) / chunk_size)
+        print(f"[Trade Report] Downloading {len(all_symbols)} symbols in {num_chunks} chunks...")
         
         for i in range(0, len(all_symbols), chunk_size):
             chunk = all_symbols[i:i+chunk_size]
-            print(f"  Downloading chunk {i}-{i+len(chunk)}...")
             try:
-                 # Using threads=True for speed
                 data = yf.download(chunk, period="1y", progress=False, threads=True, group_by='ticker')
                 if not data.empty:
                     if len(chunk) == 1:
-                         # If single ticker, yfinance returns dataframe with columns 'Open', 'Close' etc.
-                         # We need to make it MultiIndex to be consistent if possible, or just handle it.
-                         # Easiest is to add ticker as top level level if it's missing
                          if isinstance(data.columns, pd.Index) and not isinstance(data.columns, pd.MultiIndex):
-                             # Create MultiIndex
                              iterables = [[chunk[0]], data.columns]
                              data.columns = pd.MultiIndex.from_product(iterables, names=['Ticker', 'Price'])
                     
@@ -86,15 +87,22 @@ def main():
                     else:
                         all_history = pd.concat([all_history, data], axis=1)
             except Exception as e:
-                print(f"Error downloading chunk: {e}")
+                print(f"[Trade Report] Error downloading chunk: {e}")
 
+        # Summarize download results
+        if not all_history.empty:
+            downloaded = set(all_history.columns.get_level_values(0).unique())
+            failed_count = len(all_symbols) - len(downloaded)
+            if failed_count > 0:
+                print(f"[Trade Report] {failed_count} of {len(all_symbols)} symbols failed (delisted/not found).")
+        
         # Save to cache
         if not all_history.empty:
              try:
                  all_history.to_pickle(CACHE_FILE)
-                 print("Data cached successfully.")
+                 print("[Trade Report] Data cached successfully.")
              except Exception as e:
-                 print(f"Error caching data: {e}")
+                 print(f"[Trade Report] Error caching data: {e}")
 
     report_data = []
     

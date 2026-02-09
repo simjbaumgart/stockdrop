@@ -67,7 +67,10 @@ class FinnhubService:
         try:
             return self.client.transcripts_list(symbol=symbol)
         except Exception as e:
-            print(f"Error fetching transcript list for {symbol}: {e}")
+            if "403" in str(e):
+                print(f"[Finnhub] Transcript access not available for {symbol} (403). Skipping.")
+            else:
+                print(f"Error fetching transcript list for {symbol}: {e}")
             return []
 
     def get_transcript_content(self, transcript_id: str):
@@ -79,7 +82,10 @@ class FinnhubService:
         try:
             return self.client.transcripts(_id=transcript_id)
         except Exception as e:
-            print(f"Error fetching transcript content for {transcript_id}: {e}")
+            if "403" in str(e):
+                print(f"[Finnhub] Transcript content not available for {transcript_id} (403). Skipping.")
+            else:
+                print(f"Error fetching transcript content for {transcript_id}: {e}")
             return {}
 
     def extract_filing_text(self, url: str) -> str:

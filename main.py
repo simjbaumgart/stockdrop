@@ -2,8 +2,14 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 import os
+import logging
 
 load_dotenv()
+
+# Suppress noisy third-party loggers in production
+logging.getLogger('httpx').setLevel(logging.WARNING)
+logging.getLogger('httpcore').setLevel(logging.WARNING)
+logging.getLogger('googleapiclient.discovery_cache').setLevel(logging.ERROR)
 
 from app.routers import views, api, subscriptions
 import asyncio
@@ -41,7 +47,10 @@ def health_check():
 
 @app.on_event("startup")
 async def startup_event():
-    print(f"Starting StockDrop v{VERSION}")
+    print(f"\n{'='*50}")
+    print(f"  StockDrop v{VERSION}")
+    print(f"  Started at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"{'='*50}\n")
     init_db()
     asyncio.create_task(run_periodic_check())
     asyncio.create_task(run_storage_upload())

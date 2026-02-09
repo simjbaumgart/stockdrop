@@ -47,6 +47,7 @@ def init_db():
     ''')
     
     # Migration: Check for new columns and add them if missing
+    migrations_applied = []
     try:
         cursor.execute("PRAGMA table_info(decision_points)")
         columns = [info[1] for info in cursor.fetchall()]
@@ -68,19 +69,50 @@ def init_db():
             "deep_research_verdict": "TEXT",
             "deep_research_risk": "TEXT",
             "deep_research_catalyst": "TEXT",
-            "deep_research_knife_catch": "TEXT"
+            "deep_research_knife_catch": "TEXT",
+            # PM trading-level fields (v0.9)
+            "entry_price_low": "REAL",
+            "entry_price_high": "REAL",
+            "stop_loss": "REAL",
+            "take_profit_1": "REAL",
+            "take_profit_2": "REAL",
+            "pre_drop_price": "REAL",
+            "upside_percent": "REAL",
+            "downside_risk_percent": "REAL",
+            "risk_reward_ratio": "REAL",
+            "drop_type": "TEXT",
+            "conviction": "TEXT",
+            "entry_trigger": "TEXT",
+            "reassess_in_days": "INTEGER",
+            # Deep Research v2 fields
+            "deep_research_review_verdict": "TEXT",
+            "deep_research_action": "TEXT",
+            "deep_research_conviction": "TEXT",
+            "deep_research_entry_low": "REAL",
+            "deep_research_entry_high": "REAL",
+            "deep_research_stop_loss": "REAL",
+            "deep_research_tp1": "REAL",
+            "deep_research_tp2": "REAL",
+            "deep_research_upside": "REAL",
+            "deep_research_downside": "REAL",
+            "deep_research_rr_ratio": "REAL",
+            "deep_research_drop_type": "TEXT",
+            "deep_research_entry_trigger": "TEXT",
+            "deep_research_verification": "TEXT",
+            "deep_research_blindspots": "TEXT",
+            "deep_research_reason": "TEXT",
         }
         
         
         for col_name, col_type in new_columns.items():
             if col_name not in columns:
-                print(f"Migrating database: Adding column {col_name} to decision_points")
                 cursor.execute(f"ALTER TABLE decision_points ADD COLUMN {col_name} {col_type}")
+                migrations_applied.append(f"decision_points.{col_name}")
                 
         # Check for data_depth column separately as it is a newer addition
         if "data_depth" not in columns:
-             print(f"Migrating database: Adding column data_depth to decision_points")
              cursor.execute(f"ALTER TABLE decision_points ADD COLUMN data_depth TEXT")
+             migrations_applied.append("decision_points.data_depth")
 
     except Exception as e:
         print(f"Error during database migration: {e}")
@@ -117,8 +149,8 @@ def init_db():
         
         for col_name, col_type in batch_columns.items():
             if col_name not in columns:
-                print(f"Migrating database: Adding column {col_name} to batch_comparisons")
                 cursor.execute(f"ALTER TABLE batch_comparisons ADD COLUMN {col_name} {col_type}")
+                migrations_applied.append(f"batch_comparisons.{col_name}")
 
     except Exception as e:
         print(f"Error during batch table migration: {e}") 
@@ -129,11 +161,15 @@ def init_db():
         columns = [info[1] for info in cursor.fetchall()]
         
         if "batch_winner" not in columns:
-            print("Migrating database: Adding column batch_winner to decision_points")
             cursor.execute("ALTER TABLE decision_points ADD COLUMN batch_winner BOOLEAN DEFAULT 0")
+            migrations_applied.append("decision_points.batch_winner")
             
     except Exception as e:
         print(f"Error during batch_winner migration: {e}")
+    
+    # Print single migration summary
+    if migrations_applied:
+        print(f"[DB Migration] Applied {len(migrations_applied)} column migrations.")
         
     conn.commit()
     conn.close()
@@ -186,7 +222,7 @@ def add_decision_point(symbol: str, price: float, drop_percent: float, recommend
         print(f"Error adding decision point: {e}")
         return None
 
-def update_decision_point(decision_id: int, recommendation: str, reasoning: str, status: str, ai_score: float = None, data_depth: str = None) -> bool:
+def update_decision_point(decision_id: int, recommendation: str, reasoning: str, status: str, ai_score: float = None, data_depth: str = None, **kwargs) -> bool:
     """Update an existing decision point."""
     try:
         conn = sqlite3.connect(DB_NAME)
@@ -203,6 +239,18 @@ def update_decision_point(decision_id: int, recommendation: str, reasoning: str,
         if data_depth is not None:
             query += ", data_depth = ?"
             params.append(data_depth)
+
+        # PM trading-level fields (v0.9)
+        trading_fields = [
+            "conviction", "drop_type", "entry_price_low", "entry_price_high",
+            "stop_loss", "take_profit_1", "take_profit_2", "pre_drop_price",
+            "upside_percent", "downside_risk_percent", "risk_reward_ratio",
+            "entry_trigger", "reassess_in_days"
+        ]
+        for field in trading_fields:
+            if field in kwargs and kwargs[field] is not None:
+                query += f", {field} = ?"
+                params.append(kwargs[field])
             
         query += " WHERE id = ?"
         params.append(decision_id)
@@ -309,23 +357,54 @@ def get_analyzed_companies_since(date_str: str) -> List[str]:
         print(f"Error fetching analyzed companies: {e}")
         return []
 
-def update_deep_research_data(decision_id: int, verdict: str, risk: str, catalyst: str, knife_catch: str, score: int = 0, swot: str = None, global_analysis: str = None, local_analysis: str = None) -> bool:
-    """Update deep research fields for a decision point."""
+def update_deep_research_data(decision_id: int, verdict: str, risk: str, catalyst: str, knife_catch: str, score: int = 0, swot: str = None, global_analysis: str = None, local_analysis: str = None, **kwargs) -> bool:
+    """Update deep research fields for a decision point. Accepts new v2 fields via kwargs."""
     try:
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
-        cursor.execute('''
-            UPDATE decision_points 
-            SET deep_research_verdict = ?, 
-                deep_research_risk = ?, 
-                deep_research_catalyst = ?, 
-                deep_research_knife_catch = ?,
-                deep_research_score = ?,
-                deep_research_swot = ?,
-                deep_research_global_analysis = ?,
-                deep_research_local_analysis = ?
-            WHERE id = ?
-        ''', (verdict, risk, catalyst, knife_catch, score, swot, global_analysis, local_analysis, decision_id))
+        
+        # Base fields (always updated)
+        set_clauses = [
+            "deep_research_verdict = ?",
+            "deep_research_risk = ?",
+            "deep_research_catalyst = ?",
+            "deep_research_knife_catch = ?",
+            "deep_research_score = ?",
+            "deep_research_swot = ?",
+            "deep_research_global_analysis = ?",
+            "deep_research_local_analysis = ?",
+        ]
+        values = [verdict, risk, catalyst, knife_catch, score, swot, global_analysis, local_analysis]
+        
+        # New v2 fields (dynamic via kwargs)
+        new_field_map = {
+            "review_verdict": "deep_research_review_verdict",
+            "action": "deep_research_action",
+            "conviction": "deep_research_conviction",
+            "entry_low": "deep_research_entry_low",
+            "entry_high": "deep_research_entry_high",
+            "stop_loss": "deep_research_stop_loss",
+            "tp1": "deep_research_tp1",
+            "tp2": "deep_research_tp2",
+            "upside": "deep_research_upside",
+            "downside": "deep_research_downside",
+            "rr_ratio": "deep_research_rr_ratio",
+            "drop_type": "deep_research_drop_type",
+            "entry_trigger": "deep_research_entry_trigger",
+            "verification": "deep_research_verification",
+            "blindspots": "deep_research_blindspots",
+            "reason": "deep_research_reason",
+        }
+        
+        for kwarg_key, db_col in new_field_map.items():
+            if kwarg_key in kwargs and kwargs[kwarg_key] is not None:
+                set_clauses.append(f"{db_col} = ?")
+                values.append(kwargs[kwarg_key])
+        
+        values.append(decision_id)
+        
+        sql = f"UPDATE decision_points SET {', '.join(set_clauses)} WHERE id = ?"
+        cursor.execute(sql, values)
         conn.commit()
         conn.close()
         return True
@@ -347,16 +426,11 @@ def get_todays_strong_buy_candidates(date_str: str = None) -> List[dict]:
         date_query = "date(?)" if date_str else "date('now')"
         params = (target_date,) if date_str else ()
 
-        # NOTE: ai_score might be stored as REAL.
         cursor.execute(f'''
             SELECT * FROM decision_points 
             WHERE date(timestamp) = {date_query}
-            AND (
-                recommendation LIKE '%STRONG BUY%' 
-                OR 
-                (recommendation LIKE '%BUY%' AND ai_score >= 75)
-            )
-            ORDER BY ai_score DESC
+            AND recommendation LIKE '%BUY%'
+            ORDER BY timestamp DESC
         ''', params)
         rows = cursor.fetchall()
         conn.close()
@@ -505,7 +579,7 @@ def get_unbatched_candidates_by_date(date_str: str) -> List[dict]:
             AND deep_research_verdict != '-'
             AND (recommendation IN ('BUY', 'STRONG BUY', 'SPECULATIVE BUY') OR recommendation LIKE '%BUY%')
             AND (batch_id IS NULL OR batch_id = '')
-            ORDER BY ai_score DESC
+            ORDER BY deep_research_score DESC
         ''', (date_str,))
         
         rows = cursor.fetchall()
