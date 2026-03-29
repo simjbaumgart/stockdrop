@@ -1,7 +1,16 @@
 import requests
 import json
+import os
 
-TIINGO_API_KEY = "100192d5b763b6dfc9ff1bc6bc1723a5779e26c7"
+try:
+    from dotenv import load_dotenv, find_dotenv
+    load_dotenv(find_dotenv())
+except ImportError:
+    pass
+
+TIINGO_API_KEY = os.getenv("TIINGO_API_KEY")
+if not TIINGO_API_KEY:
+    raise RuntimeError("TIINGO_API_KEY not set. Please set it in your .env file.")
 BASE_URL = "https://api.tiingo.com/tiingo/news"
 
 def fetch_news(tickers):

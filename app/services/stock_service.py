@@ -11,7 +11,7 @@ from app.services.email_service import email_service
 from app.services.research_service import research_service
 from app.services.alpaca_service import alpaca_service
 from app.services.tradingview_service import tradingview_service
-from app.database import add_decision_point, get_today_decision_symbols, update_decision_point
+from app.database import add_decision_point, get_today_decision_symbols, update_decision_point, get_decision_points
 from app.services.storage_service import storage_service
 from app.services.gatekeeper_service import gatekeeper_service
 from app.utils import get_git_version
@@ -609,37 +609,27 @@ class StockService:
 
     def _should_trigger_deep_research(self, report_data: dict) -> bool:
         """
-        Gate deep research on HIGH-PROBABILITY candidates only.
-        Deep research is expensive — only trigger when the council
-        has already identified a strong setup.
+        Trigger deep research for buy decisions:
+        - BUY: always trigger (any conviction, any R/R)
+        - BUY_LIMIT: only trigger when conviction is HIGH and R/R > 1.5
         """
         action = report_data.get("recommendation", "AVOID").upper()
         conviction = report_data.get("conviction", "LOW").upper()
         risk_reward = report_data.get("risk_reward_ratio", 0)
-        drop_type = report_data.get("drop_type", "UNKNOWN")
 
-        # RULE 1: Must be a BUY or BUY_LIMIT action
-        if action not in ("BUY", "BUY_LIMIT"):
-            return False
+        # BUY: always trigger
+        if action == "BUY":
+            return True
 
-        # RULE 2: Must have at least MODERATE conviction
-        if conviction == "LOW":
-            return False
-
-        # RULE 3: Risk/reward must be favorable (> 1.5)
-        try:
-            if float(risk_reward) < 1.5:
+        # BUY_LIMIT: only high-conviction with favorable R/R
+        if action == "BUY_LIMIT":
+            try:
+                if conviction == "HIGH" and float(risk_reward) > 1.5:
+                    return True
+            except (TypeError, ValueError):
                 return False
-        except (TypeError, ValueError):
-            return False  # If we can't parse R/R, don't trigger
 
-        # RULE 4: Drop type must be recoverable
-        # Structural company-specific issues (fraud, permanent loss) rarely recover
-        non_recoverable = ("COMPANY_SPECIFIC",)
-        if drop_type in non_recoverable and conviction != "HIGH":
-            return False
-
-        return True
+        return False
 
     def _build_deep_research_context(self, report_data: dict, raw_data: dict) -> dict:
         """
@@ -744,17 +734,29 @@ class StockService:
                 decision_id = c['id']
                 drop_percent = c.get('drop_percent', 0.0)
                 
-                # Try to load council report from file
-                report_file_path = f"data/council_reports/{symbol}_{date_str}_council1.json"
+                # Try to load council reports from file
+                # council2 (Phase 1+2: includes bull/bear/risk) preferred, fallback to council1
+                council_dir = "data/council_reports"
+                council1_path = f"{council_dir}/{symbol}_{date_str}_council1.json"
+                council2_path = f"{council_dir}/{symbol}_{date_str}_council2.json"
                 council_reports = {}
                 
-                if os.path.exists(report_file_path):
+                if os.path.exists(council1_path):
                     try:
-                        with open(report_file_path, 'r') as f:
+                        with open(council1_path, 'r') as f:
                             council_reports = json.loads(f.read())
-                            print(f"  > Loaded council report from file: {report_file_path}")
+                            print(f"  > Loaded council1 report from file: {council1_path}")
                     except Exception as e:
-                        print(f"  > Error reading council report file: {e}")
+                        print(f"  > Error reading council1 report file: {e}")
+                
+                if os.path.exists(council2_path):
+                    try:
+                        with open(council2_path, 'r') as f:
+                            council2_data = json.loads(f.read())
+                            council_reports.update(council2_data)
+                            print(f"  > Loaded council2 report (bull/bear/risk) from file: {council2_path}")
+                    except Exception as e:
+                        print(f"  > Error reading council2 report file: {e}")
                 
                 # Build context from DB row + file data
                 context = {
@@ -779,7 +781,7 @@ class StockService:
                     "bear_case": council_reports.get("bear", "Not available from backfill."),
                     "technical_data": council_reports.get("technical", {}),
                     "drop_percent": drop_percent,
-                    "raw_news": [],  # Not available in backfill
+                    "raw_news": [],  # Not available in inline backfill
                     "transcript_summary": "No transcript summary available from backfill.",
                     "transcript_date": None,
                     "data_depth": {},
@@ -1642,9 +1644,14 @@ class StockService:
                 risk_reward_ratio=report_data.get("risk_reward_ratio"),
                 entry_trigger=report_data.get("entry_trigger"),
                 reassess_in_days=report_data.get("reassess_in_days"),
+                sell_price_low=report_data.get("sell_price_low"),
+                sell_price_high=report_data.get("sell_price_high"),
+                ceiling_exit=report_data.get("ceiling_exit"),
+                exit_trigger=report_data.get("exit_trigger"),
             )
             print(f"Updated decision point for {symbol}: {recommendation} -> {status} (Conviction: {report_data.get('conviction', 'N/A')})")
             print(f"  > Saved trading levels and Data Depth metrics to DB.")
+            print(f"  > Sell Zone: ${report_data.get('sell_price_low', 'N/A')} - ${report_data.get('sell_price_high', 'N/A')} | Ceiling: ${report_data.get('ceiling_exit', 'N/A')}")
             
             # Print Fund Manager Key Factors
             key_factors = report_data.get("key_factors", [])
@@ -1740,5 +1747,7 @@ class StockService:
             return date_obj - timedelta(days=1)
         else:
             return date_obj - timedelta(days=1)
+
+
 
 stock_service = StockService()

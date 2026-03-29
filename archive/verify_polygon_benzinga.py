@@ -1,10 +1,18 @@
 
 import requests
 import json
+import os
 from datetime import datetime
 
-# API Key from app/services/polygon_service.py
-API_KEY = "MX8dLTzDgcUHHLh6GNE12iOzitcS_HCH"
+try:
+    from dotenv import load_dotenv, find_dotenv
+    load_dotenv(find_dotenv())
+except ImportError:
+    pass
+
+API_KEY = os.getenv("POLYGON_API_KEY") or os.getenv("BENZINGA_API_KEY")
+if not API_KEY:
+    raise RuntimeError("POLYGON_API_KEY or BENZINGA_API_KEY not set. Please set it in your .env file.")
 BASE_URL = "https://api.polygon.io/v2/reference/news"
 
 def verify_benzinga_news(symbol="GOOG"):

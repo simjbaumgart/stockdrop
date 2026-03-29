@@ -84,6 +84,11 @@ def init_db():
             "conviction": "TEXT",
             "entry_trigger": "TEXT",
             "reassess_in_days": "INTEGER",
+            # Sell range fields (v1.0)
+            "sell_price_low": "REAL",
+            "sell_price_high": "REAL",
+            "ceiling_exit": "REAL",
+            "exit_trigger": "TEXT",
             # Deep Research v2 fields
             "deep_research_review_verdict": "TEXT",
             "deep_research_action": "TEXT",
@@ -101,6 +106,21 @@ def init_db():
             "deep_research_verification": "TEXT",
             "deep_research_blindspots": "TEXT",
             "deep_research_reason": "TEXT",
+            # Deep Research sell range fields (Plan B)
+            "deep_research_sell_price_low": "REAL",
+            "deep_research_sell_price_high": "REAL",
+            "deep_research_ceiling_exit": "REAL",
+            "deep_research_exit_trigger": "TEXT",
+            # Sell reassessment fields (Plan A)
+            "reassess_sell_action": "TEXT",
+            "reassess_thesis_status": "TEXT",
+            "reassess_sell_price_low": "REAL",
+            "reassess_sell_price_high": "REAL",
+            "reassess_ceiling_exit": "REAL",
+            "reassess_updated_stop_loss": "REAL",
+            "reassess_exit_trigger": "TEXT",
+            "reassess_timestamp": "TEXT",
+            "reassess_reasoning": "TEXT",
         }
         
         
@@ -245,7 +265,13 @@ def update_decision_point(decision_id: int, recommendation: str, reasoning: str,
             "conviction", "drop_type", "entry_price_low", "entry_price_high",
             "stop_loss", "take_profit_1", "take_profit_2", "pre_drop_price",
             "upside_percent", "downside_risk_percent", "risk_reward_ratio",
-            "entry_trigger", "reassess_in_days"
+            "entry_trigger", "reassess_in_days",
+            "sell_price_low", "sell_price_high", "ceiling_exit", "exit_trigger",
+            # Reassess columns (Plan A)
+            "reassess_sell_action", "reassess_thesis_status",
+            "reassess_sell_price_low", "reassess_sell_price_high",
+            "reassess_ceiling_exit", "reassess_updated_stop_loss",
+            "reassess_exit_trigger", "reassess_timestamp", "reassess_reasoning",
         ]
         for field in trading_fields:
             if field in kwargs and kwargs[field] is not None:
@@ -394,6 +420,11 @@ def update_deep_research_data(decision_id: int, verdict: str, risk: str, catalys
             "verification": "deep_research_verification",
             "blindspots": "deep_research_blindspots",
             "reason": "deep_research_reason",
+            # Deep Research sell range (Plan B)
+            "sell_price_low": "deep_research_sell_price_low",
+            "sell_price_high": "deep_research_sell_price_high",
+            "ceiling_exit": "deep_research_ceiling_exit",
+            "exit_trigger": "deep_research_exit_trigger",
         }
         
         for kwarg_key, db_col in new_field_map.items():

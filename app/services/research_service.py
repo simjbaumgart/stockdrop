@@ -27,7 +27,7 @@ class ResearchService:
         self.api_key = os.getenv("GEMINI_API_KEY")
         if self.api_key:
             genai.configure(api_key=self.api_key)
-            self.model = genai.GenerativeModel('gemini-3-pro-preview')
+            self.model = genai.GenerativeModel('gemini-3.1-pro-preview')
             self.flash_model = genai.GenerativeModel('gemini-3-flash-preview')
         else:
             logger.warning("GEMINI_API_KEY not found. Research service will use mock data.")
@@ -64,7 +64,7 @@ class ResearchService:
         if not self._check_and_increment_usage():
             return {"recommendation": "SKIP", "reasoning": "Daily limit reached."}
 
-        print(f"\n[ResearchService] Starting Deep Analysis for {ticker}...")
+        print(f"\n[ResearchService] Starting Research Council for {ticker}...")
         
         # Initialize State
         state = MarketState(
@@ -113,7 +113,8 @@ class ResearchService:
         }
         completed_agents = []
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+        # Increase max_workers to prevent starvation when agents hit 503 and retry
+        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
             futures = {
                 executor.submit(run_agent, "Technical Agent", self._call_agent, tech_prompt, "Technical Agent", state): "technical",
                 executor.submit(run_agent, "News Agent", self._call_agent, news_prompt, "News Agent", state): "news",
@@ -232,7 +233,20 @@ class ResearchService:
         
         # Validate Bull & Bear Reports
         state.reports = QualityControlService.validate_reports(state.reports, state.ticker, ["bull", "bear"])
-        
+
+        # --- Save Council 2 Output to JSON (Phase 1 + Phase 2: bull/bear/risk) ---
+        try:
+            council_dir = "data/council_reports"
+            os.makedirs(council_dir, exist_ok=True)
+            council2_file = f"{council_dir}/{state.ticker}_{state.date}_council2.json"
+
+            with open(council2_file, "w") as f:
+                json.dump(state.reports, f, indent=4)
+
+            print(f"  > [System] AI Council 2 Reports (Phase 1+2) saved to {council2_file}")
+        except Exception as e:
+            logger.error(f"Failed to save Council 2 reports: {e}")
+
         # --- Phase 3: Portfolio Manager & Decision ---
         print("  > Phase 3: Portfolio Manager Decision...")
         final_decision = self._run_risk_council_and_decision(state, drop_str)
@@ -245,7 +259,9 @@ class ResearchService:
         print(f"  Entry Zone: ${final_decision.get('entry_price_low', 'N/A')} - ${final_decision.get('entry_price_high', 'N/A')}")
         print(f"  Stop Loss: ${final_decision.get('stop_loss', 'N/A')} | TP1: ${final_decision.get('take_profit_1', 'N/A')} | TP2: ${final_decision.get('take_profit_2', 'N/A')}")
         print(f"  Upside: {final_decision.get('upside_percent', 'N/A')}% | Downside: {final_decision.get('downside_risk_percent', 'N/A')}% | R/R: {final_decision.get('risk_reward_ratio', 'N/A')}")
+        print(f"  Sell Zone: ${final_decision.get('sell_price_low', 'N/A')} - ${final_decision.get('sell_price_high', 'N/A')} | Ceiling: ${final_decision.get('ceiling_exit', 'N/A')}")
         print(f"  Entry Trigger: {final_decision.get('entry_trigger', 'N/A')}")
+        print(f"  Exit Trigger: {final_decision.get('exit_trigger', 'N/A')}")
         print(f"  Reassess In: {final_decision.get('reassess_in_days', 'N/A')} trading days")
         print(f"  Reason: {final_decision.get('reason')}")
         print("  Key Factors:")
@@ -311,6 +327,11 @@ class ResearchService:
             "pre_drop_price": final_decision.get("pre_drop_price"),
             "entry_trigger": final_decision.get("entry_trigger"),
             "reassess_in_days": final_decision.get("reassess_in_days"),
+            # Sell range fields (v1.0)
+            "sell_price_low": final_decision.get("sell_price_low"),
+            "sell_price_high": final_decision.get("sell_price_high"),
+            "ceiling_exit": final_decision.get("ceiling_exit"),
+            "exit_trigger": final_decision.get("exit_trigger"),
             "key_factors": final_decision.get("key_factors", []),
             # Legacy compatibility fields
             "technician_report": state.reports.get('technical', ''),
@@ -354,7 +375,7 @@ class ResearchService:
                 return name, f"[Error in {name}: {e}]"
 
         phase2_completed = []
-        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
             futures = {
                 executor.submit(run_agent, "Bull Researcher", self._call_agent, bull_prompt, "Bull Researcher", state): "bull",
                 executor.submit(run_agent, "Bear Researcher", self._call_agent, bear_prompt, "Bear Researcher", state): "bear",
@@ -451,7 +472,16 @@ class ResearchService:
         for point in reasoning:
             report_str += f"- {point}\n"
             
-        print(f"\n  [DEEP RESEARCH VERDICT]: {verdict}")
+        if verdict.upper() in ('BUY', 'BUY_LIMIT', 'STRONG_BUY', 'CONFIRMED', 'UPGRADED'):
+            verdict_icon = '\U0001F7E2'  # 🟢
+        elif verdict.upper() in ('WATCH', 'HOLD'):
+            verdict_icon = '\U0001F7E1'  # 🟡
+        elif verdict.upper() in ('AVOID', 'SELL', 'STRONG_SELL', 'DOWNGRADE', 'OVERRIDDEN'):
+            verdict_icon = '\U0001F534'  # 🔴
+        else:
+            verdict_icon = '\u2753'  # ❓
+            
+        print(f"\n  {verdict_icon} [DEEP RESEARCH VERDICT]: {verdict}")
         return report_str
 
     # --- Prompts ---
@@ -776,6 +806,12 @@ QUANTITATIVE ESTIMATION (The Bull Case Numbers):
     - **Current PE**: Identify the current PE.
     - **Bull Case Forward PE**: Estimate the forward PE assuming your benign narrative holds true.
     - **EPS Impact**: Provide a "% Impact on EPS" estimate (e.g. "-1% EPS impact").
+
+SELL TARGET ESTIMATION (The Bull Case Exit):
+- At what price level does the recovery top out? Consider pre-drop price, BB upper, SMA50, SMA200, and 52-week high as anchors.
+- At what price would even a bull say "take profits"? (e.g. "RSI > 70 combined with price at $148-150 suggests overextension")
+- Consider the drop type: earnings misses rarely fully recover in one quarter, while sector rotations can overshoot to the upside.
+- Provide a TARGET_SELL_RANGE: {{"low": $X, "high": $Y}} in your Conclusion.
 """
 
     def _create_bear_prompt(self, state: MarketState, drop_str: str) -> str:
@@ -807,6 +843,12 @@ QUANTITATIVE ESTIMATION (The Bear Case Numbers):
     - **Current PE**: Identify the current PE.
     - **Bear Case Forward PE**: Estimate the forward PE assuming the worst-case structural decline.
     - **EPS Impact**: Provide a "% Impact on EPS" estimate (e.g. "-20% EPS impact").
+
+REALISTIC EXIT CEILING (Bear's Upside Limit):
+- Even if the bull case plays out, what is the maximum realistic recovery price? Where does the bear think recovery stalls?
+- Identify the key resistance level that would cap any bounce (e.g. SMA50, BB upper, pre-drop price, volume resistance).
+- Where would the "easy money" run out? (e.g. "Volume dries up above $142, institutional selling resumes at SMA200")
+- Provide a BEAR_EXIT_CEILING: $X in your Conclusion.
 """
 
 
@@ -873,6 +915,13 @@ INSTRUCTIONS FOR TRADING LEVELS:
 - **downside_risk_percent**: Calculate from current close to stop_loss. Example: close is $100, SL is $90 → downside is 10.0.
 - **pre_drop_price**: Calculate from close and drop_percent. Formula: close / (1 + drop_percent/100). Example: close=$93, drop=-7% → pre_drop = 93 / 0.93 = $100. Include this for reference.
 
+INSTRUCTIONS FOR SELL RANGE:
+These define where you recommend SELLING (taking profits) once the position is entered. Use the Bull's TARGET_SELL_RANGE and the Bear's BEAR_EXIT_CEILING as inputs alongside technicals.
+- **sell_price_low**: Conservative exit target — where a cautious trader starts scaling out. Use the LESSER of: pre_drop_price, or bb_middle (midpoint of bb_lower and bb_upper). This is the "safe profits" level.
+- **sell_price_high**: Optimistic exit target — where even bulls should exit. Use bb_upper, SMA50, or SMA200 — whichever represents realistic resistance above sell_price_low. Consider the Bear's exit ceiling as an upper bound.
+- **ceiling_exit**: Absolute maximum target beyond which further gains are unlikely without a new catalyst. Calculate as: min(high52, bb_upper + 1×ATR). This is the "euphoria" level.
+- **exit_trigger**: A specific condition that signals time to sell (not just a price level). Examples: 'RSI crosses above 70 and price enters $142-$148 zone', 'Price stalls at SMA200 on declining volume for 2 sessions', 'Earnings report in 3 days — de-risk'. For AVOID action, set to 'N/A — no position recommended.'
+
 INSTRUCTIONS FOR DROP CLASSIFICATION:
 Classify the `drop_type` as one of:
 - "EARNINGS_MISS" — Drop triggered by disappointing earnings or guidance
@@ -911,6 +960,10 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
   "pre_drop_price": <number (calculated: close / (1 + drop_percent/100))>,
   "entry_trigger": "String describing specific condition to enter. Examples: 'RSI crosses above 30', 'Price holds above $142 for 2 sessions', 'Volume returns to 20-day average'. For BUY action, use 'Immediate — current levels are attractive.'",
   "reassess_in_days": <number (trading days before this analysis expires, typically 3-10)>,
+  "sell_price_low": <number (conservative exit target — where to start taking profits)>,
+  "sell_price_high": <number (optimistic exit target — where to fully exit)>,
+  "ceiling_exit": <number (absolute max target — beyond this, gains unlikely without new catalyst)>,
+  "exit_trigger": "String describing specific condition to sell. Examples: 'RSI > 70 and price in $142-$148 zone', 'Price stalls at SMA200 on declining volume'. For AVOID action, use 'N/A — no position recommended.'",
   "reason": "One sentence: why this is or isn't a good trade right now.",
   "key_factors": [
       "String (Factor 1 — most important evidence for/against)",
@@ -938,7 +991,7 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
                 "News Agent",
                 "Competitive Landscape Agent",
                 "Market Sentiment Agent",
-                "Technical Agent", 
+                "Technical Agent",
                 "Economics Agent",
                 "Bull Researcher",
                 "Bear Researcher",
@@ -953,7 +1006,7 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
                  
                  # Bull, Bear, and Fund Manager should use Gemini 3 Pro
                  if agent_name in ["Bull Researcher", "Bear Researcher", "Fund Manager", "Risk Management Agent"]:
-                     model_to_use = "gemini-3-pro-preview"
+                     model_to_use = "gemini-3.1-pro-preview"
                  
                  logger.info(f"Calling {agent_name} with {model_to_use} + Grounding...")
                  return self._call_grounded_model(prompt, model_name=model_to_use, agent_context=agent_name)
@@ -966,6 +1019,17 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
             response = self.model.generate_content(prompt, request_options=RequestOptions(timeout=600))
             return response.text
         except Exception as e:
+            # Check for 503 Unavailable inside generic exception (for GenAI v1 SDK)
+            if "503" in str(e) and getattr(self, "model", None) and self.model.model_name == 'models/gemini-3.1-pro-preview':
+                logger.warning(f"503 UNAVAILABLE for gemini-3.1-pro-preview. Falling back to gemini-3-pro-preview for {agent_name}...")
+                try:
+                    fallback_model = genai.GenerativeModel('gemini-3-pro-preview')
+                    fallback_response = fallback_model.generate_content(prompt, request_options=RequestOptions(timeout=600))
+                    return fallback_response.text
+                except Exception as fallback_e:
+                    logger.error(f"Fallback model also failed for {agent_name}: {fallback_e}")
+                    return f"[Error: {fallback_e}]"
+            
             logger.error(f"Error in {agent_name}: {e}")
             return f"[Error: {e}]"
 
@@ -975,10 +1039,12 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
         Includes retry logic for Gemini 3 Pro if it fails to ground correctly.
         """
         try:
-            config = {
-                "tools": [{"google_search": {}}],
-                "temperature": 0.7
-            }
+            config = new_types.GenerateContentConfig(
+                tools=[{"google_search": {}}],
+                temperature=0.7,
+                # Use GenAI's typed config for HTTP options (timeout is in millis if integer on some SDK versions, but 600 ensures a long enough wait in any unit)
+                http_options=new_types.HttpOptions(timeout=600000)
+            )
             
             response = self.grounding_client.models.generate_content(
                 model=model_name,
@@ -1018,9 +1084,23 @@ Process continuing but this agent's output is compromised.
             return report_text
             
         except Exception as e:
+            # Check for 503 using string matching on the exception (New SDK errors often contain the HTTP code)
+            is_503 = getattr(e, "code", None) == 503 or "503" in str(e)
+            
+            if is_503 and "pro" in model_name and "3.1" in model_name:
+                logger.warning(f"503 UNAVAILABLE for {model_name} in {agent_context}. Falling back to gemini-3-pro-preview...")
+                fallback_name = "gemini-3-pro-preview"
+                try:
+                    # Give it a short pause before retrying with the fallback
+                    time.sleep(2)
+                    return self._call_grounded_model(prompt, fallback_name, agent_context, retry_count=2) # retry_count=2 prevents further 3.1 retries
+                except Exception as fallback_e:
+                    logger.error(f"Fallback model also failed for {agent_context}: {fallback_e}")
+                    return f"[Error in {agent_context} (Fallback): {fallback_e}]"
+
             logger.error(f"Grounding Call Failed for {agent_context} (Model: {model_name}): {e}")
             
-            # RETRY ON EXCEPTION
+            # STANDARD RETRY ON EXCEPTION (Non-503 or already fallback)
             if retry_count < 1 and "pro" in model_name:
                  logger.info("Exception with Pro. Retrying same model after 2s delay...")
                  time.sleep(2)
@@ -1418,6 +1498,7 @@ A dedicated Risk Assessment.
 We argue that contexts should function not as concise summaries, but as comprehensive, evolving playbooks—detailed, inclusive, and rich with domain insights.
 Use Headers: "Risk Assessment", "Trap Check", "Counter-Thesis", "Key Risks".
 """
+
 
     def _check_and_increment_usage(self) -> bool:
         """

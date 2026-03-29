@@ -19,7 +19,7 @@ def test_grounding():
         print(f"Failed to initialize client: {e}")
         return
 
-    model_name = "gemini-3-pro-preview"
+    model_name = "gemini-3.1-pro-preview"
     prompt = "What is the latest stock price of Apple (AAPL) and why is it moving today?"
     
     print(f"Calling {model_name} with Grounding...")

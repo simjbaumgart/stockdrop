@@ -6,6 +6,16 @@ import logging
 
 load_dotenv()
 
+# Increase file descriptor limit for macOS to prevent [Errno 24]
+try:
+    import resource
+    soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+    # Use 65536 or hard limit, whichever is smaller, to avoid OS hard caps
+    target_limit = min(65536, hard) if hard > 0 else 65536
+    resource.setrlimit(resource.RLIMIT_NOFILE, (target_limit, hard))
+except Exception as e:
+    print(f"Warning: Could not set file descriptor limit: {e}")
+
 # Suppress noisy third-party loggers in production
 logging.getLogger('httpx').setLevel(logging.WARNING)
 logging.getLogger('httpcore').setLevel(logging.WARNING)

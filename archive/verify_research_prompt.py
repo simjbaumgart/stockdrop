@@ -7,9 +7,15 @@ from datetime import datetime
 # Ensure app can be imported
 sys.path.append(os.getcwd())
 
-# Mock Environment
+# Load Environment
+try:
+    from dotenv import load_dotenv, find_dotenv
+    load_dotenv(find_dotenv())
+except ImportError:
+    pass
+
 if not os.getenv("POLYGON_API_KEY"):
-    os.environ["POLYGON_API_KEY"] = "MX8dLTzDgcUHHLh6GNE12iOzitcS_HCH" # For testing
+    print("Warning: POLYGON_API_KEY not set. Set it in your .env file.")
 
 from app.models.market_state import MarketState
 from app.services.research_service import research_service

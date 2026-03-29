@@ -48,7 +48,7 @@ services:
       - key: OPENAI_API_KEY
         sync: false
       - key: BENZINGA_API_KEY
-        value: MX8dLTzDgcUHHLh6GNE12iOzitcS_HCH
+        sync: false
       - key: SENDER_EMAIL
         sync: false
       - key: SENDER_PASSWORD

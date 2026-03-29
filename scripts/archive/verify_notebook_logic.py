@@ -8,8 +8,8 @@ import os
 # Configuration
 DB_PATH = "subscribers.db" 
 if not os.path.exists(DB_PATH):
-    # Try typical location
-    DB_PATH = "/Users/simonbaumgart/Antigravity/Stock-Tracker/subscribers.db"
+    # Try typical location relative to project root
+    DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "subscribers.db")
 
 print(f"Using Database: {DB_PATH}")
 

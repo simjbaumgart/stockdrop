@@ -1,10 +1,18 @@
 
 import requests
 import json
+import os
 from datetime import datetime
 
-# API Key from app/services/polygon_service.py (Assuming same key works for Massive)
-API_KEY = "MX8dLTzDgcUHHLh6GNE12iOzitcS_HCH"
+try:
+    from dotenv import load_dotenv, find_dotenv
+    load_dotenv(find_dotenv())
+except ImportError:
+    pass
+
+API_KEY = os.getenv("BENZINGA_API_KEY") or os.getenv("POLYGON_API_KEY")
+if not API_KEY:
+    raise RuntimeError("BENZINGA_API_KEY or POLYGON_API_KEY not set. Please set it in your .env file.")
 
 # Potential Endpoints
 ENDPOINTS = [

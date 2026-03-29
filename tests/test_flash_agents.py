@@ -100,7 +100,7 @@ def test_agents():
          else:
               print("WARNING: Grounding signature missing.")
 
-         if "Model: gemini-3-pro-preview" in res:
+         if "Model: gemini-3.1-pro-preview" in res:
               print("SUCCESS: Model is Gemini 3 Pro Preview.")
          else:
               print(f"WARNING: Incorrect model used. Output: {res[-100:]}")

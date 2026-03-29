@@ -23,7 +23,7 @@ def test_fetch_and_save(symbol):
         
         if text:
             # Save to file
-            output_dir = "/Users/simonbaumgart/Antigravity/Stock-Tracker/data/filings"
+            output_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "filings")
             filename = os.path.join(output_dir, f"{symbol}_transcript.txt")
             with open(filename, "w", encoding="utf-8") as f:
                 f.write(f"Symbol: {symbol}\n")

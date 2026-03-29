@@ -62,6 +62,9 @@ class DeepResearchService:
                     duration = int(time.time() - self.current_task_start_time)
                     minutes, seconds = divmod(duration, 60)
                     current_job_info = f" | Job: {self.current_task_name} (Running: {minutes}m {seconds}s)"
+                    
+                    if duration > 5400: # 90 minutes
+                        logger.critical(f"[Deep Research] CRITICAL: Task '{self.current_task_name}' has been running for over 90 minutes ({minutes}m). The background thread may be completely stuck.")
                 
                 print(f"\n[Deep Research Monitor] Active Agent: {active} | Queue: {queued_ind} (Ind), {queued_batch} (Batch){current_job_info} | {datetime.now().strftime('%H:%M:%S')}")
 
@@ -81,6 +84,29 @@ class DeepResearchService:
         
         t_scan = threading.Thread(target=scanner_loop, daemon=True)
         t_scan.start()
+
+    def wait_for_completion(self, timeout_minutes=120):
+        """Blocks until all queued research tasks are completed."""
+        logger.info(f"[Deep Research] Waiting for up to {timeout_minutes} minutes for tasks to complete before exiting...")
+        start_time = time.time()
+        timeout_seconds = timeout_minutes * 60
+        
+        while time.time() - start_time < timeout_seconds:
+            with self.lock:
+                active = self.active_tasks_count
+                
+            queued_ind = self.individual_queue.qsize()
+            queued_batch = self.batch_queue.qsize()
+            
+            if queued_ind == 0 and queued_batch == 0 and active == 0:
+                logger.info("[Deep Research] All tasks completed. Safe to exit.")
+                return True
+                
+            time.sleep(15)
+            
+        logger.warning("[Deep Research] Timeout reached while waiting for completions.")
+        return False
+
 
     def _sync_batches_from_files(self):
         """
@@ -479,6 +505,11 @@ class DeepResearchService:
                 verification=verification,
                 blindspots=blindspots,
                 reason=result.get('reason', ''),
+                # Deep Research sell range (Plan B)
+                sell_price_low=result.get('sell_price_low'),
+                sell_price_high=result.get('sell_price_high'),
+                ceiling_exit=result.get('ceiling_exit'),
+                exit_trigger=result.get('exit_trigger'),
             )
             
             if success:
@@ -486,11 +517,102 @@ class DeepResearchService:
             else:
                 logger.error(f"[Deep Research] Failed to update DB for {symbol}")
 
+            # --- Deep Research overrides main trading-level columns ---
+            # Deep Research gets the final call on recommendation & limit prices.
+            if decision_id and action in ('BUY_LIMIT', 'BUY', 'WATCH', 'AVOID'):
+                self._apply_trading_level_overrides(decision_id, symbol, result)
+
+            # --- Print Formatted Deep Research Result to Console ---
+            self._print_deep_research_result(symbol, result, score)
+
             # Save to file
             self._save_result_to_file(symbol, result)
             
         except Exception as e:
             logger.error(f"[Deep Research] Error updating DB: {e}")
+
+    def _apply_trading_level_overrides(self, decision_id: int, symbol: str, result: dict):
+        """
+        Deep Research gets the final call on the limit and trading levels.
+        Overwrites the main PM-level columns (entry zone, stop-loss, etc.)
+        but PRESERVES the initial recommendation.
+        """
+        try:
+            action = result.get('action', 'AVOID')
+            
+            set_clauses = []
+            values = []
+
+            # Entry zone (the "Limit" column in the dashboard)
+            entry_low = result.get('entry_price_low')
+            entry_high = result.get('entry_price_high')
+            if entry_low is not None:
+                set_clauses.append("entry_price_low = ?")
+                values.append(float(entry_low))
+            if entry_high is not None:
+                set_clauses.append("entry_price_high = ?")
+                values.append(float(entry_high))
+
+            # Trading levels
+            for field, key in [
+                ("stop_loss", "stop_loss"),
+                ("take_profit_1", "take_profit_1"),
+                ("take_profit_2", "take_profit_2"),
+                ("upside_percent", "upside_percent"),
+                ("downside_risk_percent", "downside_risk_percent"),
+                ("risk_reward_ratio", "risk_reward_ratio"),
+                # Sell range overrides (Plan B)
+                ("sell_price_low", "sell_price_low"),
+                ("sell_price_high", "sell_price_high"),
+                ("ceiling_exit", "ceiling_exit"),
+                ("exit_trigger", "exit_trigger"),
+            ]:
+                val = result.get(key)
+                if val is not None:
+                    set_clauses.append(f"{field} = ?")
+                    values.append(float(val) if field != "exit_trigger" else val)
+
+            # Conviction & metadata
+            for field, key in [
+                ("conviction", "conviction"),
+                ("drop_type", "drop_type"),
+                ("entry_trigger", "entry_trigger"),
+                ("reassess_in_days", "reassess_in_days"),
+            ]:
+                val = result.get(key)
+                if val is not None:
+                    set_clauses.append(f"{field} = ?")
+                    values.append(val)
+
+            if not set_clauses:
+                logger.info(f"[Deep Research] No trading levels to override for {symbol}")
+                return
+
+            values.append(decision_id)
+            sql = f"UPDATE decision_points SET {', '.join(set_clauses)} WHERE id = ?"
+
+            db_path = os.getenv("DB_PATH", "subscribers.db")
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+            cursor.execute(sql, values)
+            conn.commit()
+            conn.close()
+
+            logger.info(f"[Deep Research] Overrode main trading levels for {symbol} (ID: {decision_id}): entry={entry_low}-{entry_high}")
+            # Verdict emoji based on action
+            if action in ('BUY', 'BUY_LIMIT', 'STRONG_BUY'):
+                verdict_icon = '\U0001F7E2'  # 🟢
+            elif action in ('WATCH', 'HOLD'):
+                verdict_icon = '\U0001F7E1'  # 🟡
+            elif action in ('AVOID', 'SELL', 'STRONG_SELL', 'DOWNGRADE'):
+                verdict_icon = '\U0001F534'  # 🔴
+            else:
+                verdict_icon = '\u2753'  # ❓
+                
+            print(f"  >> {verdict_icon} [Deep Research] Updated trading levels for {symbol} (Limit: {entry_low}-{entry_high})")
+
+        except Exception as e:
+            logger.error(f"[Deep Research] Failed to override trading levels for {symbol}: {e}")
 
     def _check_and_trigger_batch(self):
         """
@@ -498,6 +620,94 @@ class DeepResearchService:
         """
         logger.info("[Deep Research] Trigger checking for new batches...")
         self._scan_for_batches()
+
+    def _print_deep_research_result(self, symbol: str, result: dict, score: int):
+        """
+        Prints a formatted deep research result to the console,
+        mirroring the Portfolio Manager decision output style.
+        """
+        review_verdict = result.get('review_verdict', 'UNKNOWN')
+        action = result.get('action', 'AVOID')
+        conviction = result.get('conviction', 'N/A')
+        drop_type = result.get('drop_type', 'N/A')
+        entry_low = result.get('entry_price_low', 'N/A')
+        entry_high = result.get('entry_price_high', 'N/A')
+        stop_loss = result.get('stop_loss', 'N/A')
+        tp1 = result.get('take_profit_1', 'N/A')
+        tp2 = result.get('take_profit_2', 'N/A')
+        upside = result.get('upside_percent', 'N/A')
+        downside = result.get('downside_risk_percent', 'N/A')
+        rr = result.get('risk_reward_ratio', 'N/A')
+        risk_level = result.get('risk_level', 'N/A')
+        catalyst_type = result.get('catalyst_type', 'N/A')
+        entry_trigger = result.get('entry_trigger', 'N/A')
+        reassess = result.get('reassess_in_days', 'N/A')
+        reason = result.get('reason', 'N/A')
+        knife_catch = result.get('knife_catch_warning', False)
+
+        # Format price values
+        def fmt_price(v):
+            if v is None or v == 'N/A':
+                return 'N/A'
+            try:
+                return f"${float(v):.2f}"
+            except (TypeError, ValueError):
+                return str(v)
+
+        def fmt_pct(v):
+            if v is None or v == 'N/A':
+                return 'N/A'
+            try:
+                return f"{float(v):.1f}%"
+            except (TypeError, ValueError):
+                return str(v)
+
+        def fmt_ratio(v):
+            if v is None or v == 'N/A':
+                return 'N/A'
+            try:
+                return f"{float(v):.1f}"
+            except (TypeError, ValueError):
+                return str(v)
+
+        # Verdict emoji based on action
+        if action in ('BUY', 'BUY_LIMIT', 'STRONG_BUY'):
+            verdict_icon = '\U0001F7E2'  # 🟢 Green Circle
+        elif action in ('WATCH', 'HOLD'):
+            verdict_icon = '\U0001F7E1'  # 🟡 Yellow Circle
+        elif action in ('AVOID', 'SELL', 'STRONG_SELL', 'DOWNGRADE'):
+            verdict_icon = '\U0001F534'  # 🔴 Red Circle
+        else:
+            verdict_icon = '\u2753'  # ❓ Question Mark
+
+        knife_warning = " | KNIFE CATCH WARNING" if knife_catch in (True, "True", "true") else ""
+
+        print(f"\n{'='*60}")
+        print(f"  {verdict_icon} [DEEP RESEARCH VERDICT]: {review_verdict} — {action} (Conviction: {conviction})")
+        print(f"  Stock: {symbol} | Score: {score}/100{knife_warning}")
+        print(f"  Drop Type: {drop_type} | Risk: {risk_level} | Catalyst: {catalyst_type}")
+        print(f"  Entry Zone: {fmt_price(entry_low)} - {fmt_price(entry_high)}")
+        print(f"  Stop Loss: {fmt_price(stop_loss)} | TP1: {fmt_price(tp1)} | TP2: {fmt_price(tp2)}")
+        print(f"  Upside: {fmt_pct(upside)} | Downside: {fmt_pct(downside)} | R/R: {fmt_ratio(rr)}")
+        print(f"  Entry Trigger: {entry_trigger}")
+        print(f"  Reassess In: {reassess} trading days")
+        print(f"  Reason: {reason}")
+
+        # Verification Results
+        verification = result.get('verification_results', [])
+        if verification:
+            print("  Verification:")
+            for v in verification:
+                print(f"   - {v}")
+
+        # Council Blindspots
+        blindspots = result.get('council_blindspots', [])
+        if blindspots:
+            print("  Blindspots Found:")
+            for b in blindspots:
+                print(f"   - {b}")
+
+        print(f"{'='*60}\n")
 
     def _save_result_to_file(self, symbol, result):
         try:
@@ -646,7 +856,7 @@ class DeepResearchService:
             logger.info(f"[Deep Research] Task Started for {symbol} (ID: {interaction_id})")
             
             # 3. Poll
-            max_retries = 100 # Increased for background safety
+            max_retries = 360 # Increased to allow 90 mins for background safety
             poll_interval = 15
             poll_url = f"{self.base_url}/{interaction_id}"
             
@@ -683,6 +893,10 @@ class DeepResearchService:
         """
         Deep Research prompt — acts as a SENIOR REVIEWER
         of the council's decision, not a redo of the analysis.
+
+        When context contains 'supplementary_council_reports', full untruncated
+        mode is activated (used by the standalone backfill script to give deep
+        research the complete council data).
         """
         pm_decision = context.get("pm_decision", {})
         bull_case = context.get("bull_case", "Not available")
@@ -693,6 +907,10 @@ class DeepResearchService:
         transcript_summary = context.get("transcript_summary", "")
         transcript_date = context.get("transcript_date", "Unknown")
         data_depth = context.get("data_depth", {})
+        supplementary = context.get("supplementary_council_reports", {})
+
+        # Full context mode: no truncation when supplementary data is present
+        full_context = bool(supplementary)
 
         # Format PM decision compactly
         pm_summary = json.dumps(pm_decision, indent=2)
@@ -701,7 +919,8 @@ class DeepResearchService:
         # Format news (paywalled — deep research can't access these via Google Search)
         news_str = ""
         if raw_news:
-            for n in raw_news[:20]:
+            max_articles = 50 if full_context else 20
+            for n in raw_news[:max_articles]:
                 date = n.get('datetime_str', 'N/A')
                 source = n.get('source', 'Unknown')
                 source_type = n.get('source_type', 'WIRE')
@@ -710,9 +929,11 @@ class DeepResearchService:
                 content = n.get('content', '')
                 news_str += f"- {date} [{source_type}] [{source}]: {headline}\n"
                 if content:
-                    news_str += f"  {content[:1500]}\n\n"
+                    content_limit = len(content) if full_context else 1500
+                    news_str += f"  {content[:content_limit]}\n\n"
                 elif summary:
-                    news_str += f"  {summary[:500]}\n\n"
+                    summary_limit = len(summary) if full_context else 500
+                    news_str += f"  {summary[:summary_limit]}\n\n"
 
         # Evidence quality note
         news_count = data_depth.get("news", {}).get("total_count", 0) if isinstance(data_depth, dict) else 0
@@ -725,6 +946,23 @@ EARNINGS TRANSCRIPT SUMMARY (Date: {transcript_date}):
 (Condensed by the News Agent from the full earnings call — key points preserved)
 {transcript_summary}
 """
+
+        # Supplementary council reports section (only in full context / backfill mode)
+        supplementary_section = ""
+        if supplementary:
+            supplementary_section = "\n═══════════════════════════════════════════════════════\n"
+            supplementary_section += "SUPPLEMENTARY COUNCIL AGENT REPORTS (Full Analysis):\n"
+            supplementary_section += "═══════════════════════════════════════════════════════\n"
+            supplementary_section += "These are the full reports from the AI council's specialized agents.\n"
+            supplementary_section += "Use them as additional evidence to support or challenge the PM decision.\n\n"
+            for agent_name, report in supplementary.items():
+                label = agent_name.replace("_", " ").title()
+                report_text = report if isinstance(report, str) else json.dumps(report, indent=2)
+                supplementary_section += f"--- {label} Agent ---\n{report_text}\n\n"
+
+        # Bull/bear truncation: full text in backfill mode, 4000 chars in live mode
+        bull_display = bull_case if full_context else bull_case[:4000]
+        bear_display = bear_case if full_context else bear_case[:4000]
 
         return f"""
 You are a **Senior Investment Reviewer** at a hedge fund. An internal AI council
@@ -747,12 +985,12 @@ COUNCIL DECISION (This is what you are reviewing):
 ═══════════════════════════════════════════════════════
 BULL CASE (Constructed by Council's Bull Researcher):
 ═══════════════════════════════════════════════════════
-{bull_case[:4000]}
+{bull_display}
 
 ═══════════════════════════════════════════════════════
 BEAR CASE (Constructed by Council's Bear Researcher):
 ═══════════════════════════════════════════════════════
-{bear_case[:4000]}
+{bear_display}
 
 ═══════════════════════════════════════════════════════
 TECHNICAL DATA (Raw Indicators):
@@ -760,6 +998,8 @@ TECHNICAL DATA (Raw Indicators):
 {tech_str}
 
 {transcript_section}
+
+{supplementary_section}
 
 ═══════════════════════════════════════════════════════
 NEWS ARTICLES (Paywalled Sources — NOT available via Google Search):
@@ -824,6 +1064,13 @@ After your review, decide:
 > Look for the REACTION to the news, not just the news itself.
 > Humility: If you can't verify the "why," the risk is higher than the council thinks.
 
+STEP 3b: CALCULATE SELL RANGE
+Using your independent analysis, determine where to take profits:
+- sell_price_low: Conservative exit (pre-drop price recovery or BB middle)
+- sell_price_high: Optimistic exit (BB upper, SMA50, or SMA200 as resistance)
+- ceiling_exit: Maximum target = min(52-week high, BB upper + 1×ATR)
+- exit_trigger: Specific condition combining price level + technical signal
+
 OUTPUT FORMAT:
 Your output must be valid JSON. All price fields must be numbers. All percentage fields must be numbers.
 {{
@@ -844,6 +1091,10 @@ Your output must be valid JSON. All price fields must be numbers. All percentage
   "pre_drop_price": <number>,
   "entry_trigger": "Specific condition for entry",
   "reassess_in_days": <number>,
+  "sell_price_low": <number — conservative exit target, where to start taking profits>,
+  "sell_price_high": <number — optimistic exit target, where to fully exit>,
+  "ceiling_exit": <number — absolute max target beyond which gains unlikely>,
+  "exit_trigger": "String — specific condition for selling, e.g. 'RSI > 70 and price in $142-$148 zone'",
   "global_market_analysis": "Brief analysis of global market conditions",
   "local_market_analysis": "Brief analysis of local/sector conditions",
   "swot_analysis": {{
@@ -862,6 +1113,254 @@ Your output must be valid JSON. All price fields must be numbers. All percentage
   "reason": "One sentence: your final assessment as the senior reviewer."
 }}
 """
+
+    def _construct_sell_reassessment_prompt(self, symbol: str, context: dict) -> str:
+        """
+        Sell-focused Deep Research prompt for owned position reassessment.
+        Used by scripts/reassess_positions.py (Sell Council).
+        """
+        original = context.get("original_decision", {})
+        entry_low = original.get("entry_price_low") or 0
+        entry_high = original.get("entry_price_high") or 0
+        current_price = context.get("current_price", 0)
+        performance = context.get("performance_since_entry", "N/A")
+        stop_loss = original.get("stop_loss", "N/A")
+        sell_low = original.get("sell_price_low", "N/A")
+        sell_high = original.get("sell_price_high", "N/A")
+        ceiling = original.get("ceiling_exit", "N/A")
+        reason = original.get("reason", "N/A")
+
+        sensor_reports = json.dumps(context.get("sensor_reports", {}), indent=2)
+        technical_data = json.dumps(context.get("technical_data", {}), indent=2)
+
+        raw_news = context.get("raw_news", [])
+        news_str = ""
+        for n in raw_news[:25]:
+            date = n.get("datetime_str", "N/A")
+            source = n.get("source", "Unknown")
+            headline = n.get("headline", "No Headline")
+            summary = n.get("summary", "") or n.get("content", "")[:500]
+            news_str += f"- {date} [{source}]: {headline}\n  {summary}\n\n"
+
+        return f"""
+You are a **Senior Sell-Side Analyst** at a hedge fund. You are reviewing an EXISTING
+OWNED position to decide whether to HOLD, TAKE PARTIAL PROFITS, or EXIT FULLY.
+
+POSITION CONTEXT:
+- Ticker: {symbol}
+- Original Entry: ${entry_low} - ${entry_high}
+- Current Price: ${current_price} ({performance})
+- Current Stop Loss: ${stop_loss}
+- Current Sell Zone: ${sell_low} - ${sell_high}
+- Ceiling Exit: ${ceiling}
+- Original Buy Thesis: {reason}
+
+FRESH COUNCIL SENSOR DATA (collected just now):
+{sensor_reports}
+
+FRESH TECHNICAL INDICATORS:
+{technical_data}
+
+RECENT NEWS:
+{news_str if news_str else "No recent news provided."}
+
+YOUR TASK:
+STEP 1: THESIS STATUS — Is the original buy thesis still INTACT, WEAKENING, or BROKEN?
+  Use the fresh news and sentiment data. Search Google for any developments since the entry.
+STEP 2: TECHNICAL PICTURE — Analyze current indicators. Is RSI overbought? Has price hit
+  resistance (bb_upper, SMA50, SMA200)? Is volume supporting the move or declining?
+STEP 3: UPDATED SELL RANGE — Recalculate sell_price_low, sell_price_high, ceiling_exit
+  using fresh technicals. If thesis is weakening, lower targets. If intact with momentum, raise.
+STEP 4: ACTION RECOMMENDATION — HOLD / SELL_PARTIAL / SELL_FULL / TIGHTEN_STOP
+STEP 5: STOP LOSS UPDATE — Can only go UP (trailing stop). Never lower it.
+
+OUTPUT FORMAT (valid JSON only):
+{{
+  "thesis_status": "INTACT" | "WEAKENING" | "BROKEN",
+  "sell_action": "HOLD" | "SELL_PARTIAL" | "SELL_FULL" | "TIGHTEN_STOP",
+  "updated_sell_price_low": <number>,
+  "updated_sell_price_high": <number>,
+  "updated_ceiling_exit": <number>,
+  "updated_stop_loss": <number or null — only if raised>,
+  "exit_trigger": "Specific condition for selling",
+  "next_reassess_in_days": <number>,
+  "thesis_reasoning": "One sentence on thesis status",
+  "action_reasoning": "One sentence on recommended action",
+  "key_observations": ["observation 1", "observation 2", "observation 3"]
+}}
+"""
+
+    def execute_sell_reassessment(
+        self, symbol: str, context: dict, decision_id: int = None
+    ) -> Optional[Dict]:
+        """
+        Runs sell-focused Deep Research for owned position reassessment.
+        Synchronous execution. Returns parsed JSON result.
+        Updates monitor state so Deep Research Monitor shows the active task.
+        """
+        prompt = self._construct_sell_reassessment_prompt(symbol, context)
+        headers = {
+            "Content-Type": "application/json",
+            "x-goog-api-key": self.api_key,
+        }
+        payload = {
+            "input": prompt,
+            "agent": "deep-research-pro-preview-12-2025",
+            "background": True,
+        }
+        # Update monitor so Deep Research Monitor shows this active task
+        with self.lock:
+            self.active_tasks_count = 1
+            self.current_task_name = f"sell_reassessment ({symbol})"
+            self.current_task_start_time = time.time()
+        try:
+            response = requests.post(self.base_url, headers=headers, json=payload)
+            if response.status_code != 200:
+                logger.error(f"[Deep Research Sell] API Error: {response.text}")
+                return None
+            data = response.json()
+            interaction_id = data.get("id") or data.get("name")
+            if not interaction_id:
+                logger.error("[Deep Research Sell] No interaction_id in response")
+                return None
+            logger.info(f"[Deep Research Sell] Task Started for {symbol} (ID: {interaction_id})")
+            max_retries = 360 # Increased to 360 queries (15s interval = 90 mins)
+            poll_interval = 15
+            poll_url = f"{self.base_url}/{interaction_id}"
+            for i in range(max_retries):
+                time.sleep(poll_interval)
+                resp = requests.get(poll_url, headers=headers)
+                if resp.status_code != 200:
+                    logger.warning(f"[Deep Research Sell] Poll {i+1} HTTP {resp.status_code}: {resp.text[:200]}")
+                    continue
+                poll_data = resp.json()
+                status = poll_data.get("status", poll_data.get("state", "UNKNOWN"))
+                # Log progress every 4 polls (~1 min) so we see status in logs
+                if (i + 1) % 4 == 0:
+                    logger.info(f"[Deep Research Sell] Poll {i+1}/{max_retries}: status={status}")
+                if status in ["completed", "COMPLETED"]:
+                    result = self._parse_sell_reassessment_output(poll_data)
+                    if result is None:
+                        logger.error(
+                            f"[Deep Research Sell] Task completed for {symbol} but failed to parse output. "
+                            f"Keys: {list(poll_data.keys())}"
+                        )
+                        return None
+                    return result
+                elif status in ["failed", "FAILED"]:
+                    logger.error(f"[Deep Research Sell] Task Failed for {symbol}: {poll_data}")
+                    return None
+            logger.error(f"[Deep Research Sell] Task Timeout for {symbol} after {max_retries} polls")
+            return None
+        except Exception as e:
+            logger.error(f"[Deep Research Sell] Execution Exception: {e}")
+            return None
+        finally:
+            # Always clear monitor state when done
+            with self.lock:
+                self.active_tasks_count = 0
+                self.current_task_name = None
+                self.current_task_start_time = None
+
+    def _extract_text_from_output(self, output) -> str:
+        """Extract text from various Gemini output structures."""
+        if not isinstance(output, dict):
+            return str(output)
+        # Direct text key
+        if "text" in output and output["text"]:
+            return output["text"]
+        # Nested: content.parts[0].text (common Gemini format)
+        content = output.get("content") or output.get("result")
+        if content and isinstance(content, dict):
+            parts = content.get("parts", [])
+            if parts and isinstance(parts[0], dict) and "text" in parts[0]:
+                return parts[0]["text"]
+        return str(output)
+
+    def _parse_sell_reassessment_output(self, poll_data: dict) -> Optional[Dict]:
+        """Parse sell reassessment JSON from poll output."""
+        try:
+            outputs = poll_data.get("outputs", [])
+            if not outputs:
+                logger.warning("[Deep Research Sell] No outputs in poll_data")
+                return None
+            best_text = ""
+            for output in reversed(outputs):
+                text = self._extract_text_from_output(output)
+                if not text or text == "{}":
+                    continue
+                text = text.strip()
+                if text.startswith("```json"):
+                    text = text[7:]
+                if text.startswith("```"):
+                    text = text[3:]
+                if text.endswith("```"):
+                    text = text[:-3]
+                text = text.strip()
+                if not best_text:
+                    best_text = text
+                try:
+                    parsed = json.loads(text)
+                    if parsed and isinstance(parsed, dict):
+                        return parsed
+                except json.JSONDecodeError:
+                    import re
+                    m = re.search(r"\{.*\}", text, re.DOTALL)
+                    if m:
+                        try:
+                            return json.loads(m.group(0))
+                        except json.JSONDecodeError:
+                            pass
+            # Fallback: try repair with Flash (sell schema)
+            if best_text:
+                repaired = self._repair_sell_reassessment_output(best_text)
+                if repaired:
+                    return repaired
+            logger.warning(f"[Deep Research Sell] Parse failed. First 500 chars: {best_text[:500]}")
+            return None
+        except Exception as e:
+            logger.error(f"[Deep Research Sell] Parse error: {e}")
+            return None
+
+    def _repair_sell_reassessment_output(self, raw_text: str) -> Optional[Dict]:
+        """Uses Gemini Flash to extract sell reassessment JSON from malformed output."""
+        try:
+            logger.info("[Deep Research Sell] Attempting repair via Gemini Flash...")
+            schema_def = """
+{
+  "thesis_status": "INTACT | WEAKENING | BROKEN",
+  "sell_action": "HOLD | SELL_PARTIAL | SELL_FULL | TIGHTEN_STOP",
+  "updated_sell_price_low": 0.0,
+  "updated_sell_price_high": 0.0,
+  "updated_ceiling_exit": 0.0,
+  "updated_stop_loss": null,
+  "exit_trigger": "string",
+  "next_reassess_in_days": 5,
+  "thesis_reasoning": "string",
+  "action_reasoning": "string",
+  "key_observations": ["string"]
+}
+"""
+            prompt = f"""Extract the stock sell reassessment data into this exact JSON. Return only raw JSON, no markdown.
+SCHEMA:
+{schema_def}
+REPORT:
+{raw_text[:8000]}
+"""
+            url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+            headers = {"Content-Type": "application/json", "x-goog-api-key": self.api_key}
+            payload = {"contents": [{"parts": [{"text": prompt}]}], "generationConfig": {"response_mime_type": "application/json"}}
+            resp = requests.post(url, headers=headers, json=payload, timeout=30)
+            if resp.status_code != 200:
+                return None
+            data = resp.json()
+            if data.get("candidates") and data["candidates"][0].get("content", {}).get("parts"):
+                repair_text = data["candidates"][0]["content"]["parts"][0].get("text", "")
+                if repair_text:
+                    return json.loads(repair_text)
+        except Exception as e:
+            logger.warning(f"[Deep Research Sell] Repair failed: {e}")
+        return None
 
     def _repair_json_using_flash(self, raw_text: str, schema_type: str = 'individual') -> Optional[Dict]:
         """

@@ -11,7 +11,9 @@ try:
 except ImportError:
     pass
 
-API_KEY = "5477117586msh5d353b0362a0a36p119d3fjsn29a2acf5e2d8"
+API_KEY = os.getenv("RAPIDAPI_KEY_SEEKING_ALPHA")
+if not API_KEY:
+    raise RuntimeError("RAPIDAPI_KEY_SEEKING_ALPHA not set. Please set it in your .env file.")
 HOST = "seeking-alpha.p.rapidapi.com"
 EXPERIMENT_ROOT = "experiment_data"
 FOLDER_NAME = "WSBreakfast"

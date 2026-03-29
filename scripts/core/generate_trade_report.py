@@ -7,6 +7,7 @@ import warnings
 import sqlite3
 import pandas as pd
 import yfinance as yf
+import argparse
 from datetime import datetime, timedelta
 from dateutil import parser
 import pytz
@@ -32,7 +33,16 @@ def get_decision_points():
         return []
 
 def main():
-    print("Generating Trade Decision Report (Optimized)...")
+    parser_arg = argparse.ArgumentParser(description="Generate Trade Decision Report")
+    parser_arg.add_argument("--window", type=int, default=7, help="Performance tracking window in days (default: 7)")
+    
+    # Process args safely, ignoring uvicorn or pytest arguments if called programmatically
+    clean_args = [a for a in sys.argv[1:] if not a.startswith('main:app') and a != '--reload' and not a.startswith('--enable-email')]
+    args, unknown = parser_arg.parse_known_args(clean_args)
+    
+    window_days = args.window
+    
+    print(f"Generating Trade Decision Report ({window_days}-day window)...")
     decisions = get_decision_points()
     
     if not decisions:
@@ -167,30 +177,30 @@ def main():
         score = d.get('ai_score')
         region = d.get('region') # Get the region/market
         
-        week_later_dt = decision_dt + timedelta(days=7)
+        target_dt = decision_dt + timedelta(days=window_days)
         now = datetime.now()
-        is_future = week_later_dt > now
+        is_future = target_dt > now
         
         # Get Prices from Batch Data
         if not price_at_decision:
              price_at_decision = get_price_from_history(symbol, decision_dt)
         
-        week_later_price = None
+        target_price = None
         current_status_price = get_latest_price(symbol)
         
         if is_future:
-            week_later_price = current_status_price
-            status = "Pending (<1w)"
+            target_price = current_status_price
+            status = f"Pending (<{window_days}d)"
         else:
-            week_later_price = get_price_from_history(symbol, week_later_dt)
-            if week_later_price is None:
-                week_later_price = current_status_price
+            target_price = get_price_from_history(symbol, target_dt)
+            if target_price is None:
+                target_price = current_status_price
             status = "Completed"
 
         # Calculate Drop/Gain
         perf_pct = 0.0
-        if price_at_decision and week_later_price:
-            perf_pct = ((week_later_price - price_at_decision) / price_at_decision) * 100
+        if price_at_decision and target_price:
+            perf_pct = ((target_price - price_at_decision) / price_at_decision) * 100
             
         # Benchmark Calculations
         bench_data = {}
@@ -201,16 +211,17 @@ def main():
             if is_future:
                  bench_end = get_latest_price(bench_ticker)
             else:
-                 bench_end = get_price_from_history(bench_ticker, week_later_dt)
-                 # Fallback if no data on exact week later date (e.g. holiday), try latest
+                 bench_end = get_price_from_history(bench_ticker, target_dt)
+                 # Fallback if no data on exact target date (e.g. holiday), try latest
                  if bench_end is None:
                       bench_end = get_latest_price(bench_ticker) 
 
+            bench_label = f"{bench_name} {window_days}d"
             if bench_start and bench_end:
                 bench_perf = ((bench_end - bench_start) / bench_start) * 100
-                bench_data[f"{bench_name} 1W"] = f"{bench_perf:+.2f}%"
+                bench_data[bench_label] = f"{bench_perf:+.2f}%"
             else:
-                bench_data[f"{bench_name} 1W"] = "-"
+                bench_data[bench_label] = "-"
 
         deep_research_verdict = d.get('deep_research_verdict')
         batch_id = d.get('batch_id')
@@ -251,15 +262,28 @@ def main():
             except Exception as e:
                 evidence_str = "Error"
 
+        # Build Limit price string for BUY_LIMIT recommendations
+        entry_low = d.get('entry_price_low')
+        entry_high = d.get('entry_price_high')
+        if recommendation == "BUY_LIMIT" and (entry_low or entry_high):
+            if entry_low and entry_high:
+                limit_str = f"{float(entry_low):.2f}-{float(entry_high):.2f}"
+            elif entry_low:
+                limit_str = f"{float(entry_low):.2f}"
+            else:
+                limit_str = f"{float(entry_high):.2f}"
+        else:
+            limit_str = "-"
+
         row = {
             "Date": decision_dt.strftime("%Y-%m-%d"),
             "Symbol": symbol,
             "Market": region if region else "Unknown",
-            "Score": f"{int(score)}" if score is not None else "-",
             "Rec": recommendation,
+            "Limit": limit_str,
             "Price @ Dec": f"{price_at_decision:.2f}" if price_at_decision else "-",
-            "Price +1W": f"{week_later_price:.2f}" if week_later_price else "-",
-            "Performance": f"{perf_pct:+.2f}%" if price_at_decision and week_later_price else "-",
+            f"Price +{window_days}d": f"{target_price:.2f}" if target_price else "-",
+            "Performance": f"{perf_pct:+.2f}%" if price_at_decision and target_price else "-",
             "Verdict": deep_research_verdict if deep_research_verdict else "-",
             "Batch": batch_status,
             "Status": status,
@@ -273,7 +297,7 @@ def main():
     report_data.sort(key=lambda x: x['Date'], reverse=True)
     
     # Save Full CSV
-    csv_file = os.path.join("data", "trade_report_full.csv")
+    csv_file = os.path.join("data", f"trade_report_full_{window_days}d.csv")
     pd.DataFrame(report_data).to_csv(csv_file, index=False)
     print(f"Full CSV report saved to {csv_file}")
     
@@ -281,7 +305,7 @@ def main():
     LIMIT = 100
     shown_data = report_data[:LIMIT]
     
-    headers = ["Date", "Symbol", "Market", "Score", "Rec", "Price @ Dec", "Price +1W", "Performance", "SP500 1W", "Dow 1W", "DAX 1W", "Verdict", "Batch", "Status", "Evidence"]
+    headers = ["Date", "Symbol", "Market", "Rec", "Limit", "Price @ Dec", f"Price +{window_days}d", "Performance", f"SP500 {window_days}d", f"Dow {window_days}d", f"DAX {window_days}d", "Verdict", "Batch", "Status", "Evidence"]
     widths = {h: len(h) for h in headers}
     for row in shown_data:
         for h in headers:

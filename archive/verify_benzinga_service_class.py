@@ -7,9 +7,12 @@ sys.path.append(os.getcwd())
 
 # Inject Mock Env Var for Test if not present (simulate loading from .env)
 # In production, this comes from the actual .env file
-# REMOVED MOCK to test actual .env loading via BenzingaService
-# if not os.getenv("POLYGON_API_KEY"):
-#     os.environ["POLYGON_API_KEY"] = "MX8dLTzDgcUHHLh6GNE12iOzitcS_HCH"
+# Load environment from .env file
+try:
+    from dotenv import load_dotenv, find_dotenv
+    load_dotenv(find_dotenv())
+except ImportError:
+    pass
 
 from app.services.benzinga_service import benzinga_service
 

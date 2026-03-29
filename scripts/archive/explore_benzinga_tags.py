@@ -32,8 +32,8 @@ def explore_tags():
     
     api_key = os.getenv("BENZINGA_API_KEY")
     if not api_key:
-        # Fallback to hardcoded key found in verify script if env missing
-        api_key = "MX8dLTzDgcUHHLh6GNE12iOzitcS_HCH"
+        print("BENZINGA_API_KEY not set. Please set it in your .env file.")
+        return
         
     url = "https://api.polygon.io/v2/reference/news"
     params = {

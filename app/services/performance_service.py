@@ -8,6 +8,32 @@ from app.services.tradingview_service import tradingview_service
 
 logger = logging.getLogger(__name__)
 
+
+def normalize_to_intent(recommendation: str) -> str:
+    """
+    Map legacy + v0.9 nomenclature to a canonical performance intent.
+    Used so outcome logic works consistently across STRONG BUY, BUY_LIMIT, HOLD, etc.
+    """
+    rec = (recommendation or "").strip().upper()
+    if not rec:
+        return "NEUTRAL"
+    # Buy signals (would have entered a position)
+    if rec in ("STRONG BUY", "STRONG_BUY", "BUY"):
+        return "ENTER_NOW"
+    if rec in ("SPECULATIVE BUY", "SPECULATIVE_BUY", "BUY_LIMIT"):
+        return "ENTER_LIMIT"
+    # Avoid / no position
+    if rec in ("AVOID", "SELL", "STRONG SELL", "STRONG_SELL", "HARD_AVOID", "WAIT_FOR_STABILIZATION"):
+        return "AVOID"
+    # Neutral / watchlist
+    if rec in ("HOLD", "WATCH"):
+        return "NEUTRAL"
+    # Fallback: any value containing "BUY" → treat as buy
+    if "BUY" in rec:
+        return "ENTER_LIMIT"
+    return "NEUTRAL"
+
+
 class PerformanceService:
     def evaluate_decisions(self) -> List[Dict[str, Any]]:
         """
@@ -61,28 +87,37 @@ class PerformanceService:
             else:
                 performance_percent = ((current_price - start_price) / start_price) * 100
             
-            # Determine if the decision was "good"
-            # BUY -> Positive return (> 2%) is good
-            # SELL -> Negative return (price dropped > 2% after sell) is good (saved money)
-            # HOLD -> Neutral
+            # Normalize recommendation (handles legacy STRONG BUY, BUY_LIMIT, HOLD, etc.)
+            intent = normalize_to_intent(recommendation)
             
+            # Determine if the decision was "good"
+            # Enter signals (BUY, BUY_LIMIT, STRONG BUY, etc.) → evaluate ROI
+            # SELL → we recommended not holding; price drop = SAVED, price rise = MISSED
+            # AVOID/HOLD/WATCH → no position, NEUTRAL or AVOIDED
             outcome = "NEUTRAL"
-            if recommendation == "BUY":
+            if intent in ("ENTER_NOW", "ENTER_LIMIT"):
                 if performance_percent > 2.0:
                     outcome = "PROFIT"
                 elif performance_percent < -2.0:
                     outcome = "LOSS"
-            elif recommendation == "SELL":
-                if performance_percent < -2.0:
-                    outcome = "SAVED" # Price went down significantly after sell
-                elif performance_percent > 2.0:
-                    outcome = "MISSED" # Price went up significantly after sell
+                else:
+                    outcome = "NEUTRAL"
+            elif intent == "AVOID":
+                if "SELL" in (recommendation or "").upper():
+                    if performance_percent < -2.0:
+                        outcome = "SAVED"  # Price went down after sell
+                    elif performance_percent > 2.0:
+                        outcome = "MISSED"  # Price went up after sell
+                else:
+                    outcome = "AVOIDED"  # We didn't buy; no P&L
+            # NEUTRAL: HOLD, WATCH — no position
             
             results.append({
                 "id": decision['id'],
                 "symbol": symbol,
                 "timestamp": timestamp,
                 "recommendation": recommendation,
+                "intent": intent,
                 "start_price": start_price,
                 "current_price": current_price,
                 "performance_percent": performance_percent,
