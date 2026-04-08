@@ -66,7 +66,7 @@ def fetch_yfinance_data(symbols, indices_tickers=['^GSPC', '^DJI', '^GDAXI']):
     # Download data
     # Suppress YFinance noise
     with suppress_output():
-        data = yf.download(all_tickers, period="1mo", interval="1d", progress=False)['Close']
+        data = yf.download(all_tickers, period="3mo", interval="1d", progress=False)['Close']
     
     # If single ticker result, it's a Series, convert to DF
     if isinstance(data, pd.Series):
@@ -158,63 +158,88 @@ def generate_report():
         date_str = row['date_str']
         symbol = row['symbol']
         resolved_ticker = symbol_map.get(symbol, symbol)
-        
-        # Calculate Target Date (+1W)
+
+        # Calculate Target Dates
         start_date = row['date_obj']
-        end_date = start_date + timedelta(days=7)
-        end_date_str = end_date.strftime('%Y-%m-%d')
-        
+        end_date_1w = start_date + timedelta(days=7)
+        end_date_2w = start_date + timedelta(days=14)
+        end_date_4w = start_date + timedelta(days=28)
+
         # Prices
         price_dec = row['price_at_decision']
-        
-        # Price +1W (from YF)
-        price_1w = get_price_on_date(price_data, resolved_ticker, end_date_str)
-        
-        # If today is < 1W from decision, Price +1W is "-"
-        if datetime.now() < end_date:
-            price_1w_disp = "-"
-            perf_disp = "-"
-            status = "Pending (<1w)"
+        now = datetime.now()
+
+        # --- 1W ---
+        price_1w = get_price_on_date(price_data, resolved_ticker, end_date_1w.strftime('%Y-%m-%d'))
+        if now < end_date_1w:
+            price_1w_disp, perf_1w_disp = "-", "-"
         else:
             price_1w_disp = f"{price_1w:.2f}" if price_1w is not None else "-"
-            
-            # Performance
-            change = calculate_change(price_dec, price_1w)
-            perf_disp = f"{change*100:+.2f}%" if change is not None else "-"
-            
-            # Status
-            status = "Completed" if price_1w is not None else "Data Missing"
-            
-        # Benchmark Performance (+1W)
+            change_1w = calculate_change(price_dec, price_1w)
+            perf_1w_disp = f"{change_1w*100:+.2f}%" if change_1w is not None else "-"
+
+        # --- 2W ---
+        price_2w = get_price_on_date(price_data, resolved_ticker, end_date_2w.strftime('%Y-%m-%d'))
+        if now < end_date_2w:
+            price_2w_disp, perf_2w_disp = "-", "-"
+        else:
+            price_2w_disp = f"{price_2w:.2f}" if price_2w is not None else "-"
+            change_2w = calculate_change(price_dec, price_2w)
+            perf_2w_disp = f"{change_2w*100:+.2f}%" if change_2w is not None else "-"
+
+        # --- 4W ---
+        price_4w = get_price_on_date(price_data, resolved_ticker, end_date_4w.strftime('%Y-%m-%d'))
+        if now < end_date_4w:
+            price_4w_disp, perf_4w_disp = "-", "-"
+        else:
+            price_4w_disp = f"{price_4w:.2f}" if price_4w is not None else "-"
+            change_4w = calculate_change(price_dec, price_4w)
+            perf_4w_disp = f"{change_4w*100:+.2f}%" if change_4w is not None else "-"
+
+        # Status (based on longest horizon)
+        if now < end_date_1w:
+            status = "Pending (<1w)"
+        elif now < end_date_2w:
+            status = "Partial (1w)"
+        elif now < end_date_4w:
+            status = "Partial (2w)"
+        else:
+            status = "Completed" if price_4w is not None else "Data Missing"
+
+        # Benchmark Performance (+1W only, for brevity)
         bench_res = {}
         for name, ticker in indices.items():
             start_p = get_price_on_date(price_data, ticker, date_str)
-            end_p = get_price_on_date(price_data, ticker, end_date_str)
+            end_p = get_price_on_date(price_data, ticker, end_date_1w.strftime('%Y-%m-%d'))
             chg = calculate_change(start_p, end_p)
-            bench_res[name] = f"{chg*100:+.2f}%" if chg is not None else "+0.00%" # Default 0 if incomplete
+            bench_res[name] = f"{chg*100:+.2f}%" if chg is not None else "+0.00%"
 
         # Verdict / Rec
         verdict = row['deep_research_verdict'] if row['deep_research_verdict'] else "-"
         rec = row['recommendation'] if row['recommendation'] else "-"
-        
+
         if verdict == 'UNKNOWN' or verdict == 'ERROR_PARSING':
              verdict = "ERROR_PARSING"
-        
+
         # Batch
         batch = "Compared" if (row['batch_id'] and row['batch_id'] > 0) else "-"
         if row['batch_winner']:
             batch = "🏆 WINNER"
-            
+
         # Construct Row
         r = {
             "Date": date_str,
             "Symbol": symbol,
-            "Market": row['region'], # or clean up
+            "Market": row['region'],
             "Score": int(row['ai_score']) if pd.notna(row['ai_score']) else 0,
             "Rec": rec,
             "Price @ Dec": f"{price_dec:.2f}" if price_dec and pd.notna(price_dec) else "0.00",
             "Price +1W": price_1w_disp,
-            "Performance": perf_disp,
+            "Perf 1W": perf_1w_disp,
+            "Price +2W": price_2w_disp,
+            "Perf 2W": perf_2w_disp,
+            "Price +4W": price_4w_disp,
+            "Perf 4W": perf_4w_disp,
             "SP500 1W": bench_res['SP500'],
             "Dow 1W": bench_res['Dow'],
             "DAX 1W": bench_res['DAX'],

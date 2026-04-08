@@ -332,11 +332,9 @@ class StockService:
         
         # --- GATEKEEPER PHASE 1: Global Market Regime ---
         regime_info = gatekeeper_service.check_market_regime()
-        # print(f"Market Regime: {regime_info['regime']} ({regime_info['details']})") # Suppress global noise
-        
+        # NOTE: Bear regime no longer halts screening — we always check for strong dips.
         if regime_info['regime'] == 'BEAR':
-            print("GATEKEEPER: Market is in BEAR regime. Halting long-biased dip buying.")
-            return
+            print("GATEKEEPER: Market is in BEAR regime. Continuing screening (bear halt disabled).")
 
         # 1. Fetch Market Context
         market_context = self._fetch_market_context()
@@ -369,7 +367,9 @@ class StockService:
         print(f"Already processed symbols today: {processed_symbols}")
 
         # 3. Fetch Large Cap Movers (passing processed symbols for logging)
+        print("--- SCREENER: Fetching stocks from TradingView across all markets ---")
         large_cap_movers = self.get_large_cap_movers(processed_symbols)
+        print(f"--- SCREENER: {len(large_cap_movers)} total stocks returned from screener ---")
 
         # Save found list to CSV with timestamp
         try:
@@ -451,13 +451,21 @@ class StockService:
                     unique_stocks[sym] = s
         
         large_cap_movers = list(unique_stocks.values())
+        print(f"--- SCREENER: {len(large_cap_movers)} unique stocks after deduplication ---")
 
         # First sort by symbol alphabetic
         large_cap_movers.sort(key=lambda x: x["symbol"])
-        
+
         # Then sort by priority score descending
         large_cap_movers.sort(key=get_priority_score, reverse=True)
-        
+
+        # Count candidates that qualify for processing (>= 5% drop, not already processed)
+        qualifying_count = sum(
+            1 for s in large_cap_movers
+            if s["change_percent"] <= -5.0 and (s["symbol"], today_str) not in self.sent_notifications
+        )
+        print(f"--- SCREENER: {qualifying_count} stocks qualify for processing (>= 5% drop, not yet processed) ---")
+
         print("Processing Queue (Top 5):")
         for s in large_cap_movers[:5]:
             p_score = get_priority_score(s)
