@@ -371,6 +371,21 @@ class StockService:
         # 3. Fetch Large Cap Movers (passing processed symbols for logging)
         large_cap_movers = self.get_large_cap_movers(processed_symbols)
 
+        # Print screener overview
+        print("=" * 50)
+        print(f"  Screener Results: {len(large_cap_movers)} stocks pulled from markets")
+        print("=" * 50)
+        if large_cap_movers:
+            print(f"  {'Symbol':<10} {'Price':>10} {'Drop %':>10}    {'Exchange'}")
+            print(f"  {'─' * 45}")
+            for s in large_cap_movers:
+                symbol = s.get("symbol", "?")
+                price = s.get("price", 0)
+                change = s.get("change_percent", 0)
+                exchange = s.get("exchange", "?")
+                print(f"  {symbol:<10} ${price:>9.2f} {change:>9.2f}%    {exchange}")
+            print("=" * 50)
+
         # Save found list to CSV with timestamp
         try:
             timestamp_str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
