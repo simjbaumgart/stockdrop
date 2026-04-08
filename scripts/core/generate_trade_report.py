@@ -202,6 +202,32 @@ def main():
         if price_at_decision and target_price:
             perf_pct = ((target_price - price_at_decision) / price_at_decision) * 100
             
+        # --- 2W (14-day) horizon ---
+        target_dt_2w = decision_dt + timedelta(days=14)
+        if target_dt_2w > now:
+            price_2w = current_status_price
+            perf_2w_pct = ((price_2w - price_at_decision) / price_at_decision * 100) if price_at_decision and price_2w else 0.0
+            status_2w = "Pending"
+        else:
+            price_2w = get_price_from_history(symbol, target_dt_2w)
+            if price_2w is None:
+                price_2w = current_status_price
+            perf_2w_pct = ((price_2w - price_at_decision) / price_at_decision * 100) if price_at_decision and price_2w else 0.0
+            status_2w = "Done"
+
+        # --- 4W (28-day) horizon ---
+        target_dt_4w = decision_dt + timedelta(days=28)
+        if target_dt_4w > now:
+            price_4w = current_status_price
+            perf_4w_pct = ((price_4w - price_at_decision) / price_at_decision * 100) if price_at_decision and price_4w else 0.0
+            status_4w = "Pending"
+        else:
+            price_4w = get_price_from_history(symbol, target_dt_4w)
+            if price_4w is None:
+                price_4w = current_status_price
+            perf_4w_pct = ((price_4w - price_at_decision) / price_at_decision * 100) if price_at_decision and price_4w else 0.0
+            status_4w = "Done"
+
         # Benchmark Calculations
         bench_data = {}
         for bench_ticker, bench_name in [('^GSPC', 'SP500'), ('^DJI', 'Dow'), ('^GDAXI', 'DAX')]:
@@ -284,6 +310,10 @@ def main():
             "Price @ Dec": f"{price_at_decision:.2f}" if price_at_decision else "-",
             f"Price +{window_days}d": f"{target_price:.2f}" if target_price else "-",
             "Performance": f"{perf_pct:+.2f}%" if price_at_decision and target_price else "-",
+            f"Price +14d": f"{price_2w:.2f}" if price_2w else "-",
+            "Perf 2W": f"{perf_2w_pct:+.2f}%" if price_at_decision and price_2w else "-",
+            f"Price +28d": f"{price_4w:.2f}" if price_4w else "-",
+            "Perf 4W": f"{perf_4w_pct:+.2f}%" if price_at_decision and price_4w else "-",
             "Verdict": deep_research_verdict if deep_research_verdict else "-",
             "Batch": batch_status,
             "Status": status,
@@ -305,7 +335,7 @@ def main():
     LIMIT = 100
     shown_data = report_data[:LIMIT]
     
-    headers = ["Date", "Symbol", "Market", "Rec", "Limit", "Price @ Dec", f"Price +{window_days}d", "Performance", f"SP500 {window_days}d", f"Dow {window_days}d", f"DAX {window_days}d", "Verdict", "Batch", "Status", "Evidence"]
+    headers = ["Date", "Symbol", "Market", "Rec", "Limit", "Price @ Dec", f"Price +{window_days}d", "Performance", "Price +14d", "Perf 2W", "Price +28d", "Perf 4W", f"SP500 {window_days}d", f"Dow {window_days}d", f"DAX {window_days}d", "Verdict", "Batch", "Status", "Evidence"]
     widths = {h: len(h) for h in headers}
     for row in shown_data:
         for h in headers:
