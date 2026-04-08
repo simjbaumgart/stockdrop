@@ -27,7 +27,7 @@ from datetime import datetime
 from app.services.stock_service import stock_service
 from app.services.storage_service import storage_service
 from app.services.email_service import email_service
-from app.database import init_db
+from app.database import init_db, DB_NAME
 
 from app.services.performance_service import performance_service
 
@@ -55,6 +55,86 @@ app.include_router(subscriptions.router, prefix="/api")
 def health_check():
     return {"status": "ok", "version": VERSION}
 
+def _print_recent_decisions(label="Decisions"):
+    """Print recent decision points from DB — today + last scanned day."""
+    import sqlite3
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        # Find today's decisions
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        cursor.execute("""
+            SELECT symbol, recommendation, conviction, risk_reward_ratio,
+                   drop_percent, deep_research_verdict, timestamp
+            FROM decision_points
+            WHERE date(timestamp) = ?
+            ORDER BY timestamp DESC
+        """, (today_str,))
+        today_rows = cursor.fetchall()
+
+        # Find last scanned day (most recent day before today with decisions)
+        cursor.execute("""
+            SELECT DISTINCT date(timestamp) as scan_date
+            FROM decision_points
+            WHERE date(timestamp) < ?
+            ORDER BY scan_date DESC
+            LIMIT 1
+        """, (today_str,))
+        last_day_row = cursor.fetchone()
+        last_day_rows = []
+        last_scan_date = None
+
+        if last_day_row:
+            last_scan_date = last_day_row['scan_date']
+            cursor.execute("""
+                SELECT symbol, recommendation, conviction, risk_reward_ratio,
+                       drop_percent, deep_research_verdict, timestamp
+                FROM decision_points
+                WHERE date(timestamp) = ?
+                ORDER BY timestamp DESC
+            """, (last_scan_date,))
+            last_day_rows = cursor.fetchall()
+
+        # Print header
+        def _print_table(rows, header):
+            if not rows:
+                return
+            print(f"\n  [{header}] ({len(rows)} decisions)")
+            print(f"  {'Symbol':<8} {'Rec':<12} {'Conv':<10} {'R/R':<6} {'Drop%':<8} {'DR Verdict':<12} {'Time'}")
+            print(f"  {'-'*8} {'-'*12} {'-'*10} {'-'*6} {'-'*8} {'-'*12} {'-'*19}")
+            for r in rows:
+                symbol = r['symbol'] or ''
+                rec = r['recommendation'] or ''
+                conv = r['conviction'] or '-'
+                rr = f"{r['risk_reward_ratio']:.1f}" if r['risk_reward_ratio'] else '-'
+                drop = f"{r['drop_percent']:.1f}%" if r['drop_percent'] else '-'
+                verdict = r['deep_research_verdict'] or '-'
+                ts = r['timestamp'] or ''
+                print(f"  {symbol:<8} {rec:<12} {conv:<10} {rr:<6} {drop:<8} {verdict:<12} {ts}")
+
+        print(f"\n[{label}] {datetime.now().strftime('%H:%M:%S')}")
+
+        if today_rows:
+            _print_table(today_rows, f"Today ({today_str})")
+        else:
+            print(f"  No decisions today ({today_str}).")
+
+        if last_day_rows:
+            _print_table(last_day_rows, f"Last scan ({last_scan_date})")
+        elif not today_rows:
+            # No decisions anywhere recent — show overall stats
+            cursor.execute("SELECT MAX(timestamp) as last_ts, COUNT(*) as total FROM decision_points")
+            info = cursor.fetchone()
+            last_ts = info['last_ts'] if info else 'never'
+            total = info['total'] if info else 0
+            print(f"  Last activity: {last_ts} ({total} total in DB)")
+
+        conn.close()
+    except Exception as e:
+        print(f"[{label}] Could not read decisions: {e}")
+
 @app.on_event("startup")
 async def startup_event():
     print(f"\n{'='*50}")
@@ -62,7 +142,9 @@ async def startup_event():
     print(f"  Started at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"{'='*50}\n")
     init_db()
+    _print_recent_decisions(label="Startup")
     asyncio.create_task(run_periodic_check())
+    asyncio.create_task(run_decision_log())
     asyncio.create_task(run_storage_upload())
     asyncio.create_task(run_daily_summary())
     asyncio.create_task(run_performance_tracking())
@@ -88,11 +170,32 @@ async def run_periodic_check():
                 minutes_remaining = int(time_remaining.total_seconds() / 60)
                 # Handle potential negative remaining if we slightly overshot or logic drift, default to 0
                 minutes_remaining = max(0, minutes_remaining)
-                print(f"[Scheduler] Next Stock Drop Check in {minutes_remaining} minutes... ({next_check.strftime('%H:%M:%S')})")
+                # Heartbeat: show index status between scans so console stays active
+                try:
+                    indices = await asyncio.to_thread(stock_service.get_indices)
+                    sp500 = indices.get("S&P 500", {})
+                    stoxx = indices.get("STOXX 600", {})
+                    sp_price = sp500.get("price", "N/A")
+                    sp_chg = sp500.get("change_percent", 0)
+                    stoxx_price = stoxx.get("price", "N/A")
+                    stoxx_chg = stoxx.get("change_percent", 0)
+                    print(f"[Heartbeat] {datetime.now().strftime('%H:%M:%S')} | S&P 500: {sp_price} ({sp_chg:+.2f}%) | STOXX 600: {stoxx_price} ({stoxx_chg:+.2f}%) | Next scan in {minutes_remaining}m")
+                except Exception:
+                    print(f"[Heartbeat] {datetime.now().strftime('%H:%M:%S')} | Next scan in {minutes_remaining}m")
         except Exception as e:
             print(f"Error in periodic check: {e}")
         
         await asyncio.sleep(log_interval)
+
+async def run_decision_log():
+    """Print DB decisions table every 10 minutes for operator visibility."""
+    await asyncio.sleep(600)  # First print after 10 minutes (startup already printed)
+    while True:
+        try:
+            _print_recent_decisions(label="Decisions")
+        except Exception as e:
+            print(f"[Decisions] Error: {e}")
+        await asyncio.sleep(600)  # Every 10 minutes
 
 async def run_trade_report_update():
     """

@@ -219,7 +219,10 @@ class TradingViewService:
         ]
         
         all_movers = []
-        
+
+        regions_list = ", ".join([c['region'] for c in market_configs])
+        print(f"[Scanner] Scanning {len(market_configs)} regions: {regions_list}")
+
         # We can run these in parallel
         with concurrent.futures.ThreadPoolExecutor() as executor:
             future_to_config = {

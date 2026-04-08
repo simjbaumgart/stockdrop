@@ -88,6 +88,7 @@ class ResearchService:
         # Define wrapper for safe execution and result collection
         def run_agent(name, func, *args):
             try:
+                print(f"    - Starting {name}...")
                 return name, func(*args)
             except Exception as e:
                 logger.error(f"Error in {name}: {e}")
@@ -142,6 +143,68 @@ class ResearchService:
         agent_status = " ".join([f"[{name}✓]" for name in completed_agents])
         print(f"  > Agents: {agent_status}")
 
+        # --- Agent Key Information ---
+        # Technical Agent: extract key indicators
+        try:
+            tech_lines = tech_report.split('\n')
+            tech_summary_parts = []
+            for line in tech_lines:
+                l = line.strip().upper()
+                if 'RSI' in l and any(c.isdigit() for c in l):
+                    # Extract RSI value
+                    import re
+                    rsi_match = re.search(r'RSI[:\s]*(\d+\.?\d*)', line, re.IGNORECASE)
+                    if rsi_match:
+                        rsi_val = float(rsi_match.group(1))
+                        rsi_label = "oversold" if rsi_val < 30 else "overbought" if rsi_val > 70 else "neutral"
+                        tech_summary_parts.append(f"RSI: {rsi_val:.1f} ({rsi_label})")
+                        break
+            if 'BEARISH' in tech_report.upper():
+                tech_summary_parts.append("Trend: Bearish")
+            elif 'BULLISH' in tech_report.upper():
+                tech_summary_parts.append("Trend: Bullish")
+            if tech_summary_parts:
+                print(f"    [Technical Agent] {' | '.join(tech_summary_parts)}")
+        except Exception:
+            pass
+
+        # News Agent: top 3 headlines from raw news data
+        try:
+            news_items = raw_data.get("news_items", [])
+            if news_items:
+                print(f"    [News Agent] Top Headlines:")
+                for item in news_items[:3]:
+                    headline = item.get('headline', 'No title')[:80]
+                    source_type = item.get('source_type', 'WIRE')
+                    print(f"      - \"{headline}\" ({source_type})")
+        except Exception:
+            pass
+
+        # Seeking Alpha: data volume + top analysis headlines
+        try:
+            sa_counts = seeking_alpha_service.get_counts(state.ticker)
+            sa_total = sa_counts.get('total', 0)
+            if sa_total > 0:
+                print(f"    [Seeking Alpha Summary]")
+                print(f"      > Data Volume: {sa_total} items (Analysis: {sa_counts.get('analysis', 0)}, News: {sa_counts.get('news', 0)}, PR: {sa_counts.get('pr', 0)})")
+                # Extract top analysis headlines
+                sa_lines = sa_report.split('\n')
+                sa_headlines = []
+                capture = False
+                for line in sa_lines:
+                    if "## ANALYST SENTIMENT" in line:
+                        capture = True
+                    elif "## BREAKING NEWS" in line:
+                        capture = False
+                    if capture and line.startswith("### "):
+                        sa_headlines.append(line.replace("### ", "").strip())
+                if sa_headlines:
+                    print(f"      > Top Analysis:")
+                    for h in sa_headlines[:3]:
+                        print(f"       - {h}")
+        except Exception:
+            pass
+
         # Print data depth summary
         try:
             news_items = raw_data.get("news_items", [])
@@ -159,6 +222,7 @@ class ResearchService:
             logger.debug(f"Error printing data depth: {e}")
 
         # Print Competitive Summary to Console (Post-Execution)
+        print(f"\n  > [Competitive Landscape Agent] Analysis Complete.")
         try:
             # Flexible matching for the header (handling potential markdown formatting like ##)
             if "Summary & Key Points" in comp_report:
@@ -368,7 +432,7 @@ class ResearchService:
 
         def run_agent(name, func, *args):
             try:
-                # print(f"    - Starting {name}...")
+                print(f"    - Starting {name}...")
                 return name, func(*args)
             except Exception as e:
                 logger.error(f"Error in {name}: {e}")
@@ -394,6 +458,24 @@ class ResearchService:
                     risk_report = result
 
         print(f"  > Phase 2: {' '.join([f'[{n}✓]' for n in phase2_completed])}")
+
+        # Print risk flags from Risk Management Agent
+        try:
+            risk_concerns = []
+            if "OVERBOUGHT" in risk_report.upper():
+                risk_concerns.append("Overbought")
+            if "DIVERGENCE" in risk_report.upper():
+                risk_concerns.append("Bearish Divergence")
+            if "WEAK" in risk_report.upper() and "TREND" in risk_report.upper():
+                risk_concerns.append("Weak Trend")
+            if "LIQUIDITY" in risk_report.upper() and ("LOW" in risk_report.upper() or "THIN" in risk_report.upper()):
+                risk_concerns.append("Low Liquidity")
+            if risk_concerns:
+                print(f"    [Risk] Concerns: {', '.join(risk_concerns)}")
+            else:
+                print(f"    [Risk] No major concerns flagged")
+        except Exception:
+            pass
 
         state.reports['bull'] = bull_report
         state.reports['bear'] = bear_report

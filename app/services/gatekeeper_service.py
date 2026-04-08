@@ -89,8 +89,10 @@ class GatekeeperService:
             if curr_pct_b < 0.50:
                 is_valid = True
                 reasons['bb_status'] = f"%B ({curr_pct_b:.2f}) < 0.50 (Dip)"
+                print(f"  [Gatekeeper] {symbol}: BB %B = {curr_pct_b:.2f} (< 0.50) -> PASS")
             else:
                 reasons['bb_status'] = f"%B ({curr_pct_b:.2f}) >= 0.50 (Not Dip Enough)"
+                print(f"  [Gatekeeper] {symbol}: BB %B = {curr_pct_b:.2f} (>= 0.50) -> REJECTED")
 
             # --- Filter: Volume Anomaly (Optional) ---
             # We don't have Avg Volume easily from TA.

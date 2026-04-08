@@ -326,17 +326,22 @@ class StockService:
         Checks for large cap stocks that have dropped more than 6% (normalized)
         and sends an email notification if not already sent today.
         """
+        import time as _time
+        _cycle_start = _time.time()
+        _stocks_found = 0
+        _stocks_processed = 0
+        _stocks_analyzed = 0
+        _stocks_filtered = 0
         print("Checking for large cap drops...")
         # self.deep_research_candidates = [] # Removed batch queue
         potential_batch_candidates = [] # For Deep Research Comparison
         
         # --- GATEKEEPER PHASE 1: Global Market Regime ---
         regime_info = gatekeeper_service.check_market_regime()
-        # print(f"Market Regime: {regime_info['regime']} ({regime_info['details']})") # Suppress global noise
-        
+        print(f"[Gatekeeper] Market Regime: {regime_info['regime']} ({regime_info['details']})")
+
         if regime_info['regime'] == 'BEAR':
-            print("GATEKEEPER: Market is in BEAR regime. Halting long-biased dip buying.")
-            return
+            print(f"[Gatekeeper] BEAR regime — scanning continues (regime is informational, not blocking)")
 
         # 1. Fetch Market Context
         market_context = self._fetch_market_context()
@@ -370,6 +375,7 @@ class StockService:
 
         # 3. Fetch Large Cap Movers (passing processed symbols for logging)
         large_cap_movers = self.get_large_cap_movers(processed_symbols)
+        _stocks_found = len(large_cap_movers)
 
         # Save found list to CSV with timestamp
         try:
@@ -486,6 +492,7 @@ class StockService:
                          
                     exchange = stock.get("exchange")
                     
+                    _stocks_processed += 1
                     print(f"Processing candidate {symbol} ({company_name}) [{change_percent:.2f}%]")
                     
                     # --- Active Trading Check ---
@@ -516,6 +523,7 @@ class StockService:
                     )
                     
                     if not is_valid:
+                        _stocks_filtered += 1
                         print(f"GATEKEEPER: {symbol} REJECTED.")
                         
                         # Primary Reason
@@ -535,8 +543,9 @@ class StockService:
                         # Optionally log this rejection to DB or file?
                         continue
                         
+                    _stocks_analyzed += 1
                     print(f"GATEKEEPER: {symbol} APPROVED. Reasons: {reasons}")
-                    
+
                     print(f"Triggering notification for {symbol} ({change_percent:.2f}%)")
                     
                     # Fetch Technical Analysis (MOVED UP)
@@ -601,7 +610,10 @@ class StockService:
                 )
                 
 
-        print(f"[{datetime.now().strftime('%H:%M:%S')}] Cycle completed. Large cap drops check finished.")
+        _cycle_duration = _time.time() - _cycle_start
+        _mins = int(_cycle_duration // 60)
+        _secs = int(_cycle_duration % 60)
+        print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Cycle completed. Found {_stocks_found} | Processed {_stocks_processed} | Filtered {_stocks_filtered} | Analyzed {_stocks_analyzed} | Duration: {_mins}m {_secs}s")
         
         # --- DEEP RESEARCH BACKFILL (User Requested) ---
         # Run backfill for any high-scoring stocks from today that are missing a verdict
@@ -805,6 +817,8 @@ class StockService:
         """
         # 1. Faster Check: Use volume from Screener if available
         if volume > 50000:
+            vol_str = f"{volume/1_000_000:.1f}M" if volume >= 1_000_000 else f"{volume/1_000:.0f}K"
+            print(f"  > {symbol}: Actively traded (Volume: {vol_str})")
             return True
 
         # 2. Fallback: Check yfinance (historical volume)
@@ -831,7 +845,9 @@ class StockService:
             if avg_vol < 50000:
                 print(f"  > [Active Check] {yf_symbol} Volume Low ({int(avg_vol)} < 50k). Skipping.")
                 return False
-                
+
+            vol_str = f"{avg_vol/1_000_000:.1f}M" if avg_vol >= 1_000_000 else f"{avg_vol/1_000:.0f}K"
+            print(f"  > {symbol}: Actively traded (Avg Volume: {vol_str})")
             return True
         except Exception as e:
             print(f"  > [Active Check] Error checking {symbol}: {e}. Skipping to be safe.")
