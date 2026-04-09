@@ -611,20 +611,19 @@ class StockService:
         """
         Trigger deep research for buy decisions:
         - BUY: always trigger (any conviction, any R/R)
-        - BUY_LIMIT: only trigger when conviction is HIGH and R/R > 1.5
+        - BUY_LIMIT: trigger when R/R > 1.25 (any conviction)
         """
         action = report_data.get("recommendation", "AVOID").upper()
-        conviction = report_data.get("conviction", "LOW").upper()
         risk_reward = report_data.get("risk_reward_ratio", 0)
 
         # BUY: always trigger
         if action == "BUY":
             return True
 
-        # BUY_LIMIT: only high-conviction with favorable R/R
+        # BUY_LIMIT: trigger when risk/reward ratio exceeds 1.25
         if action == "BUY_LIMIT":
             try:
-                if conviction == "HIGH" and float(risk_reward) > 1.5:
+                if float(risk_reward) > 1.25:
                     return True
             except (TypeError, ValueError):
                 return False
