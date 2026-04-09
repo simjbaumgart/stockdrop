@@ -17,7 +17,7 @@ def fetch_data():
     conn = get_db_connection()
     query = """
     SELECT 
-        id, timestamp, symbol, region, ai_score, recommendation, 
+        id, timestamp, symbol, region, recommendation,
         price_at_decision, deep_research_verdict, batch_id, deep_research_score, batch_winner
     FROM decision_points
     WHERE timestamp >= date('now', '-30 days') -- Optimization: Last 30 days
@@ -114,14 +114,12 @@ def generate_report():
     
     # 2. De-duplication
     # Strategy: Group by Symbol + date_str.
-    # Prioritize: 
-    #   1. deep_research_verdict is NOT NULL and NOT ''
-    #   2. Higher ai_score
-    
+    # Prioritize: rows with deep_research_verdict present
+
     def rank_row(row):
-        score = row['ai_score'] if row['ai_score'] else 0
         has_deep = 1 if row['deep_research_verdict'] and row['deep_research_verdict'] not in ['-', '', 'PENDING', None] else 0
-        return (has_deep, score)
+        deep_score = row['deep_research_score'] if row['deep_research_score'] else 0
+        return (has_deep, deep_score)
 
     df['rank'] = df.apply(rank_row, axis=1)
     df = df.sort_values(by=['symbol', 'date_str', 'rank'], ascending=[True, True, False])
@@ -231,7 +229,6 @@ def generate_report():
             "Date": date_str,
             "Symbol": symbol,
             "Market": row['region'],
-            "Score": int(row['ai_score']) if pd.notna(row['ai_score']) else 0,
             "Rec": rec,
             "Price @ Dec": f"{price_dec:.2f}" if price_dec and pd.notna(price_dec) else "0.00",
             "Price +1W": price_1w_disp,

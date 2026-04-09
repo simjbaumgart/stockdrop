@@ -174,7 +174,6 @@ def main():
             
         price_at_decision = d.get('price_at_decision')
         recommendation = d.get('recommendation')
-        score = d.get('ai_score')
         region = d.get('region') # Get the region/market
         
         target_dt = decision_dt + timedelta(days=window_days)

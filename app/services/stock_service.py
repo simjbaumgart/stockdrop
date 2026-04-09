@@ -1574,7 +1574,6 @@ class StockService:
         report_data = research_service.analyze_stock(symbol, raw_data)
         
         recommendation = report_data.get("recommendation", "HOLD")
-        score = report_data.get("score", "N/A")
         
         # --- EVIDENCE CHECKLIST ---
         checklist = report_data.get("checklist", {})
@@ -1593,7 +1592,7 @@ class StockService:
         print(f"  - FED Report Considered: {fed_considered}")
         print(f"{'='*40}\n")
         
-        print(f"*** DECISION FOR {symbol}: {recommendation} (Score: {score}/100) ***")
+        print(f"*** DECISION FOR {symbol}: {recommendation} ***")
         print(f"{'='*40}\n")
         
         print(f"--- NEWS AGENT SUMMARY for {symbol} ---")
@@ -1628,7 +1627,6 @@ class StockService:
                 recommendation, 
                 reasoning, 
                 status, 
-                ai_score=float(score) if isinstance(score, (int, float)) else None,
                 data_depth=data_depth_str,
                 # PM trading-level fields (v0.9)
                 conviction=report_data.get("conviction"),
@@ -1690,7 +1688,6 @@ class StockService:
             "change_percent": change_percent,
             "recommendation": recommendation,
             "reasoning": reasoning,
-            "ai_score": float(score) if isinstance(score, (int, float, str)) and str(score).replace('.', '', 1).isdigit() else 0,
             "pe_ratio": stock.get("pe_ratio", 0.0),
             "market_cap": stock.get("market_cap", 0.0),
             "sector": stock.get("sector", self.stock_metadata.get(symbol, {}).get("sector", "Unknown")),

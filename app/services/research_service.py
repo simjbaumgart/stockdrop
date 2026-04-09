@@ -309,7 +309,6 @@ class ResearchService:
 
         return {
             "recommendation": recommendation,
-            "score": final_decision.get("score", 50),  # Legacy — no longer in prompt, kept for backward compat
             "executive_summary": final_decision.get("reason", "No reason provided."),
             "deep_reasoning_report": deep_reasoning_report,
             "detailed_report": self._format_full_report(state, deep_reasoning_report, evidence_barometer=data_depth),
@@ -1451,7 +1450,6 @@ Date: {state.date}
 {deep_section}
 ## 1. Risk Council & Decision
 **Action:** {state.final_decision.get('action')}
-**Score:** {state.final_decision.get('score')}/100
 **Reasoning:** {state.final_decision.get('reason')}
 
 ## 2. The Debate

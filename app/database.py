@@ -225,15 +225,15 @@ def get_all_subscribers() -> List[str]:
 
 def add_decision_point(symbol: str, price: float, drop_percent: float, recommendation: str, reasoning: str, status: str = "Ignored", 
                       company_name: str = None, pe_ratio: float = None, market_cap: float = None, sector: str = None, region: str = None,
-                      is_earnings_drop: bool = False, earnings_date: str = None, ai_score: float = None, git_version: str = None) -> int:
+                      is_earnings_drop: bool = False, earnings_date: str = None, git_version: str = None) -> int:
     """Add a new decision point."""
     try:
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO decision_points (symbol, price_at_decision, drop_percent, recommendation, reasoning, status, company_name, pe_ratio, market_cap, sector, region, is_earnings_drop, earnings_date, ai_score, git_version)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (symbol, price, drop_percent, recommendation, reasoning, status, company_name, pe_ratio, market_cap, sector, region, is_earnings_drop, earnings_date, ai_score, git_version))
+            INSERT INTO decision_points (symbol, price_at_decision, drop_percent, recommendation, reasoning, status, company_name, pe_ratio, market_cap, sector, region, is_earnings_drop, earnings_date, git_version)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (symbol, price, drop_percent, recommendation, reasoning, status, company_name, pe_ratio, market_cap, sector, region, is_earnings_drop, earnings_date, git_version))
         conn.commit()
         last_id = cursor.lastrowid
         conn.close()
@@ -242,7 +242,7 @@ def add_decision_point(symbol: str, price: float, drop_percent: float, recommend
         print(f"Error adding decision point: {e}")
         return None
 
-def update_decision_point(decision_id: int, recommendation: str, reasoning: str, status: str, ai_score: float = None, data_depth: str = None, **kwargs) -> bool:
+def update_decision_point(decision_id: int, recommendation: str, reasoning: str, status: str, data_depth: str = None, **kwargs) -> bool:
     """Update an existing decision point."""
     try:
         conn = sqlite3.connect(DB_NAME)
@@ -252,10 +252,6 @@ def update_decision_point(decision_id: int, recommendation: str, reasoning: str,
         query = "UPDATE decision_points SET recommendation = ?, reasoning = ?, status = ?"
         params = [recommendation, reasoning, status]
         
-        if ai_score is not None:
-            query += ", ai_score = ?"
-            params.append(ai_score)
-            
         if data_depth is not None:
             query += ", data_depth = ?"
             params.append(data_depth)
