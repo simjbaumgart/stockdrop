@@ -42,6 +42,9 @@ class SeekingAlphaService:
             # logger.info(f"Calling Seeking Alpha API: {endpoint}")
             response = requests.get(url, headers=headers, params=params)
             response.raise_for_status()
+            if not response.text.strip():
+                logger.warning(f"Empty response from {endpoint}")
+                return None
             return response.json()
         except Exception as e:
             logger.error(f"Error calling {endpoint}: {e}")
