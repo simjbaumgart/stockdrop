@@ -164,11 +164,10 @@ def test_T5_backward_compat_update():
         symbol="TEST_T5", price=200.0, drop_percent=-3.0,
         recommendation="PENDING", reasoning="...", status="Pending"
     )
-    result = update_decision_point(did, "AVOID", "Bear dominates", "Not Owned", ai_score=42.0)
+    result = update_decision_point(did, "AVOID", "Bear dominates", "Not Owned")
     _assert(result is True, "update_decision_point returned False")
     dp = get_decision_point(did)
     _assert(dp["recommendation"] == "AVOID", f"recommendation mismatch: {dp['recommendation']}")
-    _assert(abs(dp["ai_score"] - 42.0) < 0.01, f"ai_score mismatch: {dp['ai_score']}")
     # New fields should all be NULL
     _assert(dp["conviction"] is None, "conviction should be NULL for old-style update")
 
@@ -219,7 +218,6 @@ def test_T8_backfill_query():
         add_decision_point(
             symbol=f"T8_{rec}", price=100.0, drop_percent=-5.0,
             recommendation=rec, reasoning="test", status="Pending",
-            ai_score=30.0  # Low score — should NOT matter anymore
         )
 
     # Run the exact backfill query from stock_service.py
@@ -412,7 +410,6 @@ def test_T12_persist_and_retrieve_full_flow():
 
     update_decision_point(
         did, "BUY", "Strong recovery potential", "Owned",
-        ai_score=None,
         conviction=report_data["conviction"],
         drop_type=report_data["drop_type"],
         entry_price_low=report_data["entry_price_low"],
