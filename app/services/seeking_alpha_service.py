@@ -28,6 +28,45 @@ class SeekingAlphaService:
         if not self.rapidapi_key:
             logger.warning("RAPIDAPI_KEY_SEEKING_ALPHA not found. Dynamic fetching disabled.")
 
+        self.wsb_cache_dir = "data/wall_street_breakfast"
+
+    def _get_or_fetch_wsb(self) -> List[Dict]:
+        """
+        Returns raw WSB data, fetching from API at most once per day.
+        Checks for data/wall_street_breakfast/raw_YYYY-MM-DD.json first.
+        """
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        cache_file = os.path.join(self.wsb_cache_dir, f"raw_{today_str}.json")
+
+        # 1. Try daily cache
+        if os.path.exists(cache_file):
+            try:
+                with open(cache_file, "r") as f:
+                    items = json.load(f)
+                if items:
+                    return items
+            except Exception as e:
+                logger.error(f"Error reading raw WSB cache: {e}")
+
+        # 2. Fetch from API (once per day)
+        if not self.rapidapi_key:
+            return []
+
+        logger.info("Fetching WSB from API (daily)...")
+        items = self.fetch_wall_street_breakfast()
+
+        # 3. Save raw cache (only if we got data)
+        if items:
+            try:
+                os.makedirs(self.wsb_cache_dir, exist_ok=True)
+                with open(cache_file, "w") as f:
+                    json.dump(items, f, indent=2)
+                print(f"  > [Seeking Alpha Service] Cached raw WSB to {cache_file}")
+            except Exception as e:
+                logger.error(f"Error saving raw WSB cache: {e}")
+
+        return items
+
     def _call_endpoint(self, endpoint: str, params: Optional[Dict] = None) -> Any:
         """Helper to call RapidAPI endpoint."""
         if not self.rapidapi_key:
