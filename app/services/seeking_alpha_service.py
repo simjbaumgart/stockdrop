@@ -258,14 +258,8 @@ class SeekingAlphaService:
                     if not data.get("wall_street_breakfast"): # If both missing
                          return msg
 
-            # 3. Check WSB (Fetcher)
-            wsb_items = data.get("wall_street_breakfast", [])
-            if not wsb_items and self.rapidapi_key:
-                 logger.info("WSB data missing. Fetching...")
-                 wsb_items = self.fetch_wall_street_breakfast()
-                 if wsb_items:
-                     self._save_fetched_data(None, wsb_items, type="wsb")
-                     # No need to reload full context, just use local var
+            # 3. Get WSB via daily cache (fetches from API at most once/day)
+            wsb_items = self._get_or_fetch_wsb()
             
             if not stock_data:
                  stock_msg = f"Seeking Alpha Data: No specific data found for ticker {ticker}"
@@ -432,16 +426,13 @@ class SeekingAlphaService:
             news_count = len(stock_data.get("news", []))
             pr_count = len(stock_data.get("press_releases", []))
             
-            # WSB is global, so it technically exists for all, but let's count it
-            wsb_items = data.get("wall_street_breakfast", [])
+            # WSB via daily cache (fetches from API at most once/day)
+            wsb_items = self._get_or_fetch_wsb()
             wsb_count = len(wsb_items)
             wsb_date = "N/A"
             if wsb_items:
-                # Try to get date from first item
                 raw_date = wsb_items[0].get("publishOn", "")
                 if raw_date:
-                    # Keep it simple or format it. Raw is usually ISO-like or date string.
-                    # Just taking the date part if possible (YYYY-MM-DD)
                     wsb_date = raw_date.split("T")[0]
             
             # Total specific to the company

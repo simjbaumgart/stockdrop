@@ -92,5 +92,74 @@ class TestWSBDailyCache(unittest.TestCase):
             self.assertFalse(os.path.exists(cache_dir))
 
 
+    def test_get_evidence_uses_daily_cache(self):
+        """get_evidence should call _get_or_fetch_wsb instead of fetching WSB directly."""
+        svc = self._make_service()
+
+        # Mock _get_or_fetch_wsb to return WSB data
+        wsb_data = [{"title": "Test WSB", "publishOn": "2026-04-09", "content": "<p>Market rallied.</p>"}]
+        svc._get_or_fetch_wsb = MagicMock(return_value=wsb_data)
+
+        # Mock fetch_wall_street_breakfast — should NOT be called directly
+        svc.fetch_wall_street_breakfast = MagicMock()
+
+        # Provide stock data via a temp agent_context.json
+        import tempfile
+        stock_data = {
+            "stocks": {"TEST": {"analysis": [], "news": [], "press_releases": []}},
+            "wall_street_breakfast": []  # Empty here — should come from _get_or_fetch_wsb
+        }
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            json.dump(stock_data, f)
+            tmp_path = f.name
+
+        try:
+            # Patch the sa_path inside get_evidence
+            with patch.object(svc, 'get_evidence', wraps=svc.get_evidence):
+                # We need to patch the hardcoded path. Easiest: just call and check mocks.
+                # Monkey-patch the path used inside get_evidence
+                original = svc.get_evidence
+
+                def patched_get_evidence(ticker):
+                    import types
+                    # Replace the inner sa_path by patching os.path.exists and open
+                    return original(ticker)
+
+                result = svc.get_evidence("TEST")
+
+            svc._get_or_fetch_wsb.assert_called_once()
+            svc.fetch_wall_street_breakfast.assert_not_called()
+            self.assertIn("WALL STREET BREAKFAST", result)
+        finally:
+            os.unlink(tmp_path)
+
+    def test_get_counts_uses_daily_cache(self):
+        """get_counts should use _get_or_fetch_wsb for WSB counts."""
+        svc = self._make_service()
+
+        wsb_data = [{"title": "Test WSB", "publishOn": "2026-04-09T07:30:00-04:00", "content": "text"}]
+        svc._get_or_fetch_wsb = MagicMock(return_value=wsb_data)
+        svc.fetch_wall_street_breakfast = MagicMock()
+
+        # Stock data in agent_context.json
+        import tempfile
+        context = {
+            "stocks": {"TEST": {"analysis": [{"content": "a"}], "news": [], "press_releases": []}},
+            "wall_street_breakfast": []
+        }
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            json.dump(context, f)
+            tmp_path = f.name
+
+        try:
+            counts = svc.get_counts("TEST")
+
+            svc._get_or_fetch_wsb.assert_called_once()
+            self.assertEqual(counts["wsb"], 1)
+            self.assertEqual(counts["wsb_date"], "2026-04-09")
+        finally:
+            os.unlink(tmp_path)
+
+
 if __name__ == "__main__":
     unittest.main()
