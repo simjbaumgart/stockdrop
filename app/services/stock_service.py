@@ -56,15 +56,11 @@ class StockService:
         # Format: "Name": {"symbol": "...", "screener": "...", "exchange": "..."}
         self.indices_config = {
             "S&P 500": {"symbol": "SPX", "screener": "america", "exchange": "CBOE"},
-            # STOXX 600 removed from TradingView config due to API issues. Will be fetched via fallback.
-            "India": {"symbol": "NIFTY", "screener": "india", "exchange": "NSE"}
         }
-        
+
         # Keep old tickers for fallback or reference if needed
         self.indices_tickers = {
             "S&P 500": "^GSPC",
-            "STOXX 600": "^STOXX",
-            "India": "^NSEI"
         }
 
         # Sector tickers (US ETFs as proxies)
@@ -143,35 +139,6 @@ class StockService:
             "HON": {"region": "US", "sector": "Industrials"},
             "LMT": {"region": "US", "sector": "Industrials"},
             "RTX": {"region": "US", "sector": "Industrials"},
-            # Europe (Using STOXX 600 as region proxy, sectors mapped to US ETFs for simplicity or generic)
-            "ASML": {"region": "EU", "sector": "Technology"},
-            "MC.PA": {"region": "EU", "sector": "Consumer Discretionary"},
-            "NESN.SW": {"region": "EU", "sector": "Consumer Staples"},
-            "NOVN.SW": {"region": "EU", "sector": "Healthcare"},
-            "ROG.SW": {"region": "EU", "sector": "Healthcare"},
-            "SAP": {"region": "EU", "sector": "Technology"},
-            "AZN": {"region": "EU", "sector": "Healthcare"},
-            "SHEL": {"region": "EU", "sector": "Energy"},
-            "LIN": {"region": "EU", "sector": "Materials"},
-            "OR.PA": {"region": "EU", "sector": "Consumer Staples"},
-            "SIE.DE": {"region": "EU", "sector": "Industrials"},
-            "TTE.PA": {"region": "EU", "sector": "Energy"},
-            "HSBC": {"region": "EU", "sector": "Financials"},
-            "ULVR.L": {"region": "EU", "sector": "Consumer Staples"},
-            "BP.L": {"region": "EU", "sector": "Energy"},
-            "DTE.DE": {"region": "EU", "sector": "Communication Services"},
-            "AIR.PA": {"region": "EU", "sector": "Industrials"},
-            "EL.PA": {"region": "EU", "sector": "Industrials"},
-            # China
-            "600519.SS": {"region": "CN", "sector": "Consumer Staples"},
-            "300750.SZ": {"region": "CN", "sector": "Industrials"},
-            "601318.SS": {"region": "CN", "sector": "Financials"},
-            "600036.SS": {"region": "CN", "sector": "Financials"},
-            "002594.SZ": {"region": "CN", "sector": "Consumer Discretionary"},
-            "BABA": {"region": "CN", "sector": "Consumer Discretionary"},
-            "JD": {"region": "CN", "sector": "Consumer Discretionary"},
-            "PDD": {"region": "CN", "sector": "Consumer Discretionary"},
-            "BIDU": {"region": "CN", "sector": "Communication Services"}
         }
         
         # A curated list of major stocks to track for "Biggest Movers"
@@ -200,13 +167,11 @@ class StockService:
         try:
             data = tradingview_service.get_indices_data(self.indices_config)
             
-            # Check if we have valid data for all, or if we need fallback
-            # Also check for indices that were not in TradingView config (like STOXX 600)
-            expected_indices = ["S&P 500", "STOXX 600", "China", "India"]
-            
+            # Check if we have valid data, or if we need fallback
+            expected_indices = ["S&P 500"]
+
             for name in expected_indices:
                 if name not in data or data[name]["price"] == 0.0:
-                    # print(f"Fetching {name} via fallback...") # Reduce noise
                     fallback_data = self._get_index_fallback(name)
                     data[name] = fallback_data
             return data
@@ -326,6 +291,11 @@ class StockService:
         Checks for large cap stocks that have dropped more than 6% (normalized)
         and sends an email notification if not already sent today.
         """
+        version = get_git_version()
+        print(f"\n{'='*50}")
+        print(f"  StockDrop {version}")
+        print(f"  {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"{'='*50}\n")
         print("Checking for large cap drops...")
         # self.deep_research_candidates = [] # Removed batch queue
         potential_batch_candidates = [] # For Deep Research Comparison
@@ -421,38 +391,10 @@ class StockService:
         # Regions: America (US), Europe, China, India, Australia, etc.
         
         def get_priority_score(stock):
-            region_str = stock.get("region", "Other")
-            # Ensure "Germany" is detected if it comes as "Europe (Germany)" or similar
-            is_germany = "Germany" in region_str
-            is_open = self._is_market_open(region_str)
-            
-            # Priority Hierarchy:
-            # 1. US (Open) -> 100
-            # 2. Germany (Open) -> 95
-            # 3. EU (Open) -> 90
-            # 4. China (Open) -> 80
-            # 5. Rest (Open) -> 70
-            # 6. US (Closed) -> 60
-            # 7. EU (Closed) -> 50
-            # ...
-            
-            # Base Score
-            score = 0
+            is_open = self._is_market_open()
+            score = 60  # US base score
             if is_open:
-                score += 40  # Open base
-            
-            # Region Score
-            if region_str in ["America", "US"] or "America" in region_str:
-                score += 60
-            elif is_germany:
-                 score += 55 # Higher than standard EU
-            elif "Europe" in region_str or region_str == "EU":
-                score += 50
-            elif "China" in region_str or region_str == "CN":
                 score += 40
-            else:
-                score += 30
-                
             return score
         # Deduplicate stocks by symbol, keeping the one with the largest drop
         unique_stocks = {}
@@ -726,7 +668,7 @@ class StockService:
         """
         print("\n[Backfill] Checking for outstanding Deep Research candidates...")
         try:
-            conn = sqlite3.connect("subscribers.db")
+            conn = sqlite3.connect(os.getenv("DB_PATH", "subscribers.db"))
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             
@@ -1211,15 +1153,7 @@ class StockService:
             from tradingview_scraper.symbols.news import NewsScraper
             scraper = NewsScraper()
             
-            # Determine exchange (defaults to NASDAQ if not found, or use a map)
-            exchange = "NASDAQ" # Default
-            if symbol in self.stock_metadata:
-                region = self.stock_metadata[symbol].get("region", "US")
-                if region == "EU": exchange = "XETR" # Germany
-                elif region == "CN": exchange = "SSE"
-                elif region == "IN": exchange = "NSE"
-                elif region == "AU": exchange = "ASX"
-                
+            exchange = "NASDAQ"
             headers = scraper.scrape_headlines(symbol=symbol, exchange=exchange)
             
             for item in headers:
@@ -1484,29 +1418,18 @@ class StockService:
             # Silently fail or log debug
             return ""
 
-    def _is_market_open(self, region: str) -> bool:
+    def _is_market_open(self, region: str = "US") -> bool:
         """
-        Heuristic to check if a market region is currently open.
+        Check if the US market is currently open.
         Uses approximate UTC hours.
         """
         now_utc = datetime.now(pytz.utc)
-        # Weekday check (0=Mon, 6=Sun)
         if now_utc.weekday() >= 5:
             return False
-            
+
         hour = now_utc.hour + now_utc.minute / 60.0
-        
-        if "America" in region or region == "US":
-            # NYSE/NASDAQ: 14:30 - 21:00 UTC (approx)
-            return 14.5 <= hour <= 21.0
-        elif "Europe" in region or region == "EU":
-            # London/Frankfurt: 08:00 - 16:30 UTC (approx)
-            return 8.0 <= hour <= 16.5
-        elif "China" in region or region == "CN":
-            # Shanghai: 01:30 - 07:00 UTC (approx, ignoring lunch break)
-            return 1.5 <= hour <= 7.0
-        
-        return False
+        # NYSE/NASDAQ: 14:30 - 21:00 UTC (approx)
+        return 14.5 <= hour <= 21.0
 
     def _run_deep_analysis(self, symbol, price, change_percent, stock, company_name, exchange, reasons, market_context, news_data, is_earnings, earnings_date_str, current_version, technical_analysis):
         """
