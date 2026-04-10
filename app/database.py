@@ -121,6 +121,8 @@ def init_db():
             "reassess_exit_trigger": "TEXT",
             "reassess_timestamp": "TEXT",
             "reassess_reasoning": "TEXT",
+            # Batch comparison linkage
+            "batch_id": "INTEGER",
         }
         
         
