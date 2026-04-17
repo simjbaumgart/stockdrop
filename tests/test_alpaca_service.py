@@ -1,7 +1,7 @@
 # tests/test_alpaca_service.py
 """Unit tests for AlpacaService symbol translation and snapshot round-trip."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
