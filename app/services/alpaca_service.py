@@ -37,14 +37,20 @@ class AlpacaService:
         """
         Fetches snapshots for a list of symbols.
         Returns a dictionary where keys are symbols and values are snapshot objects (or dicts).
+
+        Translates caller symbols (e.g. BRK-B) to Alpaca's share-class form (BRK.B)
+        for the request, then translates response keys back so callers see the
+        original format they passed in.
         """
         if not self.stock_client:
             return {}
 
+        alpaca_symbols = [self._to_alpaca_symbol(s) for s in symbols]
+
         try:
-            request_params = StockSnapshotRequest(symbol_or_symbols=symbols)
+            request_params = StockSnapshotRequest(symbol_or_symbols=alpaca_symbols)
             snapshots = self.stock_client.get_stock_snapshot(request_params)
-            return snapshots
+            return {self._from_alpaca_symbol(k): v for k, v in snapshots.items()}
         except Exception as e:
             print(f"Error fetching Alpaca snapshots: {e}")
             return {}
