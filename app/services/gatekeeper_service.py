@@ -4,6 +4,12 @@ from datetime import datetime, timedelta
 from typing import Dict, Tuple, Optional
 from app.services.tradingview_service import tradingview_service
 
+# Minimum share price (USD) for a ticker to be considered tradeable.
+# Filters out OTC penny stocks (e.g. PBMRF $0.003, BKRKF $0.17, PPERF $0.26,
+# CEBCF $0.38, PINXF $0.75) whose Bollinger math still flags them as "dipped"
+# but which have no realistic liquidity, wide spreads, and poor LLM coverage.
+MIN_PRICE_USD = 5.0
+
 class GatekeeperService:
     def __init__(self):
         self.benchmark_symbol = "SPY" # Can be switched to QQQ
@@ -12,6 +18,17 @@ class GatekeeperService:
         self.cache_duration = timedelta(hours=1)
 
 
+
+    def check_liquidity_filter(self, price: float) -> Tuple[bool, str]:
+        """
+        Pre-filter: reject sub-$5 tickers before any expensive analysis.
+        Returns (is_valid, reason_string).
+        """
+        if price is None or price <= 0:
+            return False, f"Price missing or non-positive ({price})"
+        if price < MIN_PRICE_USD:
+            return False, f"Price ${price:.2f} < ${MIN_PRICE_USD:.2f} minimum (penny-stock filter)"
+        return True, f"Price ${price:.2f} >= ${MIN_PRICE_USD:.2f} minimum"
 
     def check_market_regime(self) -> Dict[str, str]:
         """
