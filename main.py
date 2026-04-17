@@ -7,6 +7,28 @@ import logging
 
 load_dotenv()
 
+# Survive BrokenPipeError from print() when the terminal/SSH/tmux reader
+# goes away mid-write. Python's default already keeps the process alive on
+# SIGPIPE (writes fail with BrokenPipeError rather than terminating), but
+# an unhandled BrokenPipeError in a background task can still kill that
+# task. This wrapper catches it and detaches stdout on first hit so
+# subsequent writes become silent no-ops and the service keeps running.
+import sys as _sys
+import builtins as _builtins
+
+def _safe_print_wrapper(original_print):
+    def _print(*args, **kwargs):
+        try:
+            return original_print(*args, **kwargs)
+        except BrokenPipeError:
+            try:
+                _sys.stdout = open(os.devnull, "w")
+            except Exception:
+                pass
+    return _print
+
+_builtins.print = _safe_print_wrapper(_builtins.print)
+
 # Increase file descriptor limit for macOS to prevent [Errno 24]
 try:
     import resource
@@ -37,7 +59,9 @@ import subprocess
 
 # Graceful shutdown support
 shutdown_event = asyncio.Event()
-run_for_minutes = None  # Set via --run-for CLI arg
+# Read from env var so the value survives uvicorn's re-import of this module.
+# (python main.py loads as __main__; uvicorn re-imports as "main" — a separate module)
+run_for_minutes = int(os.environ["STOCKDROP_RUN_FOR"]) if os.environ.get("STOCKDROP_RUN_FOR") else None
 
 def get_git_version():
     try:
@@ -225,6 +249,7 @@ if __name__ == "__main__":
         print("Email notifications disabled (default).")
 
     if args.run_for:
-        run_for_minutes = args.run_for
+        # Propagate via env var so uvicorn's re-import of this module picks it up.
+        os.environ["STOCKDROP_RUN_FOR"] = str(args.run_for)
 
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=not args.run_for)
