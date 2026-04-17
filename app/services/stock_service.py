@@ -482,21 +482,27 @@ class StockService:
                     
                     if not is_valid:
                         print(f"GATEKEEPER: {symbol} REJECTED.")
-                        
-                        # Primary Reason
-                        if 'bb_status' in reasons:
+
+                        # Primary Reason: liquidity takes priority over BB
+                        liquidity_status = reasons.get('liquidity_status', '')
+                        if liquidity_status and '<' in str(liquidity_status):
+                            print(f"  [PRIMARY REASON] {liquidity_status}")
+                        elif 'bb_status' in reasons:
                             print(f"  [PRIMARY REASON] {reasons['bb_status']}")
-                            
+                        elif liquidity_status:
+                            print(f"  [PRIMARY REASON] {liquidity_status}")
+
                         # Context Data
                         print("  [CONTEXT]")
                         for key, value in reasons.items():
-                            if key == 'bb_status': continue
+                            if key in ('bb_status', 'liquidity_status'):
+                                continue
                             try:
                                 val_to_print = f"{float(value):.2f}"
                             except (ValueError, TypeError):
                                 val_to_print = value
                             print(f"    {key}: {val_to_print}")
-                            
+
                         # Optionally log this rejection to DB or file?
                         continue
                         
