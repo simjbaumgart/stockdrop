@@ -46,6 +46,11 @@ except ImportError:
     Ticker = None
 
 
+# Minimum average daily volume (shares) for a ticker to be considered tradeable.
+# Paired with the gatekeeper's $5 price floor to catch above-$5 tickers that
+# still have no realistic liquidity.
+MIN_AVG_VOLUME = 100_000
+
 
 class StockService:
     def __init__(self):
@@ -771,37 +776,37 @@ class StockService:
     def _is_actively_traded(self, symbol: str, region: str = "US", volume: float = 0, exchange: str = "", name: str = "") -> bool:
         """
         Checks if the stock is actively traded to avoid illiquid tickers.
-        Criteria: Avg volume > 50k over last 5 days.
+        Criteria: Avg volume > MIN_AVG_VOLUME over last 5 days.
         """
         # 1. Faster Check: Use volume from Screener if available
-        if volume > 50000:
+        if volume > MIN_AVG_VOLUME:
             return True
 
         # 2. Fallback: Check yfinance (historical volume)
         try:
             # Suffix mapping for yfinance
             yf_symbol = self._resolve_yfinance_ticker(symbol, region, exchange, name)
-            
+
             # Use yfinance for quick volume check with shared session
             ticker = yf.Ticker(yf_symbol)
             hist = ticker.history(period="5d")
-            
+
             if hist.empty:
                 print(f"  > [Active Check] No history found for {yf_symbol}. Assuming inactive (or suffix mismatch).")
                 # If mapped symbol failed, maybe try original?
                 if yf_symbol != symbol:
-                     print(f"  > [Active Check] Retrying with original symbol {symbol}...")
-                     hist = yf.Ticker(symbol).history(period="5d")
-                     if hist.empty:
-                         return False
+                    print(f"  > [Active Check] Retrying with original symbol {symbol}...")
+                    hist = yf.Ticker(symbol).history(period="5d")
+                    if hist.empty:
+                        return False
                 else:
                     return False
-                
+
             avg_vol = hist['Volume'].mean()
-            if avg_vol < 50000:
-                print(f"  > [Active Check] {yf_symbol} Volume Low ({int(avg_vol)} < 50k). Skipping.")
+            if avg_vol < MIN_AVG_VOLUME:
+                print(f"  > [Active Check] {yf_symbol} Volume Low ({int(avg_vol)} < {MIN_AVG_VOLUME:,}). Skipping.")
                 return False
-                
+
             return True
         except Exception as e:
             print(f"  > [Active Check] Error checking {symbol}: {e}. Skipping to be safe.")

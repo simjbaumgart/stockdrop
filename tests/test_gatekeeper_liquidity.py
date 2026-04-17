@@ -87,3 +87,8 @@ def test_check_technical_filters_rejects_above_5_when_not_dipped(gatekeeper):
     assert is_valid is False
     assert "liquidity_status" in reasons  # liquidity passed
     assert "bb_status" in reasons  # but BB rejected
+
+
+def test_min_avg_volume_constant_is_100k():
+    from app.services.stock_service import MIN_AVG_VOLUME
+    assert MIN_AVG_VOLUME == 100_000
