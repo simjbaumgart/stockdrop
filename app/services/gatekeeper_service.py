@@ -86,22 +86,31 @@ class GatekeeperService:
                 return False, {"error": "Insufficient data"}
 
             reasons = {}
-            
+
             # Extract
             price = indicators.get('close', 0.0)
             bb_lower = indicators.get('bb_lower', 0.0)
             bb_upper = indicators.get('bb_upper', 0.0)
             volume = indicators.get('volume', 0)
-            
+
+            # --- Pre-filter: Liquidity (minimum share price) ---
+            liquidity_ok, liquidity_reason = self.check_liquidity_filter(price)
+            reasons['liquidity_status'] = liquidity_reason
+            reasons['price'] = price
+            if not liquidity_ok:
+                # Short-circuit before Bollinger; save the downstream pipeline cost.
+                reasons['lower_bb'] = bb_lower
+                return False, reasons
+
             # --- Filter: Bollinger Band %B (Dip) ---
             # %B = (Price - Lower) / (Upper - Lower)
             if bb_upper != bb_lower:
                 curr_pct_b = (price - bb_lower) / (bb_upper - bb_lower)
             else:
-                curr_pct_b = 0.5 # Default if squeezed/error
-            
+                curr_pct_b = 0.5  # Default if squeezed/error
+
             is_valid = False
-            
+
             # Logic: IF %B < 0.50: VALID
             if curr_pct_b < 0.50:
                 is_valid = True
@@ -111,14 +120,12 @@ class GatekeeperService:
 
             # --- Filter: Volume Anomaly (Optional) ---
             # We don't have Avg Volume easily from TA.
-            # We'll skip reliable volume anomaly check for now or just log volume.
             # reasons['volume'] = volume
 
             # Add raw values for debugging/logging
-            reasons['price'] = price
             reasons['lower_bb'] = bb_lower
             reasons['bb_pct_b'] = curr_pct_b
-            
+
             return is_valid, reasons
 
         except Exception as e:
