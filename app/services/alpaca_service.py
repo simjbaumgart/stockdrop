@@ -21,18 +21,36 @@ class AlpacaService:
             self.stock_client = StockHistoricalDataClient(self.api_key, self.secret_key)
             self.option_client = OptionHistoricalDataClient(self.api_key, self.secret_key)
 
+    @staticmethod
+    def _to_alpaca_symbol(symbol: str) -> str:
+        """Translate caller symbol (Yahoo/TradingView style, e.g. BRK-B) to
+        Alpaca's share-class form (e.g. BRK.B). Alpaca rejects the hyphen form."""
+        return symbol.replace("-", ".")
+
+    @staticmethod
+    def _from_alpaca_symbol(symbol: str) -> str:
+        """Translate Alpaca response symbol (BRK.B) back to the caller form
+        (BRK-B) so the rest of the codebase keeps its existing convention."""
+        return symbol.replace(".", "-")
+
     def get_snapshots(self, symbols: List[str]) -> Dict:
         """
         Fetches snapshots for a list of symbols.
         Returns a dictionary where keys are symbols and values are snapshot objects (or dicts).
+
+        Translates caller symbols (e.g. BRK-B) to Alpaca's share-class form (BRK.B)
+        for the request, then translates response keys back so callers see the
+        original format they passed in.
         """
         if not self.stock_client:
             return {}
 
+        alpaca_symbols = [self._to_alpaca_symbol(s) for s in symbols]
+
         try:
-            request_params = StockSnapshotRequest(symbol_or_symbols=symbols)
+            request_params = StockSnapshotRequest(symbol_or_symbols=alpaca_symbols)
             snapshots = self.stock_client.get_stock_snapshot(request_params)
-            return snapshots
+            return {self._from_alpaca_symbol(k): v for k, v in snapshots.items()}
         except Exception as e:
             print(f"Error fetching Alpaca snapshots: {e}")
             return {}
