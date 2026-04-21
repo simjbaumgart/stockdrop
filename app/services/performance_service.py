@@ -63,24 +63,7 @@ class PerformanceService:
             
             timestamp = decision['timestamp']
             
-            # Try to determine region from decision data if available, or default to US
-            # The decision table doesn't have region, but we might have saved it in the JSON blob in 'reasoning' 
-            # or we can try to guess. 
-            # Actually, stock_service saves 'region' in the separate CSV/JSON files, but the DB table 'decision_points'
-            # currently only has: symbol, price, drop_percent, recommendation, reasoning, status.
-            # We will default to "US" for now, or we could try to look it up in stock_service metadata if we imported it.
-            # For simplicity, let's try US first, or maybe we can update the DB to store region later.
-            # For now, we'll just pass "US" as default, but we can try to infer from symbol format (e.g. .DE, .PA)
-            
-            region = "US"
-            if "." in symbol:
-                suffix = symbol.split(".")[-1]
-                if suffix in ["DE", "PA", "SW", "L", "AS", "BR", "LS"]:
-                    region = "EU"
-                elif suffix in ["SS", "SZ", "HK"]:
-                    region = "CN"
-            
-            current_price = tradingview_service.get_latest_price(symbol, region)
+            current_price = tradingview_service.get_latest_price(symbol)
             
             if current_price == 0.0:
                 performance_percent = 0.0

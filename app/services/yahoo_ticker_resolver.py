@@ -7,66 +7,17 @@ class YahooTickerResolver:
     Uses a static map for common exchanges and falls back to Yahoo's Autocomplete API.
     """
     def __init__(self):
-        # 1. Define the STATIC MAP (TradingView Exchange -> Yahoo Suffix)
-        # This covers 80% of cases instantly.
+        # Static map: TradingView Exchange -> Yahoo Suffix (US only)
         self.suffix_map = {
-            # Europe
-            'LSE': '.L',      # London
-            'SIX': '.SW',     # Switzerland
-            'MIL': '.MI',     # Milan (Italy)
-            'BME': '.MC',     # Madrid (Spain)
-            'FSX': '.F',      # Frankfurt
-            'XETR': '.DE',    # Xetra (Germany)
-            'XETRA': '.DE',   # Alias
-            'GER': '.DE',     # Alias
-            'OMXSTO': '.ST',  # Stockholm (Sweden)
-            'OMXHEX': '.HE',  # Helsinki (Finland)
-            'OMXCOP': '.CO',  # Copenhagen (Denmark)
-            'EURONEXT': '.PA', # Default to Paris (Risky, requires fallback often)
-            'PAR': '.PA',      # Paris
-            'AMS': '.AS',      # Amsterdam
-            'BRU': '.BR',      # Brussels
-            'LIS': '.LS',      # Lisbon
-            
-            # Asia
-            'TSE': '.T',      # Tokyo
-            'HKSE': '.HK',    # Hong Kong
-            'SSE': '.SS',     # Shanghai
-            'SZSE': '.SZ',    # Shenzhen
-            'NSE': '.NS',     # India (NSE)
-            'BSE': '.BO',     # India (BSE)
-            'TWSE': '.TW',    # Taiwan
-            'KSE': '.KS',     # Korea
-            
-            # Americas
-            'TSX': '.TO',     # Toronto
-            'TSXV': '.V',     # TSX Venture
-            'TRT': '.TO',     # Toronto Alias
-            'NASDAQ': '',     # US (No suffix)
-            'NYSE': '',       # US (No suffix)
-            'AMEX': '',       # US (No suffix)
-            'OTC': '',        # OTC often has no suffix, or .OB
-            'US': '',         # Generic US
+            'NASDAQ': '',
+            'NYSE': '',
+            'AMEX': '',
+            'OTC': '',
+            'US': '',
         }
 
-        # 2. Region Map (Fallback if Exchange missing)
-        self.region_map = {
-            'germany': '.DE',
-            'uk': '.L',
-            'britain': '.L',
-            'france': '.PA',
-            'italy': '.MI',
-            'spain': '.MC',
-            'switzerland': '.SW',
-            'sweden': '.ST',
-            'india': '.NS',
-            'japan': '.T',
-            'china': '.SS',
-            'hong kong': '.HK',
-            'canada': '.TO',
-            'australia': '.AX',
-            'brazil': '.SA'
-        }
+        # Region map (unused for US-only, kept for interface compatibility)
+        self.region_map = {}
 
     def resolve(self, symbol: str, exchange: str = "", name: str = "", region: str = "") -> str:
         """
@@ -78,26 +29,10 @@ class YahooTickerResolver:
         exchange = exchange.strip().upper() if exchange else ""
         name = name.strip() if name else ""
         region = region.strip().lower() if region else ""
-        
-        # Handle dot replacement for TSX/CA symbols often (BBD.B -> BBD-B)
-        if region in ['canada', 'ca'] or exchange in ['TSX', 'TSXV', 'TRT']:
-            symbol = symbol.replace('.', '-')
 
-        # METHOD A: Try Static Mapping (Exchange)
+        # US exchanges need no suffix
         if exchange in self.suffix_map:
-            suffix = self.suffix_map[exchange]
-            if suffixes := self.suffix_map.get(exchange): 
-                 # Handle cases where suffix might be conditional (e.g. Euronext)
-                 pass
-            # Skip Euronext general key if we want search
-            if exchange != 'EURONEXT':
-                return f"{symbol}{suffix}"
-
-        # METHOD B: Try Static Mapping (Region)
-        if not exchange and region:
-            for key, suff in self.region_map.items():
-                if key in region:
-                    return f"{symbol}{suff}"
+            return symbol
 
         # METHOD C: The "Search API" Fallback
         # If mapping didn't work, ask Yahoo.

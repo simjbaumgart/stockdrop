@@ -22,7 +22,6 @@
                     <th>P/E</th>
                     <th>Market Cap</th>
                     <th>Sector</th>
-                    <th>Region</th>
                 </tr>
             </thead>
             <tbody>
@@ -124,7 +123,6 @@
                     <td>{{ "%.2f"|format(dp.pe_ratio) if dp.pe_ratio else '-' }}</td>
                     <td>{{ "${:,.0f}".format(dp.market_cap) if dp.market_cap else '-' }}</td>
                     <td>{{ dp.sector or '-' }}</td>
-                    <td>{{ dp.region or '-' }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

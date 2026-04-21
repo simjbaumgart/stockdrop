@@ -25,17 +25,8 @@ class TrackingService:
             if symbol in ["MOCK_TEST", "TEST", "EXAMPLE"]:
                 continue
                 
-            # Determine region (logic copied from performance_service.py)
-            region = "US"
-            if "." in symbol:
-                suffix = symbol.split(".")[-1]
-                if suffix in ["DE", "PA", "SW", "L", "AS", "BR", "LS"]:
-                    region = "EU"
-                elif suffix in ["SS", "SZ", "HK"]:
-                    region = "CN"
-            
             try:
-                current_price = tradingview_service.get_latest_price(symbol, region)
+                current_price = tradingview_service.get_latest_price(symbol)
                 
                 if current_price > 0.0:
                     add_tracking_point(decision_id, current_price)

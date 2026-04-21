@@ -110,111 +110,18 @@ class TradingViewService:
 
     def get_top_movers(self, min_market_cap_usd: int = 5_000_000_000, max_change_percent: float = -4.0, min_volume: int = 50_000, processed_symbols: Set[str] = None) -> List[Dict]:
         """
-        Fetches top movers from multiple global markets using TradingView Screener.
-        
-        Markets:
-        - America (USD)
-        - Europe (Germany, UK, France, Spain, Italy, Netherlands) (EUR/GBP)
-        - China (CNY)
-        - India (INR)
-        - Australia (AUD)
-        
+        Fetches top movers from the US market using TradingView Screener.
+
         Filters:
-        - Market Cap > $5B USD (converted to local currency)
+        - Market Cap > $5B USD
         - Change < -4%
         - Volume > 50,000
         """
-        
-        # Market Configuration with approximate exchange rates (as of late 2024/2025)
-        # We use a safe buffer or direct conversion.
-        # USD Base: 5,000,000,000 (Default)
-        
-        
-        # User requested specific lower threshold for Europe (500M)
-        eu_min_cap_usd = 500_000_000
-        
-        # Market Cap Adjustments: Increase non-US thresholds by 10%
-        # min_market_cap_usd is the base user input (e.g. 5B)
-        
-        # Adjust base for Non-US 
-        non_us_min_cap_usd = min_market_cap_usd * 1.10
-        non_us_eu_min_cap_usd = eu_min_cap_usd * 1.10
-
         market_configs = [
             {
                 "region": "America",
                 "markets": ["america"],
-                "currency_threshold": min_market_cap_usd # USD (No increase for US)
-            },
-            {
-                "region": "Europe (Germany)",
-                "markets": ["germany"],
-                "currency_threshold": non_us_eu_min_cap_usd * 0.95 # EUR ~0.95 USD
-            },
-             {
-                "region": "Europe (UK)",
-                "markets": ["uk"],
-                "currency_threshold": non_us_eu_min_cap_usd * 0.80 # GBP ~0.80 USD
-            },
-            {
-                "region": "Europe (Eurozone)",
-                "markets": ["france", "spain", "italy", "netherlands", "belgium", "portugal", "finland", "ireland", "austria"],
-                "currency_threshold": non_us_eu_min_cap_usd * 0.95 # EUR
-            },
-            {
-                "region": "Europe (Switzerland)",
-                "markets": ["switzerland"],
-                "currency_threshold": non_us_eu_min_cap_usd * 0.88 # CHF ~0.88 USD
-            },
-            {
-                "region": "Europe (Sweden)",
-                "markets": ["sweden"],
-                "currency_threshold": non_us_eu_min_cap_usd * 10.5 # SEK ~10.5 USD
-            },
-            {
-                "region": "Europe (Denmark)",
-                "markets": ["denmark"],
-                "currency_threshold": non_us_eu_min_cap_usd * 7.0 # DKK ~7.0 USD
-            },
-            {
-                "region": "Japan",
-                "markets": ["japan"],
-                "currency_threshold": non_us_min_cap_usd * 150 # JPY ~150 USD
-            },
-            # {
-            #     "region": "Canada",
-            #     "markets": ["canada"],
-            #     "currency_threshold": non_us_min_cap_usd * 1.40 # CAD ~1.40 USD
-            # },
-            {
-                "region": "South Korea",
-                "markets": ["korea"],
-                "currency_threshold": non_us_min_cap_usd * 1400 # KRW ~1400 USD
-            },
-            {
-                "region": "Taiwan",
-                "markets": ["taiwan"],
-                "currency_threshold": non_us_min_cap_usd * 32 # TWD ~32 USD
-            },
-            {
-                "region": "Brazil",
-                "markets": ["brazil"],
-                "currency_threshold": non_us_min_cap_usd * 6.0 # BRL ~6.0 USD
-            },
-            {
-                "region": "China",
-                "markets": ["china"],
-                "currency_threshold": non_us_min_cap_usd * 7.2 # CNY ~7.2 USD
-            },
-            {
-                "region": "India",
-                "markets": ["india"],
-                "currency_threshold": non_us_min_cap_usd * 84.0 # INR ~84 USD
-            },
-            {
-                "region": "Australia",
-                "markets": ["australia"],
-                "currency_threshold": non_us_min_cap_usd * 1.55 # AUD ~1.55 USD
+                "currency_threshold": min_market_cap_usd
             }
         ]
         
@@ -416,18 +323,9 @@ class TradingViewService:
 
     def get_latest_price(self, symbol: str, region: str = "US") -> float:
         """
-        Fetches the latest price for a symbol using TradingView Screener.
-        Tries to map the region to the appropriate market.
+        Fetches the latest price for a symbol using TradingView Screener (US market only).
         """
-        # Map region to markets
-        region_map = {
-            "US": ["america"],
-            "EU": ["germany", "uk", "france", "spain", "italy", "netherlands", "europe", "switzerland", "sweden", "denmark"],
-            "CN": ["china"],
-            "IN": ["india"],
-        }
-        
-        markets = region_map.get(region, ["america"]) # Default to US
+        markets = ["america"]
         
         try:
             q = Query().set_markets(*markets).select('close').where(
@@ -445,26 +343,10 @@ class TradingViewService:
 
     def get_technical_analysis(self, symbol: str, region: str = "US") -> Dict:
         """
-        Fetches technical analysis summary for a symbol.
+        Fetches technical analysis summary for a symbol (US market only).
         """
-        # Map region to markets/exchanges if needed
-        # For TA_Handler, we need screener and exchange
-        # This is a best-effort mapping.
-        
-        screener_map = {
-            "US": "america",
-            "EU": "germany", # Default to germany for EU if unknown
-            "CN": "china",
-            "IN": "india",
-        }
-        
-        exchange_map = {
-            "US": "NASDAQ", # Default, might need to try NYSE if fails or use generic
-            "EU": "XETR",
-        }
-        
-        screener = screener_map.get(region, "america")
-        exchange = exchange_map.get(region, "NASDAQ")
+        screener = "america"
+        exchange = "NASDAQ"
         
         try:
             # First try with default exchange
@@ -497,31 +379,13 @@ class TradingViewService:
     def get_technical_indicators(self, symbol: str, region: str = "US", exchange: str = None, screener: str = None) -> Dict:
         """
         Fetches specific technical indicators (SMA200, RSI, BB, Volume) for Gatekeeper.
-        If exchange/screener are provided, they are used directly. Otherwise, inferred from region.
+        If exchange/screener are provided, they are used directly. Otherwise, defaults to US.
         """
-        # Map region to markets/exchanges if explict ones not provided
-        screener_map = {
-            "US": "america", "America": "america",
-            "EU": "germany", "Europe (Germany)": "germany", "Europe (UK)": "uk", 
-            "CN": "china", "China": "china",
-            "IN": "india", "India": "india",
-        }
-        
-        # Default exchange map (best guess)
-        exchange_map = {
-            "US": "NASDAQ", "America": "NASDAQ",
-            "EU": "XETR", "Europe (Germany)": "XETR",
-            "CN": "SSE", "China": "SSE",
-            "IN": "NSE", "India": "NSE",
-        }
-        
         if not screener:
-            screener = screener_map.get(region, "america")
-            # Try to start lower case config region match or substring
-            if not screener and "Europe" in region: screener = "germany" # Fallback
-            
+            screener = "america"
+
         if not exchange:
-            exchange = exchange_map.get(region, "NASDAQ")
+            exchange = "NASDAQ"
 
 
         # Overrides for specific known tickers (like Indices/ETFs on AMEX/ARCA)
@@ -570,14 +434,9 @@ class TradingViewService:
 
     def get_earnings_date(self, symbol: str, region: str = "US") -> Optional[int]:
         """
-        Fetches the next earnings release date timestamp.
+        Fetches the next earnings release date timestamp (US market only).
         """
-        region_map = {
-            "US": ["america"],
-            "EU": ["germany", "europe"],
-            "CN": ["china"],
-        }
-        markets = region_map.get(region, ["america"])
+        markets = ["america"]
         
         try:
             q = Query().set_markets(*markets).select('earnings_release_date').where(
