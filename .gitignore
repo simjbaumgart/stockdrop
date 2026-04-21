@@ -33,6 +33,9 @@ defeatbeta-repo/
 *.db-wal
 *.db-shm
 
+# Circuit-breaker state
+.drive_breaker_state.json
+
 # Tooling and OS artifacts
 .claude/
 .fuse_hidden*
