@@ -21,7 +21,7 @@ def get_todays_candidates() -> List[Dict]:
     Fetches today's candidates with a BUY recommendation.
     """
     try:
-        conn = sqlite3.connect("subscribers.db")
+        conn = sqlite3.connect(os.getenv("DB_PATH", "subscribers.db"))
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         

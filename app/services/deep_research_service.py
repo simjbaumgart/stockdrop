@@ -153,7 +153,7 @@ class DeepResearchService:
                     
             # Cleanup Stuck Batches (Before Dec 22)
             # Query DB for STARTED batches before Dec 22
-            conn = sqlite3.connect("subscribers.db")
+            conn = sqlite3.connect(os.getenv("DB_PATH", "subscribers.db"))
             cursor = conn.cursor()
             cursor.execute("UPDATE batch_comparisons SET status = 'SKIPPED' WHERE status = 'STARTED' AND date < '2025-12-22'")
             if cursor.rowcount > 0:
@@ -197,7 +197,7 @@ class DeepResearchService:
                     if batch_id:
                         # Link candidates to this batch_id
                         try:
-                            conn = sqlite3.connect("subscribers.db")
+                            conn = sqlite3.connect(os.getenv("DB_PATH", "subscribers.db"))
                             cursor = conn.cursor()
                             candidate_ids = [c['id'] for c in chunk]
                             ids_placeholders = ','.join(['?'] * len(candidate_ids))
@@ -222,7 +222,7 @@ class DeepResearchService:
         Finds batches that are 'PENDING' or 'STARTED' (but timed out/zombie) and re-queues them.
         """
         try:
-            conn = sqlite3.connect("subscribers.db")
+            conn = sqlite3.connect(os.getenv("DB_PATH", "subscribers.db"))
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             
@@ -1044,12 +1044,29 @@ Review the council's entry zone, stop-loss, and take-profit:
 - Is the take-profit achievable? (Pre-drop price may not be realistic if the fundamental story changed.)
 - Would YOU adjust any of these levels based on your research?
 
+STEP 3b: CALCULATE SELL RANGE
+Using your independent analysis, determine where to take profits:
+- sell_price_low: Conservative exit (pre-drop price recovery or BB middle)
+- sell_price_high: Optimistic exit (BB upper, SMA50, or SMA200 as resistance)
+- ceiling_exit: Maximum target = min(52-week high, BB upper + 1×ATR)
+- exit_trigger: Specific condition combining price level + technical signal
+
 STEP 4: SWOT ANALYSIS
 Based on your independent research, construct a SWOT:
 - Strengths: What competitive advantages protect this company?
 - Weaknesses: What structural problems exist?
-- Opportunities: What catalysts could drive recovery?
-- Threats: What risks could prevent recovery?
+- Opportunities: What catalysts could drive recovery? Include any tailwinds from
+  sector momentum, commodity price trends (if this stock is effectively a levered
+  bet on an underlying commodity, e.g. silver miner ~ silver spot, oil E&P ~ crude,
+  gold / copper / uranium / lithium / nat gas / agricultural), favorable interest
+  rate direction, or FX moves.
+- Threats: What risks could prevent recovery? Include any headwinds from adverse
+  sector rotation, commodity price declines, unfavorable rate moves, or FX shifts.
+
+**Key question:** Is an external driver (sector trend, commodity price, rates, FX)
+currently a bigger force on this stock than company-specific fundamentals? If yes,
+your final verdict MUST reflect where that driver is heading — do not evaluate the
+stock in isolation.
 
 STEP 5: FINAL VERDICT
 After your review, decide:
@@ -1063,13 +1080,6 @@ After your review, decide:
 > If the news driving this drop is obvious to everyone, the recovery may already be priced in.
 > Look for the REACTION to the news, not just the news itself.
 > Humility: If you can't verify the "why," the risk is higher than the council thinks.
-
-STEP 3b: CALCULATE SELL RANGE
-Using your independent analysis, determine where to take profits:
-- sell_price_low: Conservative exit (pre-drop price recovery or BB middle)
-- sell_price_high: Optimistic exit (BB upper, SMA50, or SMA200 as resistance)
-- ceiling_exit: Maximum target = min(52-week high, BB upper + 1×ATR)
-- exit_trigger: Specific condition combining price level + technical signal
 
 OUTPUT FORMAT:
 Your output must be valid JSON. All price fields must be numbers. All percentage fields must be numbers.
@@ -1095,8 +1105,8 @@ Your output must be valid JSON. All price fields must be numbers. All percentage
   "sell_price_high": <number — optimistic exit target, where to fully exit>,
   "ceiling_exit": <number — absolute max target beyond which gains unlikely>,
   "exit_trigger": "String — specific condition for selling, e.g. 'RSI > 70 and price in $142-$148 zone'",
-  "global_market_analysis": "Brief analysis of global market conditions",
-  "local_market_analysis": "Brief analysis of local/sector conditions",
+  "global_market_analysis": "Macro drivers: broad market trend, interest rate / yield curve direction (if rate-sensitive name), FX direction (if material exposure). State whether any macro force dominates this stock's setup.",
+  "local_market_analysis": "Sector and commodity drivers: sector ETF / peer direction over the last 1-4 weeks, commodity price trend if stock is a levered commodity play. State whether sector or commodity currently dominates this stock's setup.",
   "swot_analysis": {{
     "strengths": ["point 1", "point 2"],
     "weaknesses": ["point 1", "point 2"],
