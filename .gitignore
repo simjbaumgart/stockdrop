@@ -28,3 +28,18 @@ tv_meta.json
 # Secrets
 service_account.json
 defeatbeta-repo/
+
+# SQLite WAL/SHM sidecars
+*.db-wal
+*.db-shm
+
+# Tooling and OS artifacts
+.claude/
+.fuse_hidden*
+
+# Run artifacts
+logs/
+experiment_data/
+
+# Large reference material (not source)
+literature_for_improvements_of_tool/
