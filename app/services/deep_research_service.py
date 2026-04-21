@@ -8,9 +8,37 @@ from queue import Queue, Empty
 from typing import Dict, Optional, List, Any
 from datetime import datetime
 import sqlite3
+import re
 
 # Configure logging
 logger = logging.getLogger(__name__)
+
+_CITATION_STRIP_COUNTER = {"stripped": 0}
+
+# Standalone marker (whitespace on both sides) collapses to a single space.
+_STANDALONE_CITATION_RE = re.compile(r"\s+\[Source\s*\d+\]\s+")
+# Edge/mid-word marker (leading or trailing whitespace absorbed) strips fully.
+_EDGE_CITATION_RE = re.compile(r"\s*\[Source\s*\d+\]\s*")
+
+
+def _strip_citations(raw: str) -> str:
+    """
+    Remove inline [Source N] markers from deep-research JSON text.
+
+    The model sometimes emits these despite instructions; they don't break
+    json.loads but they corrupt the human-readable string values.
+
+    Preserves the word boundary: 'x [Source 1] y' -> 'x y' (standalone
+    between words keeps a single space) but 'signa [Source 1]ling' ->
+    'signaling' (mid-word gets joined).
+    """
+    if "[Source" not in raw:
+        return raw
+    cleaned = _STANDALONE_CITATION_RE.sub(" ", raw)
+    cleaned = _EDGE_CITATION_RE.sub("", cleaned)
+    if cleaned != raw:
+        _CITATION_STRIP_COUNTER["stripped"] += 1
+    return cleaned
 
 class DeepResearchService:
     def __init__(self):
@@ -1083,6 +1111,7 @@ After your review, decide:
 
 OUTPUT FORMAT:
 Your output must be valid JSON. All price fields must be numbers. All percentage fields must be numbers.
+Do NOT include inline source markers like [Source 1], [Source 2], etc. in any string value. Your search grounding is recorded separately by the API; do not repeat citation markers inside JSON fields.
 {{
   "review_verdict": "CONFIRMED" | "UPGRADED" | "ADJUSTED" | "OVERRIDDEN",
   "action": "BUY" | "BUY_LIMIT" | "WATCH" | "AVOID",
@@ -1185,6 +1214,7 @@ STEP 4: ACTION RECOMMENDATION — HOLD / SELL_PARTIAL / SELL_FULL / TIGHTEN_STOP
 STEP 5: STOP LOSS UPDATE — Can only go UP (trailing stop). Never lower it.
 
 OUTPUT FORMAT (valid JSON only):
+Do NOT include inline source markers like [Source 1], [Source 2], etc. in any string value. Your search grounding is recorded separately by the API; do not repeat citation markers inside JSON fields.
 {{
   "thesis_status": "INTACT" | "WEAKENING" | "BROKEN",
   "sell_action": "HOLD" | "SELL_PARTIAL" | "SELL_FULL" | "TIGHTEN_STOP",
@@ -1307,6 +1337,7 @@ OUTPUT FORMAT (valid JSON only):
                 if text.endswith("```"):
                     text = text[:-3]
                 text = text.strip()
+                text = _strip_citations(text)
                 if not best_text:
                     best_text = text
                 try:
@@ -1314,11 +1345,10 @@ OUTPUT FORMAT (valid JSON only):
                     if parsed and isinstance(parsed, dict):
                         return parsed
                 except json.JSONDecodeError:
-                    import re
                     m = re.search(r"\{.*\}", text, re.DOTALL)
                     if m:
                         try:
-                            return json.loads(m.group(0))
+                            return json.loads(_strip_citations(m.group(0)))
                         except json.JSONDecodeError:
                             pass
             # Fallback: try repair with Flash (sell schema)
@@ -1493,21 +1523,21 @@ REPORT CONTENT:
                 if text.endswith("```"):
                     text = text[:-3]
                 text = text.strip()
-                
+                text = _strip_citations(text)
+
                 # Try explicit JSON parsing first
                 import json
                 try:
                     return json.loads(text)
                 except:
                     pass
-                
+
                 # Regex fallback
-                import re
                 # Look for largest outer braces
                 json_match = re.search(r'\{.*\}', text, re.DOTALL)
                 if json_match:
                     try:
-                        return json.loads(json_match.group(0))
+                        return json.loads(_strip_citations(json_match.group(0)))
                     except:
                         pass
                         
