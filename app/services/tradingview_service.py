@@ -3,6 +3,11 @@ from tradingview_screener import Query, Column
 from typing import Dict, List, Optional, Set
 import concurrent.futures
 
+from app.services.tv_exchange_resolver import (
+    resolve_tv_exchange,
+    TA_UNAVAILABLE_SENTINEL,
+)
+
 class TradingViewService:
     def __init__(self):
         pass
@@ -341,95 +346,119 @@ class TradingViewService:
             
         return 0.0
 
-    def get_technical_analysis(self, symbol: str, region: str = "US") -> Dict:
+    def get_technical_analysis(
+        self,
+        symbol: str,
+        region: str = "US",
+        exchange: Optional[str] = None,
+        screener: Optional[str] = None,
+    ) -> Dict:
         """
-        Fetches technical analysis summary for a symbol (US market only).
+        Fetches technical analysis summary for a symbol.
+
+        Returns:
+          - A dict with summary/oscillators/moving_averages/indicators on success.
+          - {'ta_unavailable': True} if the exchange resolves but TA itself
+            fails (common for OTC pinks — tradingview-ta coverage is incomplete).
+            Downstream agents should weight technicals at zero, not bearish.
+          - {} if the exchange cannot be resolved at all.
         """
-        screener = "america"
-        exchange = "NASDAQ"
-        
+        resolved = resolve_tv_exchange(
+            symbol,
+            known_exchange=exchange,
+            known_screener=screener,
+        )
+        if resolved is None:
+            print(f"TV TA: could not resolve exchange for {symbol}")
+            return {}
+        exchange, screener = resolved
+
         try:
-            # First try with default exchange
             handler = TA_Handler(
                 symbol=symbol,
                 screener=screener,
                 exchange=exchange,
-                interval=Interval.INTERVAL_1_DAY
+                interval=Interval.INTERVAL_1_DAY,
             )
             analysis = handler.get_analysis()
-            
-            # If successful, extract key indicators
+
             if analysis:
                 return {
                     "summary": analysis.summary,
                     "oscillators": analysis.oscillators,
                     "moving_averages": analysis.moving_averages,
-                    "indicators": analysis.indicators
+                    "indicators": analysis.indicators,
                 }
-                
         except Exception as e:
-            print(f"Error fetching TA for {symbol} ({region}): {e}")
-            
-            # Fallback: Try without specific exchange if possible or different exchange?
-            # TradingView TA requires exchange.
-            pass
-            
+            print(f"Error fetching TA for {symbol} on {exchange}: {e}")
+            return dict(TA_UNAVAILABLE_SENTINEL)
+
         return {}
 
-    def get_technical_indicators(self, symbol: str, region: str = "US", exchange: str = None, screener: str = None) -> Dict:
+    def get_technical_indicators(
+        self,
+        symbol: str,
+        region: str = "US",
+        exchange: Optional[str] = None,
+        screener: Optional[str] = None,
+    ) -> Dict:
         """
         Fetches specific technical indicators (SMA200, RSI, BB, Volume) for Gatekeeper.
-        If exchange/screener are provided, they are used directly. Otherwise, defaults to US.
+        If exchange/screener are provided, they are used directly. Otherwise,
+        resolve via resolve_tv_exchange. Returns {} if unresolvable or TA fails.
         """
-        if not screener:
+        # Index/ETF overrides (AMEX/ARCA)
+        if symbol in ["SPY", "XLK", "XLF", "XLV", "XLY", "XLP",
+                      "XLE", "XLI", "XLC", "XLU", "XLB", "XLRE"]:
+            exchange = "AMEX"
             screener = "america"
 
-        if not exchange:
-            exchange = "NASDAQ"
+        resolved = resolve_tv_exchange(
+            symbol,
+            known_exchange=exchange,
+            known_screener=screener,
+        )
+        if resolved is None:
+            print(f"TV: could not resolve exchange for {symbol}")
+            return {}
+        exchange, screener = resolved
 
-
-        # Overrides for specific known tickers (like Indices/ETFs on AMEX/ARCA)
-        # SPY, XLK, etc are often on AMEX
-        if symbol in ["SPY", "XLK", "XLF", "XLV", "XLY", "XLP", "XLE", "XLI", "XLC", "XLU", "XLB", "XLRE"]:
-            exchange = "AMEX"
-        
         try:
             handler = TA_Handler(
                 symbol=symbol,
                 screener=screener,
                 exchange=exchange,
-                interval=Interval.INTERVAL_1_DAY
+                interval=Interval.INTERVAL_1_DAY,
             )
-            
-            # Simple retry logic for 429
+
             import time
             max_retries = 3
+            analysis = None
             for i in range(max_retries):
                 try:
                     analysis = handler.get_analysis()
                     break
                 except Exception as e:
-                    if "429" in str(e):
-                        if i < max_retries - 1:
-                            wait_time = (i + 1) * 2 # 2s, 4s, 6s...
-                            print(f"429 Limit hit for {symbol}. Retrying in {wait_time}s...")
-                            time.sleep(wait_time)
-                            continue
-                    raise e
-            
+                    if "429" in str(e) and i < max_retries - 1:
+                        wait_time = (i + 1) * 2
+                        print(f"429 Limit hit for {symbol}. Retrying in {wait_time}s...")
+                        time.sleep(wait_time)
+                        continue
+                    raise
+
             if analysis:
                 inds = analysis.indicators
                 return {
                     "close": inds.get("close", 0.0),
                     "sma200": inds.get("SMA200", 0.0),
-                    "rsi": inds.get("RSI", 50.0), 
+                    "rsi": inds.get("RSI", 50.0),
                     "bb_lower": inds.get("BB.lower", 0.0),
                     "bb_upper": inds.get("BB.upper", 0.0),
                     "volume": inds.get("volume", 0),
                 }
         except Exception as e:
             print(f"Error fetching indicators for {symbol}: {e}")
-            
+
         return {}
 
     def get_earnings_date(self, symbol: str, region: str = "US") -> Optional[int]:

@@ -519,7 +519,12 @@ class StockService:
                     print(f"Fetching technical analysis for {symbol}...")
                     import time
                     time.sleep(2) # Avoid 429 from Gatekeeper call
-                    technical_analysis = tradingview_service.get_technical_analysis(symbol, region=stock.get("region", "US"))
+                    technical_analysis = tradingview_service.get_technical_analysis(
+                        symbol,
+                        region=stock.get("region", "US"),
+                        exchange=exchange,
+                        screener=stock.get("screener"),
+                    )
                     technical_analysis["gatekeeper_findings"] = reasons # Add early
 
                     # Check for earnings proximity (Restored)
