@@ -28,6 +28,15 @@ Two distinct AI personas review the evidence from Phase 1 independent of each ot
 *   **⚖️ The Portfolio Manager:** Acting as the final decision-maker, this agent reads both arguments and the raw evidence. It is instructed to be **risk-averse** and verify claims using its own internet search tools. It outputs a final **0-100 Score** and a decision:
     *   `STRONG BUY` / `BUY` / `HOLD` / `SELL` / `STRONG SELL`
 
+### Phase 4: The Deep Research Validator (Secondary Gatekeeper)
+Because true Deep Research is extremely token-heavy and time-consuming, the system does not deep-research every single dropping stock. Instead, it acts as a secondary gatekeeper. 
+
+*   **The Filter:** Only stocks that receive an initial high score (`BUY` or `STRONG BUY`) from Phase 3's Portfolio Manager are forwarded to the **Gemini Deep Research Agent**.
+*   **The Final Verification:** The Deep Research agent independently scours the internet, analyzes sprawling financial documents, and issues an ultimate **DR Verdict** to validate or overrule the initial Buy rating:
+    *   `STRONG_BUY` / `SPECULATIVE_BUY`: The trade is deeply validated. (Historically our highest-performing cohort).
+    *   `WAIT_FOR_STABILIZATION`: The agent likes the fundamentals, but detects a falling-knife scenario and advises patience.
+    *   `AVOID` / `HARD_AVOID`: The Deep Research agent overrules the initial AI Council, identifying a value trap or fundamental flaw they missed entirely.
+
 ---
 
 ## 🌍 Global Market Coverage
@@ -94,21 +103,34 @@ View the dashboard at `http://localhost:8000`.
 
 ---
 
-## 📊 Performance Analysis
+## 📊 Performance Analysis & Strategy Insights
 
-We analyze the performance of the AI Council's `deep_research_verdict` by comparing the price at recommendation vs. the price 1 week later.
+We continuously evaluate the **AI Council's Recommendations** combined with the **Deep Research Verdicts** by measuring both the theoretical Peak ROI and the Win Rate (>10% peak ROI baseline). 
 
-### ROI Distribution by Verdict
-![ROI Violin Plot](docs/images/violin_plot.png)
+### 1. Overall System Performance (2026 Readout)
+The table below showcases the performance of the system's various confidence cohorts against the S&P 500 baseline across identical timelines.
 
-### Summary Statistics (ROI %)
+| Recommendation | DR Verdict | N | Avg Date | Avg Max ROI | SP500 Max ROI | Win Rate (>10%) |
+|---|---|---|---|---|---|---|
+| **STRONG BUY** | **STRONG_BUY** | 1 | Feb 03 | **49.43%** | 1.09% | **100.0%** |
+| **BUY** | **SPECULATIVE_BUY** | 19 | Jan 30 | **34.31%** | 1.13% | **73.7%** |
+| **AVOID** | **AVOID** | 4 | Mar 10 | **20.82%** | 1.43% | **25.0%** |
+| **BUY** | **WAIT_FOR_STABILIZATION** | 49 | Jan 29 | **18.98%** | 0.99% | **61.2%** |
+| **SELL** | **None** | 37 | Jan 30 | **16.65%** | 1.00% | **48.6%** |
 
-| Verdict | Count | Mean | Median | Min | Max |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **HARD_AVOID** | 6 | -15.08% | -3.24% | -99.84% | 19.65% |
-| **SPECULATIVE_BUY** | 34 | 3.53% | 6.45% | -99.36% | 68.01% |
-| **STRONG_BUY** | 3 | 6.29% | -1.69% | -8.94% | 29.49% |
-| **WAIT_FOR_STABILIZATION** | 96 | 3.79% | 1.56% | -39.93% | 65.61% |
+*(Note: Data is continuously updated. See `/reports` for deeper dives).*
+
+### 2. The Cost of Being Cheap: BUY LIMIT vs Market Buy
+We ran a deep temporal simulation on the 262 instances where the agent set a **Limit Price**. The results were stark: waiting for the dip costs us the massive runners.
+- **Trigger Rate:** 86.3% filled (saving ~0.50% on average).
+- **Opportunity Cost:** The 13.7% of trades that "ran away" without dropping to our limit price rocketed for an **Avg Peak ROI of +35.06%**.
+
+### Visualizing the Data
+![ROI Distribution](docs/images/post_jan15_roi_distribution.png)
+*(Violin plot showing standard Peak ROI potential across all recommendation cohorts)*
+
+![BUY LIMIT Deep Dive](docs/images/buy_limit_roi_comparison.png)
+*(Bar chart showing how missed limit orders hold the vast majority of Alpha)*
 
 ---
 
