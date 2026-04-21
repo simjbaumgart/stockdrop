@@ -106,8 +106,8 @@ class SentimentAnalyst(BaseAnalyst):
         # Analyze News Headlines
         scanned_text = " ".join([item.get('headline', '') for item in news_items])
         
-        # Analyze Transcript (First 2000 chars for brevity/speed)
-        scanned_text += " " + transcript[:2000]
+        # Analyze full Transcript
+        scanned_text += " " + transcript
         scanned_text = scanned_text.lower()
         
         pos_count = sum(scanned_text.count(w) for w in positive_keywords)

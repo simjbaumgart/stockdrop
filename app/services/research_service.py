@@ -493,9 +493,7 @@ class ResearchService:
         # We assume 'indicators' contains what currently comes from TradingViewService:
         # RSI, Moving Averages, MACD, etc.
         
-        # Truncate Transcript for Technical Agent (Cost/Relevance Optimization)
-        # We only need the context/tone, not the full text.
-        transcript_snippet = transcript[:2000] + "..." if len(transcript) > 2000 else transcript
+        transcript_snippet = transcript
 
         return f"""
 You are the **Technical Analyst Agent**.
