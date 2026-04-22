@@ -179,7 +179,9 @@ class ResearchService:
             "Competitive Landscape Agent": "Competitive",
             "Seeking Alpha Agent": "SA"
         }
-        completed_agents = []
+        # Track (short_name, success_bool) tuples so the progress line reflects
+        # real outcomes, not just "future completed without raising".
+        completed_agents: List[tuple] = []
 
         # Increase max_workers to prevent starvation when agents hit 503 and retry
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
@@ -190,11 +192,12 @@ class ResearchService:
                 executor.submit(run_agent, "Competitive Landscape Agent", self._call_agent, comp_prompt, "Competitive Landscape Agent", state): "competitive",
                 executor.submit(run_agent, "Seeking Alpha Agent", seeking_alpha_service.get_evidence, state.ticker): "seeking_alpha"
             }
-            
+
             for future in concurrent.futures.as_completed(futures):
                 agent_name, result = future.result()
-                completed_agents.append(agent_short_names.get(agent_name, agent_name))
-                
+                short = agent_short_names.get(agent_name, agent_name)
+                completed_agents.append((short, _is_real_report(result)))
+
                 if agent_name == "Technical Agent":
                     tech_report = result
                 elif agent_name == "News Agent":
@@ -206,9 +209,11 @@ class ResearchService:
                 elif agent_name == "Seeking Alpha Agent":
                     sa_report = result
 
-        # Print compact agent progress summary
-        agent_status = " ".join([f"[{name}✓]" for name in completed_agents])
-        print(f"  > Agents: {agent_status}")
+        # Print compact agent progress summary — ✓ for real reports, ✗ for error stubs
+        agent_status = " ".join([f"[{name}{'✓' if ok else '✗'}]" for name, ok in completed_agents])
+        fail_count = sum(1 for _, ok in completed_agents if not ok)
+        suffix = f"  ({fail_count} failed)" if fail_count else ""
+        print(f"  > Agents: {agent_status}{suffix}")
 
         # Print data depth summary
         try:
