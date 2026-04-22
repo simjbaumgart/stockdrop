@@ -54,6 +54,32 @@ def _is_retryable_grounding_error(e: Exception) -> bool:
     return any(k in msg for k in _RETRYABLE_ERROR_KEYWORDS)
 
 
+# Phase 1 quality gate: abort if fewer than this many core agents return real reports.
+MIN_REAL_PHASE1_REPORTS = 3
+
+# Phase 1 core agents counted by the quality gate (economics is conditional and excluded).
+PHASE1_CORE_AGENTS = ("technical", "news", "market_sentiment", "competitive", "seeking_alpha")
+
+# Report-content markers that signal a failed agent output.
+_FAILED_REPORT_MARKERS = (
+    "[Error",
+    "[SYSTEM ERROR",
+    "[SHORT INPUT DETECTED:",
+    "Market Sentiment Analysis Failed",
+    "[Grounding Error",
+)
+
+
+def _is_real_report(report: Optional[str]) -> bool:
+    """Return True if the report looks like real agent output, not an error stub."""
+    if not report or not isinstance(report, str):
+        return False
+    if len(report) < 200:
+        return False
+    stripped = report.lstrip()
+    return not any(stripped.startswith(marker) for marker in _FAILED_REPORT_MARKERS)
+
+
 from app.services.seeking_alpha_service import seeking_alpha_service
 
 # Configure logging
@@ -262,14 +288,30 @@ class ResearchService:
             council_dir = "data/council_reports"
             os.makedirs(council_dir, exist_ok=True)
             council_file = f"{council_dir}/{state.ticker}_{state.date}_council1.json"
-            
+
             with open(council_file, "w") as f:
                 json.dump(state.reports, f, indent=4)
-            
+
             print(f"  > [System] AI Council 1 Reports saved to {council_file}")
         except Exception as e:
             logger.error(f"Failed to save Council 1 reports: {e}")
-        
+
+        # --- Phase 1 Quality Gate ---
+        # Abort before Phase 2 if too few core agents produced real reports.
+        # This prevents the PM from making decisions on a pile of error stubs
+        # (which happened during the BBY outage: 5/5 agents error-stubbed, PM
+        # still produced an AVOID verdict from grounding search alone).
+        real_count, failed_agents = self._count_real_phase1_reports(state.reports)
+        if real_count < MIN_REAL_PHASE1_REPORTS:
+            msg = (
+                f"[ABORT] Phase 1 quality gate failed for {state.ticker}: "
+                f"only {real_count}/{len(PHASE1_CORE_AGENTS)} core agents returned real reports. "
+                f"Failed: {failed_agents}. Skipping Phase 2/3/4."
+            )
+            print(f"\n{'=' * 50}\n  {msg}\n{'=' * 50}\n")
+            logger.error(msg)
+            return self._build_insufficient_data_response(state, failed_agents, real_count)
+
         # --- Phase 2: Bull & Bear Perspectives (Brain) ---
         self._run_bull_bear_perspectives(state, drop_str)
         
@@ -1018,6 +1060,91 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
 """
 
     # --- Helpers ---
+
+    def _count_real_phase1_reports(self, reports: Dict[str, Optional[str]]) -> tuple:
+        """Count how many Phase 1 core agents returned a real report (not an error stub).
+
+        Returns (real_count, failed_agent_names).
+        """
+        real = 0
+        failed = []
+        for key in PHASE1_CORE_AGENTS:
+            if _is_real_report(reports.get(key)):
+                real += 1
+            else:
+                failed.append(key)
+        return real, failed
+
+    def _build_insufficient_data_response(
+        self,
+        state: MarketState,
+        failed_agents: List[str],
+        real_count: int,
+    ) -> Dict:
+        """Build a short-circuit response when Phase 1 quality gate fails.
+
+        Mirrors the shape of the normal analyze_stock return so downstream
+        callers (stock_service, database writer, dashboard) don't need
+        special-case handling. Uses recommendation='PASS_INSUFFICIENT_DATA'
+        so it never matches 'BUY' downstream.
+        """
+        total = len(PHASE1_CORE_AGENTS)
+        summary = (
+            f"Phase 1 quality gate failed: only {real_count}/{total} core sensor "
+            f"agents returned real reports (failed: {', '.join(failed_agents)}). "
+            f"Analysis aborted before Phase 2 to avoid a PM decision from error stubs."
+        )
+        detailed = (
+            f"*** INSUFFICIENT DATA — ANALYSIS ABORTED ***\n\n{summary}\n\n"
+            f"This decision point was generated without running Bull/Bear/Risk/PM/Deep Research, "
+            f"because the Phase 1 sensor agents did not produce enough usable data (likely a "
+            f"Gemini API availability incident; check the preceding log lines for exception types).\n"
+        )
+        return {
+            "recommendation": "PASS_INSUFFICIENT_DATA",
+            "executive_summary": summary,
+            "deep_reasoning_report": "",
+            "detailed_report": detailed,
+            # PM trading-level fields
+            "conviction": "NONE",
+            "drop_type": "UNKNOWN",
+            "entry_price_low": None,
+            "entry_price_high": None,
+            "stop_loss": None,
+            "take_profit_1": None,
+            "take_profit_2": None,
+            "upside_percent": None,
+            "downside_risk_percent": None,
+            "risk_reward_ratio": None,
+            "pre_drop_price": None,
+            "entry_trigger": None,
+            "reassess_in_days": None,
+            # Sell-range fields
+            "sell_price_low": None,
+            "sell_price_high": None,
+            "ceiling_exit": None,
+            "exit_trigger": None,
+            "key_factors": [],
+            # Legacy compatibility fields (pass through whatever we got, so the UI
+            # can still show error stubs and operators can see what failed)
+            "technician_report": state.reports.get("technical", ""),
+            "bull_report": "",
+            "bear_report": "",
+            "macro_report": state.reports.get("news", ""),
+            "reasoning": summary,
+            "agent_calls": state.agent_calls,
+            "checklist": {
+                "economics_run": False,
+                "drop_reason_identified": False,
+            },
+            "key_decision_points": [],
+            "market_sentiment_report": state.reports.get("market_sentiment", ""),
+            "competitive_report": state.reports.get("competitive", ""),
+            "data_depth": {},
+            # Sentinel field so dashboards/backfill can filter these out
+            "aborted_reason": "insufficient_phase1_data",
+            "failed_phase1_agents": failed_agents,
+        }
 
     def _call_agent(self, prompt: str, agent_name: str, state: Optional[MarketState] = None) -> str:
         if not self.model:
