@@ -20,7 +20,7 @@ def test_grounding():
     print(f"\nPrompt: {prompt}")
     
     try:
-        response = research_service._call_news_agent_with_grounding(prompt)
+        response = research_service._call_grounded_model(prompt, model_name="gemini-3-flash-preview", agent_context="Grounding Test")
         print("\n--- Response ---")
         print(response)
         print("\n----------------")

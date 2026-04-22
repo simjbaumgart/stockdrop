@@ -25,11 +25,11 @@ def test_competitive_agent_direct():
     print(f"Prompt: {prompt}")
     
     try:
-        response = service._call_competitive_agent(prompt)
+        response = service._call_grounded_model(prompt, model_name="gemini-3-flash-preview", agent_context="Competitive Landscape Agent")
         print("\n[Response]:")
         print(response)
-        
-        if "Context: Competitive Landscape" in response:
+
+        if "Context: Competitive Landscape Agent" in response:
             print("\nSUCCESS: Service returned response with correct context signature.")
         else:
             print("\nWARNING: Response missing context signature.")

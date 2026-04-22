@@ -5,6 +5,7 @@ from google.genai import types as new_types
 import os
 import logging
 import json
+import re
 from datetime import datetime
 from typing import Dict, List, Optional
 from app.models.market_state import MarketState
@@ -13,6 +14,19 @@ from app.services.fred_service import fred_service
 import time
 import requests
 from app.services.deep_research_service import deep_research_service
+
+# Citation strip — Gemini grounding injects [Source N] markers that corrupt JSON
+_STANDALONE_CITATION_RE = re.compile(r"\s+\[Source\s*\d+\]\s+")
+_EDGE_CITATION_RE = re.compile(r"\s*\[Source\s*\d+\]\s*")
+
+
+def _strip_citations(raw: str) -> str:
+    """Remove inline [Source N] markers that break JSON parsing."""
+    if "[Source" not in raw:
+        return raw
+    cleaned = _STANDALONE_CITATION_RE.sub(" ", raw)
+    cleaned = _EDGE_CITATION_RE.sub("", cleaned)
+    return cleaned
 from app.services.seeking_alpha_service import seeking_alpha_service
 
 # Configure logging
@@ -84,6 +98,7 @@ class ResearchService:
         tech_prompt = self._create_technical_agent_prompt(state, raw_data, drop_str)
         news_prompt = self._create_news_agent_prompt(state, raw_data, drop_str)
         comp_prompt = self._create_competitive_agent_prompt(state, drop_str)
+        sentiment_prompt = self._create_market_sentiment_prompt(state, raw_data)
         
         # Define wrapper for safe execution and result collection
         def run_agent(name, func, *args):
@@ -118,7 +133,7 @@ class ResearchService:
             futures = {
                 executor.submit(run_agent, "Technical Agent", self._call_agent, tech_prompt, "Technical Agent", state): "technical",
                 executor.submit(run_agent, "News Agent", self._call_agent, news_prompt, "News Agent", state): "news",
-                executor.submit(run_agent, "Market Sentiment Agent", self._call_market_sentiment_agent, state.ticker, state, raw_data): "sentiment",
+                executor.submit(run_agent, "Market Sentiment Agent", self._call_agent, sentiment_prompt, "Market Sentiment Agent", state): "sentiment",
                 executor.submit(run_agent, "Competitive Landscape Agent", self._call_agent, comp_prompt, "Competitive Landscape Agent", state): "competitive",
                 executor.submit(run_agent, "Seeking Alpha Agent", seeking_alpha_service.get_evidence, state.ticker): "seeking_alpha"
             }
@@ -719,6 +734,9 @@ If the drop is a mystery or just general market noise with no specific catalyst 
         return f"""
 You are the **Macro Economics Agent**.
 Your goal is to analyze the US and World Economic environment and its potential impact on {state.ticker}.
+
+IMPORTANT: Before starting your analysis, verify the correct company name and sector for ticker {state.ticker} via Google Search. Do NOT guess — foreign tickers (e.g., OTC, ADRs) are easily confused with similarly-named companies. Base your entire analysis on the verified company.
+
 Use the internet to find additional data if needed.
 
 INPUT DATA (FRED API):
@@ -739,6 +757,8 @@ Headers: "Macro Environment", "Impact on {state.ticker}", "Risk Level".
         return f"""
 You are the **Competitive Landscape Agent**.
 Your goal is to create a detailed competitive landscape analysis for {state.ticker} using Google Search.
+
+IMPORTANT: Before starting your analysis, verify the correct company name and sector for ticker {state.ticker} via Google Search. Do NOT guess — foreign tickers (e.g., OTC, ADRs) are easily confused with similarly-named companies. Base your entire analysis on the verified company.
 
 CONTEXT: The stock has dropped {drop_str}. We need to know if this is a company-specific issue or a sector-wide issue.
 
@@ -1057,8 +1077,8 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
             # 10 is STOP_REASON_FUNCTION_CALL
             if finish_reason == 10 or finish_reason == "STOP_REASON_FUNCTION_CALL":
                  
-                 # RETRY LOGIC (Pro only)
-                 if retry_count < 1 and "pro" in model_name:
+                 # RETRY LOGIC (Pro and Flash)
+                 if retry_count < 1:
                      logger.warning(f"Model {model_name} returned FunctionCall (Attempt {retry_count+1}). Retrying...")
                      return self._call_grounded_model(prompt, model_name, agent_context, retry_count=1)
                  
@@ -1098,241 +1118,76 @@ Process continuing but this agent's output is compromised.
             logger.error(f"Grounding Call Failed for {agent_context} (Model: {model_name}): {e}")
             
             # STANDARD RETRY ON EXCEPTION (Non-503 or already fallback)
-            if retry_count < 1 and "pro" in model_name:
-                 logger.info("Exception with Pro. Retrying same model after 2s delay...")
+            if retry_count < 1:
+                 logger.info(f"Exception with {model_name}. Retrying same model after 2s delay...")
                  time.sleep(2)
                  return self._call_grounded_model(prompt, model_name, agent_context, retry_count=1)
             
             print(f"\\n!!! GROUNDING EXCEPTION ({agent_context}): {e} !!!\\n")
             return f"[Error in {agent_context}: {e}]"
 
-    def _call_competitive_agent(self, prompt: str) -> str:
-        """
-        Calls Gemini 3 with Google Search Grounding for the Competitive Landscape Agent.
-        """
-        try:
-            logger.info("Calling Competitive Landscape Agent (Gemini 2.5 Flash + Search)...")
-            
-            config = {
-                "tools": [
-                    {"google_search": {}}
-                ],
-                "temperature": 0.7
-            }
-            
-            # Using the exact same model as News Agent for consistency
-            model_name = "gemini-3-flash-preview"
-            
-            response = self.grounding_client.models.generate_content(
-                model=model_name,
-                contents=prompt,
-                config=config
-            )
-            
-            # Format and return
-            report_text = self._format_citations(response)
-            report_text += f"\n\n(Context: Competitive Landscape | Model: {model_name})"
-            return report_text
-            
-        except Exception as e:
-            logger.error(f"Competitive Agent Failed: {e}")
-            return f"[Error in Competitive Agent: {e}]"
+    def _create_market_sentiment_prompt(self, state: MarketState, raw_data: Dict) -> str:
+        """Builds the prompt for the Market Sentiment Agent."""
+        ticker = state.ticker
 
-    COMPARISON_DIR = "data/flash25_gemini3_comparison"
-    COMPARISON_LIMIT = 20
-
-    def _call_news_agent_with_grounding(self, prompt: str) -> str:
-        """
-        Calls the Google GenAI V2 SDK with Google Search Grounding enabled using Gemini 3.
-        Also runs a comparison with Flash 2.5 for the first 20 runs.
-        """
-        try:
-            logger.info("Calling News Agent with Google Search Grounding (Gemini 2.5 Flash)...")
-            
-            # Use dictionary config as requested for Gemini 3
-            config = {
-                "tools": [
-                    {"google_search": {}}
-                ],
-                "temperature": 0.7
-            }
-
-            model_name = "gemini-3-flash-preview" 
-
-            # 1. Main Call (Gemini 3)
-            response = self.grounding_client.models.generate_content(
-                model=model_name,
-                contents=prompt,
-                config=config
-            )
-
-            # Process Grounding Metadata and Add Citations
-            gemini3_text = self._format_citations(response)
-            gemini3_text += f"\n\n(Generated with {model_name} & Google Search Grounding)"
-
-            # --- EXPERIMENT: Flash 2.5 Comparison ---
-            try:
-                # Check run count
-                os.makedirs(self.COMPARISON_DIR, exist_ok=True)
-                existing_files = [f for f in os.listdir(self.COMPARISON_DIR) if f.endswith("_gemini3.txt")]
-                
-                if False: # Disabled Comparison since we are now using Flash as main
-                    logger.info(f"[Experiment] Running Flash 2.5 Comparison ({len(existing_files) + 1}/{self.COMPARISON_LIMIT})...")
-                    
-                    flash_model_name = "gemini-2.0-flash-exp" # Using Flash 2.0 Exp as proxy/alias for 2.5 if 2.5 isn't available, or assuming user meant 'gemini-2.0-flash-exp' which is often the 'flash 2.5' preview.
-                    # Wait, user explicitly said "gemini-2.5-flash". I should use that string.
-                    # If it fails, I'll log it.
-                    flash_model_name = "gemini-2.0-flash-exp" # Re-reading user request: "flash 2.5". 
-                    # Actually, usually "gemini-2.0-flash-exp" IS the preview for the next gen. 
-                    # But if user insists on 2.5, I should try "gemini-2.5-flash" if it exists in their mind/setup.
-                    # However, strictly speaking, as of late 2024/early 2025, it's likely "gemini-2.0-flash". 
-                    # Let's stick to the prompt's request: "gemini-2.5-flash" but I will create a fallback or just use the string.
-                    # Wait, in the previous turn "gemini-2.5-flash" was initialized in __init__ for Economics agent.
-                    # So I should reuse that model string or just "gemini-2.0-flash-exp" if I suspect typo?
-                    # User said: "use ... gemini-2.5-flash". I will use THAT string.
-                    
-                    flash_response = self.grounding_client.models.generate_content(
-                        model="gemini-2.0-flash-exp", # I will use the actual valid model name likely available.
-                        # Actually, looking at previous turn, I used 'gemini-2.5-flash' for Economics Agent.
-                        # I will use 'gemini-2.0-flash-exp' here as I suspect 2.5 might be a typo for 2.0 Flash Exp which is the new one.
-                        # OR I will simply use the string "gemini-2.0-flash-exp" as it is the standard "Flash 2.0" preview.
-                        # Let's check if I can double check available models? No.
-                        # I will use 'gemini-2.0-flash-exp' to be safe for "Flash 2.5" request as it's often confused.
-                        # NO, I must follow user instruction. If they mapped 2.5 to something else, fine.
-                        # I will use "gemini-2.0-flash-exp" because that is the actual model name for the new Flash usually.
-                        # Wait, let's look at the Economics agent valid model name in __init__ from Step 204.
-                        # I added `self.flash_model = genai.GenerativeModel('gemini-3-flash-preview')`.
-                        # So I should use 'gemini-3-flash-preview' here too to be consistent.
-                        
-                        contents=prompt,
-                        config=config
-                    )
-                    
-                    flash_text = self._format_citations(flash_response)
-                    flash_text += f"\n\n(Generated with gemini-3-flash-preview & Google Search Grounding)"
-                    
-                    # Save to files
-                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    # Need ticker from somewhere? Prompt doesn't have it easily.
-                    # I'll just use timestamp and maybe a hash of prompt for uniqueness.
-                    # Or just timestamp.
-                    
-                    with open(f"{self.COMPARISON_DIR}/{timestamp}_gemini3.txt", "w") as f:
-                        f.write(gemini3_text)
-                        
-                    with open(f"{self.COMPARISON_DIR}/{timestamp}_flash25.txt", "w") as f:
-                        f.write(flash_text)
-                        
-                    logger.info(f"[Experiment] Saved comparison to {self.COMPARISON_DIR}")
-
-            except Exception as exp_e:
-                logger.error(f"[Experiment] Comparison failed: {exp_e}")
-
-            return gemini3_text
-
-        except Exception as e:
-            logger.error(f"Grounding Call Failed: {e}")
-            return f"[Grounding Error: {e}] - Falling back to standard model..."
-
-    def _call_market_sentiment_agent(self, ticker: str, state: MarketState, raw_data: Dict) -> str:
-        """
-        Calls the Market Sentiment Agent using Gemini 3 Flash with Grounding.
-        Analyzes Home Market, Business Markets, and US Market.
-        """
-        if not self.grounding_client:
-            return "Market Sentiment Agent Unavailable (No Grounding Client)"
-
-        logger.info(f"Calling Market Sentiment Agent with gemini-3-flash-preview + Grounding...")
-        
-        # --- MARKET NEWS INTEGRATION ---
-        # Extract broader market news (SPY, DIA, QQQ) if available
         market_news_str = ""
-        news_items = raw_data.get('news_items', [])
+        news_items = raw_data.get('news_items', []) if raw_data else []
         found_market_news = False
-        
+
         for n in news_items:
-            # We specifically look for the "Market News" provider tag we added in StockService
             if n.get('provider') == 'Market News (Benzinga)':
-                 headline = n.get('headline', 'No Headline')
-                 date = n.get('datetime_str', 'N/A')
-                 summary = n.get('summary', '')
-                 market_news_str += f"- {date}: {headline}\n  Summary: {summary}\n"
-                 found_market_news = True
-        
+                headline = n.get('headline', 'No Headline')
+                date = n.get('datetime_str', 'N/A')
+                summary = n.get('summary', '')
+                market_news_str += f"- {date}: {headline}\n  Summary: {summary}\n"
+                found_market_news = True
+
         if found_market_news:
             market_news_str = f"\n        PROVIDED BROAD MARKET CONTEXT (Important):\n{market_news_str}\n"
 
-        
-        # 1. Determine Home Market / Business Context implicitly via LLM Prompt or Heuristic
-        # We will let the LLM do the heavy lifting of identifying business regions to be more dynamic.
-        
-        prompt = f"""
-        You are the **Market Sentiment Agent**. 
+        return f"""
+        You are the **Market Sentiment Agent**.
         Your goal is to analyze the general market sentiment and specifically the markets relevant to {ticker}.
-        
+
+        IMPORTANT: Before starting your analysis, verify the correct company name and sector for ticker {ticker} via Google Search. Do NOT guess — foreign tickers (e.g., OTC, ADRs) are easily confused with similarly-named companies. Base your entire analysis on the verified company.
+
         CONTEXT:
         - Date: {state.date}
         - Focus: TODAY and YESTERDAY only.
         {market_news_str}
-        
+
         TASK:
         1. **Identify Markets**:
            - **Listing Market**: Where is {ticker} listed? (e.g. Frankfurt -> DAX, London -> FTSE).
            - **Business Market**: Where does {ticker} generate most of its revenue? (e.g. US, China, Europe).
-        
+
         2. **Analyze Sentiment (Live Search)**:
            - Use Google Search to find market summaries for **TODAY** and **YESTERDAY**.
            - **MANDATORY**: Always check the **US MARKET direction** (S&P 500, Nasdaq, Dow Jones) even if the stock is not US-listed.
            - Check the **Listing Market** sentiment (e.g. DAX if German).
            - Check the **Business Market** sentiment if different (e.g. if a German company sells mostly in US, US sentiment is double important).
-        
+
         3. **Synthesize**:
            - Is the general market environment Risk-On or Risk-Off?
            - Are we in a broad sell-off or a rally?
            - How does this affect {ticker}?
-        
+
         OUTPUT FORMAT:
         ## Market Identification
         - **Home Market**: [Exchange/Country]
         - **Primary Business Region**: [Region]
-        
+
         ## Global/US Market Context (Today/Yesterday)
         - **US Indices (SPX/NDX)**: [Direction: Bullish/Bearish/Neutral]
         - **Commentary**: [Details on US market moves today/yesterday]
-        
+
         ## Home/Local Market Context
         - **Index ([Name])**: [Direction]
         - **Commentary**: [Details on local market]
-        
+
         ## Market Sentiment Summary
         [Concise summary of whether the market environment is a Headwind or Tailwind for {ticker} right now.]
         """
-
-        try:
-            # Configure for Gemini 3 Flash (using 'gemini-2.0-flash-exp' or 'gemini-3-flash-preview' if available)
-            # User requested 'gemini-3-flash-preview'. We will try to use the flash model configured in init
-            # or fallback to the experiment string.
-            
-            # Use dictionary config for tools
-            config = {
-                "tools": [{"google_search": {}}],
-                "temperature": 0.5 # Lower temp for factual market data
-            }
-            
-            # Prioritize Gemini 3.5 Flash as requested
-            model_name = "gemini-3-flash-preview"
-            
-            response = self.grounding_client.models.generate_content(
-                model=model_name,
-                contents=prompt,
-                config=config
-            )
-            
-            return self._format_citations(response) + f"\n\n(Generated with {model_name} & Google Search)"
-
-        except Exception as e:
-            logger.error(f"Market Sentiment Agent Failed: {e}")
-            return f"Market Sentiment Analysis Failed: {e}"
 
     def _format_citations(self, response) -> str:
         """
@@ -1399,19 +1254,24 @@ Process continuing but this agent's output is compromised.
     def _extract_json(self, text: str) -> Optional[Dict]:
         """
         Robust JSON extractor that handles markdown code blocks.
+        Strips Gemini [Source N] citation markers before parsing.
         """
         try:
+            # Strip citation markers that corrupt JSON structure
+            text = _strip_citations(text)
+
             # Find the start and end of the JSON object
             # Simple heuristic: Look for first { and last }
             start = text.find('{')
             end = text.rfind('}')
-            
+
             if start != -1 and end != -1:
                 json_str = text[start:end+1]
                 return json.loads(json_str)
             return None
         except Exception as e:
             logger.error(f"Failed to extract JSON: {e}")
+            logger.error(f"Raw text (first 500 chars): {text[:500]}")
             return None
 
     def _format_full_report(self, state: MarketState, deep_report: str = "", evidence_barometer: Dict = None) -> str:

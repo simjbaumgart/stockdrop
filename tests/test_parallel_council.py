@@ -41,26 +41,8 @@ class TestParallelCouncil(unittest.TestCase):
                     state.agent_calls += 1
             return f"{agent_name} Report"
             
-        # We also need to mock _call_market_sentiment_agent and _call_competitive_agent if they are separate
-        # In current impl, _call_agent calls them or they are called directly in analyze_stock loop.
-        
-        # Let's inspect analyze_stock loop in research_service.py:
-        # It calls:
-        # 1. _call_agent(tech)
-        # 2. _call_agent(news)
-        # 3. _call_market_sentiment_agent(ticker, state)
-        # 4. _call_agent(comp)
-        
-        # We need to mock these methods on the instance
+        # All Phase 1 agents (tech, news, sentiment, comp) now go through _call_agent.
         self.service._call_agent = MagicMock(side_effect=delayed_call)
-        
-        def delayed_sentiment(ticker, state):
-            time.sleep(1)
-            with self.service.lock:
-                state.agent_calls += 1
-            return "Sentiment Report"
-            
-        self.service._call_market_sentiment_agent = MagicMock(side_effect=delayed_sentiment)
         
         # Input Data
         raw_data = {"change_percent": -5.0, "news_items": [], "indicators": {}}

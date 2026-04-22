@@ -13,6 +13,7 @@ class GoogleStorageService:
         self.bucket_name = os.getenv('GOOGLE_STORAGE_BUCKET')
         self.client = None
         self.bucket = None
+        self._quota_exceeded = False  # Circuit breaker for quota errors
         self._authenticate()
 
     def _authenticate(self):
@@ -79,6 +80,10 @@ class GoogleStorageService:
             print("Storage client not initialized. Skipping upload.")
             return
 
+        if self._quota_exceeded:
+            # Circuit breaker: don't retry uploads after quota error this session
+            return
+
         try:
             self.bucket = self.client.bucket(self.bucket_name)
         except Exception as e:
@@ -128,7 +133,12 @@ class GoogleStorageService:
             blob.upload_from_string(new_content.getvalue(), content_type='text/csv')
             print(f"Uploaded data to {self.bucket_name}/{file_name}")
         except Exception as e:
-            print(f"Error uploading to GCS: {e}")
+            error_str = str(e).lower()
+            if "quota" in error_str or "storagequotaexceeded" in error_str:
+                print(f"GCS quota exceeded — disabling uploads for this session.")
+                self._quota_exceeded = True
+            else:
+                print(f"Error uploading to GCS: {e}")
 
     def save_locally(self, data_dict):
         """

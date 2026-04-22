@@ -98,6 +98,7 @@ def _run_council1_sensors(ticker: str, raw_data: Dict) -> Dict[str, str]:
     tech_prompt = research_service._create_technical_agent_prompt(state, raw_data, drop_str)
     news_prompt = research_service._create_news_agent_prompt(state, raw_data, drop_str)
     comp_prompt = research_service._create_competitive_agent_prompt(state, drop_str)
+    sentiment_prompt = research_service._create_market_sentiment_prompt(state, raw_data)
 
     def run_agent(name, func, *args):
         try:
@@ -121,8 +122,8 @@ def _run_council1_sensors(ticker: str, raw_data: Dict) -> Dict[str, str]:
             ): "news",
             executor.submit(
                 run_agent, "Market Sentiment Agent",
-                research_service._call_market_sentiment_agent,
-                state.ticker, state, raw_data
+                research_service._call_agent,
+                sentiment_prompt, "Market Sentiment Agent", state
             ): "sentiment",
             executor.submit(
                 run_agent, "Competitive Landscape Agent", research_service._call_agent,

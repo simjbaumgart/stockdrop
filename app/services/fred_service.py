@@ -1,6 +1,7 @@
 import os
 import datetime
 import logging
+import time
 import requests
 from typing import Dict, Any, Optional, Tuple
 
@@ -79,26 +80,36 @@ class FredService:
             "limit": 1,
         }
 
-        try:
-            response = requests.get(self.BASE_URL, params=params, timeout=10)
-            response.raise_for_status()
-            json_data = response.json()
-            observations = json_data.get("observations", [])
-            if observations:
-                latest = observations[0]
-                value = latest.get("value", "N/A")
-                date = latest.get("date", "N/A")
-                self._cache[series_id] = {
-                    "value": value,
-                    "date": date,
-                    "fetched_at": now,
-                    "stale": False,
-                }
-                return value, date
-            return "N/A", "N/A"
+        max_retries = 3
+        last_error = None
+        for attempt in range(max_retries):
+            try:
+                response = requests.get(self.BASE_URL, params=params, timeout=10)
+                response.raise_for_status()
+                json_data = response.json()
+                observations = json_data.get("observations", [])
+                if observations:
+                    latest = observations[0]
+                    value = latest.get("value", "N/A")
+                    date = latest.get("date", "N/A")
+                    self._cache[series_id] = {
+                        "value": value,
+                        "date": date,
+                        "fetched_at": now,
+                        "stale": False,
+                    }
+                    return value, date
+                return "N/A", "N/A"
 
-        except Exception as e:
-            logger.warning(f"FRED fetch failed for {series_id}: {e}")
+            except Exception as e:
+                last_error = e
+                if attempt < max_retries - 1:
+                    wait = 2 ** attempt  # 1s, 2s
+                    logger.info(f"FRED retry {attempt + 1}/{max_retries} for {series_id} after {wait}s: {e}")
+                    time.sleep(wait)
+
+        if last_error:
+            logger.warning(f"FRED fetch failed for {series_id} after {max_retries} attempts: {last_error}")
             if cached:
                 cached["stale"] = True
                 self._cache[series_id] = cached

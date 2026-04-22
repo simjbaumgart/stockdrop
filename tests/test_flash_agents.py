@@ -36,7 +36,7 @@ def test_agents():
     # 2. Test News Agent
     print("\n--- Testing News Agent (Grounding) ---")
     try:
-        # News Agent uses _call_agent -> _call_news_agent_with_grounding
+        # News Agent uses _call_agent -> _call_grounded_model
         # It requires grounding client.
         if not service.grounding_client:
             print("Skipping News Agent: No Grounding Client.")
@@ -50,7 +50,7 @@ def test_agents():
     # 3. Test Competitive Agent
     print("\n--- Testing Competitive Agent (Grounding) ---")
     try:
-        # Competitive Agent uses _call_agent -> _call_competitive_agent (via our new dispatch)
+        # Competitive Agent uses _call_agent -> _call_grounded_model
         if not service.grounding_client:
              print("Skipping Competitive Agent: No Grounding Client.")
         else:
