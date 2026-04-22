@@ -27,6 +27,33 @@ def _strip_citations(raw: str) -> str:
     cleaned = _STANDALONE_CITATION_RE.sub(" ", raw)
     cleaned = _EDGE_CITATION_RE.sub("", cleaned)
     return cleaned
+
+
+# Grounding retry policy: 1 initial attempt + up to MAX_GROUNDING_RETRIES retries
+MAX_GROUNDING_RETRIES = 2
+
+# Substrings that indicate a transient, retryable error from the Gemini grounding API.
+_RETRYABLE_ERROR_KEYWORDS = (
+    "Connection reset",
+    "[Errno 54]",
+    "503",
+    "504",
+    "UNAVAILABLE",
+    "RESOURCE_EXHAUSTED",
+    "DEADLINE_EXCEEDED",
+    "timed out",
+    "Timeout",
+)
+
+
+def _is_retryable_grounding_error(e: Exception) -> bool:
+    """Return True for transient network/API errors that are worth retrying."""
+    if isinstance(e, (ConnectionResetError, TimeoutError, ConnectionError)):
+        return True
+    msg = str(e)
+    return any(k in msg for k in _RETRYABLE_ERROR_KEYWORDS)
+
+
 from app.services.seeking_alpha_service import seeking_alpha_service
 
 # Configure logging
@@ -1053,8 +1080,17 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
     def _call_grounded_model(self, prompt: str, model_name: str, agent_context: str = "", retry_count: int = 0) -> str:
         """
         Generic helper to call a model with Google Search Grounding enabled.
-        Includes retry logic for Gemini 3 Pro if it fails to ground correctly.
+
+        Retry policy:
+        - FunctionCall (finish_reason 10, model failed to auto-ground): up to
+          MAX_GROUNDING_RETRIES retries with no backoff.
+        - Retryable exceptions (ConnectionReset, 503/504, UNAVAILABLE, timeouts):
+          up to MAX_GROUNDING_RETRIES retries with exponential backoff (2s, 4s).
+        - Non-retryable exceptions: fail fast, return error stub.
+        - 3.1-pro 503 specifically falls back to 3-pro on the first attempt
+          (model-availability issue, no point burning retries on a known-bad preview).
         """
+        attempt_label = f"attempt {retry_count + 1}/{MAX_GROUNDING_RETRIES + 1}"
         try:
             config = new_types.GenerateContentConfig(
                 tools=[{"google_search": {}}],
@@ -1062,69 +1098,71 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
                 # Use GenAI's typed config for HTTP options (timeout is in millis if integer on some SDK versions, but 600 ensures a long enough wait in any unit)
                 http_options=new_types.HttpOptions(timeout=600000)
             )
-            
+
             response = self.grounding_client.models.generate_content(
                 model=model_name,
                 contents=prompt,
                 config=config
             )
 
-            # Check for FunctionCall (finish_reason 10) which indicates failure to auto-ground on Pro
-            # We access the candidate safely
+            # Check for FunctionCall (finish_reason 10) which indicates failure to auto-ground
             candidate = response.candidates[0] if response.candidates else None
             finish_reason = candidate.finish_reason if candidate else None
-            
+
             # 10 is STOP_REASON_FUNCTION_CALL
             if finish_reason == 10 or finish_reason == "STOP_REASON_FUNCTION_CALL":
-                 
-                 # RETRY LOGIC (Pro and Flash)
-                 if retry_count < 1:
-                     logger.warning(f"Model {model_name} returned FunctionCall (Attempt {retry_count+1}). Retrying...")
-                     return self._call_grounded_model(prompt, model_name, agent_context, retry_count=1)
-                 
-                 # FAILURE VISIBILITY
-                 msg = f"""
+
+                if retry_count < MAX_GROUNDING_RETRIES:
+                    logger.warning(f"Model {model_name} returned FunctionCall ({attempt_label}) in {agent_context}. Retrying...")
+                    return self._call_grounded_model(prompt, model_name, agent_context, retry_count=retry_count + 1)
+
+                msg = f"""
 ################################################################################
 [CRITICAL WARNING] GROUNDING FAILURE IN {agent_context.upper()}
 Model: {model_name}
-Reason: Model returned a Function Call (10) instead of grounded text despite retry.
+Reason: Model returned a Function Call (10) instead of grounded text despite {MAX_GROUNDING_RETRIES} retries.
 Process continuing but this agent's output is compromised.
 ################################################################################
 """
-                 print(msg)
-                 logger.error(msg)
-                 return f"[SYSTEM ERROR: Grounding failed for {agent_context}. Model returned invalid Function Call.]"
-            
+                print(msg)
+                logger.error(msg)
+                return f"[SYSTEM ERROR: Grounding failed for {agent_context}. Model returned invalid Function Call.]"
+
             # Format and return with citations
             report_text = self._format_citations(response)
             report_text += f"\n\n(Context: {agent_context} | Model: {model_name} | Grounding: Enabled)"
             return report_text
-            
-        except Exception as e:
-            # Check for 503 using string matching on the exception (New SDK errors often contain the HTTP code)
-            is_503 = getattr(e, "code", None) == 503 or "503" in str(e)
-            
-            if is_503 and "pro" in model_name and "3.1" in model_name:
-                logger.warning(f"503 UNAVAILABLE for {model_name} in {agent_context}. Falling back to gemini-3-pro-preview...")
-                fallback_name = "gemini-3-pro-preview"
-                try:
-                    # Give it a short pause before retrying with the fallback
-                    time.sleep(2)
-                    return self._call_grounded_model(prompt, fallback_name, agent_context, retry_count=2) # retry_count=2 prevents further 3.1 retries
-                except Exception as fallback_e:
-                    logger.error(f"Fallback model also failed for {agent_context}: {fallback_e}")
-                    return f"[Error in {agent_context} (Fallback): {fallback_e}]"
 
-            logger.error(f"Grounding Call Failed for {agent_context} (Model: {model_name}): {e}")
-            
-            # STANDARD RETRY ON EXCEPTION (Non-503 or already fallback)
-            if retry_count < 1:
-                 logger.info(f"Exception with {model_name}. Retrying same model after 2s delay...")
-                 time.sleep(2)
-                 return self._call_grounded_model(prompt, model_name, agent_context, retry_count=1)
-            
-            print(f"\\n!!! GROUNDING EXCEPTION ({agent_context}): {e} !!!\\n")
-            return f"[Error in {agent_context}: {e}]"
+        except Exception as e:
+            err_type = type(e).__name__
+            err_msg = str(e)
+            is_503 = getattr(e, "code", None) == 503 or "503" in err_msg
+
+            # 3.1-pro 503 → fall back to 3-pro on the first attempt only.
+            # Both models being unavailable is a real outage; let the fallback run its own retry budget.
+            if is_503 and "pro" in model_name and "3.1" in model_name and retry_count == 0:
+                logger.warning(f"503 UNAVAILABLE for {model_name} in {agent_context} ({err_type}). Falling back to gemini-3-pro-preview...")
+                time.sleep(2)
+                try:
+                    return self._call_grounded_model(prompt, "gemini-3-pro-preview", agent_context, retry_count=0)
+                except Exception as fallback_e:
+                    logger.error(f"Fallback model also failed for {agent_context} ({type(fallback_e).__name__}): {fallback_e}")
+                    return f"[Error in {agent_context} (Fallback): {type(fallback_e).__name__}: {fallback_e}]"
+
+            retryable = _is_retryable_grounding_error(e)
+            logger.error(f"Grounding call failed for {agent_context} (model={model_name}, type={err_type}, retryable={retryable}, {attempt_label}): {err_msg}")
+
+            if retryable and retry_count < MAX_GROUNDING_RETRIES:
+                wait = 2 ** (retry_count + 1)  # 2s, 4s
+                logger.info(f"Retrying {agent_context} ({model_name}) in {wait}s ({err_type})...")
+                time.sleep(wait)
+                return self._call_grounded_model(prompt, model_name, agent_context, retry_count=retry_count + 1)
+
+            if not retryable:
+                logger.warning(f"Non-retryable exception for {agent_context} ({err_type}); failing fast.")
+
+            print(f"\n!!! GROUNDING EXCEPTION ({agent_context}, {err_type}): {e} !!!\n")
+            return f"[Error in {agent_context}: {err_type}: {e}]"
 
     def _create_market_sentiment_prompt(self, state: MarketState, raw_data: Dict) -> str:
         """Builds the prompt for the Market Sentiment Agent."""
