@@ -139,9 +139,10 @@ def load_council_reports(symbol: str, date_str: str) -> Dict:
     Falls back to council1.json (Phase 1 only: technical, news, sentiment, etc.).
     Returns a merged dict with all available agent reports.
     """
+    from app.utils.ticker_paths import safe_ticker_path
     council_dir = "data/council_reports"
-    council2_path = f"{council_dir}/{symbol}_{date_str}_council2.json"
-    council1_path = f"{council_dir}/{symbol}_{date_str}_council1.json"
+    council2_path = f"{council_dir}/{safe_ticker_path(symbol)}_{date_str}_council2.json"
+    council1_path = f"{council_dir}/{safe_ticker_path(symbol)}_{date_str}_council1.json"
 
     merged = {}
 
