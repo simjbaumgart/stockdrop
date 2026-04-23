@@ -21,7 +21,7 @@ def is_date(string):
         # Simple heuristic: must have at least one digit
         if not re.search(r'\d', string):
             return False
-        
+
         # Must strictly be a date format
         parser.parse(string)
         return True
@@ -36,13 +36,13 @@ def prune_data(data, max_words=3):
     """
     Recursively removes entries from dictionaries where the value
     is a string with <= max_words, UNLESS it is a date.
-    
+
     Args:
         data: The JSON-compatible data (dict, list, etc.)
         max_words: Threshold for word count (default 3)
-        
+
     Returns:
-        The pruned data (a new copy is NOT guaranteed, modifies in place usually, 
+        The pruned data (a new copy is NOT guaranteed, modifies in place usually,
         but for lists we rebuild).
     """
     if isinstance(data, dict):
@@ -56,10 +56,10 @@ def prune_data(data, max_words=3):
                         keys_to_remove.append(key)
             elif isinstance(value, (dict, list)):
                 prune_data(value, max_words)
-        
+
         for key in keys_to_remove:
             del data[key]
-            
+
     elif isinstance(data, list):
         # Rebuild list filtering out short strings
         new_list = []
@@ -73,7 +73,7 @@ def prune_data(data, max_words=3):
             else:
                 # Numbers, bools, etc.
                 new_list.append(item)
-        
+
         data[:] = new_list
-        
+
     return data

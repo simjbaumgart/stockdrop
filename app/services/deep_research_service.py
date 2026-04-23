@@ -1602,9 +1602,12 @@ REPORT CONTENT:
         """
         try:
             import glob
-            # Pattern: data/council_reports/{symbol}_{date}_council1.json
+            from app.utils.ticker_paths import safe_ticker_path
+            # Pattern: data/council_reports/{safe_symbol}_{date}_council1.json
             report_dir = "data/council_reports"
-            expected_file = os.path.join(report_dir, f"{symbol}_{date_str}_council1.json")
+            expected_file = os.path.join(
+                report_dir, f"{safe_ticker_path(symbol)}_{date_str}_council1.json"
+            )
             
             if os.path.exists(expected_file):
                  with open(expected_file, 'r') as f:

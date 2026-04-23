@@ -14,6 +14,7 @@ from app.services.fred_service import fred_service
 import time
 import requests
 from app.services.deep_research_service import deep_research_service
+from app.utils.ticker_paths import safe_ticker_path
 
 # Citation strip — Gemini grounding injects [Source N] markers that corrupt JSON
 _STANDALONE_CITATION_RE = re.compile(r"\s+\[Source\s*\d+\]\s+")
@@ -292,7 +293,7 @@ class ResearchService:
         try:
             council_dir = "data/council_reports"
             os.makedirs(council_dir, exist_ok=True)
-            council_file = f"{council_dir}/{state.ticker}_{state.date}_council1.json"
+            council_file = f"{council_dir}/{safe_ticker_path(state.ticker)}_{state.date}_council1.json"
 
             with open(council_file, "w") as f:
                 json.dump(state.reports, f, indent=4)
@@ -327,7 +328,7 @@ class ResearchService:
         try:
             council_dir = "data/council_reports"
             os.makedirs(council_dir, exist_ok=True)
-            council2_file = f"{council_dir}/{state.ticker}_{state.date}_council2.json"
+            council2_file = f"{council_dir}/{safe_ticker_path(state.ticker)}_{state.date}_council2.json"
 
             with open(council2_file, "w") as f:
                 json.dump(state.reports, f, indent=4)
@@ -692,7 +693,7 @@ Use headers: "Technical Signal", "Oversold Status", "Context from Report", "Verd
         try:
             log_dir = "data/news"
             os.makedirs(log_dir, exist_ok=True)
-            log_file = f"{log_dir}/{state.ticker}_{state.date}_news_context.txt"
+            log_file = f"{log_dir}/{safe_ticker_path(state.ticker)}_{state.date}_news_context.txt"
             
             with open(log_file, "w") as f:
                 f.write(f"NEWS CONTEXT FOR {state.ticker} ({state.date})\n")
@@ -802,7 +803,7 @@ Otherwise, state "NEEDS_ECONOMICS: FALSE".
 DROP REASON CHECK:
 Also, explicitly state on a new line: "REASON_FOR_DROP_IDENTIFIED: YES" if you have found a specific news event or report detail explaining the drop (e.g. "missed earnings", "CEO resignation", "lawsuit").
 If the drop is a mystery or just general market noise with no specific catalyst found, state "REASON_FOR_DROP_IDENTIFIED: NO".
-"""
+{self._news_block_for(state, "news")}"""
 
     def _create_economics_agent_prompt(self, state: MarketState, macro_data: Dict) -> str:
         return f"""
@@ -864,7 +865,7 @@ Structure it as follows:
 - Point 1
 - Point 2
 - Point 3
-"""
+{self._news_block_for(state, "competitive")}"""
 
     def _create_bull_prompt(self, state: MarketState, drop_str: str) -> str:
         return f"""
@@ -940,7 +941,7 @@ REALISTIC EXIT CEILING (Bear's Upside Limit):
 - Identify the key resistance level that would cap any bounce (e.g. SMA50, BB upper, pre-drop price, volume resistance).
 - Where would the "easy money" run out? (e.g. "Volume dries up above $142, institutional selling resumes at SMA200")
 - Provide a BEAR_EXIT_CEILING: $X in your Conclusion.
-"""
+{self._news_block_for(state, "bear")}"""
 
 
 
@@ -1062,9 +1063,30 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
       "String (Factor 3 — technical or risk consideration)"
   ]
 }}
-"""
+{self._news_block_for(state, "pm")}"""
 
     # --- Helpers ---
+
+    def _news_block_for(self, state: MarketState, agent_name: str) -> str:
+        """Return a news-digest block ready to paste into a prompt, or empty string.
+
+        Pulls the right slice per the agent-consumption map. Safe to call
+        even when digests are disabled or missing — returns "".
+        """
+        try:
+            from app.services.news_digest_service import format_for_agent
+            block = format_for_agent(
+                agent_name=agent_name,
+                date=state.date,
+                ticker=state.ticker,
+                sector=getattr(state, "sector", None),
+            )
+            if not block.strip():
+                return ""
+            return f"\n\nRELEVANT NEWS DIGEST (FT / Finimize, auto-generated):\n{block.strip()}\n"
+        except Exception as e:
+            logger.warning(f"format_for_agent({agent_name}) failed: {e}")
+            return ""
 
     def _count_real_phase1_reports(self, reports: Dict[str, Optional[str]]) -> tuple:
         """Count how many Phase 1 core agents returned a real report (not an error stub).
@@ -1357,7 +1379,7 @@ Process continuing but this agent's output is compromised.
 
         ## Market Sentiment Summary
         [Concise summary of whether the market environment is a Headwind or Tailwind for {ticker} right now.]
-        """
+        {self._news_block_for(state, "market_sentiment")}"""
 
     def _format_citations(self, response) -> str:
         """
@@ -1523,7 +1545,7 @@ OUTPUT:
 A dedicated Risk Assessment.
 We argue that contexts should function not as concise summaries, but as comprehensive, evolving playbooks—detailed, inclusive, and rich with domain insights.
 Use Headers: "Risk Assessment", "Trap Check", "Counter-Thesis", "Key Risks".
-"""
+{self._news_block_for(state, "risk")}"""
 
 
     def _check_and_increment_usage(self) -> bool:

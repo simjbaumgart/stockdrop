@@ -180,7 +180,8 @@ def load_news_context(symbol: str, date_str: str) -> List[Dict]:
     The file contains pre-formatted headlines + summaries from all sources
     (Benzinga, Alpha Vantage, Finnhub, yfinance, TradingView).
     """
-    news_path = f"data/news/{symbol}_{date_str}_news_context.txt"
+    from app.utils.ticker_paths import safe_ticker_path
+    news_path = f"data/news/{safe_ticker_path(symbol)}_{date_str}_news_context.txt"
     if os.path.exists(news_path):
         try:
             with open(news_path, "r") as f:

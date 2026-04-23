@@ -22,6 +22,7 @@ from app.services.benzinga_service import benzinga_service
 from app.services.yahoo_ticker_resolver import YahooTickerResolver
 from app.services.deep_research_service import deep_research_service
 from app.services.seeking_alpha_service import seeking_alpha_service
+from app.services.news_digest_service import ensure_news_digests_for_today
 
 # FIX: Bypass SSL verification for NLTK download inside DefeatBeta (Global Fix)
 import ssl
@@ -302,6 +303,15 @@ class StockService:
         print(f"  {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"{'='*50}\n")
         print("Checking for large cap drops...")
+
+        # News digest bootstrap — idempotent. Generates FT + Finimize daily
+        # digests if upstream Cowork scheduler has written today's raw files
+        # and our digest hasn't run yet. Silent bail if disabled/missing.
+        try:
+            ensure_news_digests_for_today()
+        except Exception as e:
+            print(f"  > [News Digest] Bootstrap raised (non-fatal): {e}")
+
         # self.deep_research_candidates = [] # Removed batch queue
         potential_batch_candidates = [] # For Deep Research Comparison
         
@@ -717,8 +727,10 @@ class StockService:
                 # Try to load council reports from file
                 # council2 (Phase 1+2: includes bull/bear/risk) preferred, fallback to council1
                 council_dir = "data/council_reports"
-                council1_path = f"{council_dir}/{symbol}_{date_str}_council1.json"
-                council2_path = f"{council_dir}/{symbol}_{date_str}_council2.json"
+                from app.utils.ticker_paths import safe_ticker_path
+                _safe = safe_ticker_path(symbol)
+                council1_path = f"{council_dir}/{_safe}_{date_str}_council1.json"
+                council2_path = f"{council_dir}/{_safe}_{date_str}_council2.json"
                 council_reports = {}
                 
                 if os.path.exists(council1_path):
