@@ -45,11 +45,12 @@ DB_PATH = os.getenv("DB_PATH", "subscribers.db")
 CONVICTION_ORDER = {"HIGH": 0, "MODERATE": 1, "LOW": 2}
 
 MISSING_VERDICT_FILTER = """
-    (deep_research_verdict IS NULL 
-     OR deep_research_verdict = '' 
-     OR deep_research_verdict = '-' 
-     OR deep_research_verdict LIKE 'UNKNOWN%%' 
-     OR deep_research_verdict = 'ERROR_PARSING')
+    (deep_research_verdict IS NULL
+     OR deep_research_verdict = ''
+     OR deep_research_verdict = '-'
+     OR deep_research_verdict LIKE 'UNKNOWN%%'
+     OR deep_research_verdict = 'ERROR_PARSING'
+     OR deep_research_verdict = 'PENDING_REVIEW')
 """
 
 

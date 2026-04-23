@@ -503,7 +503,8 @@ class DeepResearchService:
             
             # Map review_verdict to the legacy verdict field for backward compat
             # CONFIRMED/UPGRADED -> action value, ADJUSTED -> action, OVERRIDDEN -> AVOID
-            verdict_for_db = action  # Use the action as the verdict
+            # PENDING_REVIEW: don't overwrite verdict column with None; caller keeps the PM verdict.
+            verdict_for_db = action if action is not None else "PENDING_REVIEW"
             
             # Update DB with all new fields
             success = update_deep_research_data(
@@ -1480,8 +1481,10 @@ REPORT CONTENT:
                 "generationConfig": {"response_mime_type": "application/json"}
             }
             
-            # Timeout of 30s is enough for Flash
-            response = requests.post(url, headers=headers, json=payload, timeout=30)
+            # 90s: repair-via-Flash needs more headroom than a normal Flash call;
+            # the prompt includes the full truncated report plus a schema, and a
+            # 30s cap was timing out in production (see 04-22 ADBE incident).
+            response = requests.post(url, headers=headers, json=payload, timeout=90)
             if response.status_code != 200:
                 logger.error(f"[Deep Research] Repair API Error: {response.text}")
                 return None
@@ -1555,12 +1558,17 @@ REPORT CONTENT:
                 repaired_json['raw_report_full'] = final_text # Keep raw text
                 return repaired_json
             
-            logger.warning(f"[Deep Research] JSON Parse & Repair failed. Using Raw Fallback. Length: {len(final_text)}")
-            
-            # Construct a fallback JSON matching the new schema
+            logger.warning(f"[Deep Research] JSON Parse & Repair failed. Using PENDING_REVIEW fallback. Length: {len(final_text)}")
+
+            # PENDING_REVIEW fallback: we do NOT know what the reviewer concluded, so we
+            # refuse to override the PM verdict. action=None signals downstream code to
+            # leave the trading columns alone; the row is marked PENDING_REVIEW so the
+            # backfill/repair scripts can re-queue it.
+            # Regression: 04-22 ADBE had PM produce BUY_LIMIT, repair timed out, and the
+            # old ERROR_PARSING/AVOID fallback silently downgraded it to AVOID.
             return {
-                "review_verdict": "ERROR_PARSING",
-                "action": "AVOID",
+                "review_verdict": "PENDING_REVIEW",
+                "action": None,
                 "conviction": "LOW",
                 "drop_type": "UNKNOWN",
                 "risk_level": "Unknown",
@@ -1582,13 +1590,13 @@ REPORT CONTENT:
                     "strengths": [], "weaknesses": [], "opportunities": [], "threats": []
                 },
                 "verification_results": [
-                    "JSON Parsing Failed.",
+                    "JSON Parsing Failed — task marked PENDING_REVIEW.",
                     "Raw Output Below:",
                     final_text[:3000]
                 ],
                 "council_blindspots": [],
-                "knife_catch_warning": True,
-                "reason": "Deep research output could not be parsed.",
+                "knife_catch_warning": False,
+                "reason": "Deep research output could not be parsed; PM verdict preserved, flagged for re-review.",
                 "raw_report_full": final_text
             }
             

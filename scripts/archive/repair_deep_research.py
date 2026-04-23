@@ -38,7 +38,7 @@ def get_decision_id_for_symbol(symbol):
         # Find the most recent decision for this symbol giving an error
         cursor.execute('''
             SELECT id FROM decision_points 
-            WHERE symbol = ? AND deep_research_verdict IN ('ERROR_PARSING', 'UNKNOWN (Parse Error)')
+            WHERE symbol = ? AND deep_research_verdict IN ('ERROR_PARSING', 'UNKNOWN (Parse Error)', 'PENDING_REVIEW')
             ORDER BY id DESC LIMIT 1
         ''', (symbol,))
         row = cursor.fetchone()
