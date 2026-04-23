@@ -50,7 +50,9 @@ def test_bby_scenario_aborts_instead_of_high_conviction():
         "PASS",
         "PASS_INSUFFICIENT_DATA",
     )
-    assert result.get("conviction") != "HIGH"
+    # _build_insufficient_data_response sets conviction="NONE" (research_service.py ~L1165).
+    # Asserting the exact value — "!= HIGH" would pass for {} or any error shape.
+    assert result.get("conviction") == "NONE"
 
 
 def test_is_real_report_rejects_short_stubs():
@@ -58,3 +60,5 @@ def test_is_real_report_rejects_short_stubs():
     assert not _is_real_report("")
     assert not _is_real_report(None)
     assert _is_real_report("x" * 400)
+    # Long-but-erroring string: rejected via marker check, NOT length check.
+    assert not _is_real_report("[Error: " + "x" * 400 + "]")

@@ -309,6 +309,8 @@ class ResearchService:
                 if _is_real_report(retry_result):
                     state.reports[key] = retry_result
                     print(f"  > [Phase 1 Retry] {agent_label} succeeded on retry.")
+                else:
+                    print(f"  > [Phase 1 Retry] {agent_label} still failing after retry.")
             except Exception as e:
                 logger.warning(f"[Phase 1 Retry] {agent_label} retry raised: {e}")
 
