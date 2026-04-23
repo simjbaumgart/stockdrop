@@ -28,6 +28,10 @@ class GoogleDriveService:
         self._breaker_state_path = self.BREAKER_STATE_FILE
         self._consecutive_quota_failures = 0
         self._disabled_until: Optional[datetime.datetime] = None
+        self._disabled_by_env = os.getenv("DRIVE_UPLOAD_ENABLED", "true").lower() == "false"
+        if self._disabled_by_env:
+            print("[Google Drive] Upload disabled via DRIVE_UPLOAD_ENABLED=false.")
+            return
         self._load_breaker_state()
         self._authenticate()
 
@@ -95,11 +99,24 @@ class GoogleDriveService:
     def _get_or_create_spreadsheet(self):
         if not self.drive_service:
             return None
+        if self._breaker_tripped():
+            return None
         query = (
             f"name = '{self.SPREADSHEET_NAME}' and '{self.FOLDER_ID}' in parents "
             f"and mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false"
         )
-        results = self.drive_service.files().list(q=query, spaces='drive', fields='files(id, name)').execute()
+        try:
+            results = self.drive_service.files().list(
+                q=query, spaces='drive', fields='files(id, name)'
+            ).execute()
+        except Exception as e:
+            self._record_quota_failure()
+            # Demote to debug once breaker is tripped — expected noise during
+            # a quota outage; don't log every subsequent call.
+            if not self._breaker_tripped():
+                print(f"Error listing spreadsheet: {e}")
+            return None
+
         files = results.get('files', [])
         if files:
             return files[0]['id']
@@ -111,9 +128,12 @@ class GoogleDriveService:
         try:
             file = self.drive_service.files().create(body=file_metadata, fields='id').execute()
             print(f"Created new spreadsheet: {self.SPREADSHEET_NAME} ({file.get('id')})")
+            self._record_success()
             return file.get('id')
         except Exception as e:
-            print(f"Error creating spreadsheet: {e}")
+            self._record_quota_failure()
+            if not self._breaker_tripped():
+                print(f"Error creating spreadsheet: {e}")
             return None
 
     def upload_data(self, data_dict):
