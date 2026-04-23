@@ -1359,6 +1359,11 @@ Process continuing but this agent's output is compromised.
             # Both models being unavailable is a real outage; let the fallback run its own retry budget.
             if is_503 and "pro" in model_name and "3.1" in model_name and retry_count == 0:
                 logger.warning(f"503 UNAVAILABLE for {model_name} in {agent_context} ({err_type}). Falling back to gemini-3-pro-preview...")
+                if time.time() + 2 >= budget_deadline:
+                    return (
+                        f"[Error: {agent_context} exceeded {AGENT_WALL_CLOCK_BUDGET_SEC}s wall-clock "
+                        f"budget before 503 fallback]"
+                    )
                 time.sleep(2)
                 try:
                     return self._call_grounded_model(prompt, "gemini-3-pro-preview", agent_context, retry_count=0, budget_deadline=budget_deadline)
