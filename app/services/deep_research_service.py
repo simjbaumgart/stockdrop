@@ -739,11 +739,12 @@ class DeepResearchService:
 
     def _save_result_to_file(self, symbol, result):
         try:
+            from app.utils.ticker_paths import safe_ticker_path
             output_dir = "data/deep_research_reports"
             os.makedirs(output_dir, exist_ok=True)
-            
+
             date_str = datetime.now().strftime("%Y-%m-%d")
-            filename = f"deep_research_{symbol}_{date_str}_{int(time.time())}.json"
+            filename = f"deep_research_{safe_ticker_path(symbol)}_{date_str}_{int(time.time())}.json"
             filepath = os.path.join(output_dir, filename)
             
             with open(filepath, "w") as f:
