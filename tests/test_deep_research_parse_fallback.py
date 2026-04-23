@@ -373,3 +373,79 @@ def test_stock_service_backfill_query_includes_pending_review():
     assert "DONE" not in got, "fully-parsed BUY_LIMIT rows must not be re-queued"
     assert "LOWR" not in got
     assert "WEAK" not in got
+
+
+def test_get_unbatched_candidates_excludes_legacy_parse_failures(isolated_db):
+    """Legacy ERROR_PARSING and UNKNOWN-prefix verdicts must also be
+    excluded from batching — same intent as PENDING_REVIEW, they are
+    parse failures that the backfill will re-run."""
+    db_path, dbmod = isolated_db
+    date_str = "2026-04-22"
+    _seed_decision_points(
+        db_path,
+        [
+            {
+                "symbol": "ERRROW",
+                "timestamp": f"{date_str} 10:00:00",
+                "recommendation": "BUY_LIMIT",
+                "deep_research_verdict": "ERROR_PARSING",
+                "batch_id": None,
+            },
+            {
+                "symbol": "UNKROW",
+                "timestamp": f"{date_str} 11:00:00",
+                "recommendation": "BUY_LIMIT",
+                "deep_research_verdict": "UNKNOWN (Parse Error)",
+                "batch_id": None,
+            },
+            {
+                "symbol": "OKROW",
+                "timestamp": f"{date_str} 12:00:00",
+                "recommendation": "BUY_LIMIT",
+                "deep_research_verdict": "BUY_LIMIT",
+                "batch_id": None,
+            },
+        ],
+    )
+
+    symbols = {r["symbol"] for r in dbmod.get_unbatched_candidates_by_date(date_str)}
+    assert "OKROW" in symbols
+    assert "ERRROW" not in symbols, "ERROR_PARSING rows must not be batched as complete"
+    assert "UNKROW" not in symbols, "UNKNOWN-prefix rows must not be batched as complete"
+
+
+def test_get_distinct_dates_excludes_legacy_parse_failure_only_days(isolated_db):
+    """A date populated only with ERROR_PARSING / UNKNOWN rows must not
+    appear as a batchable date."""
+    db_path, dbmod = isolated_db
+    _seed_decision_points(
+        db_path,
+        [
+            {
+                "symbol": "ERR1",
+                "timestamp": "2026-04-19 10:00:00",
+                "recommendation": "BUY_LIMIT",
+                "deep_research_verdict": "ERROR_PARSING",
+                "batch_id": None,
+            },
+            {
+                "symbol": "UNK1",
+                "timestamp": "2026-04-20 10:00:00",
+                "recommendation": "BUY_LIMIT",
+                "deep_research_verdict": "UNKNOWN (Parse Error)",
+                "batch_id": None,
+            },
+            {
+                "symbol": "OK1",
+                "timestamp": "2026-04-21 10:00:00",
+                "recommendation": "BUY_LIMIT",
+                "deep_research_verdict": "BUY_LIMIT",
+                "batch_id": None,
+            },
+        ],
+    )
+
+    dates = dbmod.get_distinct_dates_with_unbatched_candidates()
+    assert "2026-04-21" in dates
+    assert "2026-04-19" not in dates
+    assert "2026-04-20" not in dates

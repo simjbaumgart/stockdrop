@@ -607,6 +607,8 @@ def get_unbatched_candidates_by_date(date_str: str) -> List[dict]:
             AND deep_research_verdict != ''
             AND deep_research_verdict != '-'
             AND deep_research_verdict != 'PENDING_REVIEW'
+            AND deep_research_verdict != 'ERROR_PARSING'
+            AND deep_research_verdict NOT LIKE 'UNKNOWN%'
             AND (recommendation IN ('BUY', 'STRONG BUY', 'SPECULATIVE BUY') OR recommendation LIKE '%BUY%')
             AND (batch_id IS NULL OR batch_id = '')
             ORDER BY deep_research_score DESC
@@ -664,6 +666,8 @@ def get_distinct_dates_with_unbatched_candidates() -> List[str]:
             AND deep_research_verdict != ''
             AND deep_research_verdict != '-'
             AND deep_research_verdict != 'PENDING_REVIEW'
+            AND deep_research_verdict != 'ERROR_PARSING'
+            AND deep_research_verdict NOT LIKE 'UNKNOWN%'
             AND (recommendation IN ('BUY', 'STRONG BUY', 'SPECULATIVE BUY') OR recommendation LIKE '%BUY%')
             AND (batch_id IS NULL OR batch_id = '')
         ''')

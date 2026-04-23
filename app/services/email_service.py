@@ -6,6 +6,7 @@ from email.mime.application import MIMEApplication
 from fpdf import FPDF
 from datetime import datetime
 from app.database import get_all_subscribers
+from app.utils.ticker_paths import safe_ticker_path
 
 class EmailService:
     def __init__(self):
@@ -219,7 +220,7 @@ class EmailService:
         if not os.path.exists(reports_dir):
             os.makedirs(reports_dir)
             
-        filename = f"report_{symbol}_{datetime.now().strftime('%Y%m%d')}.pdf"
+        filename = f"report_{safe_ticker_path(symbol)}_{datetime.now().strftime('%Y%m%d')}.pdf"
         filepath = os.path.join(reports_dir, filename)
         pdf.output(filepath)
         print(f"Reports aggregated and saved to {filepath}")

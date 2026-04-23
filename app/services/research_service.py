@@ -742,7 +742,7 @@ Use headers: "Technical Signal", "Oversold Status", "Context from Report", "Verd
             print(f"  > [News Agent] Error logging news context: {e}")
 
         # Try to load DefeatBeta data
-        defeatbeta_path = f"data/DefeatBeta_data/{state.ticker}"
+        defeatbeta_path = f"data/DefeatBeta_data/{safe_ticker_path(state.ticker)}"
         db_news = []
         db_transcript = ""
         
