@@ -16,10 +16,10 @@ class QualityControlService:
             content = reports.get(key)
             
             if isinstance(content, str):
-                if len(content) < 100:
+                if len(content) < 200:
                     msg = f"[WARNING] Report section '{key}' is suspiciously short ({len(content)} chars) for {ticker}. Flagging input."
-                    print(msg) 
-                    reports[key] = f"[SHORT INPUT DETECTED: Length {len(content)} < 100] {content}"
+                    print(msg)
+                    reports[key] = f"[SHORT INPUT DETECTED: Length {len(content)} < 200] {content}"
             elif content is None:
                 if key != "seeking_alpha":
                      print(f"[WARNING] Report section '{key}' is MISSING (None) for {ticker}.")

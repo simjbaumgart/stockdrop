@@ -56,7 +56,11 @@ def _is_retryable_grounding_error(e: Exception) -> bool:
 
 
 # Phase 1 quality gate: abort if fewer than this many core agents return real reports.
-MIN_REAL_PHASE1_REPORTS = 3
+# Four-of-five is deliberate: we tolerate a single flaky sensor (e.g. seeking_alpha
+# on an OTC ticker with no coverage) but refuse to produce a decision when the
+# majority of sensors are error stubs. The 04-22 BBY outage (5/5 truncated
+# outputs producing a HIGH-conviction AVOID) is the canonical motivator.
+MIN_REAL_PHASE1_REPORTS = 4
 
 # Phase 1 core agents counted by the quality gate (economics is conditional and excluded).
 PHASE1_CORE_AGENTS = ("technical", "news", "market_sentiment", "competitive", "seeking_alpha")
@@ -282,6 +286,31 @@ class ResearchService:
             "competitive": comp_report,
             "seeking_alpha": sa_report
         }
+
+        # --- Phase 1 one-shot retry for failed agents ---
+        # Each agent that produced an error stub (or nothing at all) gets
+        # a second attempt SEQUENTIALLY. We deliberately avoid parallel
+        # retries because the most common cause of Phase-1 failure is
+        # Gemini instability, and hammering the API in parallel during
+        # an outage just wastes retries.
+        retry_prompt_map = {
+            "technical": (tech_prompt, "Technical Agent"),
+            "news": (news_prompt, "News Agent"),
+            "market_sentiment": (sentiment_prompt, "Market Sentiment Agent"),
+            "competitive": (comp_prompt, "Competitive Landscape Agent"),
+        }
+        for key, (prompt, agent_label) in retry_prompt_map.items():
+            current = state.reports.get(key)
+            if _is_real_report(current):
+                continue
+            print(f"  > [Phase 1 Retry] {agent_label} failed first pass; retrying once...")
+            try:
+                retry_result = self._call_agent(prompt, agent_label, state)
+                if _is_real_report(retry_result):
+                    state.reports[key] = retry_result
+                    print(f"  > [Phase 1 Retry] {agent_label} succeeded on retry.")
+            except Exception as e:
+                logger.warning(f"[Phase 1 Retry] {agent_label} retry raised: {e}")
 
         # Validate Reports (Quality Control)
         # Check for short or missing inputs before passing to Bull/Bear/Storage
