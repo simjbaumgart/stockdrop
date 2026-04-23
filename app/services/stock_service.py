@@ -705,7 +705,7 @@ class StockService:
                 AND recommendation IN ('BUY', 'BUY_LIMIT')
                 AND conviction IN ('MODERATE', 'HIGH')
                 AND risk_reward_ratio >= 1.5
-                AND (deep_research_verdict IS NULL OR deep_research_verdict = '' OR deep_research_verdict = '-' OR deep_research_verdict LIKE 'UNKNOWN%' OR deep_research_verdict = 'ERROR_PARSING')
+                AND (deep_research_verdict IS NULL OR deep_research_verdict = '' OR deep_research_verdict = '-' OR deep_research_verdict LIKE 'UNKNOWN%' OR deep_research_verdict = 'ERROR_PARSING' OR deep_research_verdict = 'PENDING_REVIEW')
             """
             cursor.execute(query, (date_str,))
             rows = cursor.fetchall()

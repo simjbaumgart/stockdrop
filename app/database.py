@@ -601,11 +601,12 @@ def get_unbatched_candidates_by_date(date_str: str) -> List[dict]:
         cursor = conn.cursor()
         
         cursor.execute('''
-            SELECT * FROM decision_points 
+            SELECT * FROM decision_points
             WHERE date(timestamp) = ?
-            AND deep_research_verdict IS NOT NULL 
-            AND deep_research_verdict != '' 
+            AND deep_research_verdict IS NOT NULL
+            AND deep_research_verdict != ''
             AND deep_research_verdict != '-'
+            AND deep_research_verdict != 'PENDING_REVIEW'
             AND (recommendation IN ('BUY', 'STRONG BUY', 'SPECULATIVE BUY') OR recommendation LIKE '%BUY%')
             AND (batch_id IS NULL OR batch_id = '')
             ORDER BY deep_research_score DESC
@@ -658,10 +659,11 @@ def get_distinct_dates_with_unbatched_candidates() -> List[str]:
         cursor = conn.cursor()
         
         cursor.execute('''
-            SELECT DISTINCT date(timestamp) FROM decision_points 
-            WHERE deep_research_verdict IS NOT NULL 
-            AND deep_research_verdict != '' 
+            SELECT DISTINCT date(timestamp) FROM decision_points
+            WHERE deep_research_verdict IS NOT NULL
+            AND deep_research_verdict != ''
             AND deep_research_verdict != '-'
+            AND deep_research_verdict != 'PENDING_REVIEW'
             AND (recommendation IN ('BUY', 'STRONG BUY', 'SPECULATIVE BUY') OR recommendation LIKE '%BUY%')
             AND (batch_id IS NULL OR batch_id = '')
         ''')
