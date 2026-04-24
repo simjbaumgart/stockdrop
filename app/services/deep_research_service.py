@@ -846,10 +846,15 @@ class DeepResearchService:
             doc.build(story)
             logger.info(f"[Deep Research] Saved PDF to {filepath}")
             
-        except ImportError:
-            logger.error("ReportLab not installed. Cannot generate PDF.")
+        except ModuleNotFoundError as e:
+            logger.error(
+                "[deep-research] Individual PDF generation failed — missing dependency: %s. "
+                "Run `pip install -r requirements.txt` on the deploy target.", e
+            )
+            return None
         except Exception as e:
-            logger.error(f"[Deep Research] Error generating PDF: {e}")
+            logger.error("[deep-research] Individual PDF generation failed: %s", e, exc_info=True)
+            return None
 
     def execute_deep_research(self, symbol: str, context: dict, decision_id: int = None) -> Optional[Dict]:
         """
@@ -1917,8 +1922,15 @@ A JSON object:
             doc.build(story)
             logger.info(f"[Deep Research] Saved Batch PDF to {filepath}")
             
+        except ModuleNotFoundError as e:
+            logger.error(
+                "[deep-research] Batch PDF generation failed — missing dependency: %s. "
+                "Run `pip install -r requirements.txt` on the deploy target.", e
+            )
+            return None
         except Exception as e:
-            logger.error(f"[Deep Research] Error generating Batch PDF: {e}")
+            logger.error("[deep-research] Batch PDF generation failed: %s", e, exc_info=True)
+            return None
 
     def _summarize_report_context(self, report_json_str: str) -> str:
         """
