@@ -741,42 +741,6 @@ Use headers: "Technical Signal", "Oversold Status", "Context from Report", "Verd
         except Exception as e:
             print(f"  > [News Agent] Error logging news context: {e}")
 
-        # Try to load DefeatBeta data
-        defeatbeta_path = f"data/DefeatBeta_data/{safe_ticker_path(state.ticker)}"
-        db_news = []
-        db_transcript = ""
-        
-        try:
-            if os.path.exists(defeatbeta_path):
-                # Load Transcript
-                t_path = os.path.join(defeatbeta_path, "transcript.txt")
-                if os.path.exists(t_path):
-                    with open(t_path, "r") as f:
-                        db_transcript = f.read()
-                        
-                # Load News
-                n_path = os.path.join(defeatbeta_path, "news.json")
-                if os.path.exists(n_path):
-                    with open(n_path, "r") as f:
-                        db_json = json.load(f)
-                        for item in db_json:
-                             # Format roughly to match expected structure or just stringify
-                             db_news.append(f"{item.get('report_date','')} - {item.get('publisher','')}: {item.get('title','')} ({item.get('link','')})")
-        except Exception as e:
-            print(f"Error loading DefeatBeta data: {e}")
-
-        # Mix DefeatBeta transcript if available and original is empty or short
-        if db_transcript and len(transcript) < 100:
-             transcript = db_transcript
-        elif db_transcript:
-             transcript += f"\n\n--- ADDITIONAL TRANSCRIPT DATA (DefeatBeta) ---\n{db_transcript}" # Append snippet
-
-        # Mix DefeatBeta news
-        if db_news:
-            news_summary += "\n--- ADDITIONAL NEWS SOURCES (DefeatBeta) ---\n"
-            for line in db_news[:5]:
-                news_summary += f"- {line}\n"
-
         return f"""
 You are the **News Agent**.
 Your goal is to gauge the stock's sentiment and identify key narrative drivers for {state.ticker}.

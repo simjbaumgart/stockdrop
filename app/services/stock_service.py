@@ -24,29 +24,6 @@ from app.services.deep_research_service import deep_research_service
 from app.services.seeking_alpha_service import seeking_alpha_service
 from app.services.news_digest_service import ensure_news_digests_for_today
 
-# FIX: Bypass SSL verification for NLTK download inside DefeatBeta (Global Fix)
-import ssl
-try:
-    _create_unverified_https_context = ssl._create_unverified_context
-except AttributeError:
-    pass
-else:
-    ssl._create_default_https_context = _create_unverified_https_context
-
-# Pre-download NLTK data silently so DefeatBeta doesn't trigger it at runtime
-try:
-    import nltk
-    nltk.download('punkt_tab', quiet=True)
-except Exception:
-    pass
-
-try:
-    from defeatbeta_api.data.ticker import Ticker
-except ImportError:
-    print("DefeatBeta not installed or import failed.")
-    Ticker = None
-
-
 # Minimum average daily volume (shares) for a ticker to be considered tradeable.
 # Paired with the gatekeeper's $5 price floor to catch above-$5 tickers that
 # still have no realistic liquidity.
@@ -1279,103 +1256,10 @@ class StockService:
             return ""
 
     def get_latest_transcript(self, symbol: str) -> str:
-        """
-        Fetches the text of the most recent earnings call transcript.
-        """
-        try:
-
-            # 1. Try DefeatBeta First
-            print(f"[StockService] Fetching transcript for {symbol} from DefeatBeta...")
-            try:
-                if Ticker is None:
-                    raise ImportError("DefeatBeta Ticker not available")
-                
-                db_ticker = Ticker(symbol)
-                transcripts = db_ticker.earning_call_transcripts()
-                df = transcripts.get_transcripts_list()
-                
-                # df is a pandas DataFrame with columns like 'transcripts', 'report_date', etc.
-                if not df.empty:
-                    # Sort by date descending if possible, or take first
-                    if 'report_date' in df.columns:
-                        df = df.sort_values('report_date', ascending=False)
-                    
-                    latest_row = df.iloc[0]
-                    
-                    # Get date from DefeatBeta
-                    db_date_str = str(latest_row.get('report_date', '')).split(' ')[0]
-                    
-                    # 'transcripts' column contains the data (numpy array of dicts)
-                    transcripts_data = latest_row.get('transcripts', None)
-                    
-                    # Handle numpy array if needed
-                    import numpy as np
-                    if isinstance(transcripts_data, np.ndarray):
-                        transcripts_data = transcripts_data.tolist()
-                        
-                    content = ""
-                    if isinstance(transcripts_data, list):
-                         for part in transcripts_data: 
-                             if isinstance(part, dict) and 'content' in part:
-                                 content += part['content'] + "\n"
-                    
-                    if content:
-                        print(f"[StockService] Successfully fetched transcript from DefeatBeta for {symbol} (Len: {len(content)}).")
-                        
-                        recency_check_db = self._check_transcript_recency(symbol, db_date_str)
-                        return {
-                            "text": content,
-                            "date": db_date_str,
-                            "is_outdated": recency_check_db["is_outdated"],
-                            "warning": recency_check_db["message"]
-                        }
-            except Exception as e:
-                print(f"[StockService] DefeatBeta failed: {e}")
-
-            # 2. Fallback to Finnhub
-            print(f"[StockService] DefeatBeta transcript empty or failed for {symbol}. Trying Finnhub...")
-            
-            transcripts = finnhub_service.get_transcript_list(symbol)
-            if not transcripts:
-                return ""
-                
-            latest_id = transcripts[0]['id']
-            content = finnhub_service.get_transcript_content(latest_id)
-            
-            # Parse content (list of speech objects)
-            full_text = []
-            if 'transcript' in content:
-                for chunk in content['transcript']:
-                    speaker = chunk.get('name', 'Unknown')
-                    speech = chunk.get('speech', [])
-                    # Join list of speech strings
-                    speech_text = " ".join(speech) if isinstance(speech, list) else str(speech)
-                    full_text.append(f"{speaker}: {speech_text}")
-            
-            text = "\n".join(full_text)
-            
-            # Extract date from Finnhub metadata if available
-            transcript_date_str = None
-            if transcripts and len(transcripts) > 0:
-                 # Finnhub usually provides 'time' as "2024-10-25 10:00:00" or similar
-                 transcript_date_str = transcripts[0].get('time', '').split(' ')[0]
-
-            # Check recency
-            recency_check = self._check_transcript_recency(symbol, transcript_date_str)
-            
-            if text:
-                 return {
-                     "text": text,
-                     "date": transcript_date_str,
-                     "is_outdated": recency_check["is_outdated"],
-                     "warning": recency_check["message"]
-                 }
-                 
-            return {"text": "", "date": None, "is_outdated": False, "warning": ""}
-
-        except Exception as e:
-            print(f"[StockService] Error in get_latest_transcript for {symbol}: {e}")
-            return {"text": "", "date": None, "is_outdated": False, "warning": ""}
+        """Transcript sources (DefeatBeta, Finnhub) were removed 2026-04-24 — both
+        failed 100% of the time in production. Returns empty string so callers
+        degrade gracefully."""
+        return ""
 
     def _check_transcript_recency(self, symbol: str, transcript_date_str: str) -> Dict[str, Any]:
         """

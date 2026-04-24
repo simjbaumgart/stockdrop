@@ -5,42 +5,15 @@ from app.services.stock_service import StockService
 # Initialize Service
 service = StockService()
 
-def test_fetch_and_save(symbol):
-    print(f"\n--- Testing for {symbol} ---")
-    try:
-        # Fetch Transcript (returns dict now)
-        result = service.get_latest_transcript(symbol)
-        
-        text = result.get("text", "")
-        date = result.get("date")
-        is_outdated = result.get("is_outdated")
-        warning = result.get("warning")
-        
-        print(f"Transcript Found: {'Yes' if text else 'No'}")
-        print(f"Date: {date}")
-        print(f"Outdated: {is_outdated}")
-        print(f"Warning: {warning}")
-        
-        if text:
-            # Save to file
-            output_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "filings")
-            filename = os.path.join(output_dir, f"{symbol}_transcript.txt")
-            with open(filename, "w", encoding="utf-8") as f:
-                f.write(f"Symbol: {symbol}\n")
-                f.write(f"Date: {date}\n")
-                f.write(f"Outdated: {is_outdated}\n")
-                f.write(f"Warning: {warning}\n")
-                f.write("-" * 40 + "\n")
-                f.write(text)
-            
-            print(f"Saved to {filename}")
-        else:
-            print("No transcript content to save.")
-            
-    except Exception as e:
-        print(f"Error processing {symbol}: {e}")
-        import traceback
-        traceback.print_exc()
+def test_fetch_and_save(symbol="AAPL"):
+    """Transcript sources were removed (2026-04-24); verify get_latest_transcript
+    returns an empty result without raising."""
+    result = service.get_latest_transcript(symbol)
+    # Result must be empty str or a dict with no text content
+    assert result == "" or (
+        isinstance(result, dict) and not result.get("text")
+    ), f"expected empty transcript, got: {result!r}"
+    print(f"[{symbol}] get_latest_transcript returned empty result as expected.")
 
 if __name__ == "__main__":
     # Test a few tickers
