@@ -21,7 +21,7 @@ def digest_enabled() -> bool:
 
 
 def digest_model() -> str:
-    return os.getenv("NEWS_DIGEST_MODEL", "gemini-3.1-pro-thinking")
+    return os.getenv("NEWS_DIGEST_MODEL", "gemini-3.1-pro-preview")
 
 
 SOURCES = ("ft", "finimize")

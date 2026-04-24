@@ -314,6 +314,18 @@ def test_missing_digest_returns_empty(archive_tree):
     assert nds.format_for_agent("news", "2026-04-22", "NVDA") == ""
 
 
+def test_digest_model_default_is_valid_model():
+    """Default digest model must be a Gemini model name the API accepts."""
+    import os
+    from app.services import news_digest_schema
+
+    os.environ.pop("NEWS_DIGEST_MODEL", None)
+    model = news_digest_schema.digest_model()
+    assert model in ("gemini-3.1-pro-preview", "gemini-3-flash-preview"), (
+        f"digest_model() returned {model!r}; must be a valid Gemini model name"
+    )
+
+
 def test_format_for_agent_includes_finimize_weekly_when_mapped(archive_tree, monkeypatch):
     # Seed a Finimize weekly rollup and re-map PM to consume it for this test.
     iso_week = nds._iso_week_for("2026-04-22")
