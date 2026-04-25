@@ -434,6 +434,30 @@ class ResearchService:
         from app.services.evidence_service import evidence_service
         data_depth = evidence_service.collect_barometer(raw_data, state.reports)
 
+        # Deterministic stop-loss guardrail: widen if PM placed it too tight.
+        from app.utils.stop_loss_guard import widen_stop_if_too_tight
+        _tv_inds = raw_data.get("indicators", {})
+        _entry_low = final_decision.get("entry_price_low")
+        # Fallback to current close if entry_price_low is missing or looks like a pct
+        if _entry_low is None or (isinstance(_entry_low, (int, float)) and _entry_low < 0):
+            _entry_low = _tv_inds.get("close")
+        if _entry_low is not None:
+            _guard = widen_stop_if_too_tight(
+                stop_loss=final_decision.get("stop_loss"),
+                entry_low=float(_entry_low),
+                atr=float(_tv_inds.get("atr") or 0.0),
+                sma_50=_tv_inds.get("sma50"),
+                sma_200=_tv_inds.get("sma200"),
+                bb_lower=_tv_inds.get("bb_lower"),
+            )
+            if _guard.adjusted:
+                logger.info(
+                    "[PM stop-guard] %s: widened stop %.2f -> %.2f (%s)",
+                    state.ticker, final_decision["stop_loss"], _guard.stop_loss, _guard.reason,
+                )
+                final_decision["stop_loss"] = _guard.stop_loss
+                final_decision["stop_loss_guard_reason"] = _guard.reason
+
         return {
             "recommendation": recommendation,
             "executive_summary": final_decision.get("reason", "No reason provided."),
