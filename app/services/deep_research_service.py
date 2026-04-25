@@ -40,6 +40,60 @@ def _strip_citations(raw: str) -> str:
         _CITATION_STRIP_COUNTER["stripped"] += 1
     return cleaned
 
+_VALID_URL_SCHEMES = ("http://", "https://")
+
+
+def normalize_verification_results(raw):
+    """Coerce a raw verification_results list (mix of legacy strings + new
+    objects) into a consistent list of dicts. Claims missing a valid source
+    URL are downgraded to UNVERIFIED so downstream scoring ignores them.
+
+    Each output dict has at minimum {claim, verdict, source_url}; downgraded
+    entries also carry a downgrade_reason for diagnostics."""
+    out = []
+    for entry in raw or []:
+        if isinstance(entry, str):
+            out.append({
+                "claim": entry,
+                "verdict": "UNVERIFIED",
+                "source_url": "",
+                "downgrade_reason": "legacy_string_format",
+            })
+            continue
+        if not isinstance(entry, dict):
+            continue
+        claim = entry.get("claim", "")
+        verdict = (entry.get("verdict") or "").upper().strip()
+        url = (entry.get("source_url") or "").strip()
+
+        if not url:
+            out.append({
+                "claim": claim, "verdict": "UNVERIFIED", "source_url": "",
+                "downgrade_reason": "missing_source_url",
+            })
+        elif not url.startswith(_VALID_URL_SCHEMES):
+            out.append({
+                "claim": claim, "verdict": "UNVERIFIED", "source_url": url,
+                "downgrade_reason": "invalid_source_url",
+            })
+        elif verdict not in ("VERIFIED", "DISPUTED"):
+            out.append({
+                "claim": claim, "verdict": "UNVERIFIED", "source_url": url,
+                "downgrade_reason": f"unknown_verdict:{verdict!r}",
+            })
+        else:
+            out.append({"claim": claim, "verdict": verdict, "source_url": url})
+    return out
+
+
+def score_verification_penalty(normalized_entries) -> int:
+    """-5 per grounded DISPUTED claim. UNVERIFIED entries earn nothing."""
+    return -5 * sum(
+        1 for e in (normalized_entries or [])
+        if isinstance(e, dict) and e.get("verdict") == "DISPUTED"
+    )
+
+
 class DeepResearchService:
     def __init__(self):
         self.api_key = os.getenv("GEMINI_API_KEY")
@@ -471,10 +525,12 @@ class DeepResearchService:
         if result.get("knife_catch_warning") in (True, "True", "true"):
             score -= 15
 
-        # Dispute penalty: -5 per DISPUTED claim in verification_results
-        for v in result.get("verification_results", []):
-            if isinstance(v, str) and "DISPUTED" in v.upper():
-                score -= 5
+        # Dispute penalty (grounded only): -5 per DISPUTED claim with a valid
+        # source URL. Hallucinated disputes (missing/invalid URL) are demoted
+        # to UNVERIFIED upstream and earn no score adjustment.
+        normalized = normalize_verification_results(result.get("verification_results", []))
+        result["verification_results"] = normalized  # persist normalized form for DB & logs
+        score += score_verification_penalty(normalized)
 
         return max(0, min(100, score))
 
@@ -727,7 +783,13 @@ class DeepResearchService:
         if verification:
             print("  Verification:")
             for v in verification:
-                print(f"   - {v}")
+                if isinstance(v, dict):
+                    claim = v.get("claim", "")
+                    verdict = v.get("verdict", "UNVERIFIED")
+                    detail = v.get("source_url") or v.get("downgrade_reason", "")
+                    print(f"   - [{verdict}] {claim} — {detail}")
+                else:
+                    print(f"   - {v}")
 
         # Council Blindspots
         blindspots = result.get('council_blindspots', [])
@@ -1150,14 +1212,18 @@ Do NOT include inline source markers like [Source 1], [Source 2], etc. in any st
     "threats": ["point 1", "point 2"]
   }},
   "verification_results": [
-    "Claim 1: [VERIFIED/DISPUTED] — explanation",
-    "Claim 2: [VERIFIED/DISPUTED] — explanation",
-    "Claim 3: [VERIFIED/DISPUTED] — explanation"
+    {{
+      "claim": "concise restatement of the claim you checked",
+      "verdict": "VERIFIED" | "DISPUTED",
+      "source_url": "https://... — the exact grounded URL that supports your verdict"
+    }}
   ],
   "council_blindspots": ["Issue 1 the council missed", "Issue 2"],
   "knife_catch_warning": true | false,
   "reason": "One sentence: your final assessment as the senior reviewer."
 }}
+
+**Every entry in verification_results MUST include a source_url pointing to the specific page that grounds your verdict. Claims without a verifiable URL will be treated as UNVERIFIED and will not count toward the score.**
 """
 
     def _construct_sell_reassessment_prompt(self, symbol: str, context: dict) -> str:
@@ -1458,7 +1524,7 @@ REPORT:
     "opportunities": ["list", "of", "strings"],
     "threats": ["list", "of", "strings"]
   },
-  "verification_results": ["list", "of", "strings"],
+  "verification_results": [{"claim": "string", "verdict": "VERIFIED|DISPUTED", "source_url": "https://..."}],
   "council_blindspots": ["list", "of", "strings"],
   "knife_catch_warning": true,
   "reason": "string"
