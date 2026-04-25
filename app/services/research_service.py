@@ -477,6 +477,7 @@ class ResearchService:
             "pre_drop_price": final_decision.get("pre_drop_price"),
             "entry_trigger": final_decision.get("entry_trigger"),
             "reassess_in_days": final_decision.get("reassess_in_days"),
+            "stop_loss_guard_reason": final_decision.get("stop_loss_guard_reason"),
             # Sell range fields (v1.0)
             "sell_price_low": final_decision.get("sell_price_low"),
             "sell_price_high": final_decision.get("sell_price_high"),
