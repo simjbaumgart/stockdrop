@@ -812,12 +812,21 @@ We argue that contexts should function not as concise summaries, but as comprehe
 Use headers: "Sentiment Overview", "Reason for Drop", "Extended Transcript Summary", "Key Drivers", "Narrative Check", "Top 5 Sources".
 
 SECTION: "Extended Transcript Summary":
-If transcript data is provided, you MUST provide a detailed summary (bullet points).
-Focus on:
+This section may ONLY be filled in from the transcript_text input field
+provided in the input data. If transcript_text is empty, missing, or
+shorter than ~500 characters, you MUST output exactly:
+    "No Transcript Available."
+and nothing else for this section.
+
+You MUST NOT synthesize this section from news headlines, analyst notes,
+press releases, or any other source. The section header is reserved for
+verbatim earnings-call content. Fabricating a summary from non-transcript
+sources is a hallucination and will be flagged.
+
+If transcript_text IS substantive, provide bullet points covering:
 - Guidance & Outlook (most important)
-- Management Tone (Confident vs Defessive)
+- Management Tone (Confident vs Defensive)
 - Key Operational Updates or Strategic Shifts
-If no transcript is available, state "No Transcript Available".
 
 CITATION REQUIREMENT:
 If valid news items are provided, you MUST list the Top 5 Sources that influenced your analysis.

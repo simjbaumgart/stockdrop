@@ -24,6 +24,21 @@ from app.services.deep_research_service import deep_research_service
 from app.services.seeking_alpha_service import seeking_alpha_service
 from app.services.news_digest_service import ensure_news_digests_for_today
 
+# --- DefeatBeta SSL bypass (pinned to 0.0.29; pandas-2.x compatible) ---
+# DefeatBeta lazy-downloads NLTK 'punkt_tab' on import; macOS Python often
+# can't find the system CA bundle, so we provide an unverified context just
+# for that one download. This is intentionally narrow.
+import ssl as _ssl
+try:
+    _ssl._create_default_https_context = _ssl._create_unverified_context
+except AttributeError:
+    pass
+
+try:
+    from defeatbeta_api.data.ticker import Ticker as _DBTicker
+except ImportError:
+    _DBTicker = None  # gracefully degrade if package missing
+
 # Minimum average daily volume (shares) for a ticker to be considered tradeable.
 # Paired with the gatekeeper's $5 price floor to catch above-$5 tickers that
 # still have no realistic liquidity.
@@ -1255,11 +1270,43 @@ class StockService:
             print(f"Error fetching filing for {symbol}: {e}")
             return ""
 
-    def get_latest_transcript(self, symbol: str) -> str:
-        """Transcript sources (DefeatBeta, Finnhub) were removed 2026-04-24 — both
-        failed 100% of the time in production. Returns empty string so callers
-        degrade gracefully."""
-        return ""
+    def get_latest_transcript(self, symbol: str) -> dict:
+        """Fetch the most recent earnings-call transcript via DefeatBeta.
+
+        Returns a dict with shape:
+            {"text": str, "date": str | None, "warning": str}
+        On any failure, returns {"text": "", "date": None, "warning": ""}
+        so callers degrade gracefully (existing call site at ~line 1320 already
+        handles both dict and str returns)."""
+        empty = {"text": "", "date": None, "warning": ""}
+        if _DBTicker is None:
+            return empty
+        try:
+            df = _DBTicker(symbol).earning_call_transcripts().get_transcripts_list()
+            if df is None or df.empty:
+                return empty
+            df = df.sort_values("report_date", ascending=False)
+            row = df.iloc[0]
+            date_str = str(row.get("report_date", "")).split(" ")[0]
+
+            paragraphs = row.get("transcripts")
+            # Pandas may hand back numpy arrays of dicts
+            if hasattr(paragraphs, "tolist"):
+                paragraphs = paragraphs.tolist()
+            if not isinstance(paragraphs, list):
+                return empty
+
+            text = "\n".join(
+                p.get("content", "")
+                for p in paragraphs
+                if isinstance(p, dict) and p.get("content")
+            )
+            if not text:
+                return empty
+            return {"text": text, "date": date_str, "warning": ""}
+        except Exception as e:
+            print(f"[StockService] DefeatBeta transcript fetch failed for {symbol}: {e}")
+            return empty
 
     def _is_market_open(self, region: str = "US") -> bool:
         """
