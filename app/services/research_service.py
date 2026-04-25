@@ -15,6 +15,7 @@ import time
 import requests
 from app.services.deep_research_service import deep_research_service
 from app.utils.ticker_paths import safe_ticker_path
+from app.utils.agent_call_counter import counter as agent_call_counter
 
 # Citation strip — Gemini grounding injects [Source N] markers that corrupt JSON
 _STANDALONE_CITATION_RE = re.compile(r"\s+\[Source\s*\d+\]\s+")
@@ -166,6 +167,7 @@ class ResearchService:
         
         # Define wrapper for safe execution and result collection
         def run_agent(name, func, *args):
+            agent_call_counter.record(f"phase1.{name.lower().replace(' agent', '').replace(' ', '_')}")
             try:
                 return name, func(*args)
             except Exception as e:
@@ -518,6 +520,7 @@ class ResearchService:
         risk_report = ""
 
         def run_agent(name, func, *args):
+            agent_call_counter.record(f"phase2.{name.lower().replace(' researcher', '').replace(' agent', '').replace(' ', '_')}")
             try:
                 # print(f"    - Starting {name}...")
                 return name, func(*args)
@@ -580,6 +583,7 @@ class ResearchService:
             
         # 3. Portfolio Manager (Final Decision)
         manager_prompt = self._create_fund_manager_prompt(state, safe_concerns, risky_support, drop_str)
+        agent_call_counter.record("pm")
         decision_json_str = self._call_agent(manager_prompt, "Fund Manager", state)
         decision = self._extract_json(decision_json_str)
         

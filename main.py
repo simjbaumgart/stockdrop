@@ -54,6 +54,7 @@ from app.database import init_db
 
 from app.services.performance_service import performance_service
 from app.services.deep_research_service import deep_research_service
+from app.utils.agent_call_counter import counter as agent_call_counter
 
 import subprocess
 
@@ -145,6 +146,14 @@ async def run_periodic_check():
                 print(f"[Scheduler] Running Periodic Stock Drop Check... {datetime.now().strftime('%H:%M:%S')}")
                 await asyncio.to_thread(stock_service.check_large_cap_drops)
                 last_check_time = datetime.now().timestamp()
+                # Per-cycle agent-call quota telemetry
+                snap = agent_call_counter.snapshot()
+                print(
+                    f"[agent-quota] cycle_total={snap['total_cycle']} "
+                    f"rolling_24h={snap['total_rolling_24h']} "
+                    f"by_agent={snap['by_agent']}"
+                )
+                agent_call_counter.reset_cycle()
             else:
                 next_check = datetime.fromtimestamp(last_check_time + check_interval)
                 time_remaining = next_check - datetime.now()

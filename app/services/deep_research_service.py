@@ -9,6 +9,7 @@ from typing import Dict, Optional, List, Any
 from datetime import datetime
 import sqlite3
 import re
+from app.utils.agent_call_counter import counter as agent_call_counter
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -940,16 +941,17 @@ class DeepResearchService:
         }
         
         try:
+            agent_call_counter.record("dr.individual")
             response = requests.post(self.base_url, headers=headers, json=payload)
             if response.status_code != 200:
                 logger.error(f"[Deep Research] API Error: {response.text}")
                 return None
-                
+
             data = response.json()
             interaction_id = data.get('id') or data.get('name')
             if not interaction_id:
                 return None
-                
+
             logger.info(f"[Deep Research] Task Started for {symbol} (ID: {interaction_id})")
             
             # 3. Poll
@@ -1327,6 +1329,7 @@ Do NOT include inline source markers like [Source 1], [Source 2], etc. in any st
             self.current_task_name = f"sell_reassessment ({symbol})"
             self.current_task_start_time = time.time()
         try:
+            agent_call_counter.record("dr.sell_reassessment")
             response = requests.post(self.base_url, headers=headers, json=payload)
             if response.status_code != 200:
                 logger.error(f"[Deep Research Sell] API Error: {response.text}")
@@ -1794,6 +1797,7 @@ A JSON object:
             }
             
             logger.info(f"[Deep Research] Starting Batch Comparison via Agent...")
+            agent_call_counter.record("dr.batch")
             response = requests.post(self.base_url, headers=headers, json=payload)
             
             if response.status_code != 200:
