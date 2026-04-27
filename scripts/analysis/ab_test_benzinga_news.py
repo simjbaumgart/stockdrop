@@ -74,12 +74,48 @@ def parse_args():
     return p.parse_args()
 
 
+from contextlib import contextmanager
+
+from app.services.stock_service import StockService
+from app.services.benzinga_service import benzinga_service as _bz_singleton
+
+
+@contextmanager
+def benzinga_disabled():
+    """Force Benzinga company + market news to return empty for the duration."""
+    orig_company = _bz_singleton.get_company_news
+    orig_market = _bz_singleton.get_market_news
+    _bz_singleton.get_company_news = lambda *a, **kw: []
+    _bz_singleton.get_market_news = lambda *a, **kw: []
+    try:
+        yield
+    finally:
+        _bz_singleton.get_company_news = orig_company
+        _bz_singleton.get_market_news = orig_market
+
+
+def fetch_both(ticker: str) -> tuple[list[dict], list[dict]]:
+    """Return (with_benzinga_news, without_benzinga_news) for a ticker."""
+    svc = StockService()
+    print(f"  [{ticker}] fetching WITH Benzinga ...")
+    with_news = svc.get_aggregated_news(ticker, region="US", exchange="", company_name="")
+    print(f"  [{ticker}] fetching WITHOUT Benzinga ...")
+    with benzinga_disabled():
+        without_news = svc.get_aggregated_news(ticker, region="US", exchange="", company_name="")
+    return with_news, without_news
+
+
 def main():
     args = parse_args()
     tickers = resolve_tickers(args)
     if not tickers:
         raise SystemExit("No tickers resolved.")
     print(f"[ab-test] tickers ({len(tickers)}): {tickers}")
+
+    # TEMP smoke-test — removed in Task 5
+    sample = tickers[0]
+    w, wo = fetch_both(sample)
+    print(f"[ab-test] {sample}: with={len(w)} items, without={len(wo)} items")
 
 
 if __name__ == "__main__":
