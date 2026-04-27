@@ -212,6 +212,60 @@ def write_ticker_output(out: Path, ticker: str,
     (out / f"{ticker}_metrics.json").write_text(json.dumps(metrics, indent=2))
 
 
+def write_summary(out: Path, all_metrics: list[dict]):
+    if not all_metrics:
+        (out / "summary.md").write_text("# Benzinga A/B test\n\nNo tickers processed.\n")
+        return
+
+    lines = [
+        "# Benzinga News A/B Test — Summary",
+        "",
+        f"Generated: {datetime.now(timezone.utc).isoformat()}",
+        f"Tickers: {len(all_metrics)}",
+        "",
+        "## Per-ticker counts",
+        "",
+        "| Ticker | With | Without | Benzinga items | Δ chars | Headlines unique to WITH |",
+        "|---|---:|---:|---:|---:|---:|",
+    ]
+    tot_with = tot_without = tot_bz = tot_delta = 0
+    tot_unique_with = 0
+    for m in all_metrics:
+        c = m["counts"]
+        u = len(m["headlines_only_in_with"])
+        lines.append(
+            f"| {m['ticker']} | {c['with_total']} | {c['without_total']} "
+            f"| {c['benzinga_items']} | {c['char_delta']:+d} | {u} |"
+        )
+        tot_with += c["with_total"]; tot_without += c["without_total"]
+        tot_bz += c["benzinga_items"]; tot_delta += c["char_delta"]
+        tot_unique_with += u
+    n = len(all_metrics)
+    lines += [
+        f"| **avg** | {tot_with/n:.1f} | {tot_without/n:.1f} "
+        f"| {tot_bz/n:.1f} | {tot_delta/n:+.0f} | {tot_unique_with/n:.1f} |",
+        "",
+        "## Interpretation guide",
+        "",
+        "- **Benzinga items**: how many articles came from Benzinga/Massive + Market News combined.",
+        "- **Δ chars**: extra prompt characters Benzinga contributes (positive = Benzinga adds content).",
+        "- **Headlines unique to WITH**: news the agent would lose entirely if Benzinga were cancelled. ",
+        "  These are the items NOT covered by Alpha Vantage / Finnhub / yfinance / TradingView.",
+        "- **Headlines unique to WITHOUT** (in per-ticker JSON): items currently being deduped out by ",
+        "  Benzinga but that other providers do carry — these would re-appear if Benzinga were cancelled.",
+        "",
+        "## Decision criteria (suggested)",
+        "",
+        "- If `Headlines unique to WITH` averages < ~2 across the sample, Benzinga is largely redundant.",
+        "- If it averages ≥ 5 and includes substantive (not duplicate-paraphrased) headlines, ",
+        "  Benzinga is pulling its weight.",
+        "- Eyeball at least 2 `<TICKER>_with.txt` vs `<TICKER>_without.txt` pairs for qualitative ",
+        "  judgement — counts alone miss content depth (Benzinga `CONTENT:` blocks vs others' `SUMMARY:`).",
+        "",
+    ]
+    (out / "summary.md").write_text("\n".join(lines))
+
+
 def main():
     args = parse_args()
     tickers = resolve_tickers(args)
@@ -238,6 +292,7 @@ def main():
               f"benzinga={m['counts']['benzinga_items']} "
               f"Δchars={m['counts']['char_delta']}")
     (out / "all_metrics.json").write_text(json.dumps(all_metrics, indent=2))
+    write_summary(out, all_metrics)
     print(f"[ab-test] done. {len(all_metrics)} tickers processed.")
 
 
