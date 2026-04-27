@@ -158,6 +158,60 @@ def format_news_section(news_items: list[dict]) -> str:
     return "\n".join(out)
 
 
+BENZINGA_PROVIDERS = {"Benzinga/Massive", "Market News (Benzinga)"}
+
+
+def per_ticker_metrics(ticker: str, with_news: list[dict], without_news: list[dict],
+                       s_with: str, s_without: str) -> dict:
+    def by_prov(items):
+        d: dict[str, int] = {}
+        for n in items:
+            d[n.get("provider", "Other")] = d.get(n.get("provider", "Other"), 0) + 1
+        return d
+
+    benzinga_only = [n for n in with_news if n.get("provider") in BENZINGA_PROVIDERS]
+    headlines_with = {n.get("headline") for n in with_news if n.get("headline")}
+    headlines_without = {n.get("headline") for n in without_news if n.get("headline")}
+    unique_to_with = sorted(headlines_with - headlines_without)
+    unique_to_without = sorted(headlines_without - headlines_with)
+
+    has_insights = sum(1 for n in benzinga_only if n.get("content"))
+
+    return {
+        "ticker": ticker,
+        "counts": {
+            "with_total": len(with_news),
+            "without_total": len(without_news),
+            "benzinga_items": len(benzinga_only),
+            "with_chars": len(s_with),
+            "without_chars": len(s_without),
+            "char_delta": len(s_with) - len(s_without),
+        },
+        "providers_with": by_prov(with_news),
+        "providers_without": by_prov(without_news),
+        "headlines_only_in_with": unique_to_with,
+        "headlines_only_in_without": unique_to_without,
+        "benzinga_items_with_full_content": has_insights,
+    }
+
+
+def setup_output_dir(override: str | None) -> Path:
+    if override:
+        out = Path(override)
+    else:
+        ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        out = ROOT / "audit_reports" / "benzinga_ab_test" / ts
+    out.mkdir(parents=True, exist_ok=True)
+    return out
+
+
+def write_ticker_output(out: Path, ticker: str,
+                        s_with: str, s_without: str, metrics: dict):
+    (out / f"{ticker}_with.txt").write_text(s_with)
+    (out / f"{ticker}_without.txt").write_text(s_without)
+    (out / f"{ticker}_metrics.json").write_text(json.dumps(metrics, indent=2))
+
+
 def main():
     args = parse_args()
     tickers = resolve_tickers(args)
@@ -165,16 +219,26 @@ def main():
         raise SystemExit("No tickers resolved.")
     print(f"[ab-test] tickers ({len(tickers)}): {tickers}")
 
-    # TEMP smoke-test — removed in Task 5
-    sample = tickers[0]
-    w, wo = fetch_both(sample)
-    s_with = format_news_section(w)
-    s_without = format_news_section(wo)
-    print(f"[ab-test] {sample}: with={len(s_with)} chars, without={len(s_without)} chars")
-    print("--- WITH (first 600 chars) ---")
-    print(s_with[:600])
-    print("--- WITHOUT (first 600 chars) ---")
-    print(s_without[:600])
+    out = setup_output_dir(args.output_dir)
+    print(f"[ab-test] writing output to {out}")
+    all_metrics: list[dict] = []
+    for t in tickers:
+        try:
+            w, wo = fetch_both(t)
+        except Exception as e:
+            print(f"  [{t}] FAILED to fetch: {e}")
+            continue
+        s_with = format_news_section(w)
+        s_without = format_news_section(wo)
+        m = per_ticker_metrics(t, w, wo, s_with, s_without)
+        write_ticker_output(out, t, s_with, s_without, m)
+        all_metrics.append(m)
+        print(f"  [{t}] with={m['counts']['with_total']} "
+              f"without={m['counts']['without_total']} "
+              f"benzinga={m['counts']['benzinga_items']} "
+              f"Δchars={m['counts']['char_delta']}")
+    (out / "all_metrics.json").write_text(json.dumps(all_metrics, indent=2))
+    print(f"[ab-test] done. {len(all_metrics)} tickers processed.")
 
 
 if __name__ == "__main__":
