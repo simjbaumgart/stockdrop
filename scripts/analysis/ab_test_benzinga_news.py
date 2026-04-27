@@ -105,6 +105,59 @@ def fetch_both(ticker: str) -> tuple[list[dict], list[dict]]:
     return with_news, without_news
 
 
+def format_news_section(news_items: list[dict]) -> str:
+    """
+    Reproduces the news_summary block built in
+    app/services/research_service.py::_create_news_agent_prompt
+    (provider grouping + preferred ordering + per-item formatting).
+    Keep in sync if research_service.py changes.
+    """
+    items = sorted(news_items, key=lambda x: x.get("datetime", 0), reverse=True)
+
+    by_provider: dict[str, list[dict]] = {}
+    for n in items:
+        prov = n.get("provider", "Other Sources")
+        by_provider.setdefault(prov, []).append(n)
+
+    preferred = [
+        "Market News (Benzinga)", "Benzinga/Massive",
+        "Alpha Vantage", "Finnhub", "Yahoo Finance", "TradingView",
+    ]
+
+    out = []
+
+    def render_group(prov: str, group: list[dict]):
+        group_type = group[0].get("source_type", "WIRE") if group else "WIRE"
+        if prov == "Market News (Benzinga)":
+            out.append("--- BROAD MARKET CONTEXT (SPY/DIA/QQQ) [MARKET_CONTEXT] ---")
+        else:
+            out.append(f"--- SOURCE: {prov} [{group_type}] ---")
+        for n in group:
+            date_str = n.get("datetime_str", "N/A")
+            headline = n.get("headline", "No Headline")
+            source = n.get("source", "Unknown")
+            stype = n.get("source_type", "WIRE")
+            content = n.get("content", "") or ""
+            summary = n.get("summary", "") or ""
+            out.append(f"- {date_str}: [{stype}] {headline} ({source})")
+            if content:
+                txt = content if len(content) <= 8000 else content[:8000] + "..."
+                out.append(f"  CONTENT:\n{txt}\n")
+            elif summary:
+                out.append(f"  SUMMARY: {summary}\n")
+            else:
+                out.append("")
+
+    for prov in preferred:
+        if prov in by_provider:
+            render_group(prov, by_provider[prov])
+    for prov, group in by_provider.items():
+        if prov not in preferred:
+            render_group(prov, group)
+
+    return "\n".join(out)
+
+
 def main():
     args = parse_args()
     tickers = resolve_tickers(args)
@@ -115,7 +168,13 @@ def main():
     # TEMP smoke-test — removed in Task 5
     sample = tickers[0]
     w, wo = fetch_both(sample)
-    print(f"[ab-test] {sample}: with={len(w)} items, without={len(wo)} items")
+    s_with = format_news_section(w)
+    s_without = format_news_section(wo)
+    print(f"[ab-test] {sample}: with={len(s_with)} chars, without={len(s_without)} chars")
+    print("--- WITH (first 600 chars) ---")
+    print(s_with[:600])
+    print("--- WITHOUT (first 600 chars) ---")
+    print(s_without[:600])
 
 
 if __name__ == "__main__":
