@@ -25,6 +25,41 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
+DB_PATH = ROOT / "subscribers.db"
+
+
+def tickers_from_db(n: int) -> list[str]:
+    """Return up to n most-recent distinct tickers from decision_points."""
+    if not DB_PATH.exists():
+        raise SystemExit(f"DB not found at {DB_PATH}")
+    con = sqlite3.connect(DB_PATH)
+    try:
+        cur = con.execute(
+            "SELECT symbol FROM decision_points "
+            "ORDER BY id DESC"
+        )
+        seen, out = set(), []
+        for (t,) in cur:
+            if not t or t in seen:
+                continue
+            seen.add(t)
+            out.append(t)
+            if len(out) >= n:
+                break
+        return out
+    finally:
+        con.close()
+
+
+def resolve_tickers(args) -> list[str]:
+    if args.tickers:
+        tickers = [t.strip().upper() for t in args.tickers.split(",") if t.strip()]
+    elif args.from_db:
+        tickers = tickers_from_db(args.from_db)
+    else:
+        tickers = tickers_from_db(args.limit)
+    return tickers[: args.limit]
+
 
 def parse_args():
     p = argparse.ArgumentParser(description="Benzinga news A/B test")
@@ -41,8 +76,10 @@ def parse_args():
 
 def main():
     args = parse_args()
-    print(f"[ab-test] args: {args}")
-    # rest of pipeline added in later tasks
+    tickers = resolve_tickers(args)
+    if not tickers:
+        raise SystemExit("No tickers resolved.")
+    print(f"[ab-test] tickers ({len(tickers)}): {tickers}")
 
 
 if __name__ == "__main__":
