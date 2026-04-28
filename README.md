@@ -49,12 +49,8 @@ Because true Deep Research is extremely token-heavy and time-consuming, the syst
 
 ---
 
-## 🌍 Global Market Coverage
-StockDrop doesn't just watch the S&P 500. It monitors:
-*   🇺🇸 **USA** (NYSE, NASDAQ)
-*   🇪🇺 **Europe** (STOXX 600 components)
-*   🇨🇳 **China** (HKSE, Shanghai – Large Caps)
-*   🇮🇳 **India** (Nifty 50 components)
+## 🌍 Market Coverage
+StockDrop currently scans the **S&P 500** (NYSE, NASDAQ) via TradingView's `america` screener. The codebase is structured to add other indices (STOXX 600, CSI 300, Nifty 50) — each just needs an entry in `indices_config` — but only the S&P 500 is enabled today.
 
 ## 🔌 Data Integrations
 *   **Markets:** TradingView, Alpaca, Polygon, Finnhub, Alpha Vantage, yfinance
