@@ -480,11 +480,12 @@ class StockService:
                     cached_indicators = stock.get("cached_indicators")
                     
                     is_valid, reasons = gatekeeper_service.check_technical_filters(
-                        symbol, 
-                        region=region, 
-                        exchange=exchange, 
+                        symbol,
+                        region=region,
+                        exchange=exchange,
                         screener=screener,
-                        cached_indicators=cached_indicators
+                        cached_indicators=cached_indicators,
+                        drop_pct=change_percent,
                     )
                     
                     if not is_valid:
@@ -513,7 +514,8 @@ class StockService:
                         # Optionally log this rejection to DB or file?
                         continue
                         
-                    print(f"GATEKEEPER: {symbol} APPROVED. Reasons: {reasons}")
+                    tier = reasons.get("tier", "UNKNOWN")
+                    print(f"GATEKEEPER: {symbol} APPROVED [tier={tier}]. Reasons: {reasons}")
                     
                     print(f"Triggering notification for {symbol} ({change_percent:.2f}%)")
                     
