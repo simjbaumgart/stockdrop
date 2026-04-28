@@ -1351,7 +1351,8 @@ class StockService:
             region=stock.get("region", self.stock_metadata.get(symbol, {}).get("region")),
             is_earnings_drop=is_earnings,
             earnings_date=earnings_date_str,
-            git_version=current_version
+            git_version=current_version,
+            gatekeeper_tier=reasons.get("tier"),
         )
 
         # Generate research report
@@ -1404,7 +1405,8 @@ class StockService:
             "transcript_date": transcript_date,
             "transcript_warning": transcript_warning,
             "market_context": market_context,
-            "change_percent": stock.get("change_percent", 0.0)
+            "change_percent": stock.get("change_percent", 0.0),
+            "gatekeeper_tier": reasons.get("tier"),
         }
 
         # Pass raw_data to research service

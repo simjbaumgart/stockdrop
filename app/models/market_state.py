@@ -11,3 +11,4 @@ class MarketState:
     risk_assessment: Optional[dict] = None
     final_decision: Optional[dict] = None
     agent_calls: int = 0
+    gatekeeper_tier: Optional[str] = None

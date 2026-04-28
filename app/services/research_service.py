@@ -148,9 +148,10 @@ class ResearchService:
         # Initialize State
         state = MarketState(
             ticker=ticker,
-            date=datetime.now().strftime("%Y-%m-%d")
+            date=datetime.now().strftime("%Y-%m-%d"),
+            gatekeeper_tier=raw_data.get("gatekeeper_tier"),
         )
-        
+
         # Extract drop percent for context (default to generic if missing)
         drop_percent = raw_data.get('change_percent', -5.0)
         # Ensure it's formatted as a string with sign if needed, or absolute

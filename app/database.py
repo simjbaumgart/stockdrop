@@ -123,6 +123,8 @@ def init_db():
             "reassess_reasoning": "TEXT",
             # Batch comparison linkage
             "batch_id": "INTEGER",
+            # Tiered Bollinger gate label
+            "gatekeeper_tier": "TEXT",
         }
         
         
@@ -225,17 +227,17 @@ def get_all_subscribers() -> List[str]:
         print(f"Error fetching subscribers: {e}")
         return []
 
-def add_decision_point(symbol: str, price: float, drop_percent: float, recommendation: str, reasoning: str, status: str = "Ignored", 
+def add_decision_point(symbol: str, price: float, drop_percent: float, recommendation: str, reasoning: str, status: str = "Ignored",
                       company_name: str = None, pe_ratio: float = None, market_cap: float = None, sector: str = None, region: str = None,
-                      is_earnings_drop: bool = False, earnings_date: str = None, git_version: str = None) -> int:
+                      is_earnings_drop: bool = False, earnings_date: str = None, git_version: str = None, gatekeeper_tier: str = None) -> int:
     """Add a new decision point."""
     try:
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO decision_points (symbol, price_at_decision, drop_percent, recommendation, reasoning, status, company_name, pe_ratio, market_cap, sector, region, is_earnings_drop, earnings_date, git_version)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (symbol, price, drop_percent, recommendation, reasoning, status, company_name, pe_ratio, market_cap, sector, region, is_earnings_drop, earnings_date, git_version))
+            INSERT INTO decision_points (symbol, price_at_decision, drop_percent, recommendation, reasoning, status, company_name, pe_ratio, market_cap, sector, region, is_earnings_drop, earnings_date, git_version, gatekeeper_tier)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (symbol, price, drop_percent, recommendation, reasoning, status, company_name, pe_ratio, market_cap, sector, region, is_earnings_drop, earnings_date, git_version, gatekeeper_tier))
         conn.commit()
         last_id = cursor.lastrowid
         conn.close()
