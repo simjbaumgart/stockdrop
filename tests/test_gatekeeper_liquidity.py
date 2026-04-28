@@ -72,12 +72,13 @@ def test_check_technical_filters_accepts_above_5_with_dip(gatekeeper):
         "volume": 2_000_000,
     }
     is_valid, reasons = gatekeeper.check_technical_filters(
-        symbol="AAPL", cached_indicators=cached
+        symbol="AAPL", cached_indicators=cached, drop_pct=-6.0
     )
-    # %B = (42-40)/(60-40) = 0.10 -> qualifies
+    # %B = (42-40)/(60-40) = 0.10 -> DEEP_DIP, qualifies
     assert is_valid is True
     assert "liquidity_status" in reasons
     assert "bb_status" in reasons
+    assert reasons["tier"] == TIER_DEEP_DIP
 
 
 def test_check_technical_filters_rejects_above_5_when_not_dipped(gatekeeper):
@@ -132,3 +133,42 @@ def test_classify_tier_above_70_always_rejects(gatekeeper):
 def test_classify_tier_handles_positive_drop_pct(gatekeeper):
     # Defensive: caller may pass +8.0 instead of -8.0; classifier uses abs()
     assert gatekeeper.classify_tier(pct_b=0.55, drop_pct=8.0) == TIER_SHALLOW_DIP
+
+
+def test_check_technical_filters_returns_tier_deep_dip(gatekeeper):
+    cached = {"close": 42.0, "bb_lower": 40.0, "bb_upper": 100.0, "volume": 2_000_000}
+    # %B = (42-40)/(100-40) = 0.033 → DEEP_DIP
+    is_valid, reasons = gatekeeper.check_technical_filters(
+        symbol="AAPL", cached_indicators=cached, drop_pct=-6.5
+    )
+    assert is_valid is True
+    assert reasons["tier"] == TIER_DEEP_DIP
+
+
+def test_check_technical_filters_returns_tier_shallow_when_drop_large(gatekeeper):
+    cached = {"close": 50.0, "bb_lower": 40.0, "bb_upper": 60.0, "volume": 2_000_000}
+    # %B = 0.5 — borderline shallow
+    is_valid, reasons = gatekeeper.check_technical_filters(
+        symbol="MSFT", cached_indicators=cached, drop_pct=-9.0
+    )
+    assert is_valid is True
+    assert reasons["tier"] == TIER_SHALLOW_DIP
+
+
+def test_check_technical_filters_rejects_shallow_zone_with_small_drop(gatekeeper):
+    cached = {"close": 50.0, "bb_lower": 40.0, "bb_upper": 60.0, "volume": 2_000_000}
+    is_valid, reasons = gatekeeper.check_technical_filters(
+        symbol="MSFT", cached_indicators=cached, drop_pct=-5.0
+    )
+    assert is_valid is False
+    assert reasons["tier"] == TIER_REJECT
+
+
+def test_check_technical_filters_drop_pct_optional_defaults_to_zero(gatekeeper):
+    """Backward-compat: callers that don't supply drop_pct still work; shallow zone rejects."""
+    cached = {"close": 50.0, "bb_lower": 40.0, "bb_upper": 60.0, "volume": 2_000_000}
+    is_valid, reasons = gatekeeper.check_technical_filters(
+        symbol="MSFT", cached_indicators=cached
+    )
+    assert is_valid is False
+    assert reasons["tier"] == TIER_REJECT
