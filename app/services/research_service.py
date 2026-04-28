@@ -993,6 +993,17 @@ REALISTIC EXIT CEILING (Bear's Upside Limit):
         # Extract available technical levels for the PM to reference
         indicators = state.reports.get('technical', '')
 
+        tier = getattr(state, "gatekeeper_tier", None)
+        tier_line = {
+            "DEEP_DIP": "DEEP_DIP — %B < 0.30, statistically oversold. Default toward action if fundamentals support.",
+            "STANDARD_DIP": "STANDARD_DIP — %B in [0.30, 0.50). Standard dip-buying setup; weigh fundamentals normally.",
+            "SHALLOW_DIP": (
+                "SHALLOW_DIP — %B in [0.50, 0.70). Stock is still extended above its 20-day midline; "
+                "admitted only because today's drop was large. Apply tighter scrutiny: require a clear recovery "
+                "catalyst and tighter stop-loss. Default toward WAIT_FOR_STAB or PASS unless the bull case is strong."
+            ),
+        }.get(tier, "UNKNOWN — gatekeeper tier missing; treat as STANDARD_DIP.")
+
         return f"""
 You are the **Portfolio Manager**. You have the final vote.
 You must weigh the arguments from the Bull Agent and the Bear Agent, cross-reference with the original Agent Reports, and produce a concrete, actionable trading plan.
@@ -1002,6 +1013,7 @@ DECISION CONTEXT:
 - Drop: {drop_str} today
 - This is a "Buy the Dip" evaluation. We are looking for oversold large-cap stocks with recovery potential.
 - The investor holds positions until recovery (weeks to months), not day-trading.
+- Gatekeeper Tier: {tier_line}
 
 RISK FACTORS (For Consideration):
 - Technical Flags: {safe_concerns}
