@@ -1,5 +1,12 @@
 import pytest
-from app.services.gatekeeper_service import GatekeeperService, MIN_PRICE_USD
+from app.services.gatekeeper_service import (
+    GatekeeperService,
+    MIN_PRICE_USD,
+    TIER_DEEP_DIP,
+    TIER_STANDARD_DIP,
+    TIER_SHALLOW_DIP,
+    TIER_REJECT,
+)
 
 
 @pytest.fixture
@@ -92,3 +99,36 @@ def test_check_technical_filters_rejects_above_5_when_not_dipped(gatekeeper):
 def test_min_avg_volume_constant_is_100k():
     from app.services.stock_service import MIN_AVG_VOLUME
     assert MIN_AVG_VOLUME == 100_000
+
+
+def test_classify_tier_deep_dip(gatekeeper):
+    assert gatekeeper.classify_tier(pct_b=0.10, drop_pct=-6.0) == TIER_DEEP_DIP
+    assert gatekeeper.classify_tier(pct_b=0.29, drop_pct=-5.5) == TIER_DEEP_DIP
+
+
+def test_classify_tier_standard_dip(gatekeeper):
+    assert gatekeeper.classify_tier(pct_b=0.30, drop_pct=-5.5) == TIER_STANDARD_DIP
+    assert gatekeeper.classify_tier(pct_b=0.49, drop_pct=-5.5) == TIER_STANDARD_DIP
+
+
+def test_classify_tier_shallow_dip_requires_8pct_drop(gatekeeper):
+    # 0.50 ≤ %B < 0.70 with drop ≥ 8% → admitted as SHALLOW_DIP
+    assert gatekeeper.classify_tier(pct_b=0.55, drop_pct=-8.0) == TIER_SHALLOW_DIP
+    assert gatekeeper.classify_tier(pct_b=0.69, drop_pct=-12.5) == TIER_SHALLOW_DIP
+
+
+def test_classify_tier_shallow_zone_with_small_drop_rejects(gatekeeper):
+    # 0.50 ≤ %B < 0.70 but drop < 8% → REJECT (the AAOI/CRDO 2026-04-28 case)
+    assert gatekeeper.classify_tier(pct_b=0.55, drop_pct=-7.99) == TIER_REJECT
+    assert gatekeeper.classify_tier(pct_b=0.62, drop_pct=-5.5) == TIER_REJECT
+
+
+def test_classify_tier_above_70_always_rejects(gatekeeper):
+    # %B ≥ 0.70 → REJECT regardless of drop magnitude (the ARM 2026-04-28 case)
+    assert gatekeeper.classify_tier(pct_b=0.70, drop_pct=-15.0) == TIER_REJECT
+    assert gatekeeper.classify_tier(pct_b=0.98, drop_pct=-20.0) == TIER_REJECT
+
+
+def test_classify_tier_handles_positive_drop_pct(gatekeeper):
+    # Defensive: caller may pass +8.0 instead of -8.0; classifier uses abs()
+    assert gatekeeper.classify_tier(pct_b=0.55, drop_pct=8.0) == TIER_SHALLOW_DIP

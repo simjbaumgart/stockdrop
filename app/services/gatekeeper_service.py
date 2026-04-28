@@ -10,6 +10,18 @@ from app.services.tradingview_service import tradingview_service
 # but which have no realistic liquidity, wide spreads, and poor LLM coverage.
 MIN_PRICE_USD = 5.0
 
+# Tier names for the graduated Bollinger gate.
+TIER_DEEP_DIP = "DEEP_DIP"           # %B < 0.30 — high-conviction oversold
+TIER_STANDARD_DIP = "STANDARD_DIP"   # 0.30 ≤ %B < 0.50 — current default
+TIER_SHALLOW_DIP = "SHALLOW_DIP"     # 0.50 ≤ %B < 0.70 with ≥ 8% drop
+TIER_REJECT = "REJECT"
+
+# Tier boundaries
+PCT_B_DEEP = 0.30
+PCT_B_STANDARD = 0.50
+PCT_B_SHALLOW = 0.70
+SHALLOW_MIN_DROP_PCT = 8.0
+
 class GatekeeperService:
     def __init__(self):
         self.benchmark_symbol = "SPY" # Can be switched to QQQ
@@ -17,7 +29,24 @@ class GatekeeperService:
         self.regime_cache_time = None
         self.cache_duration = timedelta(hours=1)
 
+    def classify_tier(self, pct_b: float, drop_pct: float) -> str:
+        """
+        Classify a candidate into a Bollinger gate tier.
 
+        Args:
+            pct_b: Bollinger %B value, (price - lower) / (upper - lower).
+            drop_pct: Today's percentage drop. Sign-agnostic (uses abs()).
+
+        Returns one of TIER_DEEP_DIP, TIER_STANDARD_DIP, TIER_SHALLOW_DIP, TIER_REJECT.
+        """
+        drop_magnitude = abs(drop_pct)
+        if pct_b < PCT_B_DEEP:
+            return TIER_DEEP_DIP
+        if pct_b < PCT_B_STANDARD:
+            return TIER_STANDARD_DIP
+        if pct_b < PCT_B_SHALLOW and drop_magnitude >= SHALLOW_MIN_DROP_PCT:
+            return TIER_SHALLOW_DIP
+        return TIER_REJECT
 
     def check_liquidity_filter(self, price: float) -> Tuple[bool, str]:
         """
