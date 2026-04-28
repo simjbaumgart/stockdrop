@@ -38,12 +38,12 @@ def load_portfolio_tickers() -> Dict[str, str]:
         return {}
     sector_series = df[SECTOR_COL] if SECTOR_COL in df.columns else pd.Series([""] * len(df))
     out: Dict[str, str] = {}
-    for ticker, sector in zip(df[TICKER_COL].astype(str), sector_series.astype(str)):
-        t = ticker.strip().upper()
-        s = sector.strip() if sector and sector != "nan" else ""
+    for ticker, sector in zip(df[TICKER_COL], sector_series):
+        t = ("" if pd.isna(ticker) else str(ticker)).strip().upper()
+        s = ("" if pd.isna(sector) else str(sector)).strip()
         if not t or t == "NAN" or t in _ACCOUNT_MARKERS:
             continue
-        if not s or s == "nan":
+        if not s or s.lower() == "nan":
             # Row exists but no sector — still include with "Unknown"
             s = "Unknown"
         out[t] = s
