@@ -14,6 +14,11 @@ from app.services.fred_service import fred_service
 import time
 import requests
 from app.services.deep_research_service import deep_research_service
+from app.services.gatekeeper_service import (
+    TIER_DEEP_DIP,
+    TIER_STANDARD_DIP,
+    TIER_SHALLOW_DIP,
+)
 from app.utils.ticker_paths import safe_ticker_path
 from app.utils.agent_call_counter import counter as agent_call_counter
 
@@ -995,12 +1000,12 @@ REALISTIC EXIT CEILING (Bear's Upside Limit):
 
         tier = getattr(state, "gatekeeper_tier", None)
         tier_line = {
-            "DEEP_DIP": "DEEP_DIP — %B < 0.30, statistically oversold. Default toward action if fundamentals support.",
-            "STANDARD_DIP": "STANDARD_DIP — %B in [0.30, 0.50). Standard dip-buying setup; weigh fundamentals normally.",
-            "SHALLOW_DIP": (
+            TIER_DEEP_DIP: "DEEP_DIP — %B < 0.30, statistically oversold. Default toward action if fundamentals support.",
+            TIER_STANDARD_DIP: "STANDARD_DIP — %B in [0.30, 0.50). Standard dip-buying setup; weigh fundamentals normally.",
+            TIER_SHALLOW_DIP: (
                 "SHALLOW_DIP — %B in [0.50, 0.70). Stock is still extended above its 20-day midline; "
                 "admitted only because today's drop was large. Apply tighter scrutiny: require a clear recovery "
-                "catalyst and tighter stop-loss. Default toward WAIT_FOR_STAB or PASS unless the bull case is strong."
+                "catalyst and tighter stop-loss. Default toward WATCH or AVOID unless the bull case is strong."
             ),
         }.get(tier, "UNKNOWN — gatekeeper tier missing; treat as STANDARD_DIP.")
 
