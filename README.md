@@ -10,6 +10,8 @@ It continuously scans global markets for significant price drops in large-cap co
 
 Unlike simple "screeners" or single-prompt GPT wrappers, StockDrop uses a multi-stage, multi-agent architecture to simulate a real investment committee.
 
+![StockDrop Pipeline](docs/images/stockdrop_workflow.svg)
+
 ### Phase 0: The Gatekeeper (Pre-filter)
 Before spending tokens on a full analysis, every candidate must clear two cheap, deterministic checks:
 *   **📉 Bollinger %B < 0.50** — the stock has actually broken into the lower half of its recent volatility band, not just had a noisy red day.

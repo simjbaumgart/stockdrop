@@ -1,0 +1,210 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 1500" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/>
+    </marker>
+    <marker id="arrowOverride" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b91c1c"/>
+    </marker>
+    <linearGradient id="gradScreen" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#0ea5e9"/>
+      <stop offset="1" stop-color="#0369a1"/>
+    </linearGradient>
+    <linearGradient id="gradGate" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#f59e0b"/>
+      <stop offset="1" stop-color="#b45309"/>
+    </linearGradient>
+    <linearGradient id="gradC1" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#10b981"/>
+      <stop offset="1" stop-color="#047857"/>
+    </linearGradient>
+    <linearGradient id="gradC2" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#8b5cf6"/>
+      <stop offset="1" stop-color="#5b21b6"/>
+    </linearGradient>
+    <linearGradient id="gradPM" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#1e293b"/>
+      <stop offset="1" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="gradDR" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#dc2626"/>
+      <stop offset="1" stop-color="#7f1d1d"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="1500" fill="#f8fafc"/>
+
+  <!-- Title -->
+  <text x="550" y="42" text-anchor="middle" font-size="26" font-weight="700" fill="#0f172a">StockDrop Pipeline</text>
+  <text x="550" y="68" text-anchor="middle" font-size="14" fill="#475569">Multi-agent dip-buying analysis · FastAPI + background workers</text>
+
+  <!-- Step 1: Screener -->
+  <g>
+    <rect x="370" y="100" width="360" height="78" rx="12" fill="url(#gradScreen)"/>
+    <text x="550" y="132" text-anchor="middle" font-size="18" font-weight="700" fill="#fff">1 · Screener</text>
+    <text x="550" y="156" text-anchor="middle" font-size="13" fill="#e0f2fe">Large-cap stocks dropping &gt;5% in a single day</text>
+    <text x="550" y="172" text-anchor="middle" font-size="11" fill="#bae6fd">runs every 20 min · stock_service.py</text>
+  </g>
+  <line x1="550" y1="178" x2="550" y2="208" stroke="#334155" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 2: Gatekeeper -->
+  <g>
+    <rect x="350" y="218" width="400" height="86" rx="12" fill="url(#gradGate)"/>
+    <text x="550" y="248" text-anchor="middle" font-size="18" font-weight="700" fill="#fff">2 · Gatekeeper</text>
+    <text x="550" y="270" text-anchor="middle" font-size="12.5" fill="#fff7ed">Bollinger %B &lt; 0.50  ·  SPY vs SMA200 regime</text>
+    <text x="550" y="288" text-anchor="middle" font-size="11" fill="#fde68a">filters false-positive dips before LLM spend</text>
+  </g>
+
+  <!-- PASS exit from Gatekeeper -->
+  <line x1="750" y1="261" x2="900" y2="261" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+  <rect x="900" y="240" width="160" height="42" rx="8" fill="#e2e8f0" stroke="#94a3b8"/>
+  <text x="980" y="266" text-anchor="middle" font-size="12" font-weight="600" fill="#475569">REJECTED → drop</text>
+
+  <line x1="550" y1="304" x2="550" y2="334" stroke="#334155" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 3: Council 1 (Phase 1 sensors) -->
+  <g>
+    <rect x="120" y="344" width="860" height="200" rx="14" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+    <rect x="120" y="344" width="860" height="38" rx="14" fill="url(#gradC1)"/>
+    <text x="550" y="370" text-anchor="middle" font-size="17" font-weight="700" fill="#fff">3 · Council 1 — Phase 1 Sensor Agents (parallel · ThreadPoolExecutor max_workers=8)</text>
+
+    <!-- 5 sensor cards -->
+    <g font-size="12" fill="#064e3b">
+      <rect x="140" y="402" width="160" height="120" rx="10" fill="#fff" stroke="#10b981"/>
+      <text x="220" y="426" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46">Technical</text>
+      <text x="220" y="446" text-anchor="middle">Charts, indicators,</text>
+      <text x="220" y="462" text-anchor="middle">support/resistance</text>
+      <text x="220" y="490" text-anchor="middle" font-size="10" fill="#047857">TradingView</text>
+
+      <rect x="312" y="402" width="160" height="120" rx="10" fill="#fff" stroke="#10b981"/>
+      <text x="392" y="426" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46">News</text>
+      <text x="392" y="446" text-anchor="middle">Headlines, catalysts,</text>
+      <text x="392" y="462" text-anchor="middle">earnings events</text>
+      <text x="392" y="490" text-anchor="middle" font-size="10" fill="#047857">Benzinga</text>
+
+      <rect x="484" y="402" width="160" height="120" rx="10" fill="#fff" stroke="#10b981"/>
+      <text x="564" y="426" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46">Sentiment</text>
+      <text x="564" y="446" text-anchor="middle">Market mood,</text>
+      <text x="564" y="462" text-anchor="middle">macro context</text>
+      <text x="564" y="490" text-anchor="middle" font-size="10" fill="#047857">FRED · Finnhub</text>
+
+      <rect x="656" y="402" width="160" height="120" rx="10" fill="#fff" stroke="#10b981"/>
+      <text x="736" y="426" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46">Competitive</text>
+      <text x="736" y="446" text-anchor="middle">Peer comp,</text>
+      <text x="736" y="462" text-anchor="middle">sector landscape</text>
+      <text x="736" y="490" text-anchor="middle" font-size="10" fill="#047857">Polygon · AV</text>
+
+      <rect x="828" y="402" width="140" height="120" rx="10" fill="#fff" stroke="#10b981"/>
+      <text x="898" y="426" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46">Seeking Alpha</text>
+      <text x="898" y="446" text-anchor="middle">Analyst</text>
+      <text x="898" y="462" text-anchor="middle">sentiment</text>
+      <text x="898" y="490" text-anchor="middle" font-size="10" fill="#047857">RapidAPI</text>
+    </g>
+  </g>
+  <line x1="550" y1="544" x2="550" y2="574" stroke="#334155" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 4: Council 2 (Phase 2 debate) -->
+  <g>
+    <rect x="200" y="584" width="700" height="180" rx="14" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="2"/>
+    <rect x="200" y="584" width="700" height="38" rx="14" fill="url(#gradC2)"/>
+    <text x="550" y="610" text-anchor="middle" font-size="17" font-weight="700" fill="#fff">4 · Council 2 — Phase 2 Debate Agents (parallel · max_workers=6)</text>
+
+    <g font-size="12" fill="#3b0764">
+      <rect x="220" y="640" width="200" height="105" rx="10" fill="#fff" stroke="#8b5cf6"/>
+      <text x="320" y="664" text-anchor="middle" font-size="13" font-weight="700" fill="#5b21b6">Bull Researcher</text>
+      <text x="320" y="686" text-anchor="middle">Best-case thesis,</text>
+      <text x="320" y="702" text-anchor="middle">recovery drivers,</text>
+      <text x="320" y="718" text-anchor="middle">upside catalysts</text>
+
+      <rect x="450" y="640" width="200" height="105" rx="10" fill="#fff" stroke="#8b5cf6"/>
+      <text x="550" y="664" text-anchor="middle" font-size="13" font-weight="700" fill="#5b21b6">Bear Researcher</text>
+      <text x="550" y="686" text-anchor="middle">Worst-case thesis,</text>
+      <text x="550" y="702" text-anchor="middle">structural risks,</text>
+      <text x="550" y="718" text-anchor="middle">downside scenarios</text>
+
+      <rect x="680" y="640" width="200" height="105" rx="10" fill="#fff" stroke="#8b5cf6"/>
+      <text x="780" y="664" text-anchor="middle" font-size="13" font-weight="700" fill="#5b21b6">Risk Management</text>
+      <text x="780" y="686" text-anchor="middle">Position sizing,</text>
+      <text x="780" y="702" text-anchor="middle">stop levels,</text>
+      <text x="780" y="718" text-anchor="middle">drawdown risk</text>
+    </g>
+  </g>
+  <line x1="550" y1="764" x2="550" y2="794" stroke="#334155" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 5: Fund Manager (PM) -->
+  <g>
+    <rect x="300" y="804" width="500" height="118" rx="14" fill="url(#gradPM)"/>
+    <text x="550" y="836" text-anchor="middle" font-size="19" font-weight="700" fill="#fff">5 · Fund Manager (PM)</text>
+    <text x="550" y="860" text-anchor="middle" font-size="12.5" fill="#cbd5e1">Synthesizes Council 1 + Council 2 reports</text>
+    <text x="550" y="878" text-anchor="middle" font-size="11" fill="#94a3b8">gemini-3.1-pro-preview</text>
+
+    <g font-size="11" font-weight="700">
+      <rect x="320" y="892" width="100" height="22" rx="6" fill="#16a34a"/>
+      <text x="370" y="908" text-anchor="middle" fill="#fff">BUY</text>
+      <rect x="430" y="892" width="100" height="22" rx="6" fill="#22c55e"/>
+      <text x="480" y="908" text-anchor="middle" fill="#fff">BUY_LIMIT</text>
+      <rect x="540" y="892" width="120" height="22" rx="6" fill="#eab308"/>
+      <text x="600" y="908" text-anchor="middle" fill="#1f2937">WAIT_FOR_STAB</text>
+      <rect x="670" y="892" width="100" height="22" rx="6" fill="#94a3b8"/>
+      <text x="720" y="908" text-anchor="middle" fill="#fff">PASS</text>
+    </g>
+  </g>
+  <line x1="550" y1="922" x2="550" y2="952" stroke="#334155" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 6: Deep Research -->
+  <g>
+    <rect x="240" y="962" width="620" height="138" rx="14" fill="url(#gradDR)"/>
+    <text x="550" y="994" text-anchor="middle" font-size="19" font-weight="700" fill="#fff">6 · Senior Investment Reviewer (Deep Research)</text>
+    <text x="550" y="1018" text-anchor="middle" font-size="12.5" fill="#fee2e2">deep-research-pro · Google Search grounding</text>
+    <text x="550" y="1038" text-anchor="middle" font-size="12" fill="#fecaca">Dual priority queues (individual=high · batch=low) · 60s rate limit</text>
+    <rect x="370" y="1054" width="360" height="32" rx="8" fill="#fff"/>
+    <text x="550" y="1075" text-anchor="middle" font-size="13" font-weight="700" fill="#b91c1c">CAN OVERRIDE the PM verdict</text>
+  </g>
+
+  <!-- Override loopback arrow from DR back to PM area -->
+  <path d="M 240 1031 Q 130 1031 130 870 Q 130 850 295 850" fill="none" stroke="#b91c1c" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrowOverride)"/>
+  <text x="60" y="945" font-size="11" fill="#b91c1c" font-weight="600">override</text>
+
+  <line x1="550" y1="1100" x2="550" y2="1130" stroke="#334155" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- Final verdict + persistence -->
+  <g>
+    <rect x="280" y="1140" width="540" height="78" rx="12" fill="#0f172a"/>
+    <text x="550" y="1170" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">Final Decision → decision_points (SQLite)</text>
+    <text x="550" y="1192" text-anchor="middle" font-size="12" fill="#cbd5e1">verdict · agent reports · entry/exit prices · scores</text>
+    <text x="550" y="1208" text-anchor="middle" font-size="11" fill="#94a3b8">tracked in decision_tracking for outcome measurement</text>
+  </g>
+
+  <!-- Side panel: Background tasks -->
+  <g>
+    <rect x="40" y="1255" width="500" height="220" rx="12" fill="#fff" stroke="#cbd5e1"/>
+    <text x="60" y="1282" font-size="14" font-weight="700" fill="#0f172a">Background tasks (FastAPI startup)</text>
+    <g font-size="12" fill="#334155">
+      <text x="60" y="1308">• Periodic stock scanner — every 20 min</text>
+      <text x="60" y="1330">• Trade report CSV generation — every 60 min</text>
+      <text x="60" y="1352">• Google Cloud Storage data upload</text>
+      <text x="60" y="1374">• Daily email summary</text>
+      <text x="60" y="1396">• Performance tracking metrics</text>
+      <text x="60" y="1418">• Deep Research worker (daemon thread, 2 queues)</text>
+      <text x="60" y="1440">• Decision outcome tracking (1-week eval window)</text>
+      <text x="60" y="1462" font-size="11" fill="#64748b" font-style="italic">All blocking I/O off the asyncio event loop</text>
+    </g>
+  </g>
+
+  <!-- Side panel: Data sources -->
+  <g>
+    <rect x="560" y="1255" width="500" height="220" rx="12" fill="#fff" stroke="#cbd5e1"/>
+    <text x="580" y="1282" font-size="14" font-weight="700" fill="#0f172a">External data sources</text>
+    <g font-size="12" fill="#334155">
+      <text x="580" y="1308">• TradingView (no API key) — charts &amp; indicators</text>
+      <text x="580" y="1330">• Benzinga — news &amp; earnings</text>
+      <text x="580" y="1352">• Alpha Vantage · Finnhub · Polygon — market data</text>
+      <text x="580" y="1374">• yfinance — fallback quotes</text>
+      <text x="580" y="1396">• Seeking Alpha (RapidAPI) — analyst sentiment</text>
+      <text x="580" y="1418">• FRED — Federal Reserve macro</text>
+      <text x="580" y="1440">• Alpaca — trading + screening</text>
+      <text x="580" y="1462">• Google Cloud Storage — archival</text>
+    </g>
+  </g>
+</svg>
