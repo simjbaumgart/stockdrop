@@ -177,8 +177,23 @@ def init_db():
                 migrations_applied.append(f"batch_comparisons.{col_name}")
 
     except Exception as e:
-        print(f"Error during batch table migration: {e}") 
-        
+        print(f"Error during batch table migration: {e}")
+
+    # Transcript cache: immutable rows of (symbol, fiscal_quarter) -> transcript text.
+    # Populated by StockService.get_latest_transcript when the AV fallback fires.
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS transcript_cache (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            symbol TEXT NOT NULL,
+            fiscal_quarter TEXT NOT NULL,
+            source TEXT NOT NULL,
+            text TEXT NOT NULL,
+            report_date TEXT,
+            fetched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(symbol, fiscal_quarter)
+        )
+    ''')
+
     # Migration: Add batch_winner to decision_points
     try:
         cursor.execute("PRAGMA table_info(decision_points)")
