@@ -25,6 +25,7 @@ def test_transcript_cache_table_exists(temp_db):
     cur = conn.cursor()
     cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='transcript_cache'")
     assert cur.fetchone() is not None, "transcript_cache table missing after init_db()"
+    conn.close()
 
 
 def test_transcript_cache_columns(temp_db):
@@ -38,6 +39,7 @@ def test_transcript_cache_columns(temp_db):
     assert cols.get("text") == "TEXT"
     assert cols.get("report_date") == "TEXT"
     assert cols.get("fetched_at") == "TIMESTAMP"
+    conn.close()
 
 
 def test_transcript_cache_unique_key(temp_db):
@@ -57,3 +59,4 @@ def test_transcript_cache_unique_key(temp_db):
             ("AAPL", "2026Q1", "defeatbeta", "different", "2026-01-30"),
         )
         conn.commit()
+    conn.close()
