@@ -1291,36 +1291,22 @@ class StockService:
         """Fetch the most recent earnings-call transcript with Alpha Vantage fallback.
 
         Source priority:
-            1. SQLite cache, keyed by (symbol, latest known quarter)  — checked first
-               to avoid any external call when we already have a fresh result.
-            2. DefeatBeta (HuggingFace parquet) — primary source, may be stale.
+            1. DefeatBeta (HuggingFace parquet) — primary source, fast and free.
                If fresh (<= STALE_TRANSCRIPT_DAYS days old) return immediately.
-            3. Alpha Vantage EARNINGS_CALL_TRANSCRIPT — fires when DefeatBeta is empty
-               or its latest transcript is older than STALE_TRANSCRIPT_DAYS days.
+            2. SQLite cache, keyed by (symbol, fiscal_quarter) — checked when DefeatBeta
+               is empty or stale, before any AV call.
+            3. Alpha Vantage EARNINGS_CALL_TRANSCRIPT — fires only when both DefeatBeta
+               is stale/empty AND the cache has nothing for the latest reported quarter.
 
         Returns a dict with shape: {"text": str, "date": str | None, "warning": str}
         On any failure, returns {"text": "", "date": None, "warning": ""} so callers
-        degrade gracefully (existing call site at ~line 1369 handles empty text).
+        degrade gracefully.
 
         AV calls are bounded by an in-memory daily counter (see AlphaVantageService).
         """
         empty = {"text": "", "date": None, "warning": ""}
 
-        # Step 1: Resolve the latest known quarter (needed for cache + AV).
-        # We do this first so a cache hit can avoid all external transcript fetches.
-        quarter = self._finnhub_latest_quarter_for(symbol)
-
-        # Step 2: Cache lookup — if we already have text for this quarter, return it.
-        if quarter:
-            cached = get_cached_transcript(symbol, quarter)
-            if cached and cached.get("text"):
-                return {
-                    "text": cached["text"],
-                    "date": cached.get("report_date"),
-                    "warning": "",
-                }
-
-        # Step 3: Try DefeatBeta (doesn't need a quarter parameter).
+        # Step 1: Try DefeatBeta first (no quarter parameter needed; fast & free).
         db_text = ""
         db_date_str = None
         db_age_days = None
@@ -1349,21 +1335,28 @@ class StockService:
             except Exception as e:
                 print(f"[StockService] DefeatBeta transcript fetch failed for {symbol}: {e}")
 
-        # Step 4: Return DefeatBeta result if it's fresh enough.
-        # Trigger AV if DefeatBeta is empty or older than STALE_TRANSCRIPT_DAYS.
-        needs_av = (not db_text) or (db_age_days is not None and db_age_days > STALE_TRANSCRIPT_DAYS)
-
-        if not needs_av:
+        # Step 2: If DefeatBeta gave us fresh data, we're done — no Finnhub, no cache, no AV.
+        needs_fallback = (not db_text) or (db_age_days is not None and db_age_days > STALE_TRANSCRIPT_DAYS)
+        if not needs_fallback:
             return {"text": db_text, "date": db_date_str, "warning": ""}
 
-        # Step 5: AV fallback requires a known quarter.
+        # Step 3: Resolve the quarter. Without it we cannot use the cache or call AV.
+        quarter = self._finnhub_latest_quarter_for(symbol)
         if not quarter:
-            # Cannot call AV without a quarter — return whatever DefeatBeta gave us.
             if db_text:
                 return {"text": db_text, "date": db_date_str, "warning": ""}
             return empty
 
-        # Step 6: Call Alpha Vantage.
+        # Step 4: Cache lookup before any AV call.
+        cached = get_cached_transcript(symbol, quarter)
+        if cached and cached.get("text"):
+            return {
+                "text": cached["text"],
+                "date": cached.get("report_date"),
+                "warning": "",
+            }
+
+        # Step 5: Call Alpha Vantage.
         av = self.alpha_vantage_service.get_earnings_call_transcript(symbol, quarter)
         av_text = av.get("text", "")
 
@@ -1378,7 +1371,7 @@ class StockService:
             )
             return {"text": av_text, "date": av.get("report_date"), "warning": ""}
 
-        # Step 7: AV gave us nothing — fall back to whatever DefeatBeta had (even if stale).
+        # Step 6: AV gave us nothing — fall back to whatever DefeatBeta had (even if stale).
         if db_text:
             return {"text": db_text, "date": db_date_str, "warning": ""}
         return empty

@@ -31,21 +31,41 @@ def _db_list(report_date: str, paragraphs):
     }])
 
 
-def test_cache_hit_skips_all_external_calls(svc, monkeypatch):
-    """If (symbol, latest known quarter) is already cached, return it directly."""
+def test_cache_hit_when_db_empty_skips_av(svc):
+    """If DefeatBeta is empty AND the cache has the latest quarter, return cached and skip AV."""
     from app.database import save_cached_transcript
     save_cached_transcript("AAPL", "2026Q1", "alpha_vantage",
                            "cached transcript text",
                            "2026-01-30")
 
-    # Stub the helper that would derive the quarter — return the cached quarter
-    with patch.object(svc, "_finnhub_latest_quarter_for", return_value="2026Q1"), \
-         patch("app.services.stock_service._DBTicker") as mock_db, \
+    # DefeatBeta returns empty so we proceed to fallback path
+    fake_ticker = MagicMock()
+    fake_ticker.earning_call_transcripts.return_value.get_transcripts_list.return_value = pd.DataFrame()
+
+    with patch("app.services.stock_service._DBTicker", return_value=fake_ticker), \
+         patch.object(svc, "_finnhub_latest_quarter_for", return_value="2026Q1"), \
          patch.object(svc.alpha_vantage_service, "get_earnings_call_transcript") as mock_av:
         result = svc.get_latest_transcript("AAPL")
     assert result["text"] == "cached transcript text"
     assert result["date"] == "2026-01-30"
-    mock_db.assert_not_called()
+    mock_av.assert_not_called()
+
+
+def test_fresh_db_skips_finnhub_and_cache(svc):
+    """If DefeatBeta returns a fresh transcript, no Finnhub call and no cache lookup happen."""
+    today = datetime.utcnow().date()
+    fresh_date = (today - timedelta(days=30)).strftime("%Y-%m-%d")
+    df = _db_list(fresh_date, [{"content": "fresh DB content"}])
+
+    fake_ticker = MagicMock()
+    fake_ticker.earning_call_transcripts.return_value.get_transcripts_list.return_value = df
+
+    with patch("app.services.stock_service._DBTicker", return_value=fake_ticker), \
+         patch.object(svc, "_finnhub_latest_quarter_for") as mock_finnhub, \
+         patch.object(svc.alpha_vantage_service, "get_earnings_call_transcript") as mock_av:
+        result = svc.get_latest_transcript("AAPL")
+    assert "fresh DB content" in result["text"]
+    mock_finnhub.assert_not_called()
     mock_av.assert_not_called()
 
 

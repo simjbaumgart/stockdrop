@@ -1,6 +1,21 @@
 import os
 import sys
+import pytest
 from app.services.stock_service import StockService
+from app.database import init_db
+
+
+@pytest.fixture(autouse=True)
+def _ensure_db_schema():
+    """Ensure the DB schema (including transcript_cache) is present.
+
+    The _isolate_db fixture in other test modules reloads app.database and
+    redirects DB_NAME to a tmp path.  Running init_db() here (inside the
+    fixture, not at module-import time) guarantees the schema exists against
+    whatever DB_NAME is current when the test actually executes.
+    """
+    init_db()
+
 
 # Initialize Service
 service = StockService()
