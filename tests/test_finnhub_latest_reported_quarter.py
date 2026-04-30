@@ -55,3 +55,14 @@ def test_picks_max_period_not_first_row(svc):
     ]
     with patch.object(svc.client, "company_earnings", return_value=rows):
         assert svc.get_latest_reported_quarter("AAPL") == "2026Q1"
+
+
+def test_returns_none_when_year_or_quarter_missing(svc):
+    """If the latest row lacks year or quarter, we cannot derive the quarter string."""
+    rows_no_year = [{"period": "2025-12-31", "quarter": 1, "symbol": "AAPL"}]
+    with patch.object(svc.client, "company_earnings", return_value=rows_no_year):
+        assert svc.get_latest_reported_quarter("AAPL") is None
+
+    rows_no_quarter = [{"period": "2025-12-31", "year": 2026, "symbol": "AAPL"}]
+    with patch.object(svc.client, "company_earnings", return_value=rows_no_quarter):
+        assert svc.get_latest_reported_quarter("AAPL") is None

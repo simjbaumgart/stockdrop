@@ -126,6 +126,7 @@ class FinnhubService:
             return None
         if not rows:
             return None
+        latest = None
         try:
             latest = max(rows, key=lambda r: r.get("period", ""))
             year = latest.get("year")
