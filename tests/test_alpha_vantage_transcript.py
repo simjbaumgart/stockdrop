@@ -69,7 +69,7 @@ def test_daily_counter_increments_on_attempted_call(svc):
 
 def test_daily_cap_skips_call(svc):
     """When counter is at AV_TRANSCRIPT_DAILY_CAP, no HTTP call is made."""
-    AlphaVantageService._daily_call_count = 24  # AV_TRANSCRIPT_DAILY_CAP
+    AlphaVantageService._daily_call_count = AlphaVantageService.AV_TRANSCRIPT_DAILY_CAP
     AlphaVantageService._counter_date = date.today()
     with patch("app.services.alpha_vantage_service.requests.get") as mocked:
         result = svc.get_earnings_call_transcript("AAPL", "2026Q1")
@@ -81,7 +81,7 @@ def test_daily_cap_skips_call(svc):
 def test_counter_resets_at_new_utc_day(svc):
     """If recorded date != today, counter resets to 0 before incrementing."""
     from datetime import timedelta
-    AlphaVantageService._daily_call_count = 24
+    AlphaVantageService._daily_call_count = AlphaVantageService.AV_TRANSCRIPT_DAILY_CAP
     AlphaVantageService._counter_date = date.today() - timedelta(days=1)
     body = {"symbol": "AAPL", "quarter": "2026Q1", "transcript": []}
     with patch("app.services.alpha_vantage_service.requests.get",
