@@ -11,7 +11,7 @@ from app.services.email_service import email_service
 from app.services.research_service import research_service
 from app.services.alpaca_service import alpaca_service
 from app.services.tradingview_service import tradingview_service
-from app.database import add_decision_point, get_today_decision_symbols, update_decision_point, get_decision_points
+from app.database import add_decision_point, get_today_decision_symbols, update_decision_point, get_decision_points, get_cached_transcript, save_cached_transcript
 from app.services.storage_service import storage_service
 from app.services.gatekeeper_service import gatekeeper_service
 from app.utils import get_git_version
@@ -38,6 +38,10 @@ try:
     from defeatbeta_api.data.ticker import Ticker as _DBTicker
 except ImportError:
     _DBTicker = None  # gracefully degrade if package missing
+
+# Age threshold (in days) above which a DefeatBeta transcript is considered stale
+# and triggers an Alpha Vantage fallback fetch.
+STALE_TRANSCRIPT_DAYS = 75
 
 # Minimum average daily volume (shares) for a ticker to be considered tradeable.
 # Paired with the gatekeeper's $5 price floor to catch above-$5 tickers that
@@ -155,7 +159,11 @@ class StockService:
 
         # Initialize Yahoo Ticker Resolver
         self.resolver = YahooTickerResolver()
-        
+
+        # Service singletons used by transcript orchestration
+        self.alpha_vantage_service = alpha_vantage_service
+        self._finnhub_service = finnhub_service
+
         # Batch Candidates for Deep Research (Deprecated)
         # self.deep_research_candidates = []
 
@@ -1272,43 +1280,108 @@ class StockService:
             print(f"Error fetching filing for {symbol}: {e}")
             return ""
 
+    def _finnhub_latest_quarter_for(self, symbol: str) -> str | None:
+        """Indirection so tests can patch quarter discovery without touching FinnhubService.
+
+        Returns 'YYYYQN' (e.g. '2026Q1') for the most recently reported quarter, or None.
+        """
+        return self._finnhub_service.get_latest_reported_quarter(symbol)
+
     def get_latest_transcript(self, symbol: str) -> dict:
-        """Fetch the most recent earnings-call transcript via DefeatBeta.
+        """Fetch the most recent earnings-call transcript with Alpha Vantage fallback.
 
-        Returns a dict with shape:
-            {"text": str, "date": str | None, "warning": str}
-        On any failure, returns {"text": "", "date": None, "warning": ""}
-        so callers degrade gracefully (existing call site at ~line 1320 already
-        handles both dict and str returns)."""
+        Source priority:
+            1. SQLite cache, keyed by (symbol, latest known quarter)  — checked first
+               to avoid any external call when we already have a fresh result.
+            2. DefeatBeta (HuggingFace parquet) — primary source, may be stale.
+               If fresh (<= STALE_TRANSCRIPT_DAYS days old) return immediately.
+            3. Alpha Vantage EARNINGS_CALL_TRANSCRIPT — fires when DefeatBeta is empty
+               or its latest transcript is older than STALE_TRANSCRIPT_DAYS days.
+
+        Returns a dict with shape: {"text": str, "date": str | None, "warning": str}
+        On any failure, returns {"text": "", "date": None, "warning": ""} so callers
+        degrade gracefully (existing call site at ~line 1369 handles empty text).
+
+        AV calls are bounded by an in-memory daily counter (see AlphaVantageService).
+        """
         empty = {"text": "", "date": None, "warning": ""}
-        if _DBTicker is None:
+
+        # Step 1: Resolve the latest known quarter (needed for cache + AV).
+        # We do this first so a cache hit can avoid all external transcript fetches.
+        quarter = self._finnhub_latest_quarter_for(symbol)
+
+        # Step 2: Cache lookup — if we already have text for this quarter, return it.
+        if quarter:
+            cached = get_cached_transcript(symbol, quarter)
+            if cached and cached.get("text"):
+                return {
+                    "text": cached["text"],
+                    "date": cached.get("report_date"),
+                    "warning": "",
+                }
+
+        # Step 3: Try DefeatBeta (doesn't need a quarter parameter).
+        db_text = ""
+        db_date_str = None
+        db_age_days = None
+        if _DBTicker is not None:
+            try:
+                df = _DBTicker(symbol).earning_call_transcripts().get_transcripts_list()
+                if df is not None and not df.empty:
+                    df = df.sort_values("report_date", ascending=False)
+                    row = df.iloc[0]
+                    db_date_str = str(row.get("report_date", "")).split(" ")[0]
+                    paragraphs = row.get("transcripts")
+                    if hasattr(paragraphs, "tolist"):
+                        paragraphs = paragraphs.tolist()
+                    if isinstance(paragraphs, list):
+                        db_text = "\n".join(
+                            p.get("content", "")
+                            for p in paragraphs
+                            if isinstance(p, dict) and p.get("content")
+                        )
+                    if db_date_str:
+                        try:
+                            db_dt = datetime.strptime(db_date_str, "%Y-%m-%d").date()
+                            db_age_days = (datetime.utcnow().date() - db_dt).days
+                        except ValueError:
+                            db_age_days = None
+            except Exception as e:
+                print(f"[StockService] DefeatBeta transcript fetch failed for {symbol}: {e}")
+
+        # Step 4: Return DefeatBeta result if it's fresh enough.
+        # Trigger AV if DefeatBeta is empty or older than STALE_TRANSCRIPT_DAYS.
+        needs_av = (not db_text) or (db_age_days is not None and db_age_days > STALE_TRANSCRIPT_DAYS)
+
+        if not needs_av:
+            return {"text": db_text, "date": db_date_str, "warning": ""}
+
+        # Step 5: AV fallback requires a known quarter.
+        if not quarter:
+            # Cannot call AV without a quarter — return whatever DefeatBeta gave us.
+            if db_text:
+                return {"text": db_text, "date": db_date_str, "warning": ""}
             return empty
-        try:
-            df = _DBTicker(symbol).earning_call_transcripts().get_transcripts_list()
-            if df is None or df.empty:
-                return empty
-            df = df.sort_values("report_date", ascending=False)
-            row = df.iloc[0]
-            date_str = str(row.get("report_date", "")).split(" ")[0]
 
-            paragraphs = row.get("transcripts")
-            # Pandas may hand back numpy arrays of dicts
-            if hasattr(paragraphs, "tolist"):
-                paragraphs = paragraphs.tolist()
-            if not isinstance(paragraphs, list):
-                return empty
+        # Step 6: Call Alpha Vantage.
+        av = self.alpha_vantage_service.get_earnings_call_transcript(symbol, quarter)
+        av_text = av.get("text", "")
 
-            text = "\n".join(
-                p.get("content", "")
-                for p in paragraphs
-                if isinstance(p, dict) and p.get("content")
+        if av_text:
+            # Persist for future scans (immutable per quarter — first-write-wins).
+            save_cached_transcript(
+                symbol=symbol,
+                fiscal_quarter=quarter,
+                source="alpha_vantage",
+                text=av_text,
+                report_date=av.get("report_date"),
             )
-            if not text:
-                return empty
-            return {"text": text, "date": date_str, "warning": ""}
-        except Exception as e:
-            print(f"[StockService] DefeatBeta transcript fetch failed for {symbol}: {e}")
-            return empty
+            return {"text": av_text, "date": av.get("report_date"), "warning": ""}
+
+        # Step 7: AV gave us nothing — fall back to whatever DefeatBeta had (even if stale).
+        if db_text:
+            return {"text": db_text, "date": db_date_str, "warning": ""}
+        return empty
 
     def _is_market_open(self, region: str = "US") -> bool:
         """
