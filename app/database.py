@@ -676,7 +676,7 @@ def get_distinct_dates_with_unbatched_candidates() -> List[str]:
     try:
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
-        
+
         cursor.execute('''
             SELECT DISTINCT date(timestamp) FROM decision_points
             WHERE deep_research_verdict IS NOT NULL
@@ -688,7 +688,7 @@ def get_distinct_dates_with_unbatched_candidates() -> List[str]:
             AND (recommendation IN ('BUY', 'STRONG BUY', 'SPECULATIVE BUY') OR recommendation LIKE '%BUY%')
             AND (batch_id IS NULL OR batch_id = '')
         ''')
-        
+
         rows = cursor.fetchall()
         conn.close()
         return [row[0] for row in rows if row[0]]
@@ -696,4 +696,42 @@ def get_distinct_dates_with_unbatched_candidates() -> List[str]:
         print(f"Error fetching distinct dates: {e}")
         return []
 
+
+def get_cached_transcript(symbol: str, fiscal_quarter: str) -> dict | None:
+    """Look up a cached transcript by (symbol, fiscal_quarter).
+
+    Returns a dict with keys {text, source, report_date} or None on miss.
+    """
+    conn = sqlite3.connect(DB_NAME)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            "SELECT text, source, report_date FROM transcript_cache "
+            "WHERE symbol=? AND fiscal_quarter=?",
+            (symbol, fiscal_quarter),
+        )
+        row = cur.fetchone()
+        if row is None:
+            return None
+        return {"text": row["text"], "source": row["source"], "report_date": row["report_date"]}
+    finally:
+        conn.close()
+
+
+def save_cached_transcript(symbol: str, fiscal_quarter: str, source: str,
+                           text: str, report_date: str | None) -> None:
+    """Insert a transcript into the cache. Silently no-ops if (symbol, fiscal_quarter)
+    is already present (first writer wins — transcripts are immutable per quarter)."""
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            "INSERT OR IGNORE INTO transcript_cache "
+            "(symbol, fiscal_quarter, source, text, report_date) VALUES (?, ?, ?, ?, ?)",
+            (symbol, fiscal_quarter, source, text, report_date),
+        )
+        conn.commit()
+    finally:
+        conn.close()
 

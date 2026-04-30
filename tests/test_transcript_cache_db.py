@@ -60,3 +60,34 @@ def test_transcript_cache_unique_key(temp_db):
         )
         conn.commit()
     conn.close()
+
+
+def test_get_cached_transcript_miss(temp_db):
+    from app.database import get_cached_transcript
+    assert get_cached_transcript("AAPL", "2026Q1") is None
+
+
+def test_save_and_get_cached_transcript(temp_db):
+    from app.database import save_cached_transcript, get_cached_transcript
+    save_cached_transcript(
+        symbol="AAPL",
+        fiscal_quarter="2026Q1",
+        source="alpha_vantage",
+        text="Tim Cook here. Good afternoon.",
+        report_date="2026-01-30",
+    )
+    row = get_cached_transcript("AAPL", "2026Q1")
+    assert row is not None
+    assert row["text"].startswith("Tim Cook")
+    assert row["source"] == "alpha_vantage"
+    assert row["report_date"] == "2026-01-30"
+
+
+def test_save_cached_transcript_idempotent(temp_db):
+    """Second save with same key must NOT overwrite — first write wins."""
+    from app.database import save_cached_transcript, get_cached_transcript
+    save_cached_transcript("AAPL", "2026Q1", "defeatbeta", "first", "2026-01-30")
+    save_cached_transcript("AAPL", "2026Q1", "alpha_vantage", "second", "2026-01-30")
+    row = get_cached_transcript("AAPL", "2026Q1")
+    assert row["text"] == "first"
+    assert row["source"] == "defeatbeta"
