@@ -109,6 +109,34 @@ class FinnhubService:
             print(f"Error extracting filing text from {url}: {e}")
             return ""
 
+    def get_latest_reported_quarter(self, symbol: str) -> str | None:
+        """Return the most recently reported fiscal quarter as 'YYYYQN' (e.g. '2026Q1'),
+        or None on any failure / no data.
+
+        Uses Finnhub's free /stock/earnings endpoint which already exposes a 'quarter'
+        and 'year' field per row alongside the period date. We sort by period to be
+        defensive (Finnhub usually returns newest-first, but we don't rely on that).
+        """
+        if not self.client:
+            return None
+        try:
+            rows = self.client.company_earnings(symbol)
+        except Exception as e:
+            print(f"[FinnhubService] company_earnings failed for {symbol}: {e}")
+            return None
+        if not rows:
+            return None
+        try:
+            latest = max(rows, key=lambda r: r.get("period", ""))
+            year = latest.get("year")
+            quarter = latest.get("quarter")
+            if year is None or quarter is None:
+                return None
+            return f"{int(year)}Q{int(quarter)}"
+        except (ValueError, TypeError) as e:
+            print(f"[FinnhubService] could not derive quarter from {latest!r}: {e}")
+            return None
+
     def get_insider_sentiment(self, symbol: str, from_date: str, to_date: str):
         """
         Get insider sentiment data for a specific symbol.
