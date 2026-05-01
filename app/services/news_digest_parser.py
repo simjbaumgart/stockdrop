@@ -180,3 +180,32 @@ def parse_ft_daily(path) -> List[Article]:
 
 def parse_finimize_daily(path) -> List[Article]:
     return _parse(Path(path), ft_mode=False)
+
+
+def parse_wsj_daily(path) -> List[Article]:
+    """WSJ shares FT's H2/H3/bullet structure but tacks ' · Author' onto the
+    Published line. Reuse the FT parse path then split byline into its own field.
+    """
+    articles = _parse(Path(path), ft_mode=True)
+    out: List[Article] = []
+    for a in articles:
+        published = a.published
+        byline = a.byline
+        if " · " in published:
+            pub, _, by = published.partition(" · ")
+            published = pub.strip()
+            byline = byline or by.strip()
+        out.append(
+            Article(
+                uuid=a.uuid,
+                title=a.title,
+                section=a.section,
+                url=a.url,
+                summary=a.summary,
+                published=published,
+                tags=a.tags,
+                tickers=a.tickers,
+                byline=byline,
+            )
+        )
+    return out

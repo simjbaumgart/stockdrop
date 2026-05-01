@@ -16,11 +16,15 @@ def archive_tree(tmp_path, monkeypatch):
     (tmp_path / "FT Archive" / "daily").mkdir(parents=True)
     (tmp_path / "Finimize Archive" / "daily").mkdir(parents=True)
     (tmp_path / "Finimize Archive" / "weekly").mkdir(parents=True)
+    (tmp_path / "WSJ Archive" / "daily").mkdir(parents=True)
     (tmp_path / "FT Archive" / "daily" / "2026-04-22.md").write_text(
         (FIXTURES / "ft_2026-04-22.md").read_text(encoding="utf-8"), encoding="utf-8"
     )
     (tmp_path / "Finimize Archive" / "daily" / "2026-04-22.md").write_text(
         (FIXTURES / "finimize_2026-04-22.md").read_text(encoding="utf-8"), encoding="utf-8"
+    )
+    (tmp_path / "WSJ Archive" / "daily" / "2026-04-22.md").write_text(
+        (FIXTURES / "wsj_2026-04-22.md").read_text(encoding="utf-8"), encoding="utf-8"
     )
     return tmp_path
 
@@ -132,20 +136,26 @@ def test_appends_flagged_critical(archive_tree):
     assert any(e["ticker"] == "AAPL" and e["source"] == "ft" for e in entries)
 
 
-def test_ensure_news_digests_for_today_both_sources(archive_tree):
+def test_ensure_news_digests_for_today_all_sources(archive_tree):
     call_count = {"n": 0}
 
     def _fake(prompt):
         call_count["n"] += 1
         # derive source from prompt
-        src = "ft" if "FT articles" in prompt else "finimize"
+        if "WSJ articles" in prompt:
+            src = "wsj"
+        elif "FT articles" in prompt:
+            src = "ft"
+        else:
+            src = "finimize"
         return json.dumps(_fake_digest(src, "2026-04-22"))
 
     with patch.object(nds, "_call_thinking_model", side_effect=_fake):
         nds.ensure_news_digests_for_today("2026-04-22")
-    assert call_count["n"] == 2
+    assert call_count["n"] == 3
     assert (archive_tree / "FT Archive" / "digests" / "2026-04-22.json").exists()
     assert (archive_tree / "Finimize Archive" / "digests" / "2026-04-22.json").exists()
+    assert (archive_tree / "WSJ Archive" / "digests" / "2026-04-22.json").exists()
 
 
 # --- weekly (FT only, pulls last 3 Finimize weekly rollups) --------------
@@ -312,6 +322,79 @@ def test_competitive_includes_tickers_and_risk(archive_tree):
 
 def test_missing_digest_returns_empty(archive_tree):
     assert nds.format_for_agent("news", "2026-04-22", "NVDA") == ""
+
+
+# --- WSJ-specific ---------------------------------------------------------
+
+
+def _seed_all_three_daily_digests(archive_tree):
+    with patch.object(nds, "_call_thinking_model") as mock:
+        mock.side_effect = [
+            json.dumps(_fake_digest("ft", "2026-04-22")),
+            json.dumps(_fake_digest("finimize", "2026-04-22")),
+            json.dumps(_fake_digest("wsj", "2026-04-22")),
+        ]
+        nds.ensure_daily_digest("ft", "2026-04-22")
+        nds.ensure_daily_digest("finimize", "2026-04-22")
+        nds.ensure_daily_digest("wsj", "2026-04-22")
+
+
+def test_ensure_daily_digest_wsj_writes_json_and_md(archive_tree):
+    with patch.object(nds, "_call_thinking_model") as mock:
+        mock.return_value = json.dumps(_fake_digest("wsj", "2026-04-22"))
+        result = nds.ensure_daily_digest("wsj", "2026-04-22")
+    assert result is not None
+    assert result["source"] == "wsj"
+    j = archive_tree / "WSJ Archive" / "digests" / "2026-04-22.json"
+    m = archive_tree / "WSJ Archive" / "digests" / "2026-04-22.md"
+    assert j.exists() and m.exists()
+    # Markdown header carries the source name
+    assert "WSJ Digest" in m.read_text()
+
+
+def test_news_agent_includes_wsj_block(archive_tree):
+    _seed_all_three_daily_digests(archive_tree)
+    block = nds.format_for_agent("news", "2026-04-22", "NVDA")
+    assert "FT daily digest" in block
+    assert "WSJ daily digest" in block
+    assert "Finimize daily digest" in block
+
+
+def test_pm_agent_includes_wsj_compact(archive_tree):
+    _seed_all_three_daily_digests(archive_tree)
+    block = nds.format_for_agent("pm", "2026-04-22", "NVDA")
+    assert "WSJ daily digest" in block
+    # Compact slice means one_liner + market_tape only — no theme detail
+    assert "private_credit_strain" not in block
+
+
+def test_sentiment_skips_wsj(archive_tree):
+    _seed_all_three_daily_digests(archive_tree)
+    block = nds.format_for_agent("market_sentiment", "2026-04-22", "NVDA")
+    assert "WSJ daily digest" not in block
+
+
+def test_competitive_skips_wsj(archive_tree):
+    _seed_all_three_daily_digests(archive_tree)
+    block = nds.format_for_agent("competitive", "2026-04-22", "NVDA")
+    assert "WSJ daily digest" not in block
+
+
+def test_bear_skips_wsj(archive_tree):
+    _seed_all_three_daily_digests(archive_tree)
+    block = nds.format_for_agent("bear", "2026-04-22", "NVDA")
+    assert "WSJ daily digest" not in block
+
+
+def test_risk_skips_wsj(archive_tree):
+    _seed_all_three_daily_digests(archive_tree)
+    block = nds.format_for_agent("risk", "2026-04-22", "NVDA")
+    assert "WSJ daily digest" not in block
+
+
+def test_technical_skips_wsj(archive_tree):
+    _seed_all_three_daily_digests(archive_tree)
+    assert nds.format_for_agent("technical", "2026-04-22", "NVDA") == ""
 
 
 def test_digest_model_default_is_valid_model():

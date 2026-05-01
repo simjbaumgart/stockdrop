@@ -1,6 +1,10 @@
 from pathlib import Path
 
-from app.services.news_digest_parser import parse_ft_daily, parse_finimize_daily
+from app.services.news_digest_parser import (
+    parse_finimize_daily,
+    parse_ft_daily,
+    parse_wsj_daily,
+)
 
 FIXTURES = Path(__file__).parent / "fixtures" / "news"
 
@@ -42,3 +46,52 @@ def test_parse_finimize_extracts_tickers():
 def test_parse_missing_file_returns_empty():
     assert parse_ft_daily(FIXTURES / "nope.md") == []
     assert parse_finimize_daily(FIXTURES / "nope.md") == []
+    assert parse_wsj_daily(FIXTURES / "nope.md") == []
+
+
+def test_parse_wsj_daily_extracts_articles():
+    articles = parse_wsj_daily(FIXTURES / "wsj_2026-04-22.md")
+    assert len(articles) >= 8
+    titles = [a.title for a in articles]
+    assert any("Activist Hedge Fund" in t for t in titles)
+    activist = next(a for a in articles if "Activist Hedge Fund" in a.title)
+    assert activist.section == "markets"
+    assert activist.url.startswith("https://www.wsj.com/")
+
+
+def test_parse_wsj_daily_assigns_sections():
+    articles = parse_wsj_daily(FIXTURES / "wsj_2026-04-22.md")
+    sections = {a.section for a in articles}
+    # Fixture spans Markets / US Business / World
+    assert "markets" in sections
+    assert "us business" in sections
+    assert "world" in sections
+
+
+def test_parse_wsj_daily_splits_byline_from_published():
+    """WSJ raw lines are 'Published: 2026-04-22 12:00 UTC · AnnaMaria Andriotis'.
+    The byline (after ' · ') must land in Article.byline, not Article.published."""
+    articles = parse_wsj_daily(FIXTURES / "wsj_2026-04-22.md")
+    activist = next(a for a in articles if "Activist Hedge Fund" in a.title)
+    assert activist.byline == "AnnaMaria Andriotis"
+    assert "·" not in activist.published
+    assert "AnnaMaria" not in activist.published
+    assert activist.published.endswith("UTC")
+
+
+def test_parse_wsj_daily_handles_missing_byline():
+    """Some WSJ entries (live coverage pages) have no '· Author' suffix.
+    Those should parse cleanly with empty byline."""
+    articles = parse_wsj_daily(FIXTURES / "wsj_2026-04-22.md")
+    live = next(a for a in articles if "Stock Market Today" in a.title)
+    assert live.byline == ""
+    assert live.published.endswith("UTC")
+
+
+def test_parse_wsj_daily_uuid_falls_back_to_url_slug():
+    """WSJ URLs don't carry an FT-style hex UUID. Parser should fall back to
+    the slug from the URL path (mirroring Finimize behaviour)."""
+    articles = parse_wsj_daily(FIXTURES / "wsj_2026-04-22.md")
+    activist = next(a for a in articles if "Activist Hedge Fund" in a.title)
+    # Slug is the last path component without query string
+    assert activist.uuid.startswith("activist-hedge-fund-makes-nearly-3-billion-offer")

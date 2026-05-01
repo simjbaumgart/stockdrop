@@ -7,28 +7,32 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List
 
-_DEFAULT_ROOT = (
-    "/Users/simonbaumgart/Documents/Claude/Projects/Investment Ideas and Portfolio"
-)
-
-
 def news_archive_root() -> Path:
-    return Path(os.getenv("NEWS_ARCHIVE_ROOT", _DEFAULT_ROOT))
+    return Path(os.getenv("NEWS_ARCHIVE_ROOT", ""))
 
 
 def digest_enabled() -> bool:
-    return os.getenv("NEWS_DIGEST_ENABLED", "true").lower() in ("1", "true", "yes")
+    if os.getenv("NEWS_DIGEST_ENABLED", "true").lower() not in ("1", "true", "yes"):
+        return False
+    # Treat unset/empty NEWS_ARCHIVE_ROOT as "not configured" — otherwise Path("")
+    # silently resolves to CWD and every screener tick logs spurious "raw file missing".
+    return bool(os.getenv("NEWS_ARCHIVE_ROOT", "").strip())
 
 
 def digest_model() -> str:
     return os.getenv("NEWS_DIGEST_MODEL", "gemini-3.1-pro-preview")
 
 
-SOURCES = ("ft", "finimize")
+def digest_thinking_level() -> str:
+    return os.getenv("NEWS_DIGEST_THINKING_LEVEL", "high").lower()
+
+
+SOURCES = ("ft", "finimize", "wsj")
 
 _ARCHIVE_SUBDIR = {
     "ft": "FT Archive",
     "finimize": "Finimize Archive",
+    "wsj": "WSJ Archive",
 }
 
 
@@ -86,15 +90,16 @@ class Article:
 
 
 # See plan doc for rationale. Six direct consumers; Bull + DR + Technical + SA inherit transitively.
+# WSJ overlaps heavily with FT — to avoid prompt bloat it's wired only to PM (compact) and News (full).
 AGENT_SLICE_MAP: Dict[str, Dict[str, str]] = {
-    "technical":        {"ft_daily": "none",             "finimize_daily": "none",             "ft_weekly": "none",            "finimize_weekly": "none"},
-    "seeking_alpha":    {"ft_daily": "none",             "finimize_daily": "none",             "ft_weekly": "none",            "finimize_weekly": "none"},
-    "bull":             {"ft_daily": "none",             "finimize_daily": "none",             "ft_weekly": "none",            "finimize_weekly": "none"},
-    "deep_research":    {"ft_daily": "none",             "finimize_daily": "none",             "ft_weekly": "none",            "finimize_weekly": "none"},
-    "news":             {"ft_daily": "full",             "finimize_daily": "full",             "ft_weekly": "none",            "finimize_weekly": "none"},
-    "market_sentiment": {"ft_daily": "sentiment_full",   "finimize_daily": "sentiment_full",   "ft_weekly": "none",            "finimize_weekly": "none"},
-    "competitive":      {"ft_daily": "competitive_full", "finimize_daily": "competitive_full", "ft_weekly": "none",            "finimize_weekly": "none"},
-    "bear":             {"ft_daily": "bearish_bundle",   "finimize_daily": "none",             "ft_weekly": "weekly_macro",    "finimize_weekly": "none"},
-    "risk":             {"ft_daily": "macro_risk",       "finimize_daily": "none",             "ft_weekly": "weekly_full",     "finimize_weekly": "none"},
-    "pm":               {"ft_daily": "compact",          "finimize_daily": "compact",          "ft_weekly": "weekly_oneliner", "finimize_weekly": "none"},
+    "technical":        {"ft_daily": "none",             "finimize_daily": "none",             "wsj_daily": "none",  "ft_weekly": "none",            "finimize_weekly": "none"},
+    "seeking_alpha":    {"ft_daily": "none",             "finimize_daily": "none",             "wsj_daily": "none",  "ft_weekly": "none",            "finimize_weekly": "none"},
+    "bull":             {"ft_daily": "none",             "finimize_daily": "none",             "wsj_daily": "none",  "ft_weekly": "none",            "finimize_weekly": "none"},
+    "deep_research":    {"ft_daily": "none",             "finimize_daily": "none",             "wsj_daily": "none",  "ft_weekly": "none",            "finimize_weekly": "none"},
+    "news":             {"ft_daily": "full",             "finimize_daily": "full",             "wsj_daily": "full",  "ft_weekly": "none",            "finimize_weekly": "none"},
+    "market_sentiment": {"ft_daily": "sentiment_full",   "finimize_daily": "sentiment_full",   "wsj_daily": "none",  "ft_weekly": "none",            "finimize_weekly": "none"},
+    "competitive":      {"ft_daily": "competitive_full", "finimize_daily": "competitive_full", "wsj_daily": "none",  "ft_weekly": "none",            "finimize_weekly": "none"},
+    "bear":             {"ft_daily": "bearish_bundle",   "finimize_daily": "none",             "wsj_daily": "none",  "ft_weekly": "weekly_macro",    "finimize_weekly": "none"},
+    "risk":             {"ft_daily": "macro_risk",       "finimize_daily": "none",             "wsj_daily": "none",  "ft_weekly": "weekly_full",     "finimize_weekly": "none"},
+    "pm":               {"ft_daily": "compact",          "finimize_daily": "compact",          "wsj_daily": "compact", "ft_weekly": "weekly_oneliner", "finimize_weekly": "none"},
 }

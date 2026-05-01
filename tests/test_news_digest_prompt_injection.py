@@ -95,6 +95,61 @@ def test_missing_digest_returns_empty(tmp_path, monkeypatch):
     assert _svc()._news_block_for(state, "news") == ""
 
 
+@pytest.fixture
+def archive_tree_with_wsj_digest(tmp_path, monkeypatch):
+    monkeypatch.setenv("NEWS_ARCHIVE_ROOT", str(tmp_path))
+    monkeypatch.setenv("NEWS_DIGEST_ENABLED", "true")
+    digests_dir = tmp_path / "WSJ Archive" / "digests"
+    digests_dir.mkdir(parents=True)
+    digest = {
+        "date": "2026-04-22",
+        "source": "wsj",
+        "one_liner": "Activist push at Driven Brands sets aftermarket re-rating tone.",
+        "market_tape": "US-equity tape steady; activist M&A and tech earnings dominate.",
+        "themes": [
+            {
+                "theme": "wsj_activist_pe_pressure",
+                "sentiment": "bullish",
+                "confidence": 0.7,
+                "opinion_driven": False,
+                "supporting_articles": ["activist-hedge-fund"],
+                "one_liner": "Activists pressing PE-owned platforms.",
+            }
+        ],
+        "tickers_mentioned": {},
+        "macro_signals": [],
+        "risk_flags": [],
+        "flagged_critical": [],
+    }
+    (digests_dir / "2026-04-22.json").write_text(json.dumps(digest))
+    (digests_dir / "2026-04-22.md").write_text(
+        "# WSJ Digest — 2026-04-22\n_Activist push at Driven Brands sets aftermarket re-rating tone._\n\n## Market tape\nUS-equity tape steady.\n"
+    )
+    return tmp_path
+
+
+def test_news_agent_block_includes_wsj_section(archive_tree_with_wsj_digest):
+    state = MarketState(ticker="NVDA", date="2026-04-22")
+    block = _svc()._news_block_for(state, "news")
+    assert "WSJ daily digest" in block
+    assert "Activist push at Driven Brands" in block
+
+
+def test_pm_block_includes_wsj_compact(archive_tree_with_wsj_digest):
+    state = MarketState(ticker="NVDA", date="2026-04-22")
+    block = _svc()._news_block_for(state, "pm")
+    assert "WSJ daily digest" in block
+    assert "Activist push at Driven Brands" in block
+    # Compact must NOT include theme details
+    assert "wsj_activist_pe_pressure" not in block
+
+
+def test_sentiment_block_excludes_wsj(archive_tree_with_wsj_digest):
+    state = MarketState(ticker="NVDA", date="2026-04-22")
+    block = _svc()._news_block_for(state, "market_sentiment")
+    assert "WSJ daily digest" not in block
+
+
 def test_prompt_builders_compile_with_injection(archive_tree_with_digest):
     """The actual _create_*_prompt methods must return a string that includes the block."""
     from app.services.research_service import ResearchService
