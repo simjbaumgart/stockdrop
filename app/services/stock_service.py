@@ -782,12 +782,15 @@ class StockService:
                 }
                 
                 print(f"  > Triggering Backfill for {symbol} (Conviction: {c.get('conviction')}, R/R: {c.get('risk_reward_ratio')})...")
-                deep_research_service.queue_research_task(
+                queued = deep_research_service.queue_research_task(
                     symbol=symbol,
                     context=context,
                     decision_id=decision_id
                 )
-                print(f"  > Queued backfill task for {symbol}")
+                if queued:
+                    print(f"  > Queued backfill task for {symbol}")
+                else:
+                    print(f"  > Skipped {symbol}: already in-flight (live trigger beat the backfill)")
                 
         except Exception as e:
             print(f"[Backfill] Error processing backfill: {e}")

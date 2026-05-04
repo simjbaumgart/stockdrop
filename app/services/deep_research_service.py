@@ -108,6 +108,12 @@ class DeepResearchService:
         # Change-detection for file sync (avoid redundant re-syncs)
         self._last_synced_files = set()
 
+        # Dedup: track (symbol, date) tuples currently queued or executing.
+        # Cleared in _handle_completion / _process_individual_task finally.
+        # Backfill sweeps and the live pipeline both consult this set.
+        self._inflight: set = set()
+        self._inflight_lock = threading.Lock()
+
         if not self.api_key:
             logger.warning("GEMINI_API_KEY not found. Deep Research Service will be disabled.")
             self.is_running = False
@@ -420,11 +426,30 @@ class DeepResearchService:
                 with self.lock:
                     self.active_tasks_count = 0
 
-    def queue_research_task(self, symbol: str, context: dict, decision_id: int):
+    def _today_str(self) -> str:
+        """ISO date used as the dedup key. UTC to match decision_points.timestamp."""
+        return datetime.utcnow().strftime("%Y-%m-%d")
+
+    def queue_research_task(self, symbol: str, context: dict, decision_id: int) -> bool:
         """
         Queues an individual deep research task (HIGH PRIORITY).
         context: Pre-built context dict from StockService._build_deep_research_context()
+
+        Returns True if queued, False if a task for (symbol, today) is already
+        in flight or queued. Dedup is in-memory and per-process — restarting the
+        service clears the set, which is fine because pending DB rows will be
+        picked up by the backfill sweep on the next cycle.
         """
+        key = (symbol, self._today_str())
+        with self._inflight_lock:
+            if key in self._inflight:
+                logger.info(
+                    f"[Deep Research] SKIP duplicate enqueue for {symbol} "
+                    f"(already in-flight or queued for {key[1]})"
+                )
+                return False
+            self._inflight.add(key)
+
         payload = {
             'symbol': symbol,
             'context': context,
@@ -432,6 +457,7 @@ class DeepResearchService:
         }
         self.individual_queue.put({'type': 'individual', 'payload': payload})
         logger.info(f"[Deep Research] Queued INDIVIDUAL task for {symbol} (Priority: High)")
+        return True
 
     def queue_batch_comparison_task(self, candidates: List[Dict], batch_id: int):
         """
@@ -462,6 +488,10 @@ class DeepResearchService:
                 self._handle_completion(payload, result)
         except Exception as e:
             logger.error(f"[Deep Research] Individual Task Failed for {symbol}: {e}")
+        finally:
+            # Defensive: release inflight key even if _handle_completion never ran.
+            with self._inflight_lock:
+                self._inflight.discard((symbol, self._today_str()))
 
     def _process_batch_task(self, payload):
         """
@@ -531,6 +561,15 @@ class DeepResearchService:
         """
         Handles the completed research result (DB update, file save).
         """
+        # Always release the inflight lock for this (symbol, date), even on errors.
+        try:
+            symbol_for_release = task.get('symbol') if isinstance(task, dict) else None
+            if symbol_for_release:
+                with self._inflight_lock:
+                    self._inflight.discard((symbol_for_release, self._today_str()))
+        except Exception:
+            pass
+
         symbol = task['symbol']
         decision_id = task.get('decision_id')
         review_verdict = result.get('review_verdict', 'UNKNOWN')
