@@ -75,3 +75,21 @@ def test_non_numeric_levels_treated_as_invalid():
     ok, reason = _svc()._validate_trading_levels(result)
     assert ok is False
     assert "non-numeric" in reason.lower() or "abc" in str(reason)
+
+
+def test_validator_unaffected_by_sell_range_fields():
+    """Sell-range fields are validated separately (not by _validate_trading_levels)
+    but must be nulled in _handle_completion when entry/stop are bad. This test
+    just pins the validator's contract: it doesn't read sell-range fields."""
+    result = {
+        "entry_price_low": 50.0,
+        "entry_price_high": 55.0,
+        "stop_loss": 45.0,
+        # Sell-range fields can be anything — validator should ignore them.
+        "sell_price_low": 0.0,
+        "sell_price_high": 0.0,
+        "ceiling_exit": 0.0,
+        "exit_trigger": "",
+    }
+    ok, _ = DeepResearchService.__new__(DeepResearchService)._validate_trading_levels(result)
+    assert ok is True, "validator must only check entry/stop fields"

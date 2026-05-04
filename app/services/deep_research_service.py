@@ -620,13 +620,35 @@ class DeepResearchService:
                     f"levels rejected: {levels_reason}. Marking INCOMPLETE_TRADING_LEVELS; "
                     f"DB level columns left null."
                 )
+                # Forensic snapshot: save the raw rejected result to disk BEFORE
+                # we null the levels for the DB. Operators investigating
+                # "why was this DR rejected?" should see the original zeros.
+                try:
+                    import copy
+                    rejected_snapshot = copy.deepcopy(result)
+                    rejected_snapshot["_validation_rejection"] = {
+                        "reason": levels_reason,
+                        "review_verdict_before": review_verdict,
+                    }
+                    self._save_result_to_file(
+                        symbol, rejected_snapshot, filename_suffix="_rejected_levels"
+                    )
+                except Exception as save_err:
+                    logger.warning(
+                        f"[Deep Research] Failed to save rejected snapshot for {symbol}: {save_err}"
+                    )
                 review_verdict = "INCOMPLETE_TRADING_LEVELS"
                 result["review_verdict"] = "INCOMPLETE_TRADING_LEVELS"
                 # Null the level fields so neither DB-write path persists them.
+                # Sell-range fields share the same JSON-repair root cause —
+                # if entry/stop are bad, the sell range is suspect too.
                 for f in (
                     "entry_price_low", "entry_price_high", "stop_loss",
                     "take_profit_1", "take_profit_2",
                     "upside_percent", "downside_risk_percent", "risk_reward_ratio",
+                    # Sell-range fields share the same JSON-repair root cause —
+                    # if entry/stop are bad, the sell range is suspect too.
+                    "sell_price_low", "sell_price_high", "ceiling_exit", "exit_trigger",
                 ):
                     result[f] = None
 
@@ -886,14 +908,14 @@ class DeepResearchService:
 
         print(f"{'='*60}\n")
 
-    def _save_result_to_file(self, symbol, result):
+    def _save_result_to_file(self, symbol, result, filename_suffix: str = ""):
         try:
             from app.utils.ticker_paths import safe_ticker_path
             output_dir = "data/deep_research_reports"
             os.makedirs(output_dir, exist_ok=True)
 
             date_str = datetime.now().strftime("%Y-%m-%d")
-            filename = f"deep_research_{safe_ticker_path(symbol)}_{date_str}_{int(time.time())}.json"
+            filename = f"deep_research_{safe_ticker_path(symbol)}_{date_str}_{int(time.time())}{filename_suffix}.json"
             filepath = os.path.join(output_dir, filename)
             
             with open(filepath, "w") as f:
