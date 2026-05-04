@@ -14,8 +14,12 @@ class TestStripCitations:
     def test_simple_trailing_marker(self):
         assert _strip_citations("great news [Source 1]") == "great news"
 
-    def test_mid_word_marker_collapses_cleanly(self):
-        assert _strip_citations("signa [Source 1]ling") == "signaling"
+    def test_strips_marker_in_middle_of_word(self):
+        # Old behavior joined letters across the marker ('signaling').
+        # New behavior preserves a space because we cannot tell joined-vs-separated
+        # from the raw text alone, and word-boundary preservation is the higher
+        # priority (see CAR 'Massivestructuralunwind' production failure).
+        assert _strip_citations("signa [Source 1]ling") == "signa ling"
 
     def test_multiple_markers(self):
         raw = "text [Source 1] more [Source 2] end"
@@ -58,3 +62,27 @@ class TestParserStripsCitations:
         assert result is not None
         assert result["reason"] == "clean setup"
         assert result["action"] == "BUY"
+
+
+class TestCitationStripSpacing:
+    """Regression tests for the 'Massivestructuralunwind' spacing collapse."""
+
+    def test_marker_between_words_without_trailing_space(self):
+        assert _strip_citations("Massive [Source 1]structural") == "Massive structural"
+
+    def test_consecutive_marker_cluster(self):
+        raw = "Phy [Source 6][Source 1]sical impact [Source 10][Source 11][Source 4] expected"
+        assert _strip_citations(raw) == "Phy sical impact expected"
+
+    def test_no_double_space_after_strip(self):
+        out = _strip_citations("word [Source 1] word")
+        assert "  " not in out
+        assert out == "word word"
+
+    def test_strip_at_sentence_join(self):
+        raw = "Massive [Source 1]structural [Source 2]unwind: [Source 3]The [Source 4]stock"
+        assert _strip_citations(raw) == "Massive structural unwind: The stock"
+
+    def test_no_leading_or_trailing_space(self):
+        assert _strip_citations("[Source 1] hello") == "hello"
+        assert _strip_citations("hello [Source 1]") == "hello"

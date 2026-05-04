@@ -16,30 +16,22 @@ logger = logging.getLogger(__name__)
 
 _CITATION_STRIP_COUNTER = {"stripped": 0}
 
-# Standalone marker (whitespace on both sides) collapses to a single space.
-_STANDALONE_CITATION_RE = re.compile(r"\s+\[Source\s*\d+\]\s+")
-# Edge/mid-word marker (leading or trailing whitespace absorbed) strips fully.
-_EDGE_CITATION_RE = re.compile(r"\s*\[Source\s*\d+\]\s*")
+_CITATION_RE = re.compile(r"\[Source\s*\d+\]")
+_MULTISPACE_RE = re.compile(r"[ \t]{2,}")
 
 
 def _strip_citations(raw: str) -> str:
-    """
-    Remove inline [Source N] markers from deep-research JSON text.
+    """Remove inline [Source N] markers, preserving word boundaries.
 
-    The model sometimes emits these despite instructions; they don't break
-    json.loads but they corrupt the human-readable string values.
-
-    Preserves the word boundary: 'x [Source 1] y' -> 'x y' (standalone
-    between words keeps a single space) but 'signa [Source 1]ling' ->
-    'signaling' (mid-word gets joined).
+    See app/services/research_service.py::_strip_citations for full contract.
     """
     if "[Source" not in raw:
         return raw
-    cleaned = _STANDALONE_CITATION_RE.sub(" ", raw)
-    cleaned = _EDGE_CITATION_RE.sub("", cleaned)
+    cleaned = _CITATION_RE.sub(" ", raw)
+    cleaned = _MULTISPACE_RE.sub(" ", cleaned)
     if cleaned != raw:
         _CITATION_STRIP_COUNTER["stripped"] += 1
-    return cleaned
+    return cleaned.strip(" ")
 
 _VALID_URL_SCHEMES = ("http://", "https://")
 

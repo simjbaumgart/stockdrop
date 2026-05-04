@@ -23,17 +23,28 @@ from app.utils.ticker_paths import safe_ticker_path
 from app.utils.agent_call_counter import counter as agent_call_counter
 
 # Citation strip — Gemini grounding injects [Source N] markers that corrupt JSON
-_STANDALONE_CITATION_RE = re.compile(r"\s+\[Source\s*\d+\]\s+")
-_EDGE_CITATION_RE = re.compile(r"\s*\[Source\s*\d+\]\s*")
+# AND mid-sentence text. We replace each marker with a single space, then collapse
+# runs of whitespace, so word boundaries are preserved. Joined-vs-separated cases
+# ('signaling' vs 'signa ling') are indistinguishable from the raw text alone;
+# we deliberately favor word-boundary preservation. The CAR-style
+# 'Massivestructuralunwind' production failure was the trigger.
+_CITATION_RE = re.compile(r"\[Source\s*\d+\]")
+_MULTISPACE_RE = re.compile(r"[ \t]{2,}")
 
 
 def _strip_citations(raw: str) -> str:
-    """Remove inline [Source N] markers that break JSON parsing."""
+    """Remove inline [Source N] markers, replacing each with a single space.
+
+    'word [Source 1] word' → 'word word'   (collapses double space)
+    'word [Source 1]word'  → 'word word'   (boundary preserved)
+    '[Source 1][Source 2]' → ''            (leading/trailing trimmed)
+    'word[Source 1]word'   → 'word word'   (always inserts a space)
+    """
     if "[Source" not in raw:
         return raw
-    cleaned = _STANDALONE_CITATION_RE.sub(" ", raw)
-    cleaned = _EDGE_CITATION_RE.sub("", cleaned)
-    return cleaned
+    cleaned = _CITATION_RE.sub(" ", raw)
+    cleaned = _MULTISPACE_RE.sub(" ", cleaned)
+    return cleaned.strip(" ")
 
 
 # Grounding retry policy: 1 initial attempt + up to MAX_GROUNDING_RETRIES retries
