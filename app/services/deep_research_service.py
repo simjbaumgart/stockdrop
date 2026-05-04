@@ -454,6 +454,7 @@ class DeepResearchService:
             'symbol': symbol,
             'context': context,
             'decision_id': decision_id,
+            '_inflight_key': key,
         }
         self.individual_queue.put({'type': 'individual', 'payload': payload})
         logger.info(f"[Deep Research] Queued INDIVIDUAL task for {symbol} (Priority: High)")
@@ -489,9 +490,14 @@ class DeepResearchService:
         except Exception as e:
             logger.error(f"[Deep Research] Individual Task Failed for {symbol}: {e}")
         finally:
-            # Defensive: release inflight key even if _handle_completion never ran.
-            with self._inflight_lock:
-                self._inflight.discard((symbol, self._today_str()))
+            # Sole inflight clear site — runs AFTER _handle_completion (so after
+            # the DB write) and uses the key stored at enqueue time, so a UTC
+            # midnight crossing between enqueue and completion still clears
+            # the right key.
+            inflight_key = payload.get('_inflight_key')
+            if inflight_key:
+                with self._inflight_lock:
+                    self._inflight.discard(inflight_key)
 
     def _process_batch_task(self, payload):
         """
@@ -561,15 +567,6 @@ class DeepResearchService:
         """
         Handles the completed research result (DB update, file save).
         """
-        # Always release the inflight lock for this (symbol, date), even on errors.
-        try:
-            symbol_for_release = task.get('symbol') if isinstance(task, dict) else None
-            if symbol_for_release:
-                with self._inflight_lock:
-                    self._inflight.discard((symbol_for_release, self._today_str()))
-        except Exception:
-            pass
-
         symbol = task['symbol']
         decision_id = task.get('decision_id')
         review_verdict = result.get('review_verdict', 'UNKNOWN')
