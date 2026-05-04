@@ -640,8 +640,6 @@ class DeepResearchService:
                 review_verdict = "INCOMPLETE_TRADING_LEVELS"
                 result["review_verdict"] = "INCOMPLETE_TRADING_LEVELS"
                 # Null the level fields so neither DB-write path persists them.
-                # Sell-range fields share the same JSON-repair root cause —
-                # if entry/stop are bad, the sell range is suspect too.
                 for f in (
                     "entry_price_low", "entry_price_high", "stop_loss",
                     "take_profit_1", "take_profit_2",
