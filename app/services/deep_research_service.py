@@ -511,6 +511,40 @@ class DeepResearchService:
                  from app.database import update_batch_status
                  update_batch_status(payload['batch_id'], 'FAILED')
 
+    def _validate_trading_levels(self, result: dict) -> tuple:
+        """
+        Sanity-check trading levels parsed from DR output.
+
+        Returns (ok: bool, reason: str). The caller is expected to skip this
+        validation entirely for verdicts that legitimately have no levels
+        (e.g. OVERRIDDEN AVOID). When called for a verdict that should have
+        levels, the rules are:
+          - entry_price_low, entry_price_high, stop_loss are numeric > 0
+          - entry_price_high >= entry_price_low
+          - stop_loss < entry_price_low (stop is below entry for a long)
+        """
+        try:
+            entry_low = result.get("entry_price_low")
+            entry_high = result.get("entry_price_high")
+            stop = result.get("stop_loss")
+
+            if entry_low is None or entry_high is None or stop is None:
+                return False, "missing entry/stop levels"
+
+            entry_low = float(entry_low)
+            entry_high = float(entry_high)
+            stop = float(stop)
+
+            if entry_low <= 0 or entry_high <= 0 or stop <= 0:
+                return False, f"non-positive level (entry={entry_low}-{entry_high}, stop={stop})"
+            if entry_high < entry_low:
+                return False, f"entry_high {entry_high} < entry_low {entry_low}"
+            if stop >= entry_low:
+                return False, f"stop {stop} >= entry_low {entry_low} (wrong direction for long)"
+            return True, "ok"
+        except (TypeError, ValueError) as e:
+            return False, f"non-numeric level: {e}"
+
     def _calculate_deep_research_score(self, result: dict) -> int:
         """
         Composite scoring for deep research results.
@@ -572,7 +606,30 @@ class DeepResearchService:
         review_verdict = result.get('review_verdict', 'UNKNOWN')
         action = result.get('action', 'AVOID')
         logger.info(f"[Deep Research] Task Completed for {symbol}. Review Verdict: {review_verdict}, Action: {action}")
-        
+
+        # Validate trading levels for verdicts that should have them. If invalid,
+        # null the level fields in `result` so neither the DB write below nor
+        # _apply_trading_level_overrides persists garbage zeros, and mark the
+        # verdict as INCOMPLETE_TRADING_LEVELS so dashboards/queries can
+        # surface the rejected DR rather than silently believing it.
+        if review_verdict in ("CONFIRMED", "UPGRADED", "ADJUSTED"):
+            levels_ok, levels_reason = self._validate_trading_levels(result)
+            if not levels_ok:
+                logger.warning(
+                    f"[Deep Research] {symbol} verdict={review_verdict} but trading "
+                    f"levels rejected: {levels_reason}. Marking INCOMPLETE_TRADING_LEVELS; "
+                    f"DB level columns left null."
+                )
+                review_verdict = "INCOMPLETE_TRADING_LEVELS"
+                result["review_verdict"] = "INCOMPLETE_TRADING_LEVELS"
+                # Null the level fields so neither DB-write path persists them.
+                for f in (
+                    "entry_price_low", "entry_price_high", "stop_loss",
+                    "take_profit_1", "take_profit_2",
+                    "upside_percent", "downside_risk_percent", "risk_reward_ratio",
+                ):
+                    result[f] = None
+
         try:
             from app.database import update_deep_research_data
             
