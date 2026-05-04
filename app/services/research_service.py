@@ -1533,6 +1533,12 @@ Process continuing but this agent's output is compromised.
                         citation_string = " " + "".join(citation_refs)
                         text = text[:end_index] + citation_string + text[end_index:]
             
+            # Strip [Source N] markers from the inline body before appending
+            # the clean Sources appendix. Markers in the prose corrupt downstream
+            # consumers (DB, dashboard, PM prompt); the Sources list below is the
+            # canonical reference.
+            text = _strip_citations(text)
+
             # Add a clean Source List at the bottom (titles only, no raw URLs)
             text += "\n\n### Sources:\n"
             for i, chunk in enumerate(chunks):
