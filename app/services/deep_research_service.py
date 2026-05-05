@@ -521,7 +521,8 @@ class DeepResearchService:
         levels, the rules are:
           - entry_price_low, entry_price_high, stop_loss are numeric > 0
           - entry_price_high >= entry_price_low
-          - stop_loss < entry_price_low (stop is below entry for a long)
+          - stop_loss < entry_price_low (stop is strictly below entry for a long;
+            stop == entry is rejected because there is no risk buffer)
         """
         try:
             entry_low = result.get("entry_price_low")

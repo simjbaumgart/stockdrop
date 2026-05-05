@@ -10,6 +10,18 @@
 
 ---
 
+## Implementation Notes / Deviations from this Plan
+
+This plan was executed via subagent-driven development on branch `fix/pipeline-postrun`. Two deviations from what's prescribed below — both intentional, both improvements — landed in the actual implementation. They are recorded here so future readers reconciling the doc against `git log` don't have to dig through commit messages.
+
+1. **Task 2 (citation strip applied to stored agent reports).** The plan's Step 4 prescribes wrapping every consumer of `_format_citations` (`state.technical_report = _strip_citations(text)`). Investigation showed `_format_citations` has exactly one consumer (`research_service.py:1380`), so the implementer instead inserted `text = _strip_citations(text)` *inside* `_format_citations`, between the marker-injection loop and the `### Sources:` appendix. This guarantees the invariant — "the prose returned by this method has no `[Source N]` markers; the appendix below is the canonical reference" — independently of how many call sites exist now or in the future. Commit `7dc651b`.
+
+2. **Task 4 (DR trading-level validation).** The plan's Step 4 prescribes gating only `_apply_trading_level_overrides`. But `_handle_completion` calls `update_deep_research_data` *first* (around line 595), and that DB writer reads `entry_price_low`, `entry_price_high`, `stop_loss`, etc. directly from `result.get(...)` — so gating only the override leaves the bad zeros to be persisted by the initial write. The implementer instead validates at the top of `_handle_completion` and, on rejection, nulls the level fields in `result` (in place) so neither downstream writer persists them. The set was extended in a fix-up commit (`4b87575`) to include sell-range fields (`sell_price_low/high`, `ceiling_exit`, `exit_trigger`), since the same JSON-repair root cause produces the same zeros there. A snapshot of the pre-mutation result is saved to a `*_rejected_levels.json` artifact for forensics before nulling. Commits `be35716` + `4b87575` + `fab6a15`.
+
+Task 3 (DR enqueue dedup) also received a code-review-driven fix-up (`193c987`) to close two correctness gaps in the original commit: a UTC-midnight race (where `_today_str()` could produce different keys at enqueue vs. clear) and an early-discard race (where the inflight clear ran *before* the DB write). The final state stores the inflight key in the payload at enqueue time and clears only in the `finally` of `_process_individual_task`, which runs after `_handle_completion` returns (and therefore after the DB write).
+
+---
+
 ## File Map
 
 Changes are confined to:
