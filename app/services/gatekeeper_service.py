@@ -1,3 +1,4 @@
+import math
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
@@ -139,10 +140,33 @@ class GatekeeperService:
                 return False, reasons
 
             # --- Bollinger %B ---
+            # NaN-first: if either band is NaN (insufficient price history),
+            # report that explicitly rather than letting the drop-size fallthrough
+            # produce a misleading "Insufficient Drop" message.
+            if math.isnan(bb_lower) or math.isnan(bb_upper):
+                reasons["bb_status"] = (
+                    "%B (nan) — Bollinger bands NaN (insufficient price history)"
+                )
+                reasons["lower_bb"] = bb_lower
+                reasons["bb_pct_b"] = float("nan")
+                reasons["tier"] = TIER_REJECT
+                return False, reasons
+
             if bb_upper != bb_lower:
                 curr_pct_b = (price - bb_lower) / (bb_upper - bb_lower)
             else:
                 curr_pct_b = 0.5
+
+            # Defensive: if pct_b ended up NaN despite the band check (e.g. NaN
+            # price), reject with the NaN reason rather than misclassifying.
+            if math.isnan(curr_pct_b):
+                reasons["bb_status"] = (
+                    "%B (nan) — Bollinger calculation produced NaN"
+                )
+                reasons["lower_bb"] = bb_lower
+                reasons["bb_pct_b"] = float("nan")
+                reasons["tier"] = TIER_REJECT
+                return False, reasons
 
             tier = self.classify_tier(pct_b=curr_pct_b, drop_pct=drop_pct)
             is_valid = tier != TIER_REJECT
