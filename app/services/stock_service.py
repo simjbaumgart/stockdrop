@@ -1290,7 +1290,43 @@ class StockService:
         """
         return self._finnhub_service.get_latest_reported_quarter(symbol)
 
-    def get_latest_transcript(self, symbol: str) -> dict:
+    @staticmethod
+    def _transcript_matches_company(transcript_text: str, expected_company: str) -> bool:
+        """
+        Defensive match: does the transcript text reference the expected company?
+
+        DefeatBeta's HuggingFace dataset has known ticker-collision bugs (e.g.
+        'L' returns Loblaw instead of Loews). We verify the first 1500 chars
+        of the transcript mention either the full expected name or its first
+        significant token (modulo case and common corporate suffixes).
+
+        Returns True if no expected_company was provided (backward compat).
+        """
+        if not expected_company:
+            return True
+        if not transcript_text:
+            return False
+
+        head = transcript_text[:1500].lower()
+        expected_lower = expected_company.lower()
+        # Strip common corporate suffixes that may not appear in the call.
+        for suffix in (
+            " corporation", " corp", " incorporated", " inc.", " inc",
+            " plc", " ltd", " limited", " companies", " company", " co.",
+            " holdings", " group",
+        ):
+            if expected_lower.endswith(suffix):
+                expected_lower = expected_lower[: -len(suffix)]
+        expected_lower = expected_lower.strip(" ,.")
+
+        if not expected_lower:
+            return True  # nothing meaningful left to match — accept
+
+        # Match either the full stripped name or its first significant token.
+        first_token = expected_lower.split()[0]
+        return expected_lower in head or (len(first_token) >= 3 and first_token in head)
+
+    def get_latest_transcript(self, symbol: str, company_name: str = "") -> dict:
         """Fetch the most recent earnings-call transcript with Alpha Vantage fallback.
 
         Source priority:
@@ -1329,6 +1365,18 @@ class StockService:
                             for p in paragraphs
                             if isinstance(p, dict) and p.get("content")
                         )
+                    # Defensive: DefeatBeta returns wrong-company transcripts for
+                    # some ambiguous tickers (e.g. 'L' → Loblaw). Reject if the
+                    # transcript text doesn't reference the expected company.
+                    if db_text and not self._transcript_matches_company(db_text, company_name):
+                        print(
+                            f"[StockService] DefeatBeta company mismatch for {symbol}: "
+                            f"expected '{company_name}', transcript head did not match. "
+                            f"Discarding and falling through to AV."
+                        )
+                        db_text = ""
+                        db_date_str = None
+                        db_age_days = None
                     if db_date_str:
                         try:
                             db_dt = datetime.strptime(db_date_str, "%Y-%m-%d").date()
@@ -1435,7 +1483,7 @@ class StockService:
         # Fetch Filings & Transcript
         print(f"Fetching filings/transcript for {symbol}...")
         filings_text = self.get_latest_filing_text(symbol)
-        transcript_data = self.get_latest_transcript(symbol)
+        transcript_data = self.get_latest_transcript(symbol, company_name=company_name)
         transcript_text = ""
         transcript_date = None
         transcript_warning = ""
