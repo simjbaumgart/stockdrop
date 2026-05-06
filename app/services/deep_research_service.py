@@ -6,7 +6,7 @@ import logging
 import threading
 from queue import Queue, Empty
 from typing import Dict, Optional, List, Any
-from datetime import datetime
+from datetime import datetime, timezone
 import sqlite3
 import re
 from app.utils.agent_call_counter import counter as agent_call_counter
@@ -428,7 +428,7 @@ class DeepResearchService:
 
     def _today_str(self) -> str:
         """ISO date used as the dedup key. UTC to match decision_points.timestamp."""
-        return datetime.utcnow().strftime("%Y-%m-%d")
+        return datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
     def queue_research_task(self, symbol: str, context: dict, decision_id: int) -> bool:
         """

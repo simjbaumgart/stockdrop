@@ -5,7 +5,7 @@ import json
 import requests
 import yfinance as yf
 from typing import List, Dict, Set, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import pytz
 from app.services.email_service import email_service
 from app.services.research_service import research_service
@@ -1380,7 +1380,7 @@ class StockService:
                     if db_date_str:
                         try:
                             db_dt = datetime.strptime(db_date_str, "%Y-%m-%d").date()
-                            db_age_days = (datetime.utcnow().date() - db_dt).days
+                            db_age_days = (datetime.now(timezone.utc).date() - db_dt).days
                         except ValueError:
                             db_age_days = None
             except Exception as e:
