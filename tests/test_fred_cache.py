@@ -79,3 +79,69 @@ class TestFredCache:
             mget.return_value.raise_for_status.side_effect = Exception("500")
             data = svc.get_macro_data()
             assert data["10Y Treasury Yield"].get("stale") is True
+
+
+class TestFredPersistentSnapshot:
+    """The in-memory cache evaporates on restart. A JSON snapshot on disk lets a
+    fresh process serve last-known-good values when FRED is unreachable."""
+
+    def test_successful_fetch_writes_snapshot(self, svc, tmp_path, monkeypatch):
+        snap = tmp_path / "fred_snapshot.json"
+        monkeypatch.setattr("app.services.fred_service._SNAPSHOT_PATH", str(snap))
+        with patch("app.services.fred_service.requests.get") as mget:
+            mget.return_value.raise_for_status = MagicMock()
+            mget.return_value.json = MagicMock(return_value=_obs("4.25", "2026-04-20"))
+            svc._fetch_latest_observation("UNRATE")
+        assert snap.exists()
+        import json
+        body = json.loads(snap.read_text())
+        assert body["UNRATE"]["value"] == "4.25"
+        assert body["UNRATE"]["date"] == "2026-04-20"
+
+    def test_snapshot_loaded_on_init_as_stale(self, tmp_path, monkeypatch):
+        import json
+        snap = tmp_path / "fred_snapshot.json"
+        snap.write_text(json.dumps({
+            "UNRATE": {"value": "4.20", "date": "2026-04-15"},
+            "GDP": {"value": "30000", "date": "2026-03-31"},
+        }))
+        monkeypatch.setenv("FRED_API_KEY", "test_key")
+        monkeypatch.setattr("app.services.fred_service._SNAPSHOT_PATH", str(snap))
+        s = FredService()
+        assert "UNRATE" in s._cache
+        assert s._cache["UNRATE"]["value"] == "4.20"
+        # Loaded entries are stale by default — they came from a prior process.
+        assert s._cache["UNRATE"]["stale"] is True
+
+    def test_persistent_fallback_serves_stale_after_failed_first_fetch(
+        self, tmp_path, monkeypatch
+    ):
+        """Fresh process + FRED down + snapshot present → returns stale snapshot value."""
+        import json
+        snap = tmp_path / "fred_snapshot.json"
+        snap.write_text(json.dumps({
+            "UNRATE": {"value": "4.20", "date": "2026-04-15"},
+        }))
+        monkeypatch.setenv("FRED_API_KEY", "test_key")
+        monkeypatch.setattr("app.services.fred_service._SNAPSHOT_PATH", str(snap))
+        s = FredService()
+        with patch("app.services.fred_service.requests.get") as mget:
+            mget.return_value.raise_for_status.side_effect = Exception("500")
+            v, d = s._fetch_latest_observation("UNRATE")
+        assert v == "4.20"
+        assert d == "2026-04-15"
+
+    def test_missing_snapshot_does_not_crash(self, tmp_path, monkeypatch):
+        snap = tmp_path / "does_not_exist.json"
+        monkeypatch.setenv("FRED_API_KEY", "test_key")
+        monkeypatch.setattr("app.services.fred_service._SNAPSHOT_PATH", str(snap))
+        s = FredService()  # must not raise
+        assert s._cache == {}
+
+    def test_corrupt_snapshot_does_not_crash(self, tmp_path, monkeypatch):
+        snap = tmp_path / "snapshot.json"
+        snap.write_text("{not json")
+        monkeypatch.setenv("FRED_API_KEY", "test_key")
+        monkeypatch.setattr("app.services.fred_service._SNAPSHOT_PATH", str(snap))
+        s = FredService()  # must not raise
+        assert s._cache == {}
