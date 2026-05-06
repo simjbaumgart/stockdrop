@@ -22,27 +22,41 @@ from app.services.gatekeeper_service import (
 from app.utils.ticker_paths import safe_ticker_path
 from app.utils.agent_call_counter import counter as agent_call_counter
 
-# Citation strip — Gemini grounding injects [Source N] markers that corrupt JSON
-# AND mid-sentence text. We replace each marker with a single space, then collapse
-# runs of whitespace, so word boundaries are preserved. Joined-vs-separated cases
-# ('signaling' vs 'signa ling') are indistinguishable from the raw text alone;
-# we deliberately favor word-boundary preservation. The CAR-style
-# 'Massivestructuralunwind' production failure was the trigger.
-_CITATION_RE = re.compile(r"\[Source\s*\d+\]")
+# Citation strip — Gemini grounding injects footnote markers that corrupt JSON
+# AND mid-sentence text. Two known shapes:
+#   1. [Source N]            — original grounding format
+#   2. [N], [N.N], [N.N.N]   — bare-number footnotes (COR/ANET regression, May 2026)
+# We also accept [cite N] / [cite:N]. We replace each marker with a single space,
+# then collapse runs of whitespace, so word boundaries are preserved. Joined-vs-
+# separated cases ('signaling' vs 'signa ling') are indistinguishable from the raw
+# text alone; we deliberately favor word-boundary preservation. The CAR-style
+# 'Massivestructuralunwind' production failure was the original trigger.
+#
+# The numeric branch is deliberately narrow: digits + optional dotted sub-sections
+# only. This avoids eating real bracketed content like [BUY], [N/A], [YoY 5%],
+# [low-high], or ISO dates [2026-05-06].
+_CITATION_RE = re.compile(
+    r"\[(?:Source\s*\d+|\d+(?:\.\d+)*|cite[:\s]?\s*\d+)\]",
+    re.IGNORECASE,
+)
 _MULTISPACE_RE = re.compile(r"[ \t]{2,}")
 
 
 def _strip_citations(raw: str) -> str:
-    """Remove inline [Source N] markers, replacing each with a single space.
+    """Remove inline citation markers, replacing each with a single space.
 
     'word [Source 1] word' → 'word word'   (collapses double space)
     'word [Source 1]word'  → 'word word'   (boundary preserved)
     '[Source 1][Source 2]' → ''            (leading/trailing trimmed)
     'word[Source 1]word'   → 'word word'   (always inserts a space)
+    'growth[1.1]across'    → 'growth across' (numeric footnote)
     """
-    if "[Source" not in raw:
+    # Cheap-rejection: skip work for the common case (no '[' at all).
+    if "[" not in raw:
         return raw
     cleaned = _CITATION_RE.sub(" ", raw)
+    if cleaned == raw:
+        return raw
     cleaned = _MULTISPACE_RE.sub(" ", cleaned)
     return cleaned.strip(" ")
 

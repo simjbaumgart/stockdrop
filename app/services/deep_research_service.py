@@ -16,21 +16,31 @@ logger = logging.getLogger(__name__)
 
 _CITATION_STRIP_COUNTER = {"stripped": 0}
 
-_CITATION_RE = re.compile(r"\[Source\s*\d+\]")
+# Mirrors app/services/research_service.py::_CITATION_RE — see that file for the
+# full contract and the regression history (CAR spacing collapse, COR/ANET
+# numeric-footnote bleed). Two known marker shapes:
+#   1. [Source N]
+#   2. [N], [N.N], [N.N.N]   (bare numeric footnotes)
+# Plus [cite N] / [cite:N] for safety.
+_CITATION_RE = re.compile(
+    r"\[(?:Source\s*\d+|\d+(?:\.\d+)*|cite[:\s]?\s*\d+)\]",
+    re.IGNORECASE,
+)
 _MULTISPACE_RE = re.compile(r"[ \t]{2,}")
 
 
 def _strip_citations(raw: str) -> str:
-    """Remove inline [Source N] markers, preserving word boundaries.
+    """Remove inline citation markers, preserving word boundaries.
 
     See app/services/research_service.py::_strip_citations for full contract.
     """
-    if "[Source" not in raw:
+    if "[" not in raw:
         return raw
     cleaned = _CITATION_RE.sub(" ", raw)
+    if cleaned == raw:
+        return raw
     cleaned = _MULTISPACE_RE.sub(" ", cleaned)
-    if cleaned != raw:
-        _CITATION_STRIP_COUNTER["stripped"] += 1
+    _CITATION_STRIP_COUNTER["stripped"] += 1
     return cleaned.strip(" ")
 
 _VALID_URL_SCHEMES = ("http://", "https://")
