@@ -67,27 +67,78 @@ class SeekingAlphaService:
 
         return items
 
+    # _call_endpoint resilience policy (May 2026):
+    #   - Always set a wall-clock timeout so a stalled RapidAPI edge can't
+    #     hang the whole agent.
+    #   - Retry once with a 2s backoff on transient classes only:
+    #       * requests.Timeout / ConnectionError
+    #       * HTTP 429 (rate limit — short backoff often clears it)
+    #       * HTTP 5xx (server-side blip)
+    #   - Do NOT retry on success-with-empty-body. An empty body with 200 OK
+    #     is a real "no data" answer; retrying just burns RapidAPI quota.
+    #   - Do NOT retry on 4xx other than 429 (auth/contract issue, won't
+    #     recover from a backoff).
+    #   - Log the cause distinctly so we can see in the dashboard whether
+    #     RapidAPI is rate-limiting us or genuinely returning nothing.
+    _ENDPOINT_TIMEOUT_SEC = 10
+    _RETRY_BACKOFF_SEC = 2
+    _TRANSIENT_STATUS = {429, 500, 502, 503, 504}
+
     def _call_endpoint(self, endpoint: str, params: Optional[Dict] = None) -> Any:
-        """Helper to call RapidAPI endpoint."""
+        """Helper to call RapidAPI endpoint, with one transient-error retry."""
         if not self.rapidapi_key:
             return None
-            
+
         url = f"https://{self.rapidapi_host}/{endpoint}"
         headers = {
             "x-rapidapi-key": self.rapidapi_key,
-            "x-rapidapi-host": self.rapidapi_host
+            "x-rapidapi-host": self.rapidapi_host,
         }
-        try:
-            # logger.info(f"Calling Seeking Alpha API: {endpoint}")
-            response = requests.get(url, headers=headers, params=params)
-            response.raise_for_status()
-            if not response.text.strip():
-                logger.warning(f"Empty response from {endpoint}")
+
+        last_exc = None
+        for attempt in (1, 2):
+            try:
+                response = requests.get(
+                    url, headers=headers, params=params,
+                    timeout=self._ENDPOINT_TIMEOUT_SEC,
+                )
+            except (requests.Timeout, requests.ConnectionError) as e:
+                last_exc = e
+                if attempt == 1:
+                    logger.info(f"[SA] {endpoint} {type(e).__name__} on attempt 1; retrying in {self._RETRY_BACKOFF_SEC}s")
+                    time.sleep(self._RETRY_BACKOFF_SEC)
+                    continue
+                logger.error(f"[SA] {endpoint} failed both attempts: {e}")
                 return None
-            return response.json()
-        except Exception as e:
-            logger.error(f"Error calling {endpoint}: {e}")
-            return None
+
+            status = response.status_code
+            if status in self._TRANSIENT_STATUS:
+                if attempt == 1:
+                    logger.info(f"[SA] {endpoint} HTTP {status} on attempt 1; retrying in {self._RETRY_BACKOFF_SEC}s")
+                    time.sleep(self._RETRY_BACKOFF_SEC)
+                    continue
+                logger.error(f"[SA] {endpoint} HTTP {status} on attempt 2; giving up")
+                return None
+
+            try:
+                response.raise_for_status()
+            except requests.HTTPError as e:
+                # Non-transient 4xx: log and return — no retry.
+                logger.error(f"[SA] {endpoint} HTTP {status} (non-retryable): {e}")
+                return None
+
+            if not response.text.strip():
+                logger.warning(f"[SA] {endpoint} empty body with HTTP {status} (no retry — real 'no data')")
+                return None
+
+            try:
+                return response.json()
+            except ValueError as e:
+                logger.error(f"[SA] {endpoint} invalid JSON (HTTP {status}): {e}")
+                return None
+
+        logger.error(f"[SA] {endpoint} fell through retry loop: {last_exc}")
+        return None
 
     def _get_symbol_id(self, ticker: str) -> Optional[str]:
         """Resolves ticker to Seeking Alpha ID (though many endpoints accept ticker string)."""
