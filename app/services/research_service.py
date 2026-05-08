@@ -412,24 +412,6 @@ class ResearchService:
         final_decision = self._run_risk_council_and_decision(state, drop_str)
         state.final_decision = final_decision
         
-        # --- Print Final Decision to Console ---
-        print("\n" + "="*50)
-        print(f"  [PORTFOLIO MANAGER DECISION]: {final_decision.get('action')} (Conviction: {final_decision.get('conviction', 'N/A')})")
-        print(f"  Drop Type: {final_decision.get('drop_type', 'N/A')}")
-        print(f"  Entry Zone: ${final_decision.get('entry_price_low', 'N/A')} - ${final_decision.get('entry_price_high', 'N/A')}")
-        print(f"  Stop Loss: ${final_decision.get('stop_loss', 'N/A')} | TP1: ${final_decision.get('take_profit_1', 'N/A')} | TP2: ${final_decision.get('take_profit_2', 'N/A')}")
-        print(f"  Upside: {final_decision.get('upside_percent', 'N/A')}% | Downside: {final_decision.get('downside_risk_percent', 'N/A')}% | R/R: {final_decision.get('risk_reward_ratio', 'N/A')}")
-        print(f"  Sell Zone: ${final_decision.get('sell_price_low', 'N/A')} - ${final_decision.get('sell_price_high', 'N/A')} | Ceiling: ${final_decision.get('ceiling_exit', 'N/A')}")
-        print(f"  Entry Trigger: {final_decision.get('entry_trigger', 'N/A')}")
-        print(f"  Exit Trigger: {final_decision.get('exit_trigger', 'N/A')}")
-        print(f"  Reassess In: {final_decision.get('reassess_in_days', 'N/A')} trading days")
-        print(f"  Reason: {final_decision.get('reason')}")
-        print("  Key Factors:")
-        for factor in final_decision.get('key_factors', []):
-            print(f"   - {factor}")
-        print(f"  Total Agent Calls: {state.agent_calls}")
-        print("="*50 + "\n")
-        
         # --- Phase 4: deep reasoning check for BUY signals ---
         deep_reasoning_report = ""
         action = final_decision.get('action', 'AVOID').upper()
@@ -467,11 +449,12 @@ class ResearchService:
         from app.services.evidence_service import evidence_service
         data_depth = evidence_service.collect_barometer(raw_data, state.reports)
 
-        # Deterministic stop-loss guardrail: widen if PM placed it too tight.
-        from app.utils.stop_loss_guard import widen_stop_if_too_tight
+        # Deterministic stop-loss guardrail: widen if PM placed it too tight,
+        # then recompute R/R so the print line + DB row + dashboard reflect
+        # the new (wider) stop instead of the PM's stale numbers.
+        from app.utils.stop_loss_guard import widen_stop_if_too_tight, recompute_risk_metrics
         _tv_inds = raw_data.get("indicators", {})
         _entry_low = final_decision.get("entry_price_low")
-        # Fallback to current close if entry_price_low is missing or looks like a pct
         if _entry_low is None or (isinstance(_entry_low, (int, float)) and _entry_low < 0):
             _entry_low = _tv_inds.get("close")
         if _entry_low is not None:
@@ -490,6 +473,36 @@ class ResearchService:
                 )
                 final_decision["stop_loss"] = _guard.stop_loss
                 final_decision["stop_loss_guard_reason"] = _guard.reason
+
+            # Recompute downside / R/R against (possibly-new) stop_loss so the
+            # value the user sees matches the value the user takes risk on.
+            _metrics = recompute_risk_metrics(
+                entry_low=float(_entry_low),
+                stop_loss=final_decision.get("stop_loss"),
+                upside_percent=final_decision.get("upside_percent"),
+            )
+            if _metrics["downside_risk_percent"] is not None:
+                final_decision["downside_risk_percent"] = _metrics["downside_risk_percent"]
+            if _metrics["risk_reward_ratio"] is not None:
+                final_decision["risk_reward_ratio"] = _metrics["risk_reward_ratio"]
+
+        # --- Print Final Decision to Console (post-guard, post-recompute) ---
+        print("\n" + "="*50)
+        print(f"  [PORTFOLIO MANAGER DECISION]: {final_decision.get('action')} (Conviction: {final_decision.get('conviction', 'N/A')})")
+        print(f"  Drop Type: {final_decision.get('drop_type', 'N/A')}")
+        print(f"  Entry Zone: ${final_decision.get('entry_price_low', 'N/A')} - ${final_decision.get('entry_price_high', 'N/A')}")
+        print(f"  Stop Loss: ${final_decision.get('stop_loss', 'N/A')} | TP1: ${final_decision.get('take_profit_1', 'N/A')} | TP2: ${final_decision.get('take_profit_2', 'N/A')}")
+        print(f"  Upside: {final_decision.get('upside_percent', 'N/A')}% | Downside: {final_decision.get('downside_risk_percent', 'N/A')}% | R/R: {final_decision.get('risk_reward_ratio', 'N/A')}")
+        print(f"  Sell Zone: ${final_decision.get('sell_price_low', 'N/A')} - ${final_decision.get('sell_price_high', 'N/A')} | Ceiling: ${final_decision.get('ceiling_exit', 'N/A')}")
+        print(f"  Entry Trigger: {final_decision.get('entry_trigger', 'N/A')}")
+        print(f"  Exit Trigger: {final_decision.get('exit_trigger', 'N/A')}")
+        print(f"  Reassess In: {final_decision.get('reassess_in_days', 'N/A')} trading days")
+        print(f"  Reason: {final_decision.get('reason')}")
+        print("  Key Factors:")
+        for factor in final_decision.get('key_factors', []):
+            print(f"   - {factor}")
+        print(f"  Total Agent Calls: {state.agent_calls}")
+        print("="*50 + "\n")
 
         return {
             "recommendation": recommendation,
