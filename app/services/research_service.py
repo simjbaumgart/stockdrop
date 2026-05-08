@@ -1095,7 +1095,12 @@ Note: No explicit support/resistance levels are provided. Use Bollinger Bands, S
 
 INSTRUCTIONS FOR TRADING LEVELS:
 - **entry_price_low / entry_price_high**: The price zone where buying makes sense. Use bb_lower and the current close price as guides. If "BUY" (immediate), set this to the current close price +/- 1%.
-- **stop_loss**: Set at 2x ATR below entry_price_low, or below the bb_lower if that is tighter. This is the "thesis is broken" level. Must be a concrete number.
+- **stop_loss**: REQUIRED. Place at the *farther* (lower) of:
+    (a) entry_price_low - 2.0 * ATR  (use TradingView ATR provided above)
+    (b) nearest technical support below entry_price_low (prior swing low,
+        SMA_50, or SMA_200 — whichever is below entry).
+  Never place the stop closer than 1.5 * ATR below entry_price_low. Stops
+  tighter than this floor will be programmatically widened.
 - **take_profit_1**: Conservative target. Typically the pre-drop price (calculate from close and drop_percent) or the BB middle (average of bb_lower and bb_upper). This is the recovery target.
 - **take_profit_2**: Optimistic target. bb_upper, SMA50, or SMA200 — whichever is above TP1 and realistic. Set to null if no clear upside beyond TP1.
 - **upside_percent**: Calculate from current close to take_profit_1. Example: close is $100, TP1 is $112 → upside is 12.0.
