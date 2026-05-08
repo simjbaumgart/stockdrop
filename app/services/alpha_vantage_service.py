@@ -62,13 +62,14 @@ class AlphaVantageService:
 
         try:
             response = requests.get(self.BASE_URL, params=params)
-            
-            # Rate Limit Handling (Simple wait)
+
+            # Rate limit: return empty and let the next 20-minute scanner
+            # cycle retry. Do NOT block the caller for 60s — the screener
+            # worker thread is shared and a long sleep starves later tickers.
             if response.status_code == 429 or "rate limit" in response.text.lower():
-                print("Alpha Vantage Rate Limit Hit. Waiting 60 seconds...")
-                time.sleep(60)
-                response = requests.get(self.BASE_URL, params=params)
-                
+                print(f"Alpha Vantage Rate Limit Hit for {symbol}. Skipping for this cycle.")
+                return []
+
             data = response.json()
             
             if "feed" not in data:
