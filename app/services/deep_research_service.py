@@ -340,9 +340,28 @@ class DeepResearchService:
                     
                     logger.info(f"[Deep Research Recovery] Recovering Batch {batch_id} (PENDING). Symbols: {symbols}")
                     
-                    # Reconstruct candidates dict (minimal info needed for execute_batch_comparison)
-                    # execute_batch_comparison only needs symbol key in list of dicts.
-                    candidates = [{'symbol': s} for s in symbols]
+                    # Reconstruct candidates dict with DR fields so the batch prompt
+                    # can apply the HARD RULE against AVOID/OVERRIDDEN verdicts.
+                    candidates = []
+                    cur2 = conn.cursor()
+                    for s in symbols:
+                        cur2.execute(
+                            """
+                            SELECT symbol, deep_research_verdict,
+                                   deep_research_review_verdict,
+                                   deep_research_action, deep_research_score,
+                                   deep_research_reason
+                            FROM decision_points
+                            WHERE symbol = ? AND batch_id = ?
+                            ORDER BY id DESC LIMIT 1
+                            """,
+                            (s, batch_id),
+                        )
+                        row = cur2.fetchone()
+                        if row:
+                            candidates.append(dict(row))
+                        else:
+                            candidates.append({'symbol': s})
                     
                     # Update status to STARTED (to avoid double queueing if we scan again quickly)
                     # Actually, queue_batch_comparison_task will put it in queue. 
@@ -1826,6 +1845,21 @@ REPORT CONTENT:
         """
         try:
             symbols = [x['symbol'] for x in candidates]
+
+            if len(candidates) < 2:
+                logger.info(
+                    "[Deep Research] Skipping batch %s: only %d valid candidate(s) after DR filter.",
+                    batch_id, len(candidates),
+                )
+                print(f"[Deep Research] Skipping batch {batch_id}: < 2 valid candidates.")
+                if batch_id is not None:
+                    try:
+                        from app.database import update_batch_status
+                        update_batch_status(batch_id, "SKIPPED")
+                    except Exception as e:
+                        logger.error(f"[Deep Research] Failed to mark batch {batch_id} as SKIPPED: {e}")
+                return None
+
             logger.info(f"[Deep Research] Starting Batch Comparison for: {symbols}")
             print(f"\n{'='*60}")
             print(f"🚀 [DEEP RESEARCH] STARTING BATCH COMPARISON")
@@ -1846,16 +1880,27 @@ REPORT CONTENT:
 
             for cand in candidates:
                 sym = cand['symbol']
+                # Pull the DR verdict so the batch agent treats AVOID as a hard negative.
+                dr_verdict = cand.get('deep_research_verdict') or 'UNKNOWN'
+                dr_review = cand.get('deep_research_review_verdict') or 'UNKNOWN'
+                dr_action = cand.get('deep_research_action') or 'UNKNOWN'
+                dr_score = cand.get('deep_research_score')
+                dr_reason = cand.get('deep_research_reason') or ''
+
                 report_str = self._load_council_report(sym, date_str)
-                if report_str:
-                    summary = self._summarize_report_context(report_str)
-                    context_data += f"\n--- SUPPLEMENTARY REPORT FOR {sym} ---\n{summary}\n"
-                    
-                    # Console Output for User Verification
-                    print(f"\n[{sym}] SUMMARIZED CONTEXT (Token Optimization):")
-                    print("-" * 40)
-                    print(summary)
-                    print("-" * 40)
+                summary = self._summarize_report_context(report_str) if report_str else "(no council report)"
+                context_data += (
+                    f"\n--- SUPPLEMENTARY REPORT FOR {sym} ---\n"
+                    f"DEEP_RESEARCH_REVIEW: review_verdict={dr_review}, "
+                    f"action={dr_action}, score={dr_score}\n"
+                    f"DEEP_RESEARCH_REASON: {dr_reason[:400]}\n"
+                    f"{summary}\n"
+                )
+
+                print(f"\n[{sym}] SUMMARIZED CONTEXT (DR={dr_review}/{dr_action}):")
+                print("-" * 40)
+                print(summary)
+                print("-" * 40)
 
 
             prompt = f"""
@@ -1873,6 +1918,12 @@ CRITERIA:
 - **Catalyst:** Is there a valid reason for the drop/price action?
 - **Recovery Potential:** Which has the best chance of bouncing back?
 - **Safety:** Avoid bankruptcy risks or falling knives.
+
+HARD RULE:
+- If a candidate's DEEP_RESEARCH_REVIEW shows action=AVOID or
+  review_verdict=OVERRIDDEN, you MUST NOT name it the winner. Treat it as
+  disqualified regardless of how compelling the supplementary report looks.
+  Pick the winner from the remaining candidates.
 
 CONTEXT (Use as Supplementary Info):
 {context_data}
