@@ -6,6 +6,56 @@
     <p class="subtitle">Recent Stock Drops & AI Decisions</p>
 </header>
 
+<section id="scoreboard" style="margin-bottom: 1.5rem;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+        <div class="card" style="padding: 14px;">
+            <div style="font-size: 0.8rem; color: #94a3b8;">Cohort</div>
+            <div id="sb_cohort" style="font-size: 1.5rem; font-weight: 700;">—</div>
+            <div id="sb_cohort_sub" style="font-size: 0.75rem; color: #94a3b8;">since cohort start</div>
+        </div>
+        <div class="card" style="padding: 14px;">
+            <div style="font-size: 0.8rem; color: #94a3b8;">Win rate (4w, BUY)</div>
+            <div id="sb_winrate" style="font-size: 1.5rem; font-weight: 700;">—</div>
+            <div id="sb_winrate_sub" style="font-size: 0.75rem; color: #94a3b8;">avg return —</div>
+        </div>
+        <div class="card" style="padding: 14px;">
+            <div style="font-size: 0.8rem; color: #94a3b8;">BUY_LIMIT fill rate</div>
+            <div id="sb_fill" style="font-size: 1.5rem; font-weight: 700;">—</div>
+            <div id="sb_fill_sub" style="font-size: 0.75rem; color: #94a3b8;">— filled</div>
+        </div>
+        <div class="card" style="padding: 14px;">
+            <div style="font-size: 0.8rem; color: #94a3b8;">Median days to recover</div>
+            <div id="sb_recover" style="font-size: 1.5rem; font-weight: 700;">—</div>
+            <div style="font-size: 0.75rem;">
+                <a href="/insights" style="color: #60a5fa; text-decoration: none;">View full insights →</a>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    (async () => {
+        try {
+            const r = await fetch('/api/insights/summary');
+            const d = await r.json();
+            const h = d.headline || {};
+            const fmtPct = v => v == null ? '—' : (v * 100).toFixed(1) + '%';
+            const fmtSigned = v => v == null ? '—' : (v >= 0 ? '+' : '') + (v * 100).toFixed(2) + '%';
+            document.getElementById('sb_cohort').textContent = d.cohort_size ?? '—';
+            document.getElementById('sb_cohort_sub').textContent = `since ${d.cohort_start || '—'}`;
+            document.getElementById('sb_winrate').textContent = fmtPct(h.win_rate_4w_buys);
+            document.getElementById('sb_winrate_sub').textContent =
+                `avg return ${fmtSigned(h.avg_return_4w_buys)} (n=${h.n_buys_4w ?? 0})`;
+            document.getElementById('sb_fill').textContent = fmtPct(h.buy_limit_fill_rate);
+            document.getElementById('sb_fill_sub').textContent =
+                `${h.buy_limit_filled ?? 0} / ${h.buy_limit_count ?? 0} filled`;
+            document.getElementById('sb_recover').textContent =
+                h.median_days_to_recover != null ? h.median_days_to_recover.toFixed(1) : '—';
+        } catch (e) {
+            console.warn('insights summary fetch failed', e);
+        }
+    })();
+</script>
+
 <section>
     <div class="card" style="overflow-x: auto;">
         <table class="table table-striped table-hover"

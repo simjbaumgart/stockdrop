@@ -79,6 +79,8 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(views.router)
 from app.routers import performance
 app.include_router(performance.router)
+from app.routers import insights
+app.include_router(insights.router)
 app.include_router(api.router, prefix="/api")
 app.include_router(subscriptions.router, prefix="/api")
 
