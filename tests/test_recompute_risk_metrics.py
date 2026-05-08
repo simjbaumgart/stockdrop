@@ -1,6 +1,5 @@
 """Recompute downside_risk_percent and risk_reward_ratio from
 post-guard stop_loss values."""
-import math
 import pytest
 
 from app.utils.stop_loss_guard import recompute_risk_metrics
