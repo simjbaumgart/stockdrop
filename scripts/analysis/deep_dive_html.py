@@ -67,6 +67,7 @@ HTML_TEMPLATE = """<!doctype html>
     .card-header .sub { color: var(--muted); font-size: 0.8rem; margin-top: 3px; }
     .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .chart-box { height: 240px; position: relative; }
+    .chart-box.tall { height: 380px; }
     table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
     th, td { padding: 7px 9px; text-align: left; border-bottom: 1px solid var(--border); }
     th { color: var(--muted); font-weight: 500; cursor: pointer; user-select: none;
@@ -153,6 +154,35 @@ HTML_TEMPLATE = """<!doctype html>
                      <div class="chart-box"><canvas id="drRRRetChart"></canvas></div></div>
             </div>
         </div>
+    </div>
+
+    <h2>Performance over time since signal</h2>
+    <div class="grid grid-2">
+        <div class="card">
+            <div class="card-header">
+                <h3>Median return path by AI council verdict</h3>
+                <div class="sub">Daily close vs decision price, normalized to 0% at day 0</div>
+            </div>
+            <div class="chart-box tall"><canvas id="tsIntentChart"></canvas></div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <h3>Median return path by Deep Research verdict</h3>
+                <div class="sub">Same view, grouped by DR verdict where set</div>
+            </div>
+            <div class="chart-box tall"><canvas id="tsDrChart"></canvas></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>BUY signal trajectories</h3>
+            <div class="sub">
+                Each grey line is one ENTER_NOW or ENTER_LIMIT decision; the bold lines are
+                the per-intent medians.
+            </div>
+        </div>
+        <div class="chart-box tall"><canvas id="tsSpaghetti"></canvas></div>
     </div>
 
     <h2>Per-decision explorer</h2>
@@ -283,6 +313,162 @@ makeAvgReturnBar('pmRRRetChart', DATA.winrate_by_pm_rr, 'bucket');
 // 4. DR R/R bucket
 makeWinrateBar('drRRWinChart', DATA.winrate_by_dr_rr, 'bucket');
 makeAvgReturnBar('drRRRetChart', DATA.winrate_by_dr_rr, 'bucket');
+
+// ----- Time series since signal -----
+const COLOR_BY_INTENT = {
+    'ENTER_NOW': '#22c55e',
+    'ENTER_LIMIT': '#3b82f6',
+    'AVOID': '#ef4444',
+    'NEUTRAL': '#94a3b8',
+};
+const COLOR_BY_DR = {
+    'BUY': '#22c55e',
+    'BUY_LIMIT': '#3b82f6',
+    'AVOID': '#ef4444',
+    'WATCH': '#fbbf24',
+    'HOLD': '#94a3b8',
+};
+
+function colorForGroup(name, palette) {
+    return palette[name] || '#cbd5e1';
+}
+
+function renderMedianPaths(canvasId, groupsObj, palette) {
+    const groupNames = Object.keys(groupsObj || {});
+    if (groupNames.length === 0) {
+        emptyState(canvasId, 'no time-series data');
+        return;
+    }
+    let maxDays = 0;
+    const datasets = [];
+    for (const grp of groupNames) {
+        const g = groupsObj[grp];
+        if (!g || !g.median) continue;
+        maxDays = Math.max(maxDays, g.day_offsets.length);
+        datasets.push({
+            label: `${grp} (n=${g.n_paths})`,
+            data: g.median.map(v => v == null ? null : v * 100),
+            borderColor: colorForGroup(grp, palette),
+            backgroundColor: colorForGroup(grp, palette),
+            tension: 0.15,
+            pointRadius: 0,
+            borderWidth: 2.4,
+            spanGaps: true,
+        });
+    }
+    new Chart(document.getElementById(canvasId).getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: Array.from({length: maxDays}, (_, i) => i),
+            datasets,
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            interaction: {mode: 'index', intersect: false},
+            plugins: {
+                legend: {position: 'bottom', labels: {color: '#94a3b8', boxWidth: 12}},
+                tooltip: {callbacks: {
+                    label: c => `${c.dataset.label}: ${c.parsed.y == null ? '—' : (c.parsed.y >= 0 ? '+' : '') + c.parsed.y.toFixed(2) + '%'}`
+                }}
+            },
+            scales: {
+                y: {
+                    ticks: {color: '#94a3b8', callback: v => v.toFixed(0) + '%'},
+                    title: {display: true, text: 'Return since decision', color: '#94a3b8'},
+                    grid: {color: 'rgba(148, 163, 184, 0.08)'},
+                },
+                x: {
+                    ticks: {color: '#94a3b8'},
+                    title: {display: true, text: 'Trading days since decision', color: '#94a3b8'},
+                    grid: {color: 'rgba(148, 163, 184, 0.05)'},
+                }
+            }
+        }
+    });
+}
+
+function renderSpaghetti(canvasId) {
+    const ts = DATA.time_series || {};
+    const byIntent = ts.by_intent || {};
+    const buys = [];
+    for (const intent of ['ENTER_NOW', 'ENTER_LIMIT']) {
+        const indiv = (byIntent[intent] && byIntent[intent].individuals) || [];
+        for (const p of indiv) {
+            buys.push({...p, _intent: intent});
+        }
+    }
+    if (buys.length === 0) {
+        emptyState(canvasId, 'no buy-signal price paths');
+        return;
+    }
+
+    const datasets = buys.map(p => ({
+        label: `${p.symbol} (${p.decision_date})`,
+        data: p.returns.map(v => v * 100),
+        borderColor: 'rgba(148, 163, 184, 0.18)',
+        borderWidth: 0.8,
+        pointRadius: 0,
+        tension: 0,
+        spanGaps: true,
+        _isMedian: false,
+    }));
+
+    for (const intent of ['ENTER_NOW', 'ENTER_LIMIT']) {
+        const g = byIntent[intent];
+        if (!g || !g.median) continue;
+        datasets.push({
+            label: `${intent} median (n=${g.n_paths})`,
+            data: g.median.map(v => v == null ? null : v * 100),
+            borderColor: COLOR_BY_INTENT[intent],
+            borderWidth: 3,
+            pointRadius: 0,
+            tension: 0.15,
+            spanGaps: true,
+            _isMedian: true,
+        });
+    }
+
+    const maxDays = Math.max(...buys.map(p => p.returns.length));
+    new Chart(document.getElementById(canvasId).getContext('2d'), {
+        type: 'line',
+        data: {labels: Array.from({length: maxDays}, (_, i) => i), datasets},
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#94a3b8',
+                        boxWidth: 12,
+                        filter: (item) => item.text.includes('median'),
+                    },
+                    position: 'bottom',
+                },
+                tooltip: {
+                    filter: c => c.dataset._isMedian,
+                    callbacks: {
+                        label: c => `${c.dataset.label}: ${c.parsed.y == null ? '—' : (c.parsed.y >= 0 ? '+' : '') + c.parsed.y.toFixed(2) + '%'}`
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    ticks: {color: '#94a3b8', callback: v => v.toFixed(0) + '%'},
+                    grid: {color: 'rgba(148, 163, 184, 0.08)'},
+                    title: {display: true, text: 'Return since decision', color: '#94a3b8'},
+                },
+                x: {
+                    ticks: {color: '#94a3b8'},
+                    grid: {color: 'rgba(148, 163, 184, 0.05)'},
+                    title: {display: true, text: 'Trading days since decision', color: '#94a3b8'},
+                }
+            }
+        }
+    });
+}
+
+renderMedianPaths('tsIntentChart', (DATA.time_series || {}).by_intent, COLOR_BY_INTENT);
+renderMedianPaths('tsDrChart', (DATA.time_series || {}).by_dr_verdict, COLOR_BY_DR);
+renderSpaghetti('tsSpaghetti');
 
 // ----- Per-decision explorer -----
 const COLS = [

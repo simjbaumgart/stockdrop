@@ -6,9 +6,11 @@ no FastAPI dependency.
 from __future__ import annotations
 
 import logging
+from collections import defaultdict
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+import numpy as np
 import pandas as pd
 
 from app.services.analytics.aggregations import (
@@ -42,6 +44,78 @@ def _df_records(df: pd.DataFrame, columns: Optional[List[str]] = None) -> List[d
             else:
                 rec[str(k)] = v
         out.append(rec)
+    return out
+
+
+def _time_series_by_group(
+    cohort: pd.DataFrame,
+    bars_by_ticker: Dict[str, pd.DataFrame],
+    group_col: str,
+    max_days: int = 40,
+    include_individuals: bool = False,
+) -> Dict[str, Any]:
+    """For each value of `group_col`, build the median post-decision return path.
+
+    For every cohort row we read `max_days+1` daily closes from the cached bars,
+    starting at the decision date, and turn them into pct-returns vs the
+    decision price. We then aggregate (median, q25, q75) per day-offset within
+    each group.
+    """
+    if cohort.empty:
+        return {}
+
+    paths_by_group: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+
+    for _, row in cohort.iterrows():
+        sym = str(row.get("symbol") or "").upper()
+        if not sym:
+            continue
+        bars = bars_by_ticker.get(sym, pd.DataFrame())
+        if bars is None or bars.empty:
+            continue
+        bars = bars.sort_index()
+        forward = bars.loc[bars.index >= row["decision_date"]]
+        if forward.empty:
+            continue
+        closes = forward["Close"].astype(float).iloc[: max_days + 1]
+        if len(closes) < 2:
+            continue
+        try:
+            decision_price = float(row.get("price_at_decision") or 0)
+        except (TypeError, ValueError):
+            continue
+        if decision_price <= 0:
+            continue
+
+        rets = [(float(c) / decision_price - 1.0) for c in closes.tolist()]
+
+        group_value = row.get(group_col)
+        if group_value is None or (isinstance(group_value, float) and pd.isna(group_value)):
+            continue
+
+        paths_by_group[str(group_value)].append({
+            "symbol": sym,
+            "decision_date": row["decision_date"].strftime("%Y-%m-%d"),
+            "returns": rets,
+        })
+
+    out: Dict[str, Any] = {}
+    for grp, paths in paths_by_group.items():
+        max_len = max(len(p["returns"]) for p in paths)
+        per_day: List[List[float]] = [[] for _ in range(max_len)]
+        for p in paths:
+            for d, r in enumerate(p["returns"]):
+                per_day[d].append(r)
+        out[grp] = {
+            "day_offsets": list(range(max_len)),
+            "median": [float(np.median(x)) if x else None for x in per_day],
+            "q25": [float(np.percentile(x, 25)) if x else None for x in per_day],
+            "q75": [float(np.percentile(x, 75)) if x else None for x in per_day],
+            "count": [len(x) for x in per_day],
+            "n_paths": len(paths),
+        }
+        if include_individuals:
+            out[grp]["individuals"] = paths
     return out
 
 
@@ -169,6 +243,17 @@ def build_payload(start_date: str = "2026-02-01") -> Dict[str, Any]:
 
     eq = equity_curve(buys, horizon="4w")
 
+    # Time series since signal — median return path per group, plus individual
+    # paths for buy signals so we can render spaghetti + median in JS.
+    ts_by_intent = _time_series_by_group(
+        enriched, bars, group_col="intent",
+        max_days=40, include_individuals=True,
+    )
+    ts_by_dr_verdict = _time_series_by_group(
+        enriched, bars, group_col="deep_research_verdict",
+        max_days=40, include_individuals=False,
+    )
+
     rec_dist = time_to_recover_dist(enriched, max_days=40)
     rec_records = [{"days": int(idx), "count": int(val)} for idx, val in rec_dist.items()]
 
@@ -210,5 +295,10 @@ def build_payload(start_date: str = "2026-02-01") -> Dict[str, Any]:
         "winrate_by_dr_rr": _df_records(dr_rr),
         "equity_curve": _df_records(eq, columns=["decision_date", "equity", "n", "avg_return"]),
         "time_to_recover": rec_records,
+        "time_series": {
+            "max_days": 40,
+            "by_intent": ts_by_intent,
+            "by_dr_verdict": ts_by_dr_verdict,
+        },
         "decisions": decisions,
     }
