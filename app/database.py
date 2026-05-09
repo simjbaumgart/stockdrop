@@ -1,5 +1,5 @@
 import sqlite3
-from typing import List
+from typing import List, Optional
 
 import os
 
@@ -468,6 +468,53 @@ def update_deep_research_data(decision_id: int, verdict: str, risk: str, catalys
     except Exception as e:
         print(f"Error updating deep research data: {e}")
         return False
+
+def finalize_position_status_after_dr(
+    *,
+    decision_id: int,
+    dr_action: Optional[str],
+    dr_review_verdict: Optional[str],
+) -> bool:
+    """Atomically transition a `Pending DR Review` row to its final status
+    based on the deep-research outcome.
+
+    Rules:
+        - dr_action in {BUY, BUY_LIMIT}                  -> Owned
+        - dr_action in {AVOID, WATCH, HOLD, SELL, ...}    -> Not Owned
+        - dr_review_verdict == OVERRIDDEN (any action)    -> Not Owned
+
+    Only updates rows whose current status is 'Pending DR Review' so that
+    rows demoted by an earlier deterministic check (e.g. earnings narrative
+    inconsistency) are not silently re-promoted. Returns True if a row was
+    updated, False otherwise.
+    """
+    action_norm = (dr_action or "").upper().strip()
+    review_norm = (dr_review_verdict or "").upper().strip()
+
+    if review_norm == "OVERRIDDEN":
+        new_status = "Not Owned"
+    elif action_norm in ("BUY", "BUY_LIMIT", "STRONG_BUY", "SPECULATIVE_BUY"):
+        new_status = "Owned"
+    else:
+        new_status = "Not Owned"
+
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        cursor.execute(
+            """UPDATE decision_points
+               SET status = ?
+               WHERE id = ? AND status = 'Pending DR Review'""",
+            (new_status, decision_id),
+        )
+        conn.commit()
+        updated = cursor.rowcount > 0
+        conn.close()
+        return updated
+    except Exception as e:
+        print(f"[finalize_position_status_after_dr] error for decision_id={decision_id}: {e}")
+        return False
+
 
 def get_todays_strong_buy_candidates(date_str: str = None) -> List[dict]:
     """

@@ -832,6 +832,29 @@ class DeepResearchService:
                 
             print(f"  >> {verdict_icon} [Deep Research] Updated trading levels for {symbol} (Limit: {entry_low}-{entry_high})")
 
+            # Atomically finalize the position status now that DR has resolved.
+            # Mirrors the 3-state machine: Pending DR Review -> Owned / Not Owned.
+            try:
+                from app.database import finalize_position_status_after_dr
+                review_verdict = result.get('review_verdict')
+                final_action = result.get('action', action)
+                advanced = finalize_position_status_after_dr(
+                    decision_id=decision_id,
+                    dr_action=final_action,
+                    dr_review_verdict=review_verdict,
+                )
+                if advanced:
+                    logger.info(
+                        "[Deep Research] Finalized position status for %s "
+                        "(action=%s, review_verdict=%s)",
+                        symbol, final_action, review_verdict,
+                    )
+            except Exception as e:
+                logger.error(
+                    "[Deep Research] Failed to finalize position status for %s: %s",
+                    symbol, e,
+                )
+
         except Exception as e:
             logger.error(f"[Deep Research] Failed to override trading levels for {symbol}: {e}")
 
