@@ -1,9 +1,11 @@
-"""Build the dashboard summary payload from analytics primitives, with TTL cache."""
+"""Build a single JSON-serializable payload describing cohort performance.
+
+Used by the offline HTML report generator. Pure function — no caching,
+no FastAPI dependency.
+"""
 from __future__ import annotations
 
 import logging
-import threading
-import time
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -21,10 +23,6 @@ from app.services.analytics.price_cache import prefetch
 
 logger = logging.getLogger(__name__)
 
-_CACHE: Dict[str, Any] = {"payload": None, "built_at": 0.0}
-_CACHE_TTL_SECONDS = 60 * 60  # 1 hour
-_LOCK = threading.Lock()
-
 
 def _df_records(df: pd.DataFrame, columns: Optional[List[str]] = None) -> List[dict]:
     if df is None or df.empty:
@@ -37,7 +35,7 @@ def _df_records(df: pd.DataFrame, columns: Optional[List[str]] = None) -> List[d
         for k, v in row.items():
             if pd.isna(v):
                 rec[str(k)] = None
-            elif isinstance(v, (pd.Timestamp,)):
+            elif isinstance(v, pd.Timestamp):
                 rec[str(k)] = v.strftime("%Y-%m-%d")
             elif hasattr(v, "item"):
                 rec[str(k)] = v.item()
@@ -47,7 +45,8 @@ def _df_records(df: pd.DataFrame, columns: Optional[List[str]] = None) -> List[d
     return out
 
 
-def _build_payload(start_date: str = "2026-02-01") -> Dict[str, Any]:
+def build_payload(start_date: str = "2026-02-01") -> Dict[str, Any]:
+    """Compute every aggregation we render and return one JSON-friendly dict."""
     df = load_cohort(start_date=start_date)
     if df.empty:
         return {
@@ -60,8 +59,10 @@ def _build_payload(start_date: str = "2026-02-01") -> Dict[str, Any]:
             "winrate_by_drop_bucket": [],
             "winrate_by_dr_action": [],
             "winrate_by_gatekeeper": [],
+            "winrate_by_sector": [],
             "equity_curve": [],
             "time_to_recover": [],
+            "decisions": [],
         }
 
     end = pd.Timestamp.now().normalize()
@@ -79,7 +80,10 @@ def _build_payload(start_date: str = "2026-02-01") -> Dict[str, Any]:
 
     limits = enriched[enriched["intent"] == "ENTER_LIMIT"].copy()
     n_limits = len(limits)
-    n_filled = int(limits["limit_filled"].fillna(False).sum()) if "limit_filled" in limits.columns else 0
+    n_filled = (
+        int(limits["limit_filled"].fillna(False).astype(bool).sum())
+        if "limit_filled" in limits.columns else 0
+    )
     fill_rate = (n_filled / n_limits) if n_limits else None
     avg_filled_4w = None
     if "return_filled_4w" in limits.columns:
@@ -87,11 +91,12 @@ def _build_payload(start_date: str = "2026-02-01") -> Dict[str, Any]:
         if not sub.empty:
             avg_filled_4w = float(sub["return_filled_4w"].mean())
 
-    rec_series = enriched["days_to_recover"].dropna() if "days_to_recover" in enriched.columns else pd.Series(dtype=float)
+    rec_series = (
+        enriched["days_to_recover"].dropna()
+        if "days_to_recover" in enriched.columns else pd.Series(dtype=float)
+    )
     median_days = float(rec_series.median()) if not rec_series.empty else None
     n_recovered = int(rec_series.size)
-
-    winrate_intent_4w = winrate_by(enriched, "intent", horizon="4w")
 
     horizon_rows = []
     for h in HORIZON_DAYS:
@@ -123,10 +128,61 @@ def _build_payload(start_date: str = "2026-02-01") -> Dict[str, Any]:
     if "gatekeeper_tier" in enriched.columns and enriched["gatekeeper_tier"].notna().any():
         gatekeeper = winrate_by(enriched, "gatekeeper_tier", horizon="4w")
 
+    sector = pd.DataFrame()
+    if "sector" in enriched.columns and enriched["sector"].notna().any():
+        sector = winrate_by(enriched, "sector", horizon="4w")
+
+    # R/R buckets — same edges for PM and DR so the charts are directly comparable.
+    # Distribution check (post-2026-02-01): PM 0.0-5.4 mean 0.9; DR 0.0-4.0 mean 1.5.
+    rr_bins = [-0.001, 1.0, 2.0, 3.0, 100.0]
+    rr_labels = ["<1", "1-2", "2-3", ">=3"]
+
+    pm_rr = pd.DataFrame()
+    if "risk_reward_ratio" in enriched.columns and enriched["risk_reward_ratio"].notna().any():
+        pm_rr = winrate_by_bucket(
+            enriched, "risk_reward_ratio",
+            bins=rr_bins, labels=rr_labels, horizon="4w",
+        )
+        if not pm_rr.empty:
+            pm_rr["bucket"] = pm_rr["bucket"].astype(str)
+
+    dr_rr = pd.DataFrame()
+    if (
+        "deep_research_rr_ratio" in enriched.columns
+        and enriched["deep_research_rr_ratio"].notna().any()
+    ):
+        dr_rr = winrate_by_bucket(
+            enriched, "deep_research_rr_ratio",
+            bins=rr_bins, labels=rr_labels, horizon="4w",
+        )
+        if not dr_rr.empty:
+            dr_rr["bucket"] = dr_rr["bucket"].astype(str)
+
+    # Also expose the DR-verdict view (column-distinct from DR action, even though
+    # in current data they happen to mirror).
+    dr_verdict = pd.DataFrame()
+    if (
+        "deep_research_verdict" in enriched.columns
+        and enriched["deep_research_verdict"].notna().any()
+    ):
+        dr_verdict = winrate_by(enriched, "deep_research_verdict", horizon="4w")
+
     eq = equity_curve(buys, horizon="4w")
 
     rec_dist = time_to_recover_dist(enriched, max_days=40)
     rec_records = [{"days": int(idx), "count": int(val)} for idx, val in rec_dist.items()]
+
+    decision_cols = [
+        "id", "symbol", "decision_date", "intent", "recommendation", "drop_percent",
+        "price_at_decision", "sector", "gatekeeper_tier",
+        "deep_research_verdict", "deep_research_action",
+        "risk_reward_ratio", "deep_research_rr_ratio",
+        "return_1w", "return_2w", "return_4w", "return_8w",
+        "max_roi_4w", "max_drawdown_4w",
+        "limit_filled", "return_filled_4w",
+        "recovered", "days_to_recover",
+    ]
+    decisions = _df_records(enriched, columns=decision_cols)
 
     return {
         "generated_at": datetime.utcnow().isoformat() + "Z",
@@ -143,34 +199,16 @@ def _build_payload(start_date: str = "2026-02-01") -> Dict[str, Any]:
             "median_days_to_recover": median_days,
             "n_recovered": n_recovered,
         },
-        "winrate_by_intent": _df_records(winrate_intent_4w),
+        "winrate_by_intent": _df_records(winrate_by(enriched, "intent", horizon="4w")),
         "winrate_by_horizon": horizon_rows,
         "winrate_by_drop_bucket": _df_records(drop_bucket),
         "winrate_by_dr_action": _df_records(dr_action),
+        "winrate_by_dr_verdict": _df_records(dr_verdict),
         "winrate_by_gatekeeper": _df_records(gatekeeper),
+        "winrate_by_sector": _df_records(sector),
+        "winrate_by_pm_rr": _df_records(pm_rr),
+        "winrate_by_dr_rr": _df_records(dr_rr),
         "equity_curve": _df_records(eq, columns=["decision_date", "equity", "n", "avg_return"]),
         "time_to_recover": rec_records,
+        "decisions": decisions,
     }
-
-
-def summary_json(refresh: bool = False, start_date: str = "2026-02-01") -> Dict[str, Any]:
-    """Return cached summary payload; rebuild if stale or refresh=True."""
-    now = time.time()
-    with _LOCK:
-        cached = _CACHE.get("payload")
-        if (
-            not refresh
-            and cached is not None
-            and (now - _CACHE.get("built_at", 0)) < _CACHE_TTL_SECONDS
-            and _CACHE.get("start_date") == start_date
-        ):
-            return cached
-
-    logger.info("Rebuilding insights summary (start_date=%s, refresh=%s)", start_date, refresh)
-    payload = _build_payload(start_date=start_date)
-
-    with _LOCK:
-        _CACHE["payload"] = payload
-        _CACHE["built_at"] = time.time()
-        _CACHE["start_date"] = start_date
-    return payload

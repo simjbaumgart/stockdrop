@@ -1,11 +1,16 @@
-"""Generate a self-contained interactive HTML deep-dive report.
+"""Generate a self-contained focused HTML performance report.
 
 Usage:
     ./venv/bin/python scripts/analysis/deep_dive_html.py [--start 2026-02-01] [--out PATH]
 
-Produces a single HTML file with Chart.js charts (loaded from CDN) and a
-sortable/filterable per-decision explorer table. Open it directly in a browser —
-no server required.
+Produces a single HTML file with four focused views:
+  1. AI council (PM) verdict      -> 4w stock performance
+  2. Deep Research verdict        -> 4w stock performance
+  3. AI council R/R ratio bucket  -> 4w stock performance
+  4. Deep Research R/R bucket     -> 4w stock performance (where available)
+
+Plus a filterable/sortable per-decision explorer table at the bottom.
+Self-contained — Chart.js from CDN, just open in a browser.
 """
 from __future__ import annotations
 
@@ -29,7 +34,7 @@ HTML_TEMPLATE = """<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>StockDrop Performance Deep-Dive</title>
+<title>StockDrop Performance — Focused</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
     :root {
@@ -47,25 +52,21 @@ HTML_TEMPLATE = """<!doctype html>
            margin: 0; padding: 24px; background: var(--bg); color: var(--text);
            font-size: 14px; line-height: 1.5; }
     h1 { font-size: 1.75rem; margin: 0 0 4px 0; }
-    h2 { font-size: 1.15rem; margin: 28px 0 12px 0; padding-bottom: 6px;
-         border-bottom: 1px solid var(--border); }
+    h2 { font-size: 1.05rem; margin: 28px 0 12px 0; padding-bottom: 6px;
+         border-bottom: 1px solid var(--border); color: var(--muted);
+         text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
     h3 { font-size: 0.95rem; margin: 0; font-weight: 600; }
     .muted { color: var(--muted); font-size: 0.85rem; }
     .container { max-width: 1280px; margin: 0 auto; }
     .grid { display: grid; gap: 14px; }
-    .grid-4 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
     .grid-2 { grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); }
     .card { background: var(--panel); border: 1px solid var(--border);
             border-radius: 8px; padding: 16px; }
     .card-header { padding-bottom: 10px; border-bottom: 1px solid var(--border);
-                   margin-bottom: 12px; display: flex; justify-content: space-between;
-                   align-items: center; gap: 8px; flex-wrap: wrap; }
-    .metric-label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase;
-                    letter-spacing: 0.05em; }
-    .metric-value { font-size: 1.6rem; font-weight: 700; margin: 4px 0; }
-    .metric-sub { font-size: 0.78rem; color: var(--muted); }
-    .chart-box { height: 260px; position: relative; }
-    .chart-box.tall { height: 320px; }
+                   margin-bottom: 12px; }
+    .card-header .sub { color: var(--muted); font-size: 0.8rem; margin-top: 3px; }
+    .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .chart-box { height: 240px; position: relative; }
     table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
     th, td { padding: 7px 9px; text-align: left; border-bottom: 1px solid var(--border); }
     th { color: var(--muted); font-weight: 500; cursor: pointer; user-select: none;
@@ -87,66 +88,71 @@ HTML_TEMPLATE = """<!doctype html>
     input, select { background: var(--bg); color: var(--text);
                     border: 1px solid var(--border); border-radius: 4px; padding: 6px 10px;
                     font-size: 0.85rem; }
-    .filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+               justify-content: space-between; }
     .scroll-table { max-height: 540px; overflow-y: auto; }
-    .horizon-tabs { display: inline-flex; gap: 4px; }
-    .horizon-tabs button { background: var(--bg); color: var(--text);
-                           border: 1px solid var(--border); padding: 4px 12px;
-                           border-radius: 4px; cursor: pointer; font-size: 0.82rem; }
-    .horizon-tabs button.active { background: var(--accent); color: #0b1220;
-                                  border-color: var(--accent); }
+    .empty { color: var(--muted); padding: 30px; text-align: center; }
 </style>
 </head>
 <body>
 <div class="container">
-    <h1>StockDrop Performance Deep-Dive</h1>
+    <h1>StockDrop Performance — Focused View</h1>
     <div class="muted" id="meta"></div>
 
-    <h2>Headline</h2>
-    <div class="grid grid-4" id="headlineGrid"></div>
-
-    <h2>Equity curve</h2>
-    <div class="card">
-        <div class="card-header">
-            <h3>Equal-weight cumulative growth — BUY/BUY_LIMIT, 4w returns</h3>
-        </div>
-        <div class="chart-box tall"><canvas id="equityChart"></canvas></div>
-    </div>
-
-    <h2>Win rate by group (4w)</h2>
+    <h2>Verdict → 4-week return</h2>
     <div class="grid grid-2">
-        <div class="card">
+        <div class="card" id="card-pm">
             <div class="card-header">
-                <h3>By intent</h3>
-                <div class="horizon-tabs" id="intentHorizonTabs">
-                    <button data-h="1w">1w</button>
-                    <button data-h="2w">2w</button>
-                    <button data-h="4w" class="active">4w</button>
-                    <button data-h="8w">8w</button>
-                </div>
+                <h3>AI council (PM) verdict</h3>
+                <div class="sub">Pre-Deep-Research recommendation, by normalized intent</div>
             </div>
-            <div class="chart-box"><canvas id="intentChart"></canvas></div>
+            <div class="chart-grid">
+                <div><div class="muted" style="text-align:center; font-size: 0.75rem;">Win rate</div>
+                     <div class="chart-box"><canvas id="pmWinChart"></canvas></div></div>
+                <div><div class="muted" style="text-align:center; font-size: 0.75rem;">Avg return</div>
+                     <div class="chart-box"><canvas id="pmRetChart"></canvas></div></div>
+            </div>
         </div>
-        <div class="card">
-            <div class="card-header"><h3>By drop-size bucket</h3></div>
-            <div class="chart-box"><canvas id="dropChart"></canvas></div>
-        </div>
-        <div class="card">
-            <div class="card-header"><h3>By Deep Research action</h3></div>
-            <div class="chart-box"><canvas id="drChart"></canvas></div>
-        </div>
-        <div class="card">
-            <div class="card-header"><h3>By gatekeeper tier</h3></div>
-            <div class="chart-box"><canvas id="gateChart"></canvas></div>
+        <div class="card" id="card-dr">
+            <div class="card-header">
+                <h3>Deep Research verdict</h3>
+                <div class="sub">DR's own verdict (where set)</div>
+            </div>
+            <div class="chart-grid">
+                <div><div class="muted" style="text-align:center; font-size: 0.75rem;">Win rate</div>
+                     <div class="chart-box"><canvas id="drWinChart"></canvas></div></div>
+                <div><div class="muted" style="text-align:center; font-size: 0.75rem;">Avg return</div>
+                     <div class="chart-box"><canvas id="drRetChart"></canvas></div></div>
+            </div>
         </div>
     </div>
 
-    <h2>Time to recovery</h2>
-    <div class="card">
-        <div class="card-header">
-            <h3>Trading days until pre-drop price reached (capped at 40)</h3>
+    <h2>R/R ratio → 4-week return</h2>
+    <div class="grid grid-2">
+        <div class="card" id="card-pmrr">
+            <div class="card-header">
+                <h3>AI council R/R ratio</h3>
+                <div class="sub">PM-supplied risk_reward_ratio, bucketed</div>
+            </div>
+            <div class="chart-grid">
+                <div><div class="muted" style="text-align:center; font-size: 0.75rem;">Win rate</div>
+                     <div class="chart-box"><canvas id="pmRRWinChart"></canvas></div></div>
+                <div><div class="muted" style="text-align:center; font-size: 0.75rem;">Avg return</div>
+                     <div class="chart-box"><canvas id="pmRRRetChart"></canvas></div></div>
+            </div>
         </div>
-        <div class="chart-box"><canvas id="recoverChart"></canvas></div>
+        <div class="card" id="card-drrr">
+            <div class="card-header">
+                <h3>Deep Research R/R ratio</h3>
+                <div class="sub">DR-supplied rr_ratio, bucketed (where available)</div>
+            </div>
+            <div class="chart-grid">
+                <div><div class="muted" style="text-align:center; font-size: 0.75rem;">Win rate</div>
+                     <div class="chart-box"><canvas id="drRRWinChart"></canvas></div></div>
+                <div><div class="muted" style="text-align:center; font-size: 0.75rem;">Avg return</div>
+                     <div class="chart-box"><canvas id="drRRRetChart"></canvas></div></div>
+            </div>
+        </div>
     </div>
 
     <h2>Per-decision explorer</h2>
@@ -161,10 +167,9 @@ HTML_TEMPLATE = """<!doctype html>
                     <option value="AVOID">AVOID</option>
                     <option value="NEUTRAL">NEUTRAL</option>
                 </select>
-                <select id="filterRecovered">
-                    <option value="">Recovered: any</option>
-                    <option value="true">Recovered</option>
-                    <option value="false">Not recovered</option>
+                <select id="filterHasReturn">
+                    <option value="">All decisions</option>
+                    <option value="true">Has 4w return</option>
                 </select>
             </div>
             <div class="muted" id="rowCount"></div>
@@ -176,17 +181,6 @@ HTML_TEMPLATE = """<!doctype html>
             </table>
         </div>
     </div>
-
-    <h2>Per-horizon table</h2>
-    <div class="card scroll-table">
-        <table id="horizonTable">
-            <thead><tr>
-                <th>Horizon</th><th>Intent</th>
-                <th class="num">N</th><th class="num">Win rate</th><th class="num">Avg return</th>
-            </tr></thead>
-            <tbody></tbody>
-        </table>
-    </div>
 </div>
 
 <script>
@@ -194,65 +188,30 @@ const DATA = __PAYLOAD_JSON__;
 
 const fmtPct = v => v == null ? '—' : (v * 100).toFixed(1) + '%';
 const fmtSigned = v => v == null ? '—' : (v >= 0 ? '+' : '') + (v * 100).toFixed(2) + '%';
-const colorRet = v => v == null ? '#6b7280' : (v >= 0 ? '#22c55e' : '#ef4444');
 
 document.getElementById('meta').textContent =
     `Cohort: ${DATA.cohort_size} decisions since ${DATA.cohort_start} · Generated ${new Date(DATA.generated_at).toLocaleString()}`;
 
-// Headline cards
-const h = DATA.headline || {};
-const cards = [
-    {label: 'Win rate (4w, BUY/BUY_LIMIT)',
-     value: fmtPct(h.win_rate_4w_buys),
-     sub: `avg ${fmtSigned(h.avg_return_4w_buys)} (n=${h.n_buys_4w ?? 0})`},
-    {label: 'BUY_LIMIT fill rate',
-     value: fmtPct(h.buy_limit_fill_rate),
-     sub: `${h.buy_limit_filled ?? 0}/${h.buy_limit_count ?? 0} filled · avg ${fmtSigned(h.buy_limit_avg_filled_4w)}`},
-    {label: 'Median days to recover',
-     value: h.median_days_to_recover != null ? h.median_days_to_recover.toFixed(1) : '—',
-     sub: `${h.n_recovered ?? 0} recovered (8w window)`},
-    {label: 'Cohort size',
-     value: DATA.cohort_size,
-     sub: `since ${DATA.cohort_start}`},
-];
-document.getElementById('headlineGrid').innerHTML = cards.map(c => `
-    <div class="card">
-        <div class="metric-label">${c.label}</div>
-        <div class="metric-value">${c.value}</div>
-        <div class="metric-sub">${c.sub}</div>
-    </div>
-`).join('');
-
-// Equity curve
-const eq = DATA.equity_curve || [];
-new Chart(document.getElementById('equityChart').getContext('2d'), {
-    type: 'line',
-    data: {
-        labels: eq.map(p => p.decision_date),
-        datasets: [{label: 'Equity', data: eq.map(p => p.equity),
-                    borderColor: '#60a5fa', tension: 0.1, pointRadius: 2, fill: false}]
-    },
-    options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: {legend: {display: false}},
-        scales: {y: {ticks: {color: '#94a3b8'}}, x: {ticks: {color: '#94a3b8'}}}
-    }
-});
+function emptyState(canvasId, message) {
+    const cv = document.getElementById(canvasId);
+    const ctx = cv.getContext('2d');
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '13px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(message, cv.width / 2, cv.height / 2);
+}
 
 function makeWinrateBar(canvasId, rows, labelKey) {
     if (!rows || rows.length === 0) {
-        const c = document.getElementById(canvasId).getContext('2d');
-        c.fillStyle = '#94a3b8';
-        c.font = '14px sans-serif';
-        c.fillText('no data', 20, 40);
-        return null;
+        emptyState(canvasId, 'no data');
+        return;
     }
-    return new Chart(document.getElementById(canvasId).getContext('2d'), {
+    new Chart(document.getElementById(canvasId).getContext('2d'), {
         type: 'bar',
         data: {
             labels: rows.map(r => String(r[labelKey] ?? '(none)')),
             datasets: [{
-                label: 'Win rate',
                 data: rows.map(r => r.win_rate),
                 backgroundColor: '#3b82f6',
             }]
@@ -261,9 +220,9 @@ function makeWinrateBar(canvasId, rows, labelKey) {
             responsive: true, maintainAspectRatio: false,
             plugins: {
                 legend: {display: false},
-                tooltip: {callbacks: {label: (c) => {
+                tooltip: {callbacks: {label: c => {
                     const r = rows[c.dataIndex];
-                    return `${(r.win_rate * 100).toFixed(1)}% — n=${r.count}, avg ${(r.avg_return * 100).toFixed(2)}%`;
+                    return `${(r.win_rate * 100).toFixed(1)}% — n=${r.count}`;
                 }}}
             },
             scales: {
@@ -275,79 +234,78 @@ function makeWinrateBar(canvasId, rows, labelKey) {
     });
 }
 
-let intentChart = null;
-function renderIntent(horizon) {
-    const rows = (DATA.winrate_by_horizon || []).filter(r => r.horizon === horizon)
-        .map(r => ({intent: r.intent, win_rate: r.win_rate, avg_return: r.avg_return, count: r.n}));
-    if (intentChart) intentChart.destroy();
-    intentChart = makeWinrateBar('intentChart', rows, 'intent');
-}
-renderIntent('4w');
-document.querySelectorAll('#intentHorizonTabs button').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('#intentHorizonTabs button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        renderIntent(btn.dataset.h);
-    });
-});
-
-makeWinrateBar('dropChart', DATA.winrate_by_drop_bucket, 'bucket');
-makeWinrateBar('drChart', DATA.winrate_by_dr_action, 'deep_research_action');
-makeWinrateBar('gateChart', DATA.winrate_by_gatekeeper, 'gatekeeper_tier');
-
-const rec = DATA.time_to_recover || [];
-new Chart(document.getElementById('recoverChart').getContext('2d'), {
-    type: 'bar',
-    data: {labels: rec.map(p => p.days),
-           datasets: [{label: 'Count', data: rec.map(p => p.count), backgroundColor: '#8b5cf6'}]},
-    options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: {legend: {display: false}},
-        scales: {y: {ticks: {color: '#94a3b8'}}, x: {ticks: {color: '#94a3b8'}}}
+function makeAvgReturnBar(canvasId, rows, labelKey) {
+    if (!rows || rows.length === 0) {
+        emptyState(canvasId, 'no data');
+        return;
     }
-});
+    new Chart(document.getElementById(canvasId).getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: rows.map(r => String(r[labelKey] ?? '(none)')),
+            datasets: [{
+                data: rows.map(r => r.avg_return * 100),
+                backgroundColor: rows.map(r => r.avg_return >= 0 ? '#22c55e' : '#ef4444'),
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: {display: false},
+                tooltip: {callbacks: {label: c => {
+                    const r = rows[c.dataIndex];
+                    return `${(r.avg_return * 100).toFixed(2)}% — n=${r.count}, win ${(r.win_rate * 100).toFixed(0)}%`;
+                }}}
+            },
+            scales: {
+                y: {ticks: {color: '#94a3b8', callback: v => v.toFixed(0) + '%'}},
+                x: {ticks: {color: '#94a3b8'}}
+            }
+        }
+    });
+}
 
-// Horizon table
-const horizonOrder = {'1w': 1, '2w': 2, '4w': 3, '8w': 4};
-const hRows = [...(DATA.winrate_by_horizon || [])]
-    .sort((a, b) => (horizonOrder[a.horizon] - horizonOrder[b.horizon]) || a.intent.localeCompare(b.intent));
-document.querySelector('#horizonTable tbody').innerHTML = hRows.map(r => `
-    <tr>
-        <td>${r.horizon}</td>
-        <td><span class="pill ${r.intent.toLowerCase()}">${r.intent}</span></td>
-        <td class="num">${r.n}</td>
-        <td class="num">${(r.win_rate * 100).toFixed(0)}%</td>
-        <td class="num ${r.avg_return >= 0 ? 'pos' : 'neg'}">${(r.avg_return * 100).toFixed(2)}%</td>
-    </tr>
-`).join('');
+// 1. PM (AI council) verdict
+makeWinrateBar('pmWinChart', DATA.winrate_by_intent, 'intent');
+makeAvgReturnBar('pmRetChart', DATA.winrate_by_intent, 'intent');
+
+// 2. DR verdict
+const drVerdict = (DATA.winrate_by_dr_verdict && DATA.winrate_by_dr_verdict.length)
+    ? DATA.winrate_by_dr_verdict
+    : DATA.winrate_by_dr_action;
+makeWinrateBar('drWinChart', drVerdict, 'deep_research_verdict' in (drVerdict[0] || {}) ? 'deep_research_verdict' : 'deep_research_action');
+makeAvgReturnBar('drRetChart', drVerdict, 'deep_research_verdict' in (drVerdict[0] || {}) ? 'deep_research_verdict' : 'deep_research_action');
+
+// 3. PM R/R bucket
+makeWinrateBar('pmRRWinChart', DATA.winrate_by_pm_rr, 'bucket');
+makeAvgReturnBar('pmRRRetChart', DATA.winrate_by_pm_rr, 'bucket');
+
+// 4. DR R/R bucket
+makeWinrateBar('drRRWinChart', DATA.winrate_by_dr_rr, 'bucket');
+makeAvgReturnBar('drRRRetChart', DATA.winrate_by_dr_rr, 'bucket');
 
 // ----- Per-decision explorer -----
 const COLS = [
     {key: 'decision_date', label: 'Date', type: 'str'},
     {key: 'symbol', label: 'Symbol', type: 'str'},
-    {key: 'intent', label: 'Intent', type: 'pill'},
+    {key: 'intent', label: 'PM intent', type: 'pill'},
     {key: 'recommendation', label: 'PM rec', type: 'str'},
+    {key: 'deep_research_verdict', label: 'DR verdict', type: 'str'},
+    {key: 'risk_reward_ratio', label: 'PM R/R', type: 'num2'},
+    {key: 'deep_research_rr_ratio', label: 'DR R/R', type: 'num2'},
     {key: 'drop_percent', label: 'Drop %', type: 'pct_signed'},
     {key: 'price_at_decision', label: 'Price', type: 'usd'},
-    {key: 'sector', label: 'Sector', type: 'str'},
-    {key: 'gatekeeper_tier', label: 'Gate', type: 'str'},
-    {key: 'deep_research_action', label: 'DR', type: 'str'},
-    {key: 'return_1w', label: '1w', type: 'pct_signed'},
-    {key: 'return_2w', label: '2w', type: 'pct_signed'},
-    {key: 'return_4w', label: '4w', type: 'pct_signed'},
-    {key: 'return_8w', label: '8w', type: 'pct_signed'},
+    {key: 'return_4w', label: '4w return', type: 'pct_signed'},
+    {key: 'return_8w', label: '8w return', type: 'pct_signed'},
     {key: 'max_roi_4w', label: 'Max 4w', type: 'pct_signed'},
     {key: 'max_drawdown_4w', label: 'DD 4w', type: 'pct_signed'},
-    {key: 'limit_filled', label: 'Filled?', type: 'bool'},
-    {key: 'recovered', label: 'Recov?', type: 'bool'},
-    {key: 'days_to_recover', label: 'd-to-rec', type: 'int'},
 ];
 
 let sortState = {key: 'decision_date', dir: 'desc'};
 
 const thRow = document.querySelector('#decisionTable thead tr');
 thRow.innerHTML = COLS.map(col => {
-    const numClass = ['pct_signed', 'usd', 'int'].includes(col.type) ? ' class="num"' : '';
+    const numClass = ['pct_signed', 'usd', 'num2'].includes(col.type) ? ' class="num"' : '';
     return `<th data-key="${col.key}"${numClass}>${col.label}</th>`;
 }).join('');
 thRow.querySelectorAll('th').forEach(th => {
@@ -367,30 +325,27 @@ function renderCell(value, type) {
             return `<td class="num ${cls}">${(value >= 0 ? '+' : '') + (value * 100).toFixed(2)}%</td>`;
         }
         case 'usd': return `<td class="num">$${Number(value).toFixed(2)}</td>`;
-        case 'int': return `<td class="num">${Number(value)}</td>`;
-        case 'bool': return `<td>${value ? '✓' : '·'}</td>`;
+        case 'num2': return `<td class="num">${Number(value).toFixed(2)}</td>`;
         case 'pill': {
             const v = String(value);
             return `<td><span class="pill ${v.toLowerCase()}">${v}</span></td>`;
         }
         case 'str':
-        default:
-            if (value === 'symbol') return `<td>${value}</td>`;
-            return `<td>${value}</td>`;
+        default: return `<td>${value}</td>`;
     }
 }
 
 function renderTable() {
     const text = document.getElementById('filterText').value.toLowerCase();
     const intent = document.getElementById('filterIntent').value;
-    const recovered = document.getElementById('filterRecovered').value;
+    const hasReturn = document.getElementById('filterHasReturn').value;
 
     let rows = (DATA.decisions || []).filter(d => {
         if (intent && d.intent !== intent) return false;
-        if (recovered === 'true' && !d.recovered) return false;
-        if (recovered === 'false' && d.recovered) return false;
+        if (hasReturn === 'true' && d.return_4w == null) return false;
         if (text) {
-            const blob = [d.symbol, d.recommendation, d.deep_research_action, d.deep_research_verdict, d.sector]
+            const blob = [d.symbol, d.recommendation, d.deep_research_verdict,
+                          d.deep_research_action, d.sector]
                 .filter(Boolean).join(' ').toLowerCase();
             if (!blob.includes(text)) return false;
         }
@@ -407,7 +362,8 @@ function renderTable() {
         return String(va).localeCompare(String(vb)) * dir;
     });
 
-    document.getElementById('rowCount').textContent = `${rows.length} of ${(DATA.decisions || []).length} decisions`;
+    document.getElementById('rowCount').textContent =
+        `${rows.length} of ${(DATA.decisions || []).length} decisions`;
 
     document.querySelectorAll('#decisionTable th').forEach(th => {
         th.classList.remove('sort-asc', 'sort-desc');
@@ -429,7 +385,7 @@ function renderTable() {
 
 document.getElementById('filterText').addEventListener('input', renderTable);
 document.getElementById('filterIntent').addEventListener('change', renderTable);
-document.getElementById('filterRecovered').addEventListener('change', renderTable);
+document.getElementById('filterHasReturn').addEventListener('change', renderTable);
 
 renderTable();
 </script>
@@ -453,8 +409,7 @@ def main():
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     payload_json = json.dumps(payload, default=str, separators=(",", ":"))
-    # Defensive: keep payload safe inside <script>
-    payload_json = payload_json.replace("</", "<\\/")
+    payload_json = payload_json.replace("</", "<\\/")  # safe to inline in <script>
 
     html = HTML_TEMPLATE.replace("__PAYLOAD_JSON__", payload_json)
     out_path.write_text(html)
