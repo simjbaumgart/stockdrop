@@ -438,9 +438,6 @@ class ResearchService:
         #          # but we will append a major warning to the executive summary.
         #          final_decision['reason'] += " [WARNING: Deep Reasoning Model suggests caution/downgrade - see report]"
         
-        # Construct Final Output compatible with existing app expectations
-        recommendation = final_decision.get("action", "AVOID").upper()
-        
         # Extract checklist metadata
         economics_run = "NEEDS_ECONOMICS: TRUE" in news_report and economics_report != "" and "failed to fetch" not in economics_report
         drop_reason_identified = "REASON_FOR_DROP_IDENTIFIED: YES" in news_report
@@ -487,6 +484,39 @@ class ResearchService:
             if _metrics["risk_reward_ratio"] is not None:
                 final_decision["risk_reward_ratio"] = _metrics["risk_reward_ratio"]
 
+        # Deterministic earnings-narrative consistency check.
+        # If the PM narrates "beat" but surprise is negative (or vice versa),
+        # flag and downgrade by one tier — see TOST 2026-05 incident.
+        from app.utils.earnings_consistency import check_narrative_consistency, downgrade_action
+        ef = raw_data.get("earnings_facts") or {}
+        consistency = check_narrative_consistency(
+            reasoning=final_decision.get("reason", ""),
+            surprise_pct=ef.get("surprise_pct"),
+        )
+        if consistency.inconsistent:
+            original_action = final_decision.get("action", "")
+            new_action = downgrade_action(original_action)
+            logger.warning(
+                "[Earnings Consistency] %s: %s. Action %s -> %s",
+                state.ticker, consistency.reason, original_action, new_action,
+            )
+            print(
+                f"  > [Earnings Consistency Flag] {state.ticker}: {consistency.reason}. "
+                f"Downgrading {original_action} -> {new_action}"
+            )
+            final_decision["action"] = new_action
+            final_decision["earnings_narrative_flag"] = consistency.flag
+            existing_factors = final_decision.get("key_factors") or []
+            if isinstance(existing_factors, list):
+                existing_factors.append(
+                    f"[FLAG] {consistency.flag}: {consistency.reason}. "
+                    f"Verdict downgraded from {original_action} to {new_action}."
+                )
+                final_decision["key_factors"] = existing_factors
+
+        # Construct Final Output compatible with existing app expectations
+        recommendation = final_decision.get("action", "AVOID").upper()
+
         # --- Print Final Decision to Console (post-guard, post-recompute) ---
         print("\n" + "="*50)
         print(f"  [PORTFOLIO MANAGER DECISION]: {final_decision.get('action')} (Conviction: {final_decision.get('conviction', 'N/A')})")
@@ -531,6 +561,7 @@ class ResearchService:
             "ceiling_exit": final_decision.get("ceiling_exit"),
             "exit_trigger": final_decision.get("exit_trigger"),
             "key_factors": final_decision.get("key_factors", []),
+            "earnings_narrative_flag": final_decision.get("earnings_narrative_flag"),
             # Legacy compatibility fields
             "technician_report": state.reports.get('technical', ''),
             "bull_report": state.reports.get('bull', ''),

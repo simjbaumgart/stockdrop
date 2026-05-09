@@ -1618,6 +1618,7 @@ class StockService:
                 consensus_eps=(earnings_facts or {}).get("consensus_eps"),
                 surprise_pct=(earnings_facts or {}).get("surprise_pct"),
                 earnings_fiscal_quarter=(earnings_facts or {}).get("fiscal_quarter"),
+                earnings_narrative_flag=report_data.get("earnings_narrative_flag"),
             )
             print(f"Updated decision point for {symbol}: {recommendation} -> {status} (Conviction: {report_data.get('conviction', 'N/A')})")
             print(f"  > Saved trading levels and Data Depth metrics to DB.")
