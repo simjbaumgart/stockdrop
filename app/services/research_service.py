@@ -180,6 +180,7 @@ class ResearchService:
             ticker=ticker,
             date=datetime.now().strftime("%Y-%m-%d"),
             gatekeeper_tier=raw_data.get("gatekeeper_tier"),
+            earnings_facts=raw_data.get("earnings_facts"),
         )
 
         # Extract drop percent for context (default to generic if missing)
@@ -1047,6 +1048,23 @@ REALISTIC EXIT CEILING (Bear's Upside Limit):
             ),
         }.get(tier, "UNKNOWN — gatekeeper tier missing; treat as STANDARD_DIP.")
 
+        ef = getattr(state, "earnings_facts", None) or {}
+        if ef and ef.get("reported_eps") is not None:
+            _beat_miss = "BEAT" if (ef.get("surprise_pct") or 0) > 0 else "MISS" if (ef.get("surprise_pct") or 0) < 0 else "INLINE"
+            earnings_block = (
+                "\nEARNINGS_FACTS (canonical, from Finnhub — DO NOT infer EPS from news articles below):\n"
+                f"- Reported EPS: ${ef['reported_eps']:.2f}\n"
+                f"- Consensus EPS: ${ef['consensus_eps']:.2f}\n"
+                f"- Surprise: {ef['surprise_pct']:+.1f}% ({_beat_miss})\n"
+                f"- Fiscal quarter: {ef.get('fiscal_quarter')}\n"
+                f"- Source: {ef.get('source')} (fetched {ef.get('fetched_at')})\n"
+                "Whenever your reasoning describes whether the company beat or missed, "
+                "use the surprise sign above. News articles may cite stale consensus numbers; "
+                "the values above are the ground truth."
+            )
+        else:
+            earnings_block = "\nEARNINGS_FACTS: (no recent reported quarter available — drop is not earnings-driven, or facts unavailable)"
+
         return f"""
 You are the **Portfolio Manager**. You have the final vote.
 You must weigh the arguments from the Bull Agent and the Bear Agent, cross-reference with the original Agent Reports, and produce a concrete, actionable trading plan.
@@ -1063,6 +1081,7 @@ RISK FACTORS (For Consideration):
 - News Flags: {risky_support}
 - **RISK AGENT ASSESSMENT**:
 {risk_report}
+{earnings_block}
 
 BULL CASE:
 {bull_report}

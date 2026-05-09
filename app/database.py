@@ -125,6 +125,11 @@ def init_db():
             "batch_id": "INTEGER",
             # Tiered Bollinger gate label
             "gatekeeper_tier": "TEXT",
+            # Pre-fetched EPS facts (canonical, from Finnhub)
+            "reported_eps": "REAL",
+            "consensus_eps": "REAL",
+            "surprise_pct": "REAL",
+            "earnings_fiscal_quarter": "TEXT",
         }
         
         
@@ -287,6 +292,8 @@ def update_decision_point(decision_id: int, recommendation: str, reasoning: str,
             "reassess_sell_price_low", "reassess_sell_price_high",
             "reassess_ceiling_exit", "reassess_updated_stop_loss",
             "reassess_exit_trigger", "reassess_timestamp", "reassess_reasoning",
+            # Pre-fetched EPS facts (canonical, from Finnhub)
+            "reported_eps", "consensus_eps", "surprise_pct", "earnings_fiscal_quarter",
         ]
         for field in trading_fields:
             if field in kwargs and kwargs[field] is not None:

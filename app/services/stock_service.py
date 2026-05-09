@@ -1507,6 +1507,16 @@ class StockService:
                 if k not in indicators:
                     indicators[k] = v
 
+        # Pre-fetch structured EPS facts so the PM sees a canonical earnings
+        # dict instead of relying on the News Agent to summarize from news
+        # articles (different articles cite different consensus numbers).
+        try:
+            from app.services.finnhub_service import finnhub_service
+            earnings_facts = finnhub_service.get_earnings_facts(symbol)
+        except Exception as e:
+            print(f"[Earnings Facts] Failed to fetch for {symbol}: {e}")
+            earnings_facts = None
+
         # Prepare Raw Data dictionary
         raw_data = {
             "metrics": {
@@ -1524,6 +1534,7 @@ class StockService:
             "market_context": market_context,
             "change_percent": stock.get("change_percent", 0.0),
             "gatekeeper_tier": reasons.get("tier"),
+            "earnings_facts": earnings_facts,
         }
 
         # Pass raw_data to research service
@@ -1602,6 +1613,11 @@ class StockService:
                 sell_price_high=report_data.get("sell_price_high"),
                 ceiling_exit=report_data.get("ceiling_exit"),
                 exit_trigger=report_data.get("exit_trigger"),
+                # Pre-fetched EPS facts (canonical, from Finnhub)
+                reported_eps=(earnings_facts or {}).get("reported_eps"),
+                consensus_eps=(earnings_facts or {}).get("consensus_eps"),
+                surprise_pct=(earnings_facts or {}).get("surprise_pct"),
+                earnings_fiscal_quarter=(earnings_facts or {}).get("fiscal_quarter"),
             )
             print(f"Updated decision point for {symbol}: {recommendation} -> {status} (Conviction: {report_data.get('conviction', 'N/A')})")
             print(f"  > Saved trading levels and Data Depth metrics to DB.")

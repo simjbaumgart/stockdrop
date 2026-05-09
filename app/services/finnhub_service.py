@@ -181,6 +181,71 @@ class FinnhubService:
             print(f"[FinnhubService] could not derive quarter from {latest!r}: {e}")
             return None
 
+    def get_earnings_facts(self, symbol: str) -> dict | None:
+        """Return the latest reported quarter's EPS facts as a structured dict,
+        or None if data is missing/unavailable.
+
+        Returned shape:
+            {
+                "reported_eps": float,
+                "consensus_eps": float,
+                "surprise_pct": float,         # signed; positive = beat
+                "fiscal_quarter": "YYYYQN",
+                "period": "YYYY-MM-DD",
+                "source": "finnhub",
+                "fetched_at": "<ISO 8601 UTC>",
+            }
+        """
+        from datetime import datetime, timezone
+
+        if not self.client:
+            return None
+        try:
+            rows = _call_with_retry(self.client.company_earnings, symbol)
+        except Exception as e:
+            print(f"[FinnhubService] company_earnings failed for {symbol}: {e}")
+            return None
+        if not rows:
+            return None
+
+        try:
+            latest = max(rows, key=lambda r: r.get("period", ""))
+        except (ValueError, TypeError):
+            return None
+
+        actual = latest.get("actual")
+        estimate = latest.get("estimate")
+        if actual is None or estimate is None:
+            return None
+
+        # Finnhub may already populate surprisePercent. Fall back to computing
+        # it ourselves if missing or zero against a non-zero estimate.
+        surprise_pct = latest.get("surprisePercent")
+        if surprise_pct is None and estimate not in (0, None):
+            try:
+                surprise_pct = round((float(actual) - float(estimate)) / float(estimate) * 100.0, 2)
+            except (TypeError, ValueError):
+                surprise_pct = None
+
+        year = latest.get("year")
+        quarter = latest.get("quarter")
+        fq = None
+        if year is not None and quarter is not None:
+            try:
+                fq = f"{int(year)}Q{int(quarter)}"
+            except (TypeError, ValueError):
+                fq = None
+
+        return {
+            "reported_eps": float(actual),
+            "consensus_eps": float(estimate),
+            "surprise_pct": float(surprise_pct) if surprise_pct is not None else None,
+            "fiscal_quarter": fq,
+            "period": latest.get("period"),
+            "source": "finnhub",
+            "fetched_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        }
+
     def get_insider_sentiment(self, symbol: str, from_date: str, to_date: str):
         """
         Get insider sentiment data for a specific symbol.
