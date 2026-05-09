@@ -20,6 +20,7 @@ from app.services.analytics.aggregations import (
     winrate_by_bucket,
 )
 from app.services.analytics.cohort import load_cohort
+from app.services.analytics.intervals import mean_ci
 from app.services.analytics.outcomes import HORIZON_DAYS, enrich_outcomes
 from app.services.analytics.price_cache import get_bars, prefetch
 from app.services.analytics.stats import (
@@ -111,11 +112,24 @@ def _time_series_by_group(
         for p in paths:
             for d, r in enumerate(p["returns"]):
                 per_day[d].append(r)
+        # Per-day mean / SE / 95% t-CI alongside median + quartiles
+        means, ses, ci_lows, ci_highs = [], [], [], []
+        for x in per_day:
+            ci = mean_ci(x)
+            means.append(ci["mean"])
+            ses.append(ci["se"])
+            ci_lows.append(ci["ci_low"])
+            ci_highs.append(ci["ci_high"])
+
         out[grp] = {
             "day_offsets": list(range(max_len)),
             "median": [float(np.median(x)) if x else None for x in per_day],
             "q25": [float(np.percentile(x, 25)) if x else None for x in per_day],
             "q75": [float(np.percentile(x, 75)) if x else None for x in per_day],
+            "mean": means,
+            "se": ses,
+            "ci_low": ci_lows,
+            "ci_high": ci_highs,
             "count": [len(x) for x in per_day],
             "n_paths": len(paths),
         }
@@ -164,11 +178,24 @@ def _spy_overlay(
     for p in paths:
         for d, r in enumerate(p):
             per_day[d].append(r)
+
+    means, ses, ci_lows, ci_highs = [], [], [], []
+    for x in per_day:
+        ci = mean_ci(x)
+        means.append(ci["mean"])
+        ses.append(ci["se"])
+        ci_lows.append(ci["ci_low"])
+        ci_highs.append(ci["ci_high"])
+
     return {
         "day_offsets": list(range(max_len)),
         "median": [float(np.median(x)) if x else None for x in per_day],
         "q25": [float(np.percentile(x, 25)) if x else None for x in per_day],
         "q75": [float(np.percentile(x, 75)) if x else None for x in per_day],
+        "mean": means,
+        "se": ses,
+        "ci_low": ci_lows,
+        "ci_high": ci_highs,
         "count": [len(x) for x in per_day],
         "n_paths": len(paths),
     }

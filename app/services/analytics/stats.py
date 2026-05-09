@@ -12,6 +12,14 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
+from app.services.analytics.intervals import (
+    mean_ci,
+    pearson_ci,
+    proportion_se,
+    spearman_ci,
+    wilson_ci,
+)
+
 
 def _bh_adjust(pvalues: List[float]) -> List[float]:
     """Benjamini-Hochberg FDR adjustment. Returns adjusted p-values in input order.
@@ -123,7 +131,9 @@ def correlation(
     out: Dict[str, Any] = {
         "x_col": x_col, "y_col": y_col, "n": 0,
         "pearson_r": None, "pearson_p": None,
+        "pearson_ci_low": None, "pearson_ci_high": None,
         "spearman_rho": None, "spearman_p": None,
+        "spearman_ci_low": None, "spearman_ci_high": None,
         "x_mean": None, "x_std": None,
         "y_mean": None, "y_std": None,
         "points": [],
@@ -144,11 +154,15 @@ def correlation(
     try:
         pr = stats.pearsonr(x, y)
         out["pearson_r"] = float(pr.statistic); out["pearson_p"] = float(pr.pvalue)
+        lo, hi = pearson_ci(out["pearson_r"], n)
+        out["pearson_ci_low"] = lo; out["pearson_ci_high"] = hi
     except Exception:
         pass
     try:
         sp = stats.spearmanr(x, y)
         out["spearman_rho"] = float(sp.statistic); out["spearman_p"] = float(sp.pvalue)
+        lo, hi = spearman_ci(out["spearman_rho"], n)
+        out["spearman_ci_low"] = lo; out["spearman_ci_high"] = hi
     except Exception:
         pass
 
@@ -174,9 +188,18 @@ def recovery_stats(df: pd.DataFrame, group_col: str = "intent") -> pd.DataFrame:
     days_to_recover, and post-recovery mean returns at +5/+10/+20 days
     (where the `post_recover_*` columns exist on the enriched frame).
     """
-    cols = ["group", "n_total", "n_recovered", "recovery_rate",
-            "p25_days", "p50_days", "p75_days", "p90_days",
-            "post_recover_5d_mean", "post_recover_10d_mean", "post_recover_20d_mean"]
+    cols = [
+        "group", "n_total", "n_recovered",
+        "recovery_rate", "recovery_rate_se",
+        "recovery_rate_ci_low", "recovery_rate_ci_high",
+        "p25_days", "p50_days", "p75_days", "p90_days",
+        "post_recover_5d_mean", "post_recover_5d_se",
+        "post_recover_5d_ci_low", "post_recover_5d_ci_high",
+        "post_recover_10d_mean", "post_recover_10d_se",
+        "post_recover_10d_ci_low", "post_recover_10d_ci_high",
+        "post_recover_20d_mean", "post_recover_20d_se",
+        "post_recover_20d_ci_low", "post_recover_20d_ci_high",
+    ]
     if df.empty or group_col not in df.columns:
         return pd.DataFrame(columns=cols)
 
@@ -186,11 +209,15 @@ def recovery_stats(df: pd.DataFrame, group_col: str = "intent") -> pd.DataFrame:
         rec = sub.dropna(subset=["days_to_recover"]) if "days_to_recover" in sub.columns else pd.DataFrame()
         n_rec = len(rec)
         days = rec["days_to_recover"].astype(float) if n_rec else pd.Series([], dtype=float)
+        rate_low, rate_high = wilson_ci(n_rec, n_total)
         row = {
             "group": str(grp) if grp is not None else "(none)",
             "n_total": int(n_total),
             "n_recovered": int(n_rec),
             "recovery_rate": float(n_rec / n_total) if n_total else None,
+            "recovery_rate_se": proportion_se(n_rec, n_total),
+            "recovery_rate_ci_low": rate_low,
+            "recovery_rate_ci_high": rate_high,
             "p25_days": float(days.quantile(0.25)) if n_rec else None,
             "p50_days": float(days.quantile(0.5)) if n_rec else None,
             "p75_days": float(days.quantile(0.75)) if n_rec else None,
@@ -199,10 +226,16 @@ def recovery_stats(df: pd.DataFrame, group_col: str = "intent") -> pd.DataFrame:
         for d in (5, 10, 20):
             col = f"post_recover_{d}d"
             if col in sub.columns:
-                vals = sub[col].dropna()
-                row[f"{col}_mean"] = float(vals.mean()) if len(vals) else None
+                ci = mean_ci(sub[col].dropna().tolist())
+                row[f"{col}_mean"] = ci["mean"]
+                row[f"{col}_se"] = ci["se"]
+                row[f"{col}_ci_low"] = ci["ci_low"]
+                row[f"{col}_ci_high"] = ci["ci_high"]
             else:
                 row[f"{col}_mean"] = None
+                row[f"{col}_se"] = None
+                row[f"{col}_ci_low"] = None
+                row[f"{col}_ci_high"] = None
         rows.append(row)
     out = pd.DataFrame(rows)
     return out.sort_values("n_total", ascending=False).reset_index(drop=True)

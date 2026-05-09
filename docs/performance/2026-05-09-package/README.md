@@ -1,6 +1,6 @@
 # Performance analysis package — 2026-02-01
 
-Generated 2026-05-09 20:30. Cohort size: **372 decisions**.
+Generated 2026-05-09 20:40. Cohort size: **372 decisions**.
 
 ## Files
 
@@ -20,6 +20,7 @@ Generated 2026-05-09 20:30. Cohort size: **372 decisions**.
 - `charts/09_avgreturn_by_dr_rr.png`
 - `charts/10_winrate_by_drop_size.png`
 - `charts/11_timeseries_by_intent.png`
+- `charts/11b_timeseries_mean_ci_by_intent.png`
 - `charts/12_timeseries_by_dr_verdict.png`
 - `charts/13_timeseries_alpha_by_intent.png`
 - `charts/14_buy_trajectories_spaghetti.png`

@@ -1,6 +1,6 @@
 # StockDrop Performance Analysis — 2026-02-01 cohort
 
-_Generated 2026-05-09 20:30. Cohort: **372 decisions**._
+_Generated 2026-05-09 20:40. Cohort: **372 decisions**._
 
 ## Executive summary
 
@@ -27,12 +27,12 @@ Equal-weight cumulative growth assuming each ENTER_NOW/ENTER_LIMIT decision is h
 
 ### 2.1 AI council (PM) intent
 
-| intent      |   count |   win_rate |   avg_return |   median_return |   std_return |
-|:------------|--------:|-----------:|-------------:|----------------:|-------------:|
-| AVOID       |      18 |      0.611 |        0.275 |           0.084 |        0.727 |
-| NEUTRAL     |       9 |      0.667 |        0.466 |           0.021 |        1.059 |
-| ENTER_NOW   |       8 |      1     |        0.221 |           0.182 |        0.171 |
-| ENTER_LIMIT |       4 |      1     |        0.37  |           0.142 |        0.536 |
+| intent      |   count |   win_rate |   win_rate_se |   win_rate_ci_low |   win_rate_ci_high |   avg_return |   avg_return_se |   avg_return_ci_low |   avg_return_ci_high |   median_return |   std_return |
+|:------------|--------:|-----------:|--------------:|------------------:|-------------------:|-------------:|----------------:|--------------------:|---------------------:|----------------:|-------------:|
+| AVOID       |      18 |      0.611 |      0.114904 |          0.38619  |           0.796948 |        0.275 |       0.171443  |          -0.0871957 |             0.636232 |           0.084 |        0.727 |
+| NEUTRAL     |       9 |      0.667 |      0.157135 |          0.354202 |           0.879416 |        0.466 |       0.353124  |          -0.348398  |             1.28021  |           0.021 |        1.059 |
+| ENTER_NOW   |       8 |      1     |      0        |          0.675592 |           1        |        0.221 |       0.0605294 |           0.0776654 |             0.363924 |           0.182 |        0.171 |
+| ENTER_LIMIT |       4 |      1     |      0        |          0.510109 |           1        |        0.37  |       0.267987  |          -0.482719  |             1.22299  |           0.142 |        0.536 |
 
 
 ![wr_intent](charts/02_winrate_by_intent.png)
@@ -43,12 +43,12 @@ Equal-weight cumulative growth assuming each ENTER_NOW/ENTER_LIMIT decision is h
 
 ### 2.2 Deep Research verdict
 
-| deep_research_verdict   |   count |   win_rate |   avg_return |   median_return | std_return   |
-|:------------------------|--------:|-----------:|-------------:|----------------:|:-------------|
-|                         |      29 |       0.69 |        0.344 |           0.066 | 0.806        |
-| BUY_LIMIT               |       6 |       1    |        0.335 |           0.173 | 0.421        |
-| AVOID                   |       3 |       1    |        0.152 |           0.148 | 0.066        |
-| BUY                     |       1 |       0    |       -0.065 |          -0.065 |              |
+| deep_research_verdict   |   count |   win_rate |   win_rate_se |   win_rate_ci_low |   win_rate_ci_high |   avg_return |   avg_return_se |   avg_return_ci_low |   avg_return_ci_high |   median_return | std_return   |
+|:------------------------|--------:|-----------:|--------------:|------------------:|-------------------:|-------------:|----------------:|--------------------:|---------------------:|----------------:|:-------------|
+|                         |      29 |       0.69 |     0.0859091 |          0.507699 |           0.827244 |        0.344 |       0.149754  |           0.0373892 |             0.650905 |           0.066 | 0.806        |
+| BUY_LIMIT               |       6 |       1    |     0         |          0.609666 |           1        |        0.335 |       0.171998  |          -0.107388  |             0.776884 |           0.173 | 0.421        |
+| AVOID                   |       3 |       1    |     0         |          0.438503 |           1        |        0.152 |       0.0383088 |          -0.012357  |             0.317302 |           0.148 | 0.066        |
+| BUY                     |       1 |       0    |     0         |          0        |           0.793451 |       -0.065 |     nan         |         nan         |           nan        |          -0.065 |              |
 
 
 ![wr_dr](charts/04_winrate_by_dr_verdict.png)
@@ -83,12 +83,12 @@ DR verdicts: **none of the 1 pairwise comparisons** are significant — DR group
 
 ### 4.1 AI council R/R
 
-| bucket   |   count | win_rate   | avg_return   | median_return   | std_return   |
-|:---------|--------:|:-----------|:-------------|:----------------|:-------------|
-| <1       |      23 | 0.609      | 0.075        | 0.021           | 0.149        |
-| 1-2      |       6 | 0.833      | 0.098        | 0.122           | 0.085        |
-| 2-3      |       6 | 1.000      | 0.853        | 0.364           | 1.176        |
-| >=3      |       0 |            |              |                 |              |
+| bucket   |   count | win_rate   |   win_rate_se |   win_rate_ci_low |   win_rate_ci_high | avg_return   |   avg_return_se |   avg_return_ci_low |   avg_return_ci_high | median_return   | std_return   |
+|:---------|--------:|:-----------|--------------:|------------------:|-------------------:|:-------------|----------------:|--------------------:|---------------------:|:----------------|:-------------|
+| <1       |      23 | 0.609      |      0.101764 |          0.407855 |           0.778424 | 0.075        |       0.0311253 |          0.0107923  |             0.139892 | 0.021           | 0.149        |
+| 1-2      |       6 | 0.833      |      0.152145 |          0.436497 |           0.969947 | 0.098        |       0.0348772 |          0.00879879 |             0.188108 | 0.122           | 0.085        |
+| 2-3      |       6 | 1.000      |      0        |          0.609666 |           1        | 0.853        |       0.480054  |         -0.381241   |             2.0868   | 0.364           | 1.176        |
+| >=3      |       0 |            |    nan        |        nan        |         nan        |              |     nan         |        nan          |           nan        |                 |              |
 
 
 ![wr_pmrr](charts/06_winrate_by_pm_rr.png)
@@ -97,7 +97,7 @@ DR verdicts: **none of the 1 pairwise comparisons** are significant — DR group
 ![ar_pmrr](charts/07_avgreturn_by_pm_rr.png)
 
 
-PM R/R vs 4w return (n=35): Pearson r=+0.377 (p=0.026), Spearman ρ=+0.090 (p=0.607). Pearson is significant but Spearman is not, meaning the linear correlation is being driven by a few high-R/R outliers rather than a monotonic relationship.
+PM R/R vs 4w return (n=35): Pearson r=+0.377 (p=0.026) 95% CI [+0.05, +0.63], Spearman ρ=+0.090 (p=0.607) 95% CI [-0.25, +0.41]. Pearson is significant but Spearman is not, meaning the linear correlation is being driven by a few high-R/R outliers rather than a monotonic relationship.
 
 
 ![corr_pm](charts/15_corr_pm_rr_vs_return.png)
@@ -105,12 +105,12 @@ PM R/R vs 4w return (n=35): Pearson r=+0.377 (p=0.026), Spearman ρ=+0.090 (p=0.
 
 ### 4.2 Deep Research R/R
 
-| bucket   |   count | win_rate   | avg_return   | median_return   | std_return   |
-|:---------|--------:|:-----------|:-------------|:----------------|:-------------|
-| <1       |       4 | 1.000      | 0.227        | 0.218           | 0.086        |
-| 2-3      |       3 | 1.000      | 0.453        | 0.148           | 0.622        |
-| 1-2      |       2 | 0.500      | 0.022        | 0.022           | 0.123        |
-| >=3      |       0 |            |              |                 |              |
+| bucket   |   count | win_rate   |   win_rate_se |   win_rate_ci_low |   win_rate_ci_high | avg_return   |   avg_return_se |   avg_return_ci_low |   avg_return_ci_high | median_return   | std_return   |
+|:---------|--------:|:-----------|--------------:|------------------:|-------------------:|:-------------|----------------:|--------------------:|---------------------:|:----------------|:-------------|
+| <1       |       4 | 1.000      |      0        |         0.510109  |           1        | 0.227        |       0.0431036 |           0.0897685 |             0.364119 | 0.218           | 0.086        |
+| 2-3      |       3 | 1.000      |      0        |         0.438503  |           1        | 0.453        |       0.359045  |          -1.09141   |             1.99828  | 0.148           | 0.622        |
+| 1-2      |       2 | 0.500      |      0.353553 |         0.0945312 |           0.905469 | 0.022        |       0.0871786 |          -1.0853    |             1.13011  | 0.022           | 0.123        |
+| >=3      |       0 |            |    nan        |       nan         |         nan        |              |     nan         |         nan         |           nan        |                 |              |
 
 
 ![wr_drrr](charts/08_winrate_by_dr_rr.png)
@@ -165,7 +165,12 @@ Median return path from the decision date forward, with SPY's median over the sa
 
 ### 6.1 By AI council intent
 
+Two views: median path with **inter-quartile range** band (default), and mean path with **95% t-CI** band.
+
 ![ts_intent](charts/11_timeseries_by_intent.png)
+
+
+![ts_intent_mean](charts/11b_timeseries_mean_ci_by_intent.png)
 
 
 ### 6.2 By Deep Research verdict

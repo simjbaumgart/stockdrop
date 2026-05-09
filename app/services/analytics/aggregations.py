@@ -3,40 +3,72 @@ from __future__ import annotations
 
 from typing import List, Optional
 
+import numpy as np
 import pandas as pd
+
+from app.services.analytics.intervals import (
+    mean_ci,
+    proportion_se,
+    wilson_ci,
+)
+
+_AGG_COLS = [
+    "count", "win_rate", "win_rate_se", "win_rate_ci_low", "win_rate_ci_high",
+    "avg_return", "avg_return_se", "avg_return_ci_low", "avg_return_ci_high",
+    "median_return", "std_return",
+]
 
 
 def _return_col(horizon: str) -> str:
     return f"return_{horizon}"
 
 
+def _empty_winrate(group_col: str) -> pd.DataFrame:
+    return pd.DataFrame(columns=[group_col, *_AGG_COLS])
+
+
 def winrate_by(df: pd.DataFrame, group_col: str, horizon: str = "4w") -> pd.DataFrame:
-    """count / win_rate / avg_return / median_return / std_return per group."""
+    """Per-group descriptive stats for the realized horizon return.
+
+    Output columns:
+      count, win_rate, win_rate_se, win_rate_ci_low/high (Wilson 95%),
+      avg_return, avg_return_se, avg_return_ci_low/high (t-based 95%),
+      median_return, std_return.
+    """
     col = _return_col(horizon)
     if df.empty or col not in df.columns or group_col not in df.columns:
-        return pd.DataFrame(
-            columns=[group_col, "count", "win_rate", "avg_return", "median_return", "std_return"]
-        )
+        return _empty_winrate(group_col)
 
     sub = df.dropna(subset=[col]).copy()
     if sub.empty:
-        return pd.DataFrame(
-            columns=[group_col, "count", "win_rate", "avg_return", "median_return", "std_return"]
-        )
-    sub["_win"] = (sub[col] > 0).astype(int)
+        return _empty_winrate(group_col)
 
-    grouped = (
-        sub.groupby(group_col, dropna=False)
-        .agg(
-            count=(col, "size"),
-            win_rate=("_win", "mean"),
-            avg_return=(col, "mean"),
-            median_return=(col, "median"),
-            std_return=(col, "std"),
-        )
-        .reset_index()
-    )
-    return grouped.sort_values("count", ascending=False).reset_index(drop=True)
+    rows = []
+    for grp, frame in sub.groupby(group_col, dropna=False):
+        values = frame[col].astype(float).values
+        n = int(len(values))
+        wins = int((values > 0).sum())
+
+        m_ci = mean_ci(values)
+        wr_low, wr_high = wilson_ci(wins, n)
+        row = {
+            group_col: grp,
+            "count": n,
+            "win_rate": float(wins / n) if n else None,
+            "win_rate_se": proportion_se(wins, n),
+            "win_rate_ci_low": wr_low,
+            "win_rate_ci_high": wr_high,
+            "avg_return": m_ci["mean"],
+            "avg_return_se": m_ci["se"],
+            "avg_return_ci_low": m_ci["ci_low"],
+            "avg_return_ci_high": m_ci["ci_high"],
+            "median_return": float(np.median(values)) if n else None,
+            "std_return": float(values.std(ddof=1)) if n > 1 else None,
+        }
+        rows.append(row)
+
+    out = pd.DataFrame(rows)
+    return out.sort_values("count", ascending=False).reset_index(drop=True)
 
 
 def winrate_by_bucket(

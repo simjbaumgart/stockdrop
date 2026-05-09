@@ -35,34 +35,61 @@ def _save(fig, path: Path) -> Path:
     return path
 
 
+def _error_pair(series_low, series_high, center) -> Optional[np.ndarray]:
+    """Build a (2, n) yerr array from CI bounds; None if any bound is missing."""
+    if series_low is None or series_high is None:
+        return None
+    low = np.asarray(series_low, dtype=float)
+    high = np.asarray(series_high, dtype=float)
+    c = np.asarray(center, dtype=float)
+    if np.any(np.isnan(low)) or np.any(np.isnan(high)) or np.any(np.isnan(c)):
+        return None
+    return np.vstack([np.maximum(0, c - low), np.maximum(0, high - c)])
+
+
 def winrate_bar(agg: pd.DataFrame, group_col: str, title: str, out_path: Path) -> Path:
-    fig, ax = plt.subplots(figsize=(8, 4))
+    """Win-rate bar chart with Wilson 95% CI error bars when available."""
+    fig, ax = plt.subplots(figsize=(8, 4.5))
     if agg.empty:
         ax.text(0.5, 0.5, "no data", ha="center", va="center")
         ax.set_axis_off()
         return _save(fig, out_path)
     x = agg[group_col].astype(str)
-    ax.bar(x, agg["win_rate"], color="#4C72B0")
-    ax.set_ylim(0, 1.1)
-    ax.set_ylabel("Win rate")
+    yerr = None
+    if "win_rate_ci_low" in agg.columns and "win_rate_ci_high" in agg.columns:
+        yerr = _error_pair(agg["win_rate_ci_low"], agg["win_rate_ci_high"], agg["win_rate"])
+    ax.bar(x, agg["win_rate"], color="#4C72B0",
+           yerr=yerr, capsize=4, ecolor="#1f2937",
+           error_kw={"elinewidth": 1.2})
+    ax.set_ylim(0, 1.15)
+    ax.set_ylabel("Win rate (95% Wilson CI)")
     ax.set_title(title)
     for i, (wr, n) in enumerate(zip(agg["win_rate"], agg["count"])):
-        ax.text(i, wr + 0.02, f"{wr:.0%}\n(n={n})", ha="center", fontsize=8)
+        ax.text(i, min(1.10, wr + 0.04), f"{wr:.0%}\n(n={n})", ha="center", fontsize=8)
     plt.xticks(rotation=30, ha="right")
     return _save(fig, out_path)
 
 
 def avg_return_bar(agg: pd.DataFrame, group_col: str, title: str, out_path: Path) -> Path:
-    fig, ax = plt.subplots(figsize=(8, 4))
+    """Average-return bar chart with t-distribution 95% CI error bars when available."""
+    fig, ax = plt.subplots(figsize=(8, 4.5))
     if agg.empty:
         ax.text(0.5, 0.5, "no data", ha="center", va="center")
         ax.set_axis_off()
         return _save(fig, out_path)
     x = agg[group_col].astype(str)
-    colors = ["#55A868" if v >= 0 else "#C44E52" for v in agg["avg_return"]]
-    ax.bar(x, agg["avg_return"] * 100, color=colors)
+    colors = ["#55A868" if v is not None and v >= 0 else "#C44E52" for v in agg["avg_return"]]
+    centers = (agg["avg_return"] * 100).astype(float)
+    yerr = None
+    if "avg_return_ci_low" in agg.columns and "avg_return_ci_high" in agg.columns:
+        low = agg["avg_return_ci_low"] * 100
+        high = agg["avg_return_ci_high"] * 100
+        yerr = _error_pair(low, high, centers)
+    ax.bar(x, centers, color=colors,
+           yerr=yerr, capsize=4, ecolor="#1f2937",
+           error_kw={"elinewidth": 1.2})
     ax.axhline(0, color="black", linewidth=0.5)
-    ax.set_ylabel("Avg return (%)")
+    ax.set_ylabel("Avg return (%) — 95% t-CI")
     ax.set_title(title)
     plt.xticks(rotation=30, ha="right")
     return _save(fig, out_path)
@@ -103,29 +130,50 @@ def time_series_lines(
     palette: Optional[Dict[str, str]] = None,
     spy_overlay: Optional[dict] = None,
     ylabel: str = "Return since decision",
+    use: str = "median",
+    show_ci: bool = True,
 ) -> Path:
-    """One median-return line per group (input shape matches `_time_series_by_group`).
+    """Per-group line chart for `_time_series_by_group` output.
 
-    If `spy_overlay` is provided (same shape as a group), draws it as a dashed
-    grey reference.
+    `use` selects the central tendency series ("median" or "mean").
+    When `show_ci=True` and the group includes `ci_low`/`ci_high`, a translucent
+    band is drawn between them; for "median" we fall back to the q25/q75 IQR
+    band (which is what's available for the median).
     """
     fig, ax = plt.subplots(figsize=(10, 5))
     palette = palette or {}
 
+    def _to_pct(seq):
+        return [v * 100 if v is not None else np.nan for v in seq]
+
     plotted = False
     for grp, data in groups.items():
-        if not data or not data.get("median"):
+        if not data:
+            continue
+        center = data.get(use)
+        if not center:
             continue
         x = data["day_offsets"]
-        y = [v * 100 if v is not None else np.nan for v in data["median"]]
+        y = _to_pct(center)
         color = palette.get(grp, "#cbd5e1")
         n = data.get("n_paths", 0)
+
+        if show_ci:
+            if use == "mean" and data.get("ci_low") and data.get("ci_high"):
+                lo = _to_pct(data["ci_low"])
+                hi = _to_pct(data["ci_high"])
+                ax.fill_between(x, lo, hi, color=color, alpha=0.12, linewidth=0)
+            elif use == "median" and data.get("q25") and data.get("q75"):
+                lo = _to_pct(data["q25"])
+                hi = _to_pct(data["q75"])
+                ax.fill_between(x, lo, hi, color=color, alpha=0.10, linewidth=0)
+
         ax.plot(x, y, color=color, linewidth=2.2, label=f"{grp} (n={n})")
         plotted = True
 
-    if spy_overlay and spy_overlay.get("median"):
+    if spy_overlay and spy_overlay.get(use):
         x = spy_overlay["day_offsets"]
-        y = [v * 100 if v is not None else np.nan for v in spy_overlay["median"]]
+        y = _to_pct(spy_overlay[use])
         ax.plot(x, y, color="#6b7280", linewidth=1.6, linestyle="--",
                 label=f"S&P 500 (n_windows={spy_overlay.get('n_paths', 0)})")
         plotted = True
@@ -137,7 +185,8 @@ def time_series_lines(
 
     ax.axhline(0, color="black", linewidth=0.5)
     ax.set_xlabel("Trading days since decision")
-    ax.set_ylabel(ylabel + " (%)")
+    band_label = "95% CI" if use == "mean" else "IQR"
+    ax.set_ylabel(f"{ylabel} (%)\n— {use} with {band_label} band")
     ax.set_title(title)
     ax.grid(True, linestyle=":", alpha=0.3)
     ax.legend(loc="best", fontsize=9)
@@ -194,6 +243,8 @@ def scatter_with_regression(
     title: str,
     xlabel: str,
     out_path: Path,
+    pearson_ci: Optional[tuple] = None,
+    spearman_ci: Optional[tuple] = None,
 ) -> Path:
     """Scatter of (x, y) with the OLS line and a stats annotation."""
     fig, ax = plt.subplots(figsize=(8, 5))
@@ -219,9 +270,15 @@ def scatter_with_regression(
 
     annot_lines = [f"n={len(points)}"]
     if pearson_r is not None:
-        annot_lines.append(f"Pearson r={pearson_r:+.3f} (p={_pf(pearson_p)})")
+        line = f"Pearson r={pearson_r:+.3f} (p={_pf(pearson_p)})"
+        if pearson_ci and pearson_ci[0] is not None:
+            line += f"\n  95% CI: [{pearson_ci[0]:+.3f}, {pearson_ci[1]:+.3f}]"
+        annot_lines.append(line)
     if spearman_rho is not None:
-        annot_lines.append(f"Spearman ρ={spearman_rho:+.3f} (p={_pf(spearman_p)})")
+        line = f"Spearman ρ={spearman_rho:+.3f} (p={_pf(spearman_p)})"
+        if spearman_ci and spearman_ci[0] is not None:
+            line += f"\n  95% CI: [{spearman_ci[0]:+.3f}, {spearman_ci[1]:+.3f}]"
+        annot_lines.append(line)
     if slope is not None:
         annot_lines.append(f"slope={slope:+.4f}")
 

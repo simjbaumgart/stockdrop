@@ -163,17 +163,27 @@ def _generate_charts(payload: Dict[str, Any], enriched: pd.DataFrame, charts_dir
 
     out["ts_intent"] = time_series_lines(
         ts.get("by_intent") or {},
-        "Median return path by AI council intent (with S&P 500 overlay)",
+        "Median return path by AI council intent — IQR band, with S&P 500 overlay",
         charts_dir / "11_timeseries_by_intent.png",
         palette=INTENT_COLORS,
         spy_overlay=spy_overlay,
+        use="median",
+    )
+    out["ts_intent_mean"] = time_series_lines(
+        ts.get("by_intent") or {},
+        "Mean return path by AI council intent — 95% CI band, with S&P 500 overlay",
+        charts_dir / "11b_timeseries_mean_ci_by_intent.png",
+        palette=INTENT_COLORS,
+        spy_overlay=spy_overlay,
+        use="mean",
     )
     out["ts_dr"] = time_series_lines(
         ts.get("by_dr_verdict") or {},
-        "Median return path by Deep Research verdict (with S&P 500 overlay)",
+        "Median return path by Deep Research verdict — IQR band, with S&P 500 overlay",
         charts_dir / "12_timeseries_by_dr_verdict.png",
         palette=DR_COLORS,
         spy_overlay=spy_overlay,
+        use="median",
     )
 
     # Build alpha view by subtracting SPY
@@ -231,6 +241,8 @@ def _generate_charts(payload: Dict[str, Any], enriched: pd.DataFrame, charts_dir
         "AI council R/R ratio vs realized 4w return",
         "AI council R/R ratio (risk_reward_ratio)",
         charts_dir / "15_corr_pm_rr_vs_return.png",
+        pearson_ci=(corr_pm.get("pearson_ci_low"), corr_pm.get("pearson_ci_high")),
+        spearman_ci=(corr_pm.get("spearman_ci_low"), corr_pm.get("spearman_ci_high")),
     )
     corr_dr = (payload.get("stats") or {}).get("corr_dr_rr") or {}
     out["corr_dr"] = scatter_with_regression(
@@ -242,6 +254,8 @@ def _generate_charts(payload: Dict[str, Any], enriched: pd.DataFrame, charts_dir
         "Deep Research R/R vs realized 4w return",
         "Deep Research R/R (deep_research_rr_ratio)",
         charts_dir / "16_corr_dr_rr_vs_return.png",
+        pearson_ci=(corr_dr.get("pearson_ci_low"), corr_dr.get("pearson_ci_high")),
+        spearman_ci=(corr_dr.get("spearman_ci_low"), corr_dr.get("spearman_ci_high")),
     )
 
     # Recovery histogram by intent
@@ -456,10 +470,20 @@ def _build_findings(payload: Dict[str, Any]) -> Dict[str, str]:
     # B — Correlation
     corr_pm = (payload.get("stats") or {}).get("corr_pm_rr") or {}
     if corr_pm.get("n", 0) >= 5:
+        pcl, pch = corr_pm.get("pearson_ci_low"), corr_pm.get("pearson_ci_high")
+        scl, sch = corr_pm.get("spearman_ci_low"), corr_pm.get("spearman_ci_high")
+        ci_pm_pearson = (
+            f" 95% CI [{pcl:+.2f}, {pch:+.2f}]"
+            if pcl is not None and pch is not None else ""
+        )
+        ci_pm_spearman = (
+            f" 95% CI [{scl:+.2f}, {sch:+.2f}]"
+            if scl is not None and sch is not None else ""
+        )
         findings["corr_pm"] = (
             f"PM R/R vs 4w return (n={corr_pm['n']}): "
-            f"Pearson r={corr_pm.get('pearson_r', 0):+.3f} (p={_pf(corr_pm.get('pearson_p'))}), "
-            f"Spearman ρ={corr_pm.get('spearman_rho', 0):+.3f} (p={_pf(corr_pm.get('spearman_p'))})."
+            f"Pearson r={corr_pm.get('pearson_r', 0):+.3f} (p={_pf(corr_pm.get('pearson_p'))}){ci_pm_pearson}, "
+            f"Spearman ρ={corr_pm.get('spearman_rho', 0):+.3f} (p={_pf(corr_pm.get('spearman_p'))}){ci_pm_spearman}."
         )
         if (corr_pm.get("pearson_p") or 1) < 0.05 and (corr_pm.get("spearman_p") or 1) < 0.05:
             findings["corr_pm"] += " Both linear and rank correlations significant — robust signal."
@@ -700,7 +724,11 @@ def _build_report(
         "the same calendar windows (dashed line) as a passive benchmark.",
         "",
         "### 6.1 By AI council intent",
+        "",
+        "Two views: median path with **inter-quartile range** band (default), and "
+        "mean path with **95% t-CI** band.",
         img("ts_intent"),
+        img("ts_intent_mean"),
         "",
         "### 6.2 By Deep Research verdict",
         img("ts_dr"),

@@ -372,19 +372,53 @@ function emptyState(canvasId, message) {
     ctx.fillText(message, cv.width / 2, cv.height / 2);
 }
 
+// Build a {plus: [...], minus: [...]} arrays for Chart.js v4 errorBars
+// (we render the lo/hi as separate line segments via afterDraw plugin).
+const errorBarPlugin = {
+    id: 'ciErrorBars',
+    afterDatasetsDraw(chart) {
+        const ds = chart.data.datasets[0];
+        if (!ds || !ds._ciBars) return;
+        const meta = chart.getDatasetMeta(0);
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.strokeStyle = '#1f2937';
+        ctx.lineWidth = 1.2;
+        ds._ciBars.forEach((bar, i) => {
+            if (bar.lo == null || bar.hi == null) return;
+            const x = meta.data[i].x;
+            const yLo = chart.scales.y.getPixelForValue(bar.lo);
+            const yHi = chart.scales.y.getPixelForValue(bar.hi);
+            const cap = 6;
+            ctx.beginPath();
+            ctx.moveTo(x, yLo); ctx.lineTo(x, yHi);
+            ctx.moveTo(x - cap, yLo); ctx.lineTo(x + cap, yLo);
+            ctx.moveTo(x - cap, yHi); ctx.lineTo(x + cap, yHi);
+            ctx.stroke();
+        });
+        ctx.restore();
+    }
+};
+Chart.register(errorBarPlugin);
+
 function makeWinrateBar(canvasId, rows, labelKey) {
     if (!rows || rows.length === 0) {
         emptyState(canvasId, 'no data');
         return;
     }
+    const dataset = {
+        data: rows.map(r => r.win_rate),
+        backgroundColor: '#3b82f6',
+        _ciBars: rows.map(r => ({
+            lo: r.win_rate_ci_low ?? null,
+            hi: r.win_rate_ci_high ?? null,
+        })),
+    };
     new Chart(document.getElementById(canvasId).getContext('2d'), {
         type: 'bar',
         data: {
             labels: rows.map(r => String(r[labelKey] ?? '(none)')),
-            datasets: [{
-                data: rows.map(r => r.win_rate),
-                backgroundColor: '#3b82f6',
-            }]
+            datasets: [dataset]
         },
         options: {
             responsive: true, maintainAspectRatio: false,
@@ -392,7 +426,11 @@ function makeWinrateBar(canvasId, rows, labelKey) {
                 legend: {display: false},
                 tooltip: {callbacks: {label: c => {
                     const r = rows[c.dataIndex];
-                    return `${(r.win_rate * 100).toFixed(1)}% — n=${r.count}`;
+                    const ciLo = r.win_rate_ci_low, ciHi = r.win_rate_ci_high;
+                    const ciStr = (ciLo != null && ciHi != null)
+                        ? `, 95% CI [${(ciLo * 100).toFixed(0)}%, ${(ciHi * 100).toFixed(0)}%]`
+                        : '';
+                    return `${(r.win_rate * 100).toFixed(1)}% — n=${r.count}${ciStr}`;
                 }}}
             },
             scales: {
@@ -409,14 +447,19 @@ function makeAvgReturnBar(canvasId, rows, labelKey) {
         emptyState(canvasId, 'no data');
         return;
     }
+    const dataset = {
+        data: rows.map(r => r.avg_return * 100),
+        backgroundColor: rows.map(r => r.avg_return >= 0 ? '#22c55e' : '#ef4444'),
+        _ciBars: rows.map(r => ({
+            lo: r.avg_return_ci_low != null ? r.avg_return_ci_low * 100 : null,
+            hi: r.avg_return_ci_high != null ? r.avg_return_ci_high * 100 : null,
+        })),
+    };
     new Chart(document.getElementById(canvasId).getContext('2d'), {
         type: 'bar',
         data: {
             labels: rows.map(r => String(r[labelKey] ?? '(none)')),
-            datasets: [{
-                data: rows.map(r => r.avg_return * 100),
-                backgroundColor: rows.map(r => r.avg_return >= 0 ? '#22c55e' : '#ef4444'),
-            }]
+            datasets: [dataset]
         },
         options: {
             responsive: true, maintainAspectRatio: false,
@@ -424,7 +467,13 @@ function makeAvgReturnBar(canvasId, rows, labelKey) {
                 legend: {display: false},
                 tooltip: {callbacks: {label: c => {
                     const r = rows[c.dataIndex];
-                    return `${(r.avg_return * 100).toFixed(2)}% — n=${r.count}, win ${(r.win_rate * 100).toFixed(0)}%`;
+                    const seStr = r.avg_return_se != null
+                        ? `, SE ${(r.avg_return_se * 100).toFixed(2)}%`
+                        : '';
+                    const ciStr = (r.avg_return_ci_low != null && r.avg_return_ci_high != null)
+                        ? `, 95% CI [${(r.avg_return_ci_low * 100).toFixed(2)}%, ${(r.avg_return_ci_high * 100).toFixed(2)}%]`
+                        : '';
+                    return `${(r.avg_return * 100).toFixed(2)}% — n=${r.count}${seStr}${ciStr}`;
                 }}}
             },
             scales: {
@@ -708,10 +757,16 @@ function renderCorrelation(canvasId, statsId, corrData, label) {
     }
     const r = corrData.pearson_r, p = corrData.pearson_p;
     const rho = corrData.spearman_rho, prho = corrData.spearman_p;
+    const pcl = corrData.pearson_ci_low, pch = corrData.pearson_ci_high;
+    const scl = corrData.spearman_ci_low, sch = corrData.spearman_ci_high;
+    const pCi = (pcl != null && pch != null)
+        ? ` <span class="muted">[${pcl.toFixed(2)}, ${pch.toFixed(2)}]</span>` : '';
+    const sCi = (scl != null && sch != null)
+        ? ` <span class="muted">[${scl.toFixed(2)}, ${sch.toFixed(2)}]</span>` : '';
     el.innerHTML = `
         <strong>n=${corrData.n}</strong>
-        Pearson r=${r != null ? r.toFixed(3) : '—'} (p=${pFmt(p)})
-        · Spearman ρ=${rho != null ? rho.toFixed(3) : '—'} (p=${pFmt(prho)})
+        Pearson r=${r != null ? r.toFixed(3) : '—'} (p=${pFmt(p)})${pCi}
+        · Spearman ρ=${rho != null ? rho.toFixed(3) : '—'} (p=${pFmt(prho)})${sCi}
         · slope=${corrData.regression_slope != null ? corrData.regression_slope.toFixed(3) : '—'}
     `;
 
@@ -781,18 +836,32 @@ function renderRecoveryTable(tableId, rows) {
     const dFmtDay = v => v == null ? '—' : v.toFixed(1);
     const sFmt = v => v == null ? '—' : (v >= 0 ? '+' : '') + (v * 100).toFixed(2) + '%';
     const sCls = v => v == null ? '' : (v >= 0 ? 'pos' : 'neg');
+    const recRate = r => {
+        if (r.recovery_rate == null) return '—';
+        const main = (r.recovery_rate * 100).toFixed(0) + '%';
+        if (r.recovery_rate_ci_low != null && r.recovery_rate_ci_high != null) {
+            return `${main}<br><span class="muted" style="font-size:.7rem;">[${(r.recovery_rate_ci_low*100).toFixed(0)}%, ${(r.recovery_rate_ci_high*100).toFixed(0)}%]</span>`;
+        }
+        return main;
+    };
+    const postCell = (mean, lo, hi) => {
+        const main = sFmt(mean);
+        if (lo == null || hi == null) return `<td class="num ${sCls(mean)}">${main}</td>`;
+        const ci = `<br><span class="muted" style="font-size:.7rem;">[${(lo*100).toFixed(1)}%, ${(hi*100).toFixed(1)}%]</span>`;
+        return `<td class="num ${sCls(mean)}">${main}${ci}</td>`;
+    };
     tbody.innerHTML = rows.map(r => `
         <tr>
             <td>${r.group}</td>
             <td class="num">${r.n_total}</td>
             <td class="num">${r.n_recovered}</td>
-            <td class="num">${r.recovery_rate == null ? '—' : (r.recovery_rate * 100).toFixed(0) + '%'}</td>
+            <td class="num">${recRate(r)}</td>
             <td class="num">${dFmtDay(r.p25_days)}</td>
             <td class="num">${dFmtDay(r.p50_days)}</td>
             <td class="num">${dFmtDay(r.p75_days)}</td>
-            <td class="num ${sCls(r.post_recover_5d_mean)}">${sFmt(r.post_recover_5d_mean)}</td>
-            <td class="num ${sCls(r.post_recover_10d_mean)}">${sFmt(r.post_recover_10d_mean)}</td>
-            <td class="num ${sCls(r.post_recover_20d_mean)}">${sFmt(r.post_recover_20d_mean)}</td>
+            ${postCell(r.post_recover_5d_mean, r.post_recover_5d_ci_low, r.post_recover_5d_ci_high)}
+            ${postCell(r.post_recover_10d_mean, r.post_recover_10d_ci_low, r.post_recover_10d_ci_high)}
+            ${postCell(r.post_recover_20d_mean, r.post_recover_20d_ci_low, r.post_recover_20d_ci_high)}
         </tr>
     `).join('');
 }
