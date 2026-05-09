@@ -93,6 +93,19 @@ HTML_TEMPLATE = """<!doctype html>
                justify-content: space-between; }
     .scroll-table { max-height: 540px; overflow-y: auto; }
     .empty { color: var(--muted); padding: 30px; text-align: center; }
+    .badge { display: inline-block; padding: 1px 8px; border-radius: 10px;
+             font-size: 0.72rem; font-weight: 600; }
+    .badge.sig { background: #15803d; color: #dcfce7; }
+    .badge.ns  { background: #475569; color: #e2e8f0; }
+    .badge.ns  { background: #334155; color: #94a3b8; }
+    .toggle-bar { display: inline-flex; gap: 4px; }
+    .toggle-bar button { background: var(--bg); color: var(--text);
+                        border: 1px solid var(--border); padding: 4px 10px;
+                        border-radius: 4px; cursor: pointer; font-size: 0.78rem; }
+    .toggle-bar button.active { background: var(--accent); color: #0b1220;
+                               border-color: var(--accent); }
+    .stat-row { font-size: 0.85rem; color: var(--muted); padding: 6px 0; }
+    .stat-row strong { color: var(--text); margin-right: 6px; }
 </style>
 </head>
 <body>
@@ -156,7 +169,16 @@ HTML_TEMPLATE = """<!doctype html>
         </div>
     </div>
 
-    <h2>Performance over time since signal</h2>
+    <h2>Performance over time since signal — vs S&amp;P 500</h2>
+    <div style="margin-bottom: 10px;">
+        <div class="toggle-bar" id="tsModeToggle">
+            <button data-mode="absolute" class="active">Absolute return</button>
+            <button data-mode="alpha">Excess vs SPY</button>
+        </div>
+        <span class="muted" style="margin-left: 12px; font-size: 0.78rem;">
+            SPY median over the same calendar windows is shown as a dashed line.
+        </span>
+    </div>
     <div class="grid grid-2">
         <div class="card">
             <div class="card-header">
@@ -183,6 +205,124 @@ HTML_TEMPLATE = """<!doctype html>
             </div>
         </div>
         <div class="chart-box tall"><canvas id="tsSpaghetti"></canvas></div>
+    </div>
+
+    <h2>Statistical significance — return_4w differences between groups</h2>
+    <div class="grid grid-2">
+        <div class="card">
+            <div class="card-header">
+                <h3>AI council verdict (intent)</h3>
+                <div class="sub">
+                    Pairwise Welch t-test (unequal variance) and Mann-Whitney U;
+                    p-values FDR-adjusted (Benjamini-Hochberg).
+                </div>
+            </div>
+            <div class="scroll-table">
+                <table id="sigIntentTable">
+                    <thead><tr>
+                        <th>Group A</th><th>Group B</th>
+                        <th class="num">N₁ / N₂</th>
+                        <th class="num">Δ mean</th>
+                        <th class="num">Cohen's d</th>
+                        <th class="num">Welch p (FDR)</th>
+                        <th class="num">MWU p (FDR)</th>
+                        <th>Sig.</th>
+                    </tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <h3>Deep Research verdict</h3>
+                <div class="sub">Same comparison applied to DR groups (smaller n).</div>
+            </div>
+            <div class="scroll-table">
+                <table id="sigDrTable">
+                    <thead><tr>
+                        <th>Group A</th><th>Group B</th>
+                        <th class="num">N₁ / N₂</th>
+                        <th class="num">Δ mean</th>
+                        <th class="num">Cohen's d</th>
+                        <th class="num">Welch p (FDR)</th>
+                        <th class="num">MWU p (FDR)</th>
+                        <th>Sig.</th>
+                    </tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <h2>R/R ratio vs realized 4w return — correlation</h2>
+    <div class="grid grid-2">
+        <div class="card">
+            <div class="card-header">
+                <h3>AI council R/R (risk_reward_ratio)</h3>
+                <div id="corrPmStats" class="sub"></div>
+            </div>
+            <div class="chart-box tall"><canvas id="corrPmChart"></canvas></div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <h3>Deep Research R/R (deep_research_rr_ratio)</h3>
+                <div id="corrDrStats" class="sub"></div>
+            </div>
+            <div class="chart-box tall"><canvas id="corrDrChart"></canvas></div>
+        </div>
+    </div>
+
+    <h2>Recovery patterns</h2>
+    <div class="grid grid-2">
+        <div class="card">
+            <div class="card-header">
+                <h3>By AI council verdict</h3>
+                <div class="sub">
+                    Trading days from decision until pre-drop level reached, plus
+                    average return at +5/+10/+20 days <em>after</em> recovery.
+                </div>
+            </div>
+            <div class="scroll-table">
+                <table id="recIntentTable">
+                    <thead><tr>
+                        <th>Group</th>
+                        <th class="num">N total</th>
+                        <th class="num">Recovered</th>
+                        <th class="num">% recov</th>
+                        <th class="num">p25 d</th>
+                        <th class="num">p50 d</th>
+                        <th class="num">p75 d</th>
+                        <th class="num">+5d</th>
+                        <th class="num">+10d</th>
+                        <th class="num">+20d</th>
+                    </tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <h3>By Deep Research verdict</h3>
+                <div class="sub">Same view for DR groups.</div>
+            </div>
+            <div class="scroll-table">
+                <table id="recDrTable">
+                    <thead><tr>
+                        <th>Group</th>
+                        <th class="num">N total</th>
+                        <th class="num">Recovered</th>
+                        <th class="num">% recov</th>
+                        <th class="num">p25 d</th>
+                        <th class="num">p50 d</th>
+                        <th class="num">p75 d</th>
+                        <th class="num">+5d</th>
+                        <th class="num">+10d</th>
+                        <th class="num">+20d</th>
+                    </tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <h2>Per-decision explorer</h2>
@@ -333,21 +473,36 @@ function colorForGroup(name, palette) {
     return palette[name] || '#cbd5e1';
 }
 
-function renderMedianPaths(canvasId, groupsObj, palette) {
+// Subtract SPY from a group's median path to get alpha (excess vs SPY).
+function asAlpha(groupMedian, spyMedian) {
+    const out = [];
+    for (let i = 0; i < groupMedian.length; i++) {
+        const g = groupMedian[i], s = (spyMedian && i < spyMedian.length) ? spyMedian[i] : null;
+        if (g == null || s == null) out.push(null);
+        else out.push(g - s);
+    }
+    return out;
+}
+
+function renderMedianPaths(canvasId, groupsObj, palette, mode = 'absolute') {
     const groupNames = Object.keys(groupsObj || {});
     if (groupNames.length === 0) {
         emptyState(canvasId, 'no time-series data');
-        return;
+        return null;
     }
+    const spy = (DATA.time_series || {}).spy_overlay || {};
     let maxDays = 0;
     const datasets = [];
     for (const grp of groupNames) {
         const g = groupsObj[grp];
         if (!g || !g.median) continue;
         maxDays = Math.max(maxDays, g.day_offsets.length);
+        const series = mode === 'alpha' && spy.median
+            ? asAlpha(g.median, spy.median)
+            : g.median;
         datasets.push({
             label: `${grp} (n=${g.n_paths})`,
-            data: g.median.map(v => v == null ? null : v * 100),
+            data: series.map(v => v == null ? null : v * 100),
             borderColor: colorForGroup(grp, palette),
             backgroundColor: colorForGroup(grp, palette),
             tension: 0.15,
@@ -356,7 +511,20 @@ function renderMedianPaths(canvasId, groupsObj, palette) {
             spanGaps: true,
         });
     }
-    new Chart(document.getElementById(canvasId).getContext('2d'), {
+    if (mode === 'absolute' && spy.median) {
+        maxDays = Math.max(maxDays, spy.median.length);
+        datasets.push({
+            label: 'S&P 500 (SPY median)',
+            data: spy.median.map(v => v == null ? null : v * 100),
+            borderColor: '#cbd5e1',
+            borderWidth: 2,
+            borderDash: [5, 4],
+            pointRadius: 0,
+            tension: 0.15,
+            spanGaps: true,
+        });
+    }
+    return new Chart(document.getElementById(canvasId).getContext('2d'), {
         type: 'line',
         data: {
             labels: Array.from({length: maxDays}, (_, i) => i),
@@ -374,7 +542,11 @@ function renderMedianPaths(canvasId, groupsObj, palette) {
             scales: {
                 y: {
                     ticks: {color: '#94a3b8', callback: v => v.toFixed(0) + '%'},
-                    title: {display: true, text: 'Return since decision', color: '#94a3b8'},
+                    title: {
+                        display: true,
+                        text: mode === 'alpha' ? 'Excess return vs SPY' : 'Return since decision',
+                        color: '#94a3b8',
+                    },
                     grid: {color: 'rgba(148, 163, 184, 0.08)'},
                 },
                 x: {
@@ -466,9 +638,166 @@ function renderSpaghetti(canvasId) {
     });
 }
 
-renderMedianPaths('tsIntentChart', (DATA.time_series || {}).by_intent, COLOR_BY_INTENT);
-renderMedianPaths('tsDrChart', (DATA.time_series || {}).by_dr_verdict, COLOR_BY_DR);
+let tsIntentChart = null;
+let tsDrChart = null;
+function renderTimeSeriesPair(mode) {
+    if (tsIntentChart) tsIntentChart.destroy();
+    if (tsDrChart) tsDrChart.destroy();
+    tsIntentChart = renderMedianPaths('tsIntentChart',
+        (DATA.time_series || {}).by_intent, COLOR_BY_INTENT, mode);
+    tsDrChart = renderMedianPaths('tsDrChart',
+        (DATA.time_series || {}).by_dr_verdict, COLOR_BY_DR, mode);
+}
+renderTimeSeriesPair('absolute');
 renderSpaghetti('tsSpaghetti');
+
+document.querySelectorAll('#tsModeToggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('#tsModeToggle button')
+            .forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderTimeSeriesPair(btn.dataset.mode);
+    });
+});
+
+// ----- Statistical significance tables -----
+function pFmt(p) {
+    if (p == null || isNaN(p)) return '—';
+    if (p < 0.001) return '<0.001';
+    return p.toFixed(3);
+}
+function dFmt(d) {
+    if (d == null || isNaN(d)) return '—';
+    return (d >= 0 ? '+' : '') + d.toFixed(2);
+}
+function renderSigTable(tableId, rows) {
+    const tbody = document.querySelector(`#${tableId} tbody`);
+    if (!rows || rows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="empty">no significance data</td></tr>';
+        return;
+    }
+    rows.sort((a, b) => (a.welch_p_fdr ?? 1) - (b.welch_p_fdr ?? 1));
+    tbody.innerHTML = rows.map(r => {
+        const sig = r.significant;
+        const diffCls = (r.diff ?? 0) >= 0 ? 'pos' : 'neg';
+        const diffStr = (r.diff == null) ? '—' :
+            ((r.diff >= 0 ? '+' : '') + (r.diff * 100).toFixed(2) + '%');
+        return `
+            <tr>
+                <td>${r.group_a}</td>
+                <td>${r.group_b}</td>
+                <td class="num">${r.n_a} / ${r.n_b}</td>
+                <td class="num ${diffCls}">${diffStr}</td>
+                <td class="num">${dFmt(r.cohen_d)}</td>
+                <td class="num">${pFmt(r.welch_p_fdr)}</td>
+                <td class="num">${pFmt(r.mwu_p_fdr)}</td>
+                <td><span class="badge ${sig ? 'sig' : 'ns'}">${sig ? 'p<0.05' : 'n.s.'}</span></td>
+            </tr>`;
+    }).join('');
+}
+renderSigTable('sigIntentTable', (DATA.stats || {}).pairwise_intent || []);
+renderSigTable('sigDrTable', (DATA.stats || {}).pairwise_dr_verdict || []);
+
+// ----- Correlation scatter plots -----
+function renderCorrelation(canvasId, statsId, corrData, label) {
+    const el = document.getElementById(statsId);
+    if (!corrData || corrData.n < 5) {
+        el.textContent = `n=${corrData ? corrData.n : 0} — too few points for correlation.`;
+        emptyState(canvasId, 'too few points');
+        return;
+    }
+    const r = corrData.pearson_r, p = corrData.pearson_p;
+    const rho = corrData.spearman_rho, prho = corrData.spearman_p;
+    el.innerHTML = `
+        <strong>n=${corrData.n}</strong>
+        Pearson r=${r != null ? r.toFixed(3) : '—'} (p=${pFmt(p)})
+        · Spearman ρ=${rho != null ? rho.toFixed(3) : '—'} (p=${pFmt(prho)})
+        · slope=${corrData.regression_slope != null ? corrData.regression_slope.toFixed(3) : '—'}
+    `;
+
+    const points = corrData.points || [];
+    const datasets = [{
+        type: 'scatter',
+        label: label,
+        data: points.map(p => ({x: p.x, y: p.y * 100})),
+        backgroundColor: 'rgba(96, 165, 250, 0.55)',
+        borderColor: 'rgba(96, 165, 250, 0.9)',
+        pointRadius: 3,
+    }];
+    if (corrData.regression_slope != null && points.length > 1) {
+        const xs = points.map(p => p.x);
+        const xmin = Math.min(...xs), xmax = Math.max(...xs);
+        const slope = corrData.regression_slope, b = corrData.regression_intercept;
+        datasets.push({
+            type: 'line',
+            label: 'OLS fit',
+            data: [{x: xmin, y: (slope * xmin + b) * 100},
+                   {x: xmax, y: (slope * xmax + b) * 100}],
+            borderColor: '#fbbf24',
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            pointRadius: 0,
+            tension: 0,
+        });
+    }
+
+    new Chart(document.getElementById(canvasId).getContext('2d'), {
+        data: {datasets},
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: {labels: {color: '#94a3b8', boxWidth: 12}, position: 'bottom'},
+                tooltip: {callbacks: {label: c => {
+                    const x = c.parsed.x, y = c.parsed.y;
+                    return `R/R=${x.toFixed(2)}, return=${y.toFixed(2)}%`;
+                }}}
+            },
+            scales: {
+                x: {
+                    type: 'linear',
+                    title: {display: true, text: 'R/R ratio', color: '#94a3b8'},
+                    ticks: {color: '#94a3b8'},
+                    grid: {color: 'rgba(148, 163, 184, 0.05)'},
+                },
+                y: {
+                    title: {display: true, text: '4-week return', color: '#94a3b8'},
+                    ticks: {color: '#94a3b8', callback: v => v.toFixed(0) + '%'},
+                    grid: {color: 'rgba(148, 163, 184, 0.08)'},
+                }
+            }
+        }
+    });
+}
+renderCorrelation('corrPmChart', 'corrPmStats', (DATA.stats || {}).corr_pm_rr, 'PM R/R');
+renderCorrelation('corrDrChart', 'corrDrStats', (DATA.stats || {}).corr_dr_rr, 'DR R/R');
+
+// ----- Recovery tables -----
+function renderRecoveryTable(tableId, rows) {
+    const tbody = document.querySelector(`#${tableId} tbody`);
+    if (!rows || rows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" class="empty">no recovery data</td></tr>';
+        return;
+    }
+    const dFmtDay = v => v == null ? '—' : v.toFixed(1);
+    const sFmt = v => v == null ? '—' : (v >= 0 ? '+' : '') + (v * 100).toFixed(2) + '%';
+    const sCls = v => v == null ? '' : (v >= 0 ? 'pos' : 'neg');
+    tbody.innerHTML = rows.map(r => `
+        <tr>
+            <td>${r.group}</td>
+            <td class="num">${r.n_total}</td>
+            <td class="num">${r.n_recovered}</td>
+            <td class="num">${r.recovery_rate == null ? '—' : (r.recovery_rate * 100).toFixed(0) + '%'}</td>
+            <td class="num">${dFmtDay(r.p25_days)}</td>
+            <td class="num">${dFmtDay(r.p50_days)}</td>
+            <td class="num">${dFmtDay(r.p75_days)}</td>
+            <td class="num ${sCls(r.post_recover_5d_mean)}">${sFmt(r.post_recover_5d_mean)}</td>
+            <td class="num ${sCls(r.post_recover_10d_mean)}">${sFmt(r.post_recover_10d_mean)}</td>
+            <td class="num ${sCls(r.post_recover_20d_mean)}">${sFmt(r.post_recover_20d_mean)}</td>
+        </tr>
+    `).join('');
+}
+renderRecoveryTable('recIntentTable', (DATA.stats || {}).recovery_by_intent || []);
+renderRecoveryTable('recDrTable', (DATA.stats || {}).recovery_by_dr_verdict || []);
 
 // ----- Per-decision explorer -----
 const COLS = [

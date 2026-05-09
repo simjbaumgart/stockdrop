@@ -70,6 +70,26 @@ def compute_outcome(
             day_offsets = int((forward.index <= first_hit_idx).sum() - 1)
             out["days_to_recover"] = day_offsets
 
+            # Post-recovery returns: how does the stock behave AFTER recovery?
+            # Compute pct change from recovery-day close to N trading days later.
+            try:
+                recover_pos = forward.index.get_loc(first_hit_idx)
+            except KeyError:
+                recover_pos = None
+            if recover_pos is not None:
+                recover_close = float(closes.iloc[recover_pos])
+                if recover_close > 0:
+                    for n_days in (5, 10, 20):
+                        future_pos = recover_pos + n_days
+                        if future_pos < len(closes):
+                            future_close = float(closes.iloc[future_pos])
+                            out[f"post_recover_{n_days}d"] = float(
+                                (future_close - recover_close) / recover_close
+                            )
+    # NaN-fill post-recovery columns when not recovered, so the schema is consistent
+    for n_days in (5, 10, 20):
+        out.setdefault(f"post_recover_{n_days}d", np.nan)
+
     return out
 
 

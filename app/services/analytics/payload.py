@@ -21,7 +21,12 @@ from app.services.analytics.aggregations import (
 )
 from app.services.analytics.cohort import load_cohort
 from app.services.analytics.outcomes import HORIZON_DAYS, enrich_outcomes
-from app.services.analytics.price_cache import prefetch
+from app.services.analytics.price_cache import get_bars, prefetch
+from app.services.analytics.stats import (
+    correlation,
+    pairwise_welch,
+    recovery_stats,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -117,6 +122,61 @@ def _time_series_by_group(
         if include_individuals:
             out[grp]["individuals"] = paths
     return out
+
+
+def _spy_overlay(
+    cohort: pd.DataFrame,
+    spy_bars: pd.DataFrame,
+    max_days: int = 40,
+) -> Dict[str, Any]:
+    """For each cohort decision date, build SPY's normalized return path; aggregate.
+
+    Returns the same shape as a `_time_series_by_group` group entry so the JS can
+    treat SPY as just another series.
+    """
+    if cohort.empty or spy_bars is None or spy_bars.empty:
+        return {}
+    spy_bars = spy_bars.sort_index()
+    paths: List[List[float]] = []
+
+    for decision_date in cohort["decision_date"].dropna().unique():
+        forward = spy_bars.loc[spy_bars.index >= decision_date]
+        if forward.empty:
+            continue
+        closes = forward["Close"].astype(float).iloc[: max_days + 1]
+        if len(closes) < 2:
+            continue
+        base = float(closes.iloc[0])
+        if base <= 0:
+            continue
+        # weight by number of cohort decisions on this date so the SPY median
+        # matches the time-weighting of the per-intent medians
+        weight = int((cohort["decision_date"] == decision_date).sum())
+        rets = [(float(c) / base - 1.0) for c in closes.tolist()]
+        for _ in range(weight):
+            paths.append(rets)
+
+    if not paths:
+        return {}
+
+    max_len = max(len(p) for p in paths)
+    per_day: List[List[float]] = [[] for _ in range(max_len)]
+    for p in paths:
+        for d, r in enumerate(p):
+            per_day[d].append(r)
+    return {
+        "day_offsets": list(range(max_len)),
+        "median": [float(np.median(x)) if x else None for x in per_day],
+        "q25": [float(np.percentile(x, 25)) if x else None for x in per_day],
+        "q75": [float(np.percentile(x, 75)) if x else None for x in per_day],
+        "count": [len(x) for x in per_day],
+        "n_paths": len(paths),
+    }
+
+
+def _stats_records(stats_df: pd.DataFrame) -> List[Dict[str, Any]]:
+    """Convert a stats DataFrame to list of dicts; bools survive _df_records cleanly."""
+    return _df_records(stats_df)
 
 
 def build_payload(start_date: str = "2026-02-01") -> Dict[str, Any]:
@@ -254,6 +314,28 @@ def build_payload(start_date: str = "2026-02-01") -> Dict[str, Any]:
         max_days=40, include_individuals=False,
     )
 
+    # SPY benchmark — fetch a single ticker spanning the cohort
+    try:
+        spy_bars = get_bars(
+            "SPY",
+            start=df["decision_date"].min(),
+            end=end + pd.Timedelta(days=2),
+        )
+    except Exception as e:
+        logger.warning("SPY fetch failed: %s", e)
+        spy_bars = pd.DataFrame()
+    spy_overlay = _spy_overlay(enriched, spy_bars, max_days=40)
+
+    # Statistics
+    stats_intent = pairwise_welch(enriched, group_col="intent", value_col="return_4w", min_n=5)
+    stats_dr_verdict = pairwise_welch(
+        enriched, group_col="deep_research_verdict", value_col="return_4w", min_n=3
+    )
+    corr_pm_rr = correlation(enriched, x_col="risk_reward_ratio", y_col="return_4w")
+    corr_dr_rr = correlation(enriched, x_col="deep_research_rr_ratio", y_col="return_4w")
+    rec_intent = recovery_stats(enriched, group_col="intent")
+    rec_dr_verdict = recovery_stats(enriched, group_col="deep_research_verdict")
+
     rec_dist = time_to_recover_dist(enriched, max_days=40)
     rec_records = [{"days": int(idx), "count": int(val)} for idx, val in rec_dist.items()]
 
@@ -299,6 +381,15 @@ def build_payload(start_date: str = "2026-02-01") -> Dict[str, Any]:
             "max_days": 40,
             "by_intent": ts_by_intent,
             "by_dr_verdict": ts_by_dr_verdict,
+            "spy_overlay": spy_overlay,
+        },
+        "stats": {
+            "pairwise_intent": _stats_records(stats_intent),
+            "pairwise_dr_verdict": _stats_records(stats_dr_verdict),
+            "corr_pm_rr": corr_pm_rr,
+            "corr_dr_rr": corr_dr_rr,
+            "recovery_by_intent": _stats_records(rec_intent),
+            "recovery_by_dr_verdict": _stats_records(rec_dr_verdict),
         },
         "decisions": decisions,
     }
