@@ -102,6 +102,37 @@ def test_dr_avoid_without_overridden_still_demotes(temp_db):
     assert _get_status(temp_db, did) == "Not Owned"
 
 
+def test_incomplete_trading_levels_demotes_pending_to_not_owned(temp_db):
+    """When DR validates the verdict but rejects the trading levels, the row
+    must NOT be promoted to Owned — entry_price_low/high may be null."""
+    did = _insert(temp_db, symbol="X", recommendation="BUY", status="Pending DR Review")
+    db.finalize_position_status_after_dr(
+        decision_id=did, dr_action="BUY_LIMIT",
+        dr_review_verdict="INCOMPLETE_TRADING_LEVELS",
+    )
+    assert _get_status(temp_db, did) == "Not Owned"
+
+
+def test_error_parsing_verdict_demotes_pending_to_not_owned(temp_db):
+    """ERROR_PARSING means DR's response wasn't usable — never promote."""
+    did = _insert(temp_db, symbol="X", recommendation="BUY", status="Pending DR Review")
+    db.finalize_position_status_after_dr(
+        decision_id=did, dr_action="BUY",
+        dr_review_verdict="ERROR_PARSING",
+    )
+    assert _get_status(temp_db, did) == "Not Owned"
+
+
+def test_pending_review_verdict_demotes_pending_to_not_owned(temp_db):
+    """PENDING_REVIEW means DR didn't reach a clean verdict — never promote."""
+    did = _insert(temp_db, symbol="X", recommendation="BUY", status="Pending DR Review")
+    db.finalize_position_status_after_dr(
+        decision_id=did, dr_action="BUY",
+        dr_review_verdict="PENDING_REVIEW",
+    )
+    assert _get_status(temp_db, did) == "Not Owned"
+
+
 def test_finalize_no_op_when_decision_id_missing(temp_db):
     result = db.finalize_position_status_after_dr(
         decision_id=999999, dr_action="BUY", dr_review_verdict="CONFIRMED",

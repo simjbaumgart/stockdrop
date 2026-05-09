@@ -479,9 +479,12 @@ def finalize_position_status_after_dr(
     based on the deep-research outcome.
 
     Rules:
+        - dr_review_verdict in {OVERRIDDEN, INCOMPLETE_TRADING_LEVELS,
+          ERROR_PARSING, PENDING_REVIEW}                  -> Not Owned
+          (these signal DR did not produce a clean usable verdict; do not
+          enter the position regardless of the action label)
         - dr_action in {BUY, BUY_LIMIT}                  -> Owned
         - dr_action in {AVOID, WATCH, HOLD, SELL, ...}    -> Not Owned
-        - dr_review_verdict == OVERRIDDEN (any action)    -> Not Owned
 
     Only updates rows whose current status is 'Pending DR Review' so that
     rows demoted by an earlier deterministic check (e.g. earnings narrative
@@ -491,7 +494,16 @@ def finalize_position_status_after_dr(
     action_norm = (dr_action or "").upper().strip()
     review_norm = (dr_review_verdict or "").upper().strip()
 
-    if review_norm == "OVERRIDDEN":
+    # Non-clean DR verdicts: never promote to Owned, even if the action
+    # label looks like BUY (the trading-level overrides may have nulled
+    # entry_price_low/high, so 'Owned' would point at no entry zone).
+    _NON_CLEAN_VERDICTS = {
+        "OVERRIDDEN",
+        "INCOMPLETE_TRADING_LEVELS",
+        "ERROR_PARSING",
+        "PENDING_REVIEW",
+    }
+    if review_norm in _NON_CLEAN_VERDICTS:
         new_status = "Not Owned"
     elif action_norm in ("BUY", "BUY_LIMIT", "STRONG_BUY", "SPECULATIVE_BUY"):
         new_status = "Owned"
