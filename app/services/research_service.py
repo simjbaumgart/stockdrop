@@ -1050,12 +1050,17 @@ REALISTIC EXIT CEILING (Bear's Upside Limit):
 
         ef = getattr(state, "earnings_facts", None) or {}
         if ef and ef.get("reported_eps") is not None:
-            _beat_miss = "BEAT" if (ef.get("surprise_pct") or 0) > 0 else "MISS" if (ef.get("surprise_pct") or 0) < 0 else "INLINE"
+            _sp = ef.get("surprise_pct")
+            if _sp is None:
+                _surprise_line = "- Surprise: N/A (estimate was 0 or missing)\n"
+            else:
+                _beat_miss = "BEAT" if _sp > 0 else "MISS" if _sp < 0 else "INLINE"
+                _surprise_line = f"- Surprise: {_sp:+.1f}% ({_beat_miss})\n"
             earnings_block = (
                 "\nEARNINGS_FACTS (canonical, from Finnhub — DO NOT infer EPS from news articles below):\n"
                 f"- Reported EPS: ${ef['reported_eps']:.2f}\n"
                 f"- Consensus EPS: ${ef['consensus_eps']:.2f}\n"
-                f"- Surprise: {ef['surprise_pct']:+.1f}% ({_beat_miss})\n"
+                + _surprise_line +
                 f"- Fiscal quarter: {ef.get('fiscal_quarter')}\n"
                 f"- Source: {ef.get('source')} (fetched {ef.get('fetched_at')})\n"
                 "Whenever your reasoning describes whether the company beat or missed, "
