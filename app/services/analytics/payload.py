@@ -179,11 +179,20 @@ def _stats_records(stats_df: pd.DataFrame) -> List[Dict[str, Any]]:
     return _df_records(stats_df)
 
 
-def build_payload(start_date: str = "2026-02-01") -> Dict[str, Any]:
-    """Compute every aggregation we render and return one JSON-friendly dict."""
+def compute_dataset(start_date: str = "2026-02-01") -> Dict[str, Any]:
+    """Build everything: enriched cohort, raw bars, SPY bars, and the JSON payload.
+
+    Returns a dict with keys:
+        - "enriched": pd.DataFrame with one row per decision plus all derived columns.
+        - "bars": dict[ticker -> OHLC DataFrame].
+        - "spy_bars": pd.DataFrame of SPY OHLC over the cohort window.
+        - "payload": the JSON-serializable dict consumed by the HTML report.
+
+    `build_payload` is a thin wrapper that returns just `payload` for back-compat.
+    """
     df = load_cohort(start_date=start_date)
     if df.empty:
-        return {
+        empty_payload = {
             "generated_at": datetime.utcnow().isoformat() + "Z",
             "cohort_size": 0,
             "cohort_start": start_date,
@@ -197,6 +206,12 @@ def build_payload(start_date: str = "2026-02-01") -> Dict[str, Any]:
             "equity_curve": [],
             "time_to_recover": [],
             "decisions": [],
+        }
+        return {
+            "enriched": df,
+            "bars": {},
+            "spy_bars": pd.DataFrame(),
+            "payload": empty_payload,
         }
 
     end = pd.Timestamp.now().normalize()
@@ -351,7 +366,7 @@ def build_payload(start_date: str = "2026-02-01") -> Dict[str, Any]:
     ]
     decisions = _df_records(enriched, columns=decision_cols)
 
-    return {
+    payload = {
         "generated_at": datetime.utcnow().isoformat() + "Z",
         "cohort_size": int(len(enriched)),
         "cohort_start": start_date,
@@ -393,3 +408,14 @@ def build_payload(start_date: str = "2026-02-01") -> Dict[str, Any]:
         },
         "decisions": decisions,
     }
+    return {
+        "enriched": enriched,
+        "bars": bars,
+        "spy_bars": spy_bars,
+        "payload": payload,
+    }
+
+
+def build_payload(start_date: str = "2026-02-01") -> Dict[str, Any]:
+    """Back-compat wrapper: return just the JSON payload dict."""
+    return compute_dataset(start_date=start_date)["payload"]
