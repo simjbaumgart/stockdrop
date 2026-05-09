@@ -604,7 +604,8 @@ class StockService:
         """
         Trigger deep research for buy decisions:
         - BUY: always trigger (any conviction, any R/R)
-        - BUY_LIMIT: trigger when R/R > 1.25 (any conviction)
+        - BUY_LIMIT: trigger when R/R > 1.0 (any conviction). Mirrors the
+          Pending DR Review status gate so rows are never stranded.
         """
         action = report_data.get("recommendation", "AVOID").upper()
         risk_reward = report_data.get("risk_reward_ratio", 0)
