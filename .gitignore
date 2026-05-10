@@ -21,8 +21,11 @@ reports/
 # notebooks/
 .ipynb_checkpoints/
 
-# Data
+# Data (raw caches, fixtures, scratch)
 data/
+# Re-include the curated analysis-package data dirs so they ship with the report
+!docs/performance/**/data/
+!docs/performance/**/data/**
 *.db
 *.sqlite3
 usage_stats.json
