@@ -1,6 +1,6 @@
 # Performance analysis package — 2026-02-01
 
-Generated 2026-05-10 09:25. Cohort size: **363 decisions**.
+Generated 2026-05-10 09:41. Cohort size: **363 decisions**.
 
 ## Files
 
@@ -31,6 +31,8 @@ Generated 2026-05-10 09:25. Cohort size: **363 decisions**.
 - `charts/19_winloss_by_dr_verdict.png`
 - `charts/20_cum_pnl_calendar_by_intent.png`
 - `charts/21_cum_pnl_calendar_by_dr_verdict.png`
+- `charts/22_rr_box_pm_by_intent.png`
+- `charts/23_rr_box_dr_by_verdict.png`
 
 ### Data
 
@@ -42,13 +44,27 @@ Generated 2026-05-10 09:25. Cohort size: **363 decisions**.
 - `data/spy_bars.csv`
 - `data/stats_corr_dr_rr.json`
 - `data/stats_corr_pm_rr.json`
+- `data/stats_dr_rr_by_dr_verdict.json`
+- `data/stats_dr_rr_by_dr_verdict_pairwise.csv`
+- `data/stats_dr_rr_by_dr_verdict_per_group.csv`
+- `data/stats_dr_rr_by_intent.json`
+- `data/stats_dr_rr_by_intent_pairwise.csv`
+- `data/stats_dr_rr_by_intent_per_group.csv`
 - `data/stats_pairwise_dr_verdict.csv`
 - `data/stats_pairwise_intent.csv`
+- `data/stats_pm_rr_by_dr_verdict.json`
+- `data/stats_pm_rr_by_dr_verdict_pairwise.csv`
+- `data/stats_pm_rr_by_dr_verdict_per_group.csv`
+- `data/stats_pm_rr_by_intent.json`
+- `data/stats_pm_rr_by_intent_pairwise.csv`
+- `data/stats_pm_rr_by_intent_per_group.csv`
 - `data/stats_recovery_by_dr_verdict.csv`
 - `data/stats_recovery_by_intent.csv`
 - `data/time_series.json`
 - `data/time_series_individuals.json`
 - `data/time_to_recover.csv`
+- `data/top_dr_rr.csv`
+- `data/top_pm_rr.csv`
 - `data/winloss_by_dr_verdict.json`
 - `data/winloss_by_intent.json`
 - `data/winrate_by_dr_action.csv`

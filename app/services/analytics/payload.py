@@ -27,6 +27,8 @@ from app.services.analytics.stats import (
     correlation,
     pairwise_welch,
     recovery_stats,
+    rr_by_group,
+    top_rr_decisions,
 )
 
 logger = logging.getLogger(__name__)
@@ -556,6 +558,20 @@ def compute_dataset(start_date: str = "2026-02-01") -> Dict[str, Any]:
     rec_intent = recovery_stats(enriched, group_col="intent")
     rec_dr_verdict = recovery_stats(enriched, group_col="deep_research_verdict")
 
+    # R/R distribution by verdict (categorical R/R correlation)
+    pm_rr_by_intent = rr_by_group(enriched, "intent", "risk_reward_ratio", min_n=3)
+    dr_rr_by_dr_verdict = rr_by_group(
+        enriched, "deep_research_verdict", "deep_research_rr_ratio", min_n=2
+    )
+    pm_rr_by_dr_verdict = rr_by_group(
+        enriched, "deep_research_verdict", "risk_reward_ratio", min_n=2
+    )
+    dr_rr_by_intent = rr_by_group(enriched, "intent", "deep_research_rr_ratio", min_n=2)
+
+    # Top-N high-R/R decisions, surfaced as data tables
+    top_pm_rr = top_rr_decisions(enriched, "risk_reward_ratio", n=25)
+    top_dr_rr = top_rr_decisions(enriched, "deep_research_rr_ratio", n=25)
+
     rec_dist = time_to_recover_dist(enriched, max_days=40)
     rec_records = [{"days": int(idx), "count": int(val)} for idx, val in rec_dist.items()]
 
@@ -614,6 +630,12 @@ def compute_dataset(start_date: str = "2026-02-01") -> Dict[str, Any]:
             "corr_dr_rr": corr_dr_rr,
             "recovery_by_intent": _stats_records(rec_intent),
             "recovery_by_dr_verdict": _stats_records(rec_dr_verdict),
+            "pm_rr_by_intent": pm_rr_by_intent,
+            "dr_rr_by_dr_verdict": dr_rr_by_dr_verdict,
+            "pm_rr_by_dr_verdict": pm_rr_by_dr_verdict,
+            "dr_rr_by_intent": dr_rr_by_intent,
+            "top_pm_rr": _stats_records(top_pm_rr),
+            "top_dr_rr": _stats_records(top_dr_rr),
         },
         "decisions": decisions,
     }
