@@ -402,6 +402,103 @@ def rr_boxplot_by_group(
     return _save(fig, out_path)
 
 
+def multi_horizon_grouped_bar(
+    by_horizon: Dict[str, pd.DataFrame],
+    group_col: str,
+    metric: str,
+    title: str,
+    out_path: Path,
+    palette: Optional[Dict[str, str]] = None,
+    group_order: Optional[List[str]] = None,
+    use_ci: bool = True,
+) -> Path:
+    """Side-by-side bars: one bar per horizon for each group.
+
+    `by_horizon` maps "1w" / "2w" / "4w" -> aggregation DataFrame
+    (output shape of `aggregations.winrate_by`).
+
+    `metric` is "win_rate" or "avg_return".
+    """
+    fig, ax = plt.subplots(figsize=(11, 5))
+    horizons = [h for h in ("1w", "2w", "4w") if h in by_horizon and not by_horizon[h].empty]
+    if not horizons:
+        ax.text(0.5, 0.5, "no data", ha="center", va="center", transform=ax.transAxes)
+        ax.set_axis_off()
+        return _save(fig, out_path)
+
+    # Establish group order from the first non-empty horizon
+    seed = by_horizon[horizons[0]]
+    if group_order:
+        groups = [g for g in group_order if g in seed[group_col].astype(str).values]
+    else:
+        groups = list(seed[group_col].astype(str))
+
+    palette = palette or {}
+    horizon_palette = {"1w": "#fbbf24", "2w": "#60a5fa", "4w": "#22c55e"}
+
+    n_groups = len(groups)
+    n_h = len(horizons)
+    width = 0.8 / max(n_h, 1)
+    indices = np.arange(n_groups)
+
+    is_pct_metric = metric == "win_rate"
+    is_signed = metric == "avg_return"
+    counts_label_pos = []
+
+    for hi, h in enumerate(horizons):
+        df = by_horizon[h].copy()
+        df[group_col] = df[group_col].astype(str)
+        # Reindex by the canonical group order
+        df = df.set_index(group_col).reindex(groups).reset_index()
+        values = df[metric].fillna(0).astype(float).values
+        if is_pct_metric:
+            disp = values
+        else:
+            disp = values * 100.0
+        offset = (hi - (n_h - 1) / 2.0) * width
+        positions = indices + offset
+        bar_color = horizon_palette.get(h, "#94a3b8")
+        # Error bars
+        yerr = None
+        if use_ci:
+            ci_low_col = f"{metric}_ci_low"
+            ci_high_col = f"{metric}_ci_high"
+            if ci_low_col in df.columns and ci_high_col in df.columns:
+                # Fall back to the point estimate when CI is missing (yields zero-width error bar)
+                low = df[ci_low_col].fillna(df[metric]).astype(float).values
+                high = df[ci_high_col].fillna(df[metric]).astype(float).values
+                if is_signed:
+                    low = low * 100.0; high = high * 100.0
+                lo_err = np.maximum(0, disp - low)
+                hi_err = np.maximum(0, high - disp)
+                yerr = np.vstack([lo_err, hi_err])
+        ax.bar(positions, disp, width=width * 0.95,
+               color=bar_color, label=h,
+               yerr=yerr, capsize=3, ecolor="#1f2937",
+               error_kw={"elinewidth": 0.8})
+        # Annotate counts above each bar
+        if "count" in df.columns:
+            for x, v, c in zip(positions, disp, df["count"].fillna(0).astype(int)):
+                if c > 0:
+                    label_y = v + (0.02 if is_pct_metric else 1.5)
+                    ax.text(x, label_y, f"n={c}", ha="center", fontsize=7, color="#475569")
+
+    ax.axhline(0 if is_signed else None, color="black", linewidth=0.5) if is_signed else None
+    ax.set_xticks(indices)
+    ax.set_xticklabels(groups, rotation=20, ha="right")
+    if is_pct_metric:
+        ax.set_ylim(0, 1.15)
+        ax.set_ylabel("Win rate (95% Wilson CI)")
+        ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda v, _: f"{v*100:.0f}%"))
+    else:
+        ax.set_ylabel("Avg return % (95% t-CI)")
+        ax.axhline(0, color="black", linewidth=0.5)
+    ax.set_title(title)
+    ax.legend(title="horizon", loc="best", fontsize=9)
+    ax.grid(True, axis="y", linestyle=":", alpha=0.3)
+    return _save(fig, out_path)
+
+
 def equity_curve_chart(curve_df: pd.DataFrame, title: str, out_path: Path) -> Path:
     """Convenience wrapper around `equity_line` that takes a list of records."""
     return equity_line(curve_df, title, out_path)

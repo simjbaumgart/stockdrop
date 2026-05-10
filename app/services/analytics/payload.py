@@ -548,13 +548,66 @@ def compute_dataset(start_date: str = "2026-02-01") -> Dict[str, Any]:
         spy_bars = pd.DataFrame()
     spy_overlay = _spy_overlay(enriched, spy_bars, max_days=40)
 
-    # Statistics
-    stats_intent = pairwise_welch(enriched, group_col="intent", value_col="return_4w", min_n=5)
-    stats_dr_verdict = pairwise_welch(
-        enriched, group_col="deep_research_verdict", value_col="return_4w", min_n=3
-    )
-    corr_pm_rr = correlation(enriched, x_col="risk_reward_ratio", y_col="return_4w")
-    corr_dr_rr = correlation(enriched, x_col="deep_research_rr_ratio", y_col="return_4w")
+    # Statistics — run at 1w / 2w / 4w so the small-n 4w results sit alongside
+    # the larger-n short-horizon ones.
+    HORIZONS = ("1w", "2w", "4w")
+    stats_intent_by_h = {
+        h: pairwise_welch(enriched, group_col="intent", value_col=f"return_{h}", min_n=5)
+        for h in HORIZONS
+    }
+    stats_dr_verdict_by_h = {
+        h: pairwise_welch(
+            enriched, group_col="deep_research_verdict", value_col=f"return_{h}", min_n=3,
+        )
+        for h in HORIZONS
+    }
+    corr_pm_rr_by_h = {
+        h: correlation(enriched, x_col="risk_reward_ratio", y_col=f"return_{h}")
+        for h in HORIZONS
+    }
+    corr_dr_rr_by_h = {
+        h: correlation(enriched, x_col="deep_research_rr_ratio", y_col=f"return_{h}")
+        for h in HORIZONS
+    }
+    # Per-intent / per-DR-verdict aggregations at every horizon
+    winrate_intent_by_h = {
+        h: winrate_by(enriched, "intent", horizon=h) for h in HORIZONS
+    }
+    winrate_dr_verdict_by_h = {
+        h: winrate_by(enriched, "deep_research_verdict", horizon=h) for h in HORIZONS
+    }
+    drop_bucket_by_h = {}
+    for h in HORIZONS:
+        b = winrate_by_bucket(
+            enriched, "drop_percent",
+            bins=[-100, -15, -8, -5, 0],
+            labels=["<= -15%", "-15 to -8", "-8 to -5", "> -5%"],
+            horizon=h,
+        )
+        if not b.empty:
+            b["bucket"] = b["bucket"].astype(str)
+        drop_bucket_by_h[h] = b
+    pm_rr_bucket_by_h = {}
+    dr_rr_bucket_by_h = {}
+    for h in HORIZONS:
+        bins = [-0.001, 1.0, 2.0, 3.0, 100.0]
+        labels = ["<1", "1-2", "2-3", ">=3"]
+        if "risk_reward_ratio" in enriched.columns and enriched["risk_reward_ratio"].notna().any():
+            b = winrate_by_bucket(enriched, "risk_reward_ratio", bins=bins, labels=labels, horizon=h)
+            if not b.empty:
+                b["bucket"] = b["bucket"].astype(str)
+            pm_rr_bucket_by_h[h] = b
+        if "deep_research_rr_ratio" in enriched.columns and enriched["deep_research_rr_ratio"].notna().any():
+            b = winrate_by_bucket(enriched, "deep_research_rr_ratio", bins=bins, labels=labels, horizon=h)
+            if not b.empty:
+                b["bucket"] = b["bucket"].astype(str)
+            dr_rr_bucket_by_h[h] = b
+
+    # Keep the 4w-named fields for back-compat / visual headline.
+    stats_intent = stats_intent_by_h["4w"]
+    stats_dr_verdict = stats_dr_verdict_by_h["4w"]
+    corr_pm_rr = corr_pm_rr_by_h["4w"]
+    corr_dr_rr = corr_dr_rr_by_h["4w"]
     rec_intent = recovery_stats(enriched, group_col="intent")
     rec_dr_verdict = recovery_stats(enriched, group_col="deep_research_verdict")
 
@@ -636,6 +689,21 @@ def compute_dataset(start_date: str = "2026-02-01") -> Dict[str, Any]:
             "dr_rr_by_intent": dr_rr_by_intent,
             "top_pm_rr": _stats_records(top_pm_rr),
             "top_dr_rr": _stats_records(top_dr_rr),
+            # Multi-horizon: same family of analyses repeated at 1w / 2w / 4w
+            "by_horizon": {
+                h: {
+                    "winrate_by_intent": _stats_records(winrate_intent_by_h[h]),
+                    "winrate_by_dr_verdict": _stats_records(winrate_dr_verdict_by_h[h]),
+                    "winrate_by_drop_bucket": _stats_records(drop_bucket_by_h[h]),
+                    "winrate_by_pm_rr": _stats_records(pm_rr_bucket_by_h.get(h, pd.DataFrame())),
+                    "winrate_by_dr_rr": _stats_records(dr_rr_bucket_by_h.get(h, pd.DataFrame())),
+                    "pairwise_intent": _stats_records(stats_intent_by_h[h]),
+                    "pairwise_dr_verdict": _stats_records(stats_dr_verdict_by_h[h]),
+                    "corr_pm_rr": corr_pm_rr_by_h[h],
+                    "corr_dr_rr": corr_dr_rr_by_h[h],
+                }
+                for h in HORIZONS
+            },
         },
         "decisions": decisions,
     }
