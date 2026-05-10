@@ -237,6 +237,119 @@ def sweep_rr_cutoff(
     return pd.DataFrame(rows)
 
 
+def per_verdict_breakdown(
+    df: pd.DataFrame, rr_col: str, rr_min: float, horizon: str,
+    investment: float, cost_in: float, cost_out: float,
+    spy_returns: Dict,
+) -> pd.DataFrame:
+    """Decompose the strategy's P&L by intent within the chosen R/R band."""
+    rows = []
+    for intent in ("ENTER_NOW", "ENTER_LIMIT", "AVOID", "NEUTRAL"):
+        sub = df[df["intent"] == intent]
+        _, agg = run_simulation(
+            sub, rr_col=rr_col, rr_min=rr_min, horizon=horizon,
+            investment=investment, cost_in=cost_in, cost_out=cost_out,
+            spy_returns=spy_returns,
+        )
+        rows.append({
+            "intent": intent,
+            "n_trades": agg["n_trades"],
+            "total_invested_eur": agg["total_invested_eur"],
+            "strategy_net_eur": agg["total_net_pnl_eur"],
+            "spy_net_eur": agg["total_spy_net_pnl_eur"],
+            "alpha_eur": agg["total_alpha_eur"],
+            "roi": agg["roi"],
+            "alpha_roi": agg["alpha_roi"],
+            "win_rate_net": agg["win_rate_net"],
+        })
+    # Append a TOTAL row
+    _, total_agg = run_simulation(
+        df, rr_col=rr_col, rr_min=rr_min, horizon=horizon,
+        investment=investment, cost_in=cost_in, cost_out=cost_out,
+        spy_returns=spy_returns,
+    )
+    rows.append({
+        "intent": "TOTAL",
+        "n_trades": total_agg["n_trades"],
+        "total_invested_eur": total_agg["total_invested_eur"],
+        "strategy_net_eur": total_agg["total_net_pnl_eur"],
+        "spy_net_eur": total_agg["total_spy_net_pnl_eur"],
+        "alpha_eur": total_agg["total_alpha_eur"],
+        "roi": total_agg["roi"],
+        "alpha_roi": total_agg["alpha_roi"],
+        "win_rate_net": total_agg["win_rate_net"],
+    })
+    return pd.DataFrame(rows)
+
+
+def sweep_drop_one_verdict(
+    df: pd.DataFrame, rr_col: str, rr_min: float, horizon: str,
+    investment: float, cost_in: float, cost_out: float,
+    spy_returns: Dict,
+) -> pd.DataFrame:
+    """For each verdict G, run the strategy without G; compare to baseline + BUY-only."""
+    intents = ("ENTER_NOW", "ENTER_LIMIT", "AVOID", "NEUTRAL")
+    _, base_agg = run_simulation(
+        df, rr_col=rr_col, rr_min=rr_min, horizon=horizon,
+        investment=investment, cost_in=cost_in, cost_out=cost_out,
+        spy_returns=spy_returns,
+    )
+    base_alpha = base_agg["total_alpha_eur"]
+    base_alpha_roi = base_agg["alpha_roi"]
+
+    rows = [{
+        "config": "ALL (baseline)",
+        "n_trades": base_agg["n_trades"],
+        "total_invested_eur": base_agg["total_invested_eur"],
+        "strategy_net_eur": base_agg["total_net_pnl_eur"],
+        "spy_net_eur": base_agg["total_spy_net_pnl_eur"],
+        "alpha_eur": base_agg["total_alpha_eur"],
+        "roi": base_agg["roi"],
+        "alpha_roi": base_agg["alpha_roi"],
+        "delta_alpha_eur": 0.0,
+        "delta_alpha_pct": 0.0,
+    }]
+    for drop in intents:
+        kept = df[df["intent"] != drop]
+        _, agg = run_simulation(
+            kept, rr_col=rr_col, rr_min=rr_min, horizon=horizon,
+            investment=investment, cost_in=cost_in, cost_out=cost_out,
+            spy_returns=spy_returns,
+        )
+        rows.append({
+            "config": f"Drop {drop}",
+            "n_trades": agg["n_trades"],
+            "total_invested_eur": agg["total_invested_eur"],
+            "strategy_net_eur": agg["total_net_pnl_eur"],
+            "spy_net_eur": agg["total_spy_net_pnl_eur"],
+            "alpha_eur": agg["total_alpha_eur"],
+            "roi": agg["roi"],
+            "alpha_roi": agg["alpha_roi"],
+            "delta_alpha_eur": agg["total_alpha_eur"] - base_alpha,
+            "delta_alpha_pct": agg["alpha_roi"] - base_alpha_roi,
+        })
+    # BUY-only
+    buys = df[df["intent"].isin(["ENTER_NOW", "ENTER_LIMIT"])]
+    _, agg = run_simulation(
+        buys, rr_col=rr_col, rr_min=rr_min, horizon=horizon,
+        investment=investment, cost_in=cost_in, cost_out=cost_out,
+        spy_returns=spy_returns,
+    )
+    rows.append({
+        "config": "Keep BUY only",
+        "n_trades": agg["n_trades"],
+        "total_invested_eur": agg["total_invested_eur"],
+        "strategy_net_eur": agg["total_net_pnl_eur"],
+        "spy_net_eur": agg["total_spy_net_pnl_eur"],
+        "alpha_eur": agg["total_alpha_eur"],
+        "roi": agg["roi"],
+        "alpha_roi": agg["alpha_roi"],
+        "delta_alpha_eur": agg["total_alpha_eur"] - base_alpha,
+        "delta_alpha_pct": agg["alpha_roi"] - base_alpha_roi,
+    })
+    return pd.DataFrame(rows)
+
+
 def sweep_investment(
     df: pd.DataFrame, rr_col: str, rr_min: float, horizon: str,
     cost_in: float, cost_out: float, spy_returns: Dict,
@@ -289,6 +402,39 @@ def _print_rr_sweep(df: pd.DataFrame, label: str) -> None:
               f"€{r['alpha_eur']:>+10,.2f} "
               f"{r['roi']:>+7.2%} {r['spy_roi']:>+7.2%} {r['alpha_roi']:>+7.2%} "
               f"{r['win_rate_net']:>5.1%}{marker}")
+
+
+def _print_per_verdict(df: pd.DataFrame, label: str) -> None:
+    print("=" * 96)
+    print(f"  {label}")
+    print("=" * 96)
+    print(f"  {'verdict':<14s} {'n':>3s} {'invested':>10s} {'strat €':>11s} "
+          f"{'spy €':>11s} {'alpha €':>11s} {'ROI':>7s} {'alpha %':>8s} {'win%':>6s}")
+    print(f"  {'-' * 90}")
+    for _, r in df.iterrows():
+        print(f"  {r['intent']:<14s} {int(r['n_trades']):>3d} "
+              f"€{r['total_invested_eur']:>9,.0f} "
+              f"€{r['strategy_net_eur']:>+10,.2f} €{r['spy_net_eur']:>+10,.2f} "
+              f"€{r['alpha_eur']:>+10,.2f} {r['roi']:>+7.2%} {r['alpha_roi']:>+8.2%} "
+              f"{r['win_rate_net']:>5.1%}")
+
+
+def _print_drop_one(df: pd.DataFrame, label: str) -> None:
+    print("=" * 110)
+    print(f"  {label}")
+    print("=" * 110)
+    print(f"  {'config':<22s} {'n':>3s} {'invested':>10s} {'strat €':>11s} "
+          f"{'spy €':>11s} {'alpha €':>11s} {'ROI':>7s} {'alpha %':>8s} "
+          f"{'Δalpha€':>9s} {'Δalpha%':>9s}")
+    print(f"  {'-' * 106}")
+    for _, r in df.iterrows():
+        delta_eur = f"{r['delta_alpha_eur']:+9.2f}" if r["config"] != "ALL (baseline)" else "       —"
+        delta_pct = f"{r['delta_alpha_pct']:+8.2%}" if r["config"] != "ALL (baseline)" else "       —"
+        print(f"  {r['config']:<22s} {int(r['n_trades']):>3d} "
+              f"€{r['total_invested_eur']:>9,.0f} "
+              f"€{r['strategy_net_eur']:>+10,.2f} €{r['spy_net_eur']:>+10,.2f} "
+              f"€{r['alpha_eur']:>+10,.2f} {r['roi']:>+7.2%} {r['alpha_roi']:>+8.2%} "
+              f"{delta_eur} {delta_pct}")
 
 
 def _print_investment_sweep(df: pd.DataFrame, label: str) -> None:
@@ -369,6 +515,38 @@ def main():
     if args.no_sweep:
         return
 
+    # --- Per-verdict contribution at the chosen R/R cutoff ---
+    print()
+    pv_df = per_verdict_breakdown(
+        df, rr_col=args.rr_col, rr_min=args.rr_min, horizon=args.horizon,
+        investment=args.investment, cost_in=args.cost_in, cost_out=args.cost_out,
+        spy_returns=spy_returns,
+    )
+    _print_per_verdict(
+        pv_df,
+        f"PER-VERDICT CONTRIBUTION — {args.rr_col} > {args.rr_min}, "
+        f"hold {args.horizon}, €{args.investment:.0f}/trade",
+    )
+    pv_path = out.parent / f"per_verdict_{args.rr_col}_above_{args.rr_min}_{args.horizon}.csv"
+    pv_df.to_csv(pv_path, index=False)
+    print(f"\nSaved per-verdict CSV to {pv_path}")
+
+    # --- Drop-one-verdict sensitivity ---
+    print()
+    drop_df = sweep_drop_one_verdict(
+        df, rr_col=args.rr_col, rr_min=args.rr_min, horizon=args.horizon,
+        investment=args.investment, cost_in=args.cost_in, cost_out=args.cost_out,
+        spy_returns=spy_returns,
+    )
+    _print_drop_one(
+        drop_df,
+        f"DROP-ONE-VERDICT — {args.rr_col} > {args.rr_min}, "
+        f"hold {args.horizon}, €{args.investment:.0f}/trade",
+    )
+    drop_path = out.parent / f"drop_one_verdict_{args.rr_col}_above_{args.rr_min}_{args.horizon}.csv"
+    drop_df.to_csv(drop_path, index=False)
+    print(f"\nSaved drop-one-verdict CSV to {drop_path}")
+
     # --- R/R cutoff sweep ---
     print()
     rr_grid = [round(0.5 + 0.25 * i, 2) for i in range(0, 19)]   # 0.50 ... 5.00
@@ -386,6 +564,24 @@ def main():
     sweep_path = out.parent / f"sweep_rr_{args.rr_col}_{args.horizon}_inv{int(args.investment)}.csv"
     rr_sweep.to_csv(sweep_path, index=False)
     print(f"\nSaved R/R sweep to {sweep_path}")
+
+    # Same R/R sweep but restricted to BUY verdicts (ENTER_NOW + ENTER_LIMIT)
+    print()
+    buys_only = df[df["intent"].isin(["ENTER_NOW", "ENTER_LIMIT"])]
+    rr_sweep_buy = sweep_rr_cutoff(
+        buys_only, rr_col=args.rr_col, horizon=args.horizon,
+        investment=args.investment,
+        cost_in=args.cost_in, cost_out=args.cost_out,
+        spy_returns=spy_returns, thresholds=rr_grid,
+    )
+    _print_rr_sweep(
+        rr_sweep_buy,
+        f"R/R CUTOFF SWEEP — BUY ONLY (ENTER_NOW + ENTER_LIMIT), "
+        f"hold {args.horizon}, €{args.investment:.0f}/trade",
+    )
+    sweep_buy_path = out.parent / f"sweep_rr_buy_only_{args.rr_col}_{args.horizon}_inv{int(args.investment)}.csv"
+    rr_sweep_buy.to_csv(sweep_buy_path, index=False)
+    print(f"\nSaved BUY-only R/R sweep to {sweep_buy_path}")
 
     # --- Investment-size sweep at the user-chosen R/R threshold ---
     print()
