@@ -1,6 +1,6 @@
 # Performance analysis package — 2026-02-01
 
-Generated 2026-05-09 20:40. Cohort size: **372 decisions**.
+Generated 2026-05-09 22:33. Cohort size: **372 decisions**.
 
 ## Files
 
@@ -27,10 +27,16 @@ Generated 2026-05-09 20:40. Cohort size: **372 decisions**.
 - `charts/15_corr_pm_rr_vs_return.png`
 - `charts/16_corr_dr_rr_vs_return.png`
 - `charts/17_recovery_days_by_intent.png`
+- `charts/18_winloss_by_intent.png`
+- `charts/19_winloss_by_dr_verdict.png`
+- `charts/20_cum_pnl_calendar_by_intent.png`
+- `charts/21_cum_pnl_calendar_by_dr_verdict.png`
 
 ### Data
 
 - `data/cohort_enriched.csv`
+- `data/cum_pnl_by_dr_verdict.json`
+- `data/cum_pnl_by_intent.json`
 - `data/equity_curve.csv`
 - `data/full_payload.json`
 - `data/spy_bars.csv`
@@ -43,6 +49,8 @@ Generated 2026-05-09 20:40. Cohort size: **372 decisions**.
 - `data/time_series.json`
 - `data/time_series_individuals.json`
 - `data/time_to_recover.csv`
+- `data/winloss_by_dr_verdict.json`
+- `data/winloss_by_intent.json`
 - `data/winrate_by_dr_action.csv`
 - `data/winrate_by_dr_rr.csv`
 - `data/winrate_by_dr_verdict.csv`

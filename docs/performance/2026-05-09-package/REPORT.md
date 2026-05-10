@@ -1,6 +1,6 @@
 # StockDrop Performance Analysis — 2026-02-01 cohort
 
-_Generated 2026-05-09 20:40. Cohort: **372 decisions**._
+_Generated 2026-05-09 22:33. Cohort: **372 decisions**._
 
 ## Executive summary
 
@@ -196,14 +196,46 @@ Light grey lines are individual ENTER_NOW + ENTER_LIMIT decisions; bold lines ar
 ![wr_drop](charts/10_winrate_by_drop_size.png)
 
 
-## 8. Limitations
+## 8. Profit and loss decomposition
+
+Two complementary views of how each group's wins and losses played out *over time*.
+
+### 8.1 Winner vs loser trajectories per category
+
+Each cohort row is classified at day-20 by the sign of its return. The panels below show the **mean winning trajectory** vs the **mean losing trajectory** within each category, with 95% CI bands.
+
+Why this matters: a high overall avg return can come from many small wins or a few large ones; this chart lets you see the asymmetry.
+
+
+![winloss_intent](charts/18_winloss_by_intent.png)
+
+
+
+![winloss_dr](charts/19_winloss_by_dr_verdict.png)
+
+
+### 8.2 Cumulative mark-to-market P&L over calendar time
+
+Assume **\$1 is invested at every signal** at the decision-date close, held forward, and marked to its closing price every subsequent trading day. The lines below sum that mark-to-market P&L across every open position, by category, on each calendar date.
+
+Useful for seeing *when* the P&L accrued (early jump? steady drift?) and how each category's book performed in real time.
+
+
+![cum_pnl_intent](charts/20_cum_pnl_calendar_by_intent.png)
+
+
+
+![cum_pnl_dr](charts/21_cum_pnl_calendar_by_dr_verdict.png)
+
+
+## 9. Limitations
 
 - **Forward-window coverage.** With current `decision_date` range, no decision   has more than ~22 trading days of forward data, which means the 4-week and   8-week return columns are NaN for most rows. Re-running this script after   more time elapses extends every horizon naturally.
 - **Sample size.** After dropping rows without 4w returns, intent groups have   n=4–18 and DR-verdict groups have n=1–6. The pairwise significance tests are   honest about this — they refuse to call differences "real" until the data   catches up.
 - **Market regime.** Cohort window appears to coincide with a broad SPY rally   (+7.6% median over 20 trading days). Many AVOIDs would have been profitable   passive holdings; that is a property of this regime and should not be   generalized.
 - **Storage duplication.** `deep_research_action` and `deep_research_verdict`   carry identical values in this DB; the Q2/3.1 sections are therefore   redundant against the underlying signal.
 
-## 9. Recommendations
+## 10. Recommendations
 
 - **Wait, then re-run.** The single largest analytical lift is more time.   Once the earliest decisions reach their 8-week mark, re-run   `build_package.py` and the same charts will tell a much sharper story.
 - **Investigate AVOID hits.** AVOIDs with high `+20d` post-recovery returns   are worth pulling individually — was the AVOID a calibration bug, or did   the model correctly price in higher risk that didn't materialize this regime?

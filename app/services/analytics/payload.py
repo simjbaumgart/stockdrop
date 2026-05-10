@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 from collections import defaultdict
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -135,6 +135,166 @@ def _time_series_by_group(
         }
         if include_individuals:
             out[grp]["individuals"] = paths
+    return out
+
+
+def _winloss_split_by_group(
+    cohort: pd.DataFrame,
+    bars_by_ticker: Dict[str, pd.DataFrame],
+    group_col: str,
+    horizon_label: str = "4w",
+    horizon_day: int = 20,
+    max_days: int = 40,
+) -> Dict[str, Any]:
+    """Split each group's per-day mean return path into winners vs losers.
+
+    A row is classified by the sign of its return at `horizon_day` (or last
+    available day if it isn't yet old enough). The output mirrors the shape of
+    `_time_series_by_group` for each subgroup so the JS / matplotlib renderers
+    can reuse the same chart code.
+
+    Returns:
+        {
+            group_value: {
+                "winners":  {day_offsets, mean, ci_low, ci_high, count, n_paths},
+                "losers":   {...},
+                "n_winners": int,
+                "n_losers":  int,
+                "horizon_label": str,
+            },
+            ...
+        }
+    """
+    if cohort.empty:
+        return {}
+
+    paths_by_group: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+    for _, row in cohort.iterrows():
+        sym = str(row.get("symbol") or "").upper()
+        if not sym:
+            continue
+        bars = bars_by_ticker.get(sym, pd.DataFrame())
+        if bars is None or bars.empty:
+            continue
+        bars = bars.sort_index()
+        forward = bars.loc[bars.index >= row["decision_date"]]
+        if forward.empty:
+            continue
+        closes = forward["Close"].astype(float).iloc[: max_days + 1]
+        if len(closes) < 2:
+            continue
+        try:
+            decision_price = float(row.get("price_at_decision") or 0)
+        except (TypeError, ValueError):
+            continue
+        if decision_price <= 0:
+            continue
+        rets = [(float(c) / decision_price - 1.0) for c in closes.tolist()]
+
+        group_value = row.get(group_col)
+        if group_value is None or (isinstance(group_value, float) and pd.isna(group_value)):
+            continue
+
+        # Classify by the sign of the return at horizon_day (or final available)
+        idx = min(horizon_day, len(rets) - 1)
+        final_ret = rets[idx]
+        side = "winners" if final_ret > 0 else "losers"
+        paths_by_group[(str(group_value), side)].append({
+            "symbol": sym,
+            "decision_date": row["decision_date"].strftime("%Y-%m-%d"),
+            "final_ret": final_ret,
+            "returns": rets,
+        })
+
+    out: Dict[str, Any] = {}
+    groups = sorted({g for g, _ in paths_by_group.keys()})
+    for grp in groups:
+        out[grp] = {"horizon_label": horizon_label, "n_winners": 0, "n_losers": 0}
+        for side in ("winners", "losers"):
+            paths = paths_by_group.get((grp, side), [])
+            if not paths:
+                out[grp][side] = None
+                continue
+            max_len = max(len(p["returns"]) for p in paths)
+            per_day = [[] for _ in range(max_len)]
+            for p in paths:
+                for d, r in enumerate(p["returns"]):
+                    per_day[d].append(r)
+            means, ci_lows, ci_highs = [], [], []
+            for x in per_day:
+                ci = mean_ci(x)
+                means.append(ci["mean"])
+                ci_lows.append(ci["ci_low"])
+                ci_highs.append(ci["ci_high"])
+            out[grp][side] = {
+                "day_offsets": list(range(max_len)),
+                "mean": means,
+                "ci_low": ci_lows,
+                "ci_high": ci_highs,
+                "count": [len(x) for x in per_day],
+                "n_paths": len(paths),
+            }
+            out[grp][f"n_{side}"] = len(paths)
+    return out
+
+
+def _cumulative_pnl_by_calendar(
+    cohort: pd.DataFrame,
+    bars_by_ticker: Dict[str, pd.DataFrame],
+    group_col: str,
+    initial_per_signal: float = 1.0,
+) -> Dict[str, Any]:
+    """Cumulative dollar P&L per group over actual calendar dates.
+
+    For each row, a `initial_per_signal` long position is opened at the
+    decision-date close and marked-to-market every subsequent trading day.
+    The result is a per-group time series of total mark-to-market P&L,
+    summed across all open positions on that calendar date.
+    """
+    if cohort.empty:
+        return {}
+
+    series_by_group: Dict[str, List[Tuple[pd.Timestamp, float]]] = defaultdict(list)
+    counts_by_group: Dict[str, int] = defaultdict(int)
+
+    for _, row in cohort.iterrows():
+        grp = row.get(group_col)
+        if grp is None or (isinstance(grp, float) and pd.isna(grp)):
+            continue
+        grp = str(grp)
+        sym = str(row.get("symbol") or "").upper()
+        if not sym:
+            continue
+        bars = bars_by_ticker.get(sym, pd.DataFrame())
+        if bars is None or bars.empty:
+            continue
+        bars = bars.sort_index()
+        forward = bars.loc[bars.index >= row["decision_date"]]
+        if forward.empty:
+            continue
+        try:
+            entry = float(row.get("price_at_decision") or 0)
+        except (TypeError, ValueError):
+            continue
+        if entry <= 0:
+            continue
+        counts_by_group[grp] += 1
+        for ts, close in forward["Close"].astype(float).items():
+            pnl = initial_per_signal * (float(close) / entry - 1.0)
+            series_by_group[grp].append((pd.Timestamp(ts).normalize(), pnl))
+
+    out: Dict[str, Any] = {}
+    for grp, rows in series_by_group.items():
+        if not rows:
+            continue
+        df = pd.DataFrame(rows, columns=["date", "pnl"])
+        # Sum across all open positions per calendar date
+        agg = df.groupby("date", as_index=False)["pnl"].sum().sort_values("date")
+        out[grp] = {
+            "dates": [d.strftime("%Y-%m-%d") for d in agg["date"]],
+            "cumulative_pnl": [float(v) for v in agg["pnl"]],
+            "n_signals": int(counts_by_group[grp]),
+        }
     return out
 
 
@@ -356,6 +516,24 @@ def compute_dataset(start_date: str = "2026-02-01") -> Dict[str, Any]:
         max_days=40, include_individuals=False,
     )
 
+    # Winner/loser split by intent (and DR verdict)
+    winloss_by_intent = _winloss_split_by_group(
+        enriched, bars, group_col="intent",
+        horizon_label="20d", horizon_day=20, max_days=40,
+    )
+    winloss_by_dr_verdict = _winloss_split_by_group(
+        enriched, bars, group_col="deep_research_verdict",
+        horizon_label="20d", horizon_day=20, max_days=40,
+    )
+
+    # Cumulative dollar P&L per group over calendar time (mark-to-market)
+    cum_pnl_by_intent = _cumulative_pnl_by_calendar(
+        enriched, bars, group_col="intent", initial_per_signal=1.0,
+    )
+    cum_pnl_by_dr_verdict = _cumulative_pnl_by_calendar(
+        enriched, bars, group_col="deep_research_verdict", initial_per_signal=1.0,
+    )
+
     # SPY benchmark — fetch a single ticker spanning the cohort
     try:
         spy_bars = get_bars(
@@ -424,6 +602,10 @@ def compute_dataset(start_date: str = "2026-02-01") -> Dict[str, Any]:
             "by_intent": ts_by_intent,
             "by_dr_verdict": ts_by_dr_verdict,
             "spy_overlay": spy_overlay,
+            "winloss_by_intent": winloss_by_intent,
+            "winloss_by_dr_verdict": winloss_by_dr_verdict,
+            "cum_pnl_by_intent": cum_pnl_by_intent,
+            "cum_pnl_by_dr_verdict": cum_pnl_by_dr_verdict,
         },
         "stats": {
             "pairwise_intent": _stats_records(stats_intent),
