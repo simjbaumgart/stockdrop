@@ -31,11 +31,13 @@ from app.services.analytics.charts import (  # noqa: E402
     DR_COLORS,
     INTENT_COLORS,
     avg_return_bar,
+    cum_pnl_calendar,
     equity_line,
     recovery_histogram_by_group,
     scatter_with_regression,
     spaghetti_plot,
     time_series_lines,
+    win_loss_split_grid,
     winrate_bar,
 )
 from app.services.analytics.payload import compute_dataset  # noqa: E402
@@ -266,6 +268,36 @@ def _generate_charts(payload: Dict[str, Any], enriched: pd.DataFrame, charts_dir
         palette=INTENT_COLORS,
     )
 
+    # Win/loss split per intent and per DR verdict
+    out["winloss_intent"] = win_loss_split_grid(
+        ts.get("winloss_by_intent") or {},
+        "Winner vs loser trajectories — by AI council intent (split at day-20 sign)",
+        charts_dir / "18_winloss_by_intent.png",
+        palette=INTENT_COLORS,
+        group_order=["ENTER_NOW", "ENTER_LIMIT", "AVOID", "NEUTRAL"],
+    )
+    out["winloss_dr"] = win_loss_split_grid(
+        ts.get("winloss_by_dr_verdict") or {},
+        "Winner vs loser trajectories — by Deep Research verdict",
+        charts_dir / "19_winloss_by_dr_verdict.png",
+        palette=DR_COLORS,
+        group_order=["BUY", "BUY_LIMIT", "AVOID", "WATCH", "HOLD"],
+    )
+
+    # Cumulative dollar P&L over actual calendar time, per group
+    out["cum_pnl_intent"] = cum_pnl_calendar(
+        ts.get("cum_pnl_by_intent") or {},
+        "Cumulative mark-to-market P&L by AI council intent\n($1 per signal, summed across all open positions)",
+        charts_dir / "20_cum_pnl_calendar_by_intent.png",
+        palette=INTENT_COLORS,
+    )
+    out["cum_pnl_dr"] = cum_pnl_calendar(
+        ts.get("cum_pnl_by_dr_verdict") or {},
+        "Cumulative mark-to-market P&L by Deep Research verdict\n($1 per signal, summed across all open positions)",
+        charts_dir / "21_cum_pnl_calendar_by_dr_verdict.png",
+        palette=DR_COLORS,
+    )
+
     return out
 
 
@@ -339,6 +371,15 @@ def _export_data(payload: Dict[str, Any], enriched: pd.DataFrame,
         path = data_dir / "time_series.json"
         path.write_text(json.dumps(ts_export, default=str, indent=2))
         out["time_series"] = path
+
+        # Win/loss split per group + cumulative P&L by calendar
+        for key in ("winloss_by_intent", "winloss_by_dr_verdict",
+                    "cum_pnl_by_intent", "cum_pnl_by_dr_verdict"):
+            value = ts.get(key)
+            if value:
+                p = data_dir / f"{key}.json"
+                p.write_text(json.dumps(value, default=str, indent=2))
+                out[key] = p
 
         # individuals separately for compactness
         individuals = []
@@ -747,7 +788,39 @@ def _build_report(
         "",
         img("wr_drop"),
         "",
-        "## 8. Limitations",
+        "## 8. Profit and loss decomposition",
+        "",
+        "Two complementary views of how each group's wins and losses played out "
+        "*over time*.",
+        "",
+        "### 8.1 Winner vs loser trajectories per category",
+        "",
+        "Each cohort row is classified at day-20 by the sign of its return. The "
+        "panels below show the **mean winning trajectory** vs the **mean losing "
+        "trajectory** within each category, with 95% CI bands.",
+        "",
+        "Why this matters: a high overall avg return can come from many small "
+        "wins or a few large ones; this chart lets you see the asymmetry.",
+        "",
+        img("winloss_intent"),
+        "",
+        img("winloss_dr"),
+        "",
+        "### 8.2 Cumulative mark-to-market P&L over calendar time",
+        "",
+        "Assume **\\$1 is invested at every signal** at the decision-date close, "
+        "held forward, and marked to its closing price every subsequent trading "
+        "day. The lines below sum that mark-to-market P&L across every open "
+        "position, by category, on each calendar date.",
+        "",
+        "Useful for seeing *when* the P&L accrued (early jump? steady drift?) and "
+        "how each category's book performed in real time.",
+        "",
+        img("cum_pnl_intent"),
+        "",
+        img("cum_pnl_dr"),
+        "",
+        "## 9. Limitations",
         "",
         "- **Forward-window coverage.** With current `decision_date` range, no decision "
         "  has more than ~22 trading days of forward data, which means the 4-week and "
@@ -765,7 +838,7 @@ def _build_report(
         "  carry identical values in this DB; the Q2/3.1 sections are therefore "
         "  redundant against the underlying signal.",
         "",
-        "## 9. Recommendations",
+        "## 10. Recommendations",
         "",
         "- **Wait, then re-run.** The single largest analytical lift is more time. "
         "  Once the earliest decisions reach their 8-week mark, re-run "

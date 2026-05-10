@@ -338,3 +338,126 @@ def recovery_histogram_by_group(
 def equity_curve_chart(curve_df: pd.DataFrame, title: str, out_path: Path) -> Path:
     """Convenience wrapper around `equity_line` that takes a list of records."""
     return equity_line(curve_df, title, out_path)
+
+
+def win_loss_split_grid(
+    winloss: Dict[str, dict],
+    title: str,
+    out_path: Path,
+    palette: Optional[Dict[str, str]] = None,
+    group_order: Optional[List[str]] = None,
+) -> Path:
+    """Small-multiples chart: one panel per group, showing winners vs losers.
+
+    Each panel plots (a) the mean trajectory of the WINNING decisions in that
+    group and (b) the mean trajectory of the LOSING decisions, both with 95%
+    CI bands. The horizontal axis is trading days since decision.
+    """
+    palette = palette or {}
+    groups = group_order if group_order else sorted(winloss.keys())
+    groups = [g for g in groups if g in winloss]
+    if not groups:
+        fig, ax = plt.subplots(figsize=(10, 5))
+        ax.text(0.5, 0.5, "no data", ha="center", va="center", transform=ax.transAxes)
+        ax.set_axis_off()
+        return _save(fig, out_path)
+
+    n = len(groups)
+    cols = min(2, n)
+    rows = (n + cols - 1) // cols
+    fig, axes = plt.subplots(rows, cols, figsize=(11, 4.4 * rows), sharex=True, sharey=False)
+    axes = np.atleast_1d(axes).flatten() if hasattr(axes, "flatten") else [axes]
+
+    def _to_pct(seq):
+        return [v * 100 if v is not None else np.nan for v in seq]
+
+    for i, grp in enumerate(groups):
+        ax = axes[i]
+        data = winloss[grp]
+        plotted = False
+        # Winners
+        w = data.get("winners")
+        if w and w.get("mean"):
+            x = w["day_offsets"]
+            y = _to_pct(w["mean"])
+            lo = _to_pct(w["ci_low"]); hi = _to_pct(w["ci_high"])
+            ax.fill_between(x, lo, hi, color="#22c55e", alpha=0.15, linewidth=0)
+            ax.plot(x, y, color="#16a34a", linewidth=2.4,
+                    label=f"Winners (n={w['n_paths']})")
+            plotted = True
+        # Losers
+        l = data.get("losers")
+        if l and l.get("mean"):
+            x = l["day_offsets"]
+            y = _to_pct(l["mean"])
+            lo = _to_pct(l["ci_low"]); hi = _to_pct(l["ci_high"])
+            ax.fill_between(x, lo, hi, color="#ef4444", alpha=0.15, linewidth=0)
+            ax.plot(x, y, color="#dc2626", linewidth=2.4,
+                    label=f"Losers (n={l['n_paths']})")
+            plotted = True
+
+        ax.axhline(0, color="black", linewidth=0.5)
+        ax.set_title(grp, fontsize=11, color=palette.get(grp, "#334155"), fontweight="bold")
+        ax.grid(True, linestyle=":", alpha=0.3)
+        if plotted:
+            ax.legend(loc="best", fontsize=8)
+        else:
+            ax.text(0.5, 0.5, "no data", ha="center", va="center", transform=ax.transAxes)
+            ax.set_axis_off()
+
+    # Hide unused axes if any
+    for j in range(n, len(axes)):
+        axes[j].set_visible(False)
+
+    fig.suptitle(title, fontsize=12, y=0.995)
+    fig.supxlabel("Trading days since decision", fontsize=10)
+    fig.supylabel("Mean return (%) with 95% CI", fontsize=10)
+    fig.tight_layout()
+    fig.subplots_adjust(top=0.93)
+    fig.savefig(out_path, dpi=120, bbox_inches="tight")
+    plt.close(fig)
+    return out_path
+
+
+def cum_pnl_calendar(
+    series_by_group: Dict[str, dict],
+    title: str,
+    out_path: Path,
+    palette: Optional[Dict[str, str]] = None,
+) -> Path:
+    """Cumulative dollar P&L over actual calendar dates, one line per group.
+
+    Series shape (per group): {dates: [...], cumulative_pnl: [...], n_signals: int}.
+    """
+    palette = palette or {}
+    fig, ax = plt.subplots(figsize=(11, 5))
+
+    if not series_by_group:
+        ax.text(0.5, 0.5, "no data", ha="center", va="center", transform=ax.transAxes)
+        ax.set_axis_off()
+        return _save(fig, out_path)
+
+    plotted = False
+    for grp, data in series_by_group.items():
+        if not data or not data.get("cumulative_pnl"):
+            continue
+        dates = pd.to_datetime(data["dates"])
+        pnl = np.asarray(data["cumulative_pnl"], dtype=float)
+        color = palette.get(grp, "#cbd5e1")
+        ax.plot(dates, pnl, color=color, linewidth=2.2,
+                label=f"{grp} (n={data.get('n_signals', 0)})")
+        plotted = True
+
+    if not plotted:
+        ax.text(0.5, 0.5, "no data", ha="center", va="center", transform=ax.transAxes)
+        ax.set_axis_off()
+        return _save(fig, out_path)
+
+    ax.axhline(0, color="black", linewidth=0.5)
+    ax.set_xlabel("Calendar date")
+    ax.set_ylabel("Cumulative mark-to-market P&L\n($1 per signal)")
+    ax.set_title(title)
+    ax.grid(True, linestyle=":", alpha=0.3)
+    ax.legend(loc="best", fontsize=9)
+    fig.autofmt_xdate()
+    return _save(fig, out_path)
