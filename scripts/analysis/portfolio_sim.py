@@ -1,16 +1,17 @@
 """Portfolio simulation: filter by R/R threshold, hold for N trading days, compute P&L.
 
+Now includes:
+  • SPY paired benchmark per trade (€X invested in SPY over the same window).
+  • R/R cutoff sweep — find the threshold that maximizes net P&L / ROI / alpha.
+  • Investment-size sweep — show how per-trade capital changes the picture.
+
 Usage:
     ./venv/bin/python scripts/analysis/portfolio_sim.py
-    ./venv/bin/python scripts/analysis/portfolio_sim.py --rr-min 1.5 --horizon 1w \
-        --investment 750 --cost-in 3 --cost-out 3
-    ./venv/bin/python scripts/analysis/portfolio_sim.py --rr-col deep_research_rr_ratio \
-        --rr-min 2.0 --horizon 2w
-    ./venv/bin/python scripts/analysis/portfolio_sim.py --intent-only --no-penny
+    ./venv/bin/python scripts/analysis/portfolio_sim.py --rr-min 2.0 --horizon 2w
+    ./venv/bin/python scripts/analysis/portfolio_sim.py --no-sweep    # skip optimization
 
 Defaults match the user-requested simulation (PM R/R > 1.5, 1-week hold,
-€750/trade, €6 round-trip cost). Output is a per-trade ledger CSV plus
-aggregate stats printed to stdout.
+€750/trade, €6 round-trip cost).
 """
 from __future__ import annotations
 
@@ -19,16 +20,58 @@ import logging
 import sys
 from datetime import datetime
 from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
+import numpy as np
 import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
 from app.services.analytics.payload import compute_dataset  # noqa: E402
+from app.services.analytics.price_cache import get_bars  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger("portfolio_sim")
+
+HORIZON_DAYS = {"1w": 5, "2w": 10, "4w": 20, "8w": 40}
+
+
+def _spy_returns_by_date(
+    cohort_dates: pd.Series,
+    horizon_days: int,
+) -> Dict[pd.Timestamp, Optional[float]]:
+    """Look up SPY's return over `horizon_days` trading days starting at each date.
+
+    Uses the existing parquet cache via price_cache.get_bars.
+    """
+    if cohort_dates.empty:
+        return {}
+    start = pd.Timestamp(cohort_dates.min())
+    end = pd.Timestamp(cohort_dates.max()) + pd.Timedelta(days=horizon_days * 3 + 5)
+    spy = get_bars("SPY", start=start, end=end)
+    if spy is None or spy.empty:
+        return {}
+    spy = spy.sort_index()
+
+    out: Dict[pd.Timestamp, Optional[float]] = {}
+    for d in cohort_dates.dropna().unique():
+        d = pd.Timestamp(d).normalize()
+        forward = spy.loc[spy.index >= d]
+        if forward.empty or len(forward) <= horizon_days:
+            out[d] = None
+            continue
+        try:
+            close_at = float(forward["Close"].iloc[0])
+            close_after = float(forward["Close"].iloc[horizon_days])
+        except Exception:
+            out[d] = None
+            continue
+        if close_at <= 0:
+            out[d] = None
+        else:
+            out[d] = (close_after - close_at) / close_at
+    return out
 
 
 def run_simulation(
@@ -39,13 +82,11 @@ def run_simulation(
     investment: float,
     cost_in: float,
     cost_out: float,
-    intent_only: bool,
-    min_price: float | None,
-) -> tuple[pd.DataFrame, dict]:
-    """Apply the trade filter and compute per-row + aggregate P&L.
-
-    Returns (per_trade_df, aggregate_stats_dict).
-    """
+    intent_only: bool = False,
+    min_price: Optional[float] = None,
+    spy_returns: Optional[Dict[pd.Timestamp, Optional[float]]] = None,
+) -> Tuple[pd.DataFrame, Dict]:
+    """Apply trade filter and compute per-row + aggregate P&L (with SPY benchmark)."""
     cost_total = cost_in + cost_out
     horizon_col = f"return_{horizon}"
 
@@ -70,6 +111,21 @@ def run_simulation(
     sub["net_pnl_eur"] = sub["gross_pnl_eur"] - cost_total
     sub["net_return_pct"] = sub["net_pnl_eur"] / investment
 
+    # Paired SPY benchmark
+    if spy_returns is not None and not sub.empty:
+        sub["spy_return"] = sub["decision_date"].map(
+            lambda d: spy_returns.get(pd.Timestamp(d).normalize())
+        )
+        sub["spy_pnl_eur"] = investment * sub["spy_return"]
+        # SPY benchmark assumes the same round-trip cost (a fair like-for-like)
+        sub["spy_net_pnl_eur"] = sub["spy_pnl_eur"] - cost_total
+        sub["alpha_pnl_eur"] = sub["net_pnl_eur"] - sub["spy_net_pnl_eur"]
+    else:
+        sub["spy_return"] = np.nan
+        sub["spy_pnl_eur"] = np.nan
+        sub["spy_net_pnl_eur"] = np.nan
+        sub["alpha_pnl_eur"] = np.nan
+
     n = len(sub)
     total_invested = n * investment
     total_gross = float(sub["gross_pnl_eur"].sum()) if n else 0.0
@@ -77,6 +133,13 @@ def run_simulation(
     total_net = float(sub["net_pnl_eur"].sum()) if n else 0.0
     win_gross = int((sub["gross_pnl_eur"] > 0).sum()) if n else 0
     win_net = int((sub["net_pnl_eur"] > 0).sum()) if n else 0
+
+    # SPY aggregate (skipping rows with no SPY data)
+    spy_valid = sub.dropna(subset=["spy_pnl_eur"]) if "spy_pnl_eur" in sub else pd.DataFrame()
+    n_spy = len(spy_valid)
+    total_spy_gross = float(spy_valid["spy_pnl_eur"].sum()) if n_spy else 0.0
+    total_spy_net = float(spy_valid["spy_net_pnl_eur"].sum()) if n_spy else 0.0
+    total_alpha = float(spy_valid["alpha_pnl_eur"].sum()) if n_spy else 0.0
 
     agg = {
         "n_trades": n,
@@ -90,66 +153,177 @@ def run_simulation(
         "win_rate_net": (win_net / n) if n else 0.0,
         "mean_net_return_pct": float(sub["net_return_pct"].mean()) if n else 0.0,
         "median_net_return_pct": float(sub["net_return_pct"].median()) if n else 0.0,
+        # SPY benchmark
+        "n_spy_paired": n_spy,
+        "total_spy_gross_pnl_eur": total_spy_gross,
+        "total_spy_net_pnl_eur": total_spy_net,
+        "spy_roi": (total_spy_net / (n_spy * investment)) if n_spy else 0.0,
+        "total_alpha_eur": total_alpha,
+        "alpha_roi": (total_alpha / (n_spy * investment)) if n_spy else 0.0,
     }
     return sub, agg
 
 
-def _print_simulation(label: str, df: pd.DataFrame, agg: dict, horizon_col: str,
-                      rr_col: str, top_n: int = 5) -> None:
-    print("=" * 96)
+def _print_simulation(label: str, df: pd.DataFrame, agg: Dict,
+                      horizon_col: str, rr_col: str) -> None:
+    print("=" * 110)
     print(f"  {label}")
-    print("=" * 96)
+    print("=" * 110)
     if df.empty:
         print("  No trades match the filter.")
         return
     cols = ["symbol", "decision_date", "intent", "recommendation", rr_col,
-            "price_at_decision", horizon_col, "gross_pnl_eur",
-            "round_trip_cost_eur", "net_pnl_eur"]
+            "price_at_decision", horizon_col, "spy_return",
+            "net_pnl_eur", "spy_net_pnl_eur", "alpha_pnl_eur"]
+    cols = [c for c in cols if c in df.columns]
     disp = df[cols].copy()
     disp[horizon_col] = disp[horizon_col].apply(lambda v: f"{v * 100:+.2f}%")
-    disp["gross_pnl_eur"] = disp["gross_pnl_eur"].apply(lambda v: f"€{v:+.2f}")
-    disp["net_pnl_eur"] = disp["net_pnl_eur"].apply(lambda v: f"€{v:+.2f}")
-    disp["round_trip_cost_eur"] = disp["round_trip_cost_eur"].apply(lambda v: f"€{v:.2f}")
+    if "spy_return" in disp.columns:
+        disp["spy_return"] = disp["spy_return"].apply(
+            lambda v: "" if pd.isna(v) else f"{v * 100:+.2f}%"
+        )
+    for c in ("net_pnl_eur", "spy_net_pnl_eur", "alpha_pnl_eur"):
+        if c in disp.columns:
+            disp[c] = disp[c].apply(lambda v: "" if pd.isna(v) else f"€{v:+.2f}")
     disp["price_at_decision"] = disp["price_at_decision"].apply(
         lambda v: f"${v:.4f}" if v < 1 else f"${v:.2f}"
     )
-    disp.columns = ["symbol", "date", "intent", "rec", "R/R",
-                    "entry", "return", "gross", "cost", "net"]
+    rename = {
+        "symbol": "symbol", "decision_date": "date",
+        rr_col: "R/R", horizon_col: "return", "price_at_decision": "entry",
+        "spy_return": "spy_ret", "net_pnl_eur": "net €",
+        "spy_net_pnl_eur": "spy net €", "alpha_pnl_eur": "alpha €",
+    }
+    disp.columns = [rename.get(c, c) for c in disp.columns]
     print(disp.to_string(index=False))
     print()
-    print(f"  Number of trades:         {agg['n_trades']}")
-    print(f"  Total capital deployed:   €{agg['total_invested_eur']:>12,.2f}")
-    print(f"  Total gross P&L:          €{agg['total_gross_pnl_eur']:>+12,.2f}")
-    print(f"  Total trading costs:      €{agg['total_cost_eur']:>+12,.2f}")
-    print(f"  Total NET P&L:            €{agg['total_net_pnl_eur']:>+12,.2f}")
-    print(f"  Final portfolio value:    €{agg['final_value_eur']:>12,.2f}    "
-          f"({agg['roi']:+.2%} ROI)")
-    print(f"  Win rate (gross | net):   {agg['win_rate_gross']:.1%} | {agg['win_rate_net']:.1%}")
-    print(f"  Mean / median net return: {agg['mean_net_return_pct']:+.2%} / "
+    print(f"  Number of trades:               {agg['n_trades']}")
+    print(f"  Total capital deployed:         €{agg['total_invested_eur']:>14,.2f}")
+    print(f"  Strategy NET P&L:               €{agg['total_net_pnl_eur']:>+14,.2f}    "
+          f"(ROI {agg['roi']:+.2%})")
+    print(f"  SPY NET P&L (same dates+sizes): €{agg['total_spy_net_pnl_eur']:>+14,.2f}    "
+          f"(ROI {agg['spy_roi']:+.2%})")
+    print(f"  Strategy ALPHA vs SPY:          €{agg['total_alpha_eur']:>+14,.2f}    "
+          f"({agg['alpha_roi']:+.2%})")
+    print(f"  Win rate (net):                 {agg['win_rate_net']:.1%}")
+    print(f"  Mean / median net return:       {agg['mean_net_return_pct']:+.2%} / "
           f"{agg['median_net_return_pct']:+.2%}")
+
+
+def sweep_rr_cutoff(
+    df: pd.DataFrame, rr_col: str, horizon: str,
+    investment: float, cost_in: float, cost_out: float,
+    spy_returns: Dict, thresholds: List[float],
+) -> pd.DataFrame:
+    rows = []
+    for t in thresholds:
+        _, agg = run_simulation(
+            df, rr_col=rr_col, rr_min=t, horizon=horizon,
+            investment=investment, cost_in=cost_in, cost_out=cost_out,
+            spy_returns=spy_returns,
+        )
+        rows.append({
+            "rr_threshold": t,
+            "n_trades": agg["n_trades"],
+            "total_invested_eur": agg["total_invested_eur"],
+            "strategy_net_eur": agg["total_net_pnl_eur"],
+            "spy_net_eur": agg["total_spy_net_pnl_eur"],
+            "alpha_eur": agg["total_alpha_eur"],
+            "roi": agg["roi"],
+            "spy_roi": agg["spy_roi"],
+            "alpha_roi": agg["alpha_roi"],
+            "win_rate_net": agg["win_rate_net"],
+        })
+    return pd.DataFrame(rows)
+
+
+def sweep_investment(
+    df: pd.DataFrame, rr_col: str, rr_min: float, horizon: str,
+    cost_in: float, cost_out: float, spy_returns: Dict,
+    investments: List[float],
+) -> pd.DataFrame:
+    rows = []
+    for inv in investments:
+        _, agg = run_simulation(
+            df, rr_col=rr_col, rr_min=rr_min, horizon=horizon,
+            investment=inv, cost_in=cost_in, cost_out=cost_out,
+            spy_returns=spy_returns,
+        )
+        rows.append({
+            "per_trade_eur": inv,
+            "n_trades": agg["n_trades"],
+            "total_invested_eur": agg["total_invested_eur"],
+            "strategy_net_eur": agg["total_net_pnl_eur"],
+            "spy_net_eur": agg["total_spy_net_pnl_eur"],
+            "alpha_eur": agg["total_alpha_eur"],
+            "roi": agg["roi"],
+            "spy_roi": agg["spy_roi"],
+            "alpha_roi": agg["alpha_roi"],
+            "cost_drag_pct": (cost_in + cost_out) / inv,
+        })
+    return pd.DataFrame(rows)
+
+
+def _print_rr_sweep(df: pd.DataFrame, label: str) -> None:
+    print("=" * 110)
+    print(f"  {label}")
+    print("=" * 110)
+    print(f"{'R/R >':<7s} {'n':>4s} {'invested':>11s} {'strat €':>11s} "
+          f"{'spy €':>11s} {'alpha €':>11s} {'ROI':>7s} {'spy ROI':>8s} "
+          f"{'alpha':>7s} {'win%':>6s}")
+    print("-" * 110)
+    best_alpha_idx = df["alpha_eur"].idxmax() if not df.empty else None
+    best_roi_idx = df["roi"].idxmax() if not df.empty else None
+    for i, r in df.iterrows():
+        marker = ""
+        if i == best_alpha_idx:
+            marker += "  ◀ MAX α"
+        if i == best_roi_idx and i != best_alpha_idx:
+            marker += "  ◀ MAX ROI"
+        elif i == best_roi_idx and i == best_alpha_idx:
+            marker += " (and ROI)"
+        print(f"{r['rr_threshold']:<7.2f} {int(r['n_trades']):>4d} "
+              f"€{r['total_invested_eur']:>10,.0f} "
+              f"€{r['strategy_net_eur']:>+10,.2f} "
+              f"€{r['spy_net_eur']:>+10,.2f} "
+              f"€{r['alpha_eur']:>+10,.2f} "
+              f"{r['roi']:>+7.2%} {r['spy_roi']:>+7.2%} {r['alpha_roi']:>+7.2%} "
+              f"{r['win_rate_net']:>5.1%}{marker}")
+
+
+def _print_investment_sweep(df: pd.DataFrame, label: str) -> None:
+    print("=" * 110)
+    print(f"  {label}")
+    print("=" * 110)
+    print(f"{'€/trade':<10s} {'n':>4s} {'invested':>11s} {'strat €':>11s} "
+          f"{'spy €':>11s} {'alpha €':>11s} {'ROI':>7s} {'spy ROI':>8s} "
+          f"{'alpha':>7s} {'cost drag':>10s}")
+    print("-" * 110)
+    for _, r in df.iterrows():
+        print(f"€{int(r['per_trade_eur']):<9d} {int(r['n_trades']):>4d} "
+              f"€{r['total_invested_eur']:>10,.0f} "
+              f"€{r['strategy_net_eur']:>+10,.2f} "
+              f"€{r['spy_net_eur']:>+10,.2f} "
+              f"€{r['alpha_eur']:>+10,.2f} "
+              f"{r['roi']:>+7.2%} {r['spy_roi']:>+7.2%} {r['alpha_roi']:>+7.2%} "
+              f"{r['cost_drag_pct']:>9.2%}")
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--start", default="2026-02-01", help="Cohort start date")
+    parser.add_argument("--start", default="2026-02-01")
     parser.add_argument("--rr-col", default="risk_reward_ratio",
-                        choices=["risk_reward_ratio", "deep_research_rr_ratio"],
-                        help="R/R column to filter on")
-    parser.add_argument("--rr-min", type=float, default=1.5,
-                        help="Minimum R/R to include the trade")
-    parser.add_argument("--horizon", default="1w", choices=["1w", "2w", "4w", "8w"],
-                        help="Holding period")
-    parser.add_argument("--investment", type=float, default=750.0,
-                        help="Capital per trade (currency units)")
-    parser.add_argument("--cost-in", type=float, default=3.0,
-                        help="Fill commission per trade")
-    parser.add_argument("--cost-out", type=float, default=3.0,
-                        help="Termination commission per trade")
-    parser.add_argument("--intent-only", action="store_true",
-                        help="Only count ENTER_NOW + ENTER_LIMIT verdicts")
-    parser.add_argument("--no-penny", action="store_true",
-                        help="Exclude stocks priced < $1 at decision")
-    parser.add_argument("--out", default=None, help="Output CSV path")
+                        choices=["risk_reward_ratio", "deep_research_rr_ratio"])
+    parser.add_argument("--rr-min", type=float, default=1.5)
+    parser.add_argument("--horizon", default="1w", choices=["1w", "2w", "4w", "8w"])
+    parser.add_argument("--investment", type=float, default=750.0)
+    parser.add_argument("--cost-in", type=float, default=3.0)
+    parser.add_argument("--cost-out", type=float, default=3.0)
+    parser.add_argument("--intent-only", action="store_true")
+    parser.add_argument("--no-penny", action="store_true")
+    parser.add_argument("--no-sweep", action="store_true",
+                        help="Skip the R/R + investment sweeps")
+    parser.add_argument("--out", default=None)
     args = parser.parse_args()
 
     logger.info("Loading cohort (start=%s)...", args.start)
@@ -158,11 +332,20 @@ def main():
     logger.info("Cohort size: %d", len(df))
 
     horizon_col = f"return_{args.horizon}"
+
+    # Pre-fetch SPY returns for every decision date in the cohort
+    horizon_days = HORIZON_DAYS[args.horizon]
+    logger.info("Fetching SPY benchmark for %d unique dates...",
+                df["decision_date"].nunique())
+    spy_returns = _spy_returns_by_date(df["decision_date"], horizon_days)
+
     main_df, main_agg = run_simulation(
         df,
         rr_col=args.rr_col, rr_min=args.rr_min, horizon=args.horizon,
         investment=args.investment, cost_in=args.cost_in, cost_out=args.cost_out,
-        intent_only=args.intent_only, min_price=1.0 if args.no_penny else None,
+        intent_only=args.intent_only,
+        min_price=1.0 if args.no_penny else None,
+        spy_returns=spy_returns,
     )
     label = (
         f"PORTFOLIO SIM — {args.rr_col} > {args.rr_min}, hold {args.horizon}, "
@@ -174,32 +357,52 @@ def main():
         label += "  (no penny stocks)"
     _print_simulation(label, main_df, main_agg, horizon_col, args.rr_col)
 
-    # Always show two sensitivities so the user sees outlier impact
-    if not args.no_penny and not args.intent_only:
-        no_penny_df, no_penny_agg = run_simulation(
-            df, rr_col=args.rr_col, rr_min=args.rr_min, horizon=args.horizon,
-            investment=args.investment, cost_in=args.cost_in, cost_out=args.cost_out,
-            intent_only=False, min_price=1.0,
-        )
-        print()
-        _print_simulation(
-            "SENSITIVITY: same filter but excluding penny stocks (price < $1)",
-            no_penny_df, no_penny_agg, horizon_col, args.rr_col,
-        )
-
     out = args.out or (
-        REPO_ROOT
-        / "docs"
-        / "performance"
-        / f"{datetime.now():%Y-%m-%d}-package"
-        / "data"
+        REPO_ROOT / "docs" / "performance"
+        / f"{datetime.now():%Y-%m-%d}-package" / "data"
         / f"portfolio_sim_{args.rr_col}_above_{args.rr_min}_{args.horizon}.csv"
     )
-    out = Path(out)
-    out.parent.mkdir(parents=True, exist_ok=True)
+    out = Path(out); out.parent.mkdir(parents=True, exist_ok=True)
     main_df.to_csv(out, index=False)
+    print(f"\nSaved per-trade ledger to {out}")
+
+    if args.no_sweep:
+        return
+
+    # --- R/R cutoff sweep ---
     print()
-    print(f"Saved per-trade ledger to {out}")
+    rr_grid = [round(0.5 + 0.25 * i, 2) for i in range(0, 19)]   # 0.50 ... 5.00
+    rr_sweep = sweep_rr_cutoff(
+        df, rr_col=args.rr_col, horizon=args.horizon,
+        investment=args.investment,
+        cost_in=args.cost_in, cost_out=args.cost_out,
+        spy_returns=spy_returns, thresholds=rr_grid,
+    )
+    _print_rr_sweep(
+        rr_sweep,
+        f"R/R CUTOFF SWEEP — {args.rr_col}, hold {args.horizon}, "
+        f"€{args.investment:.0f}/trade",
+    )
+    sweep_path = out.parent / f"sweep_rr_{args.rr_col}_{args.horizon}_inv{int(args.investment)}.csv"
+    rr_sweep.to_csv(sweep_path, index=False)
+    print(f"\nSaved R/R sweep to {sweep_path}")
+
+    # --- Investment-size sweep at the user-chosen R/R threshold ---
+    print()
+    inv_grid = [100, 250, 500, 750, 1000, 2500, 5000, 10000]
+    inv_sweep = sweep_investment(
+        df, rr_col=args.rr_col, rr_min=args.rr_min, horizon=args.horizon,
+        cost_in=args.cost_in, cost_out=args.cost_out,
+        spy_returns=spy_returns, investments=inv_grid,
+    )
+    _print_investment_sweep(
+        inv_sweep,
+        f"INVESTMENT-SIZE SWEEP — {args.rr_col} > {args.rr_min}, hold {args.horizon}, "
+        f"€{args.cost_in + args.cost_out:.0f} round-trip",
+    )
+    inv_path = out.parent / f"sweep_investment_{args.rr_col}_above_{args.rr_min}_{args.horizon}.csv"
+    inv_sweep.to_csv(inv_path, index=False)
+    print(f"\nSaved investment sweep to {inv_path}")
 
 
 if __name__ == "__main__":
