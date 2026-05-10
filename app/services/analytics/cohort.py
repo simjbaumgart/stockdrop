@@ -15,6 +15,16 @@ from app.services.performance_service import normalize_to_intent
 # underscore is treated as fixture data. The bare "TEST" symbol is also dropped.
 _BARE_TEST_RE = re.compile(r"^TEST$", re.IGNORECASE)
 
+# Symbols deliberately excluded from analysis. Any reason for an entry should
+# be captured here so the filter is auditable.
+#
+# - PBMRF: trades sub-cent (decision price ~$0.0028). yfinance shows a +309%
+#   1-week move that is mathematically real but not investable: bid/ask
+#   spread, minimum tick size, and slippage on a sub-cent stock would erase
+#   any retail-feasible return. The data point dominates aggregate P&L and
+#   distorts every win-rate / R/R correlation it touches.
+EXCLUDED_SYMBOLS = {"PBMRF"}
+
 
 def _is_test_symbol(symbol: object) -> bool:
     if symbol is None:
@@ -25,6 +35,12 @@ def _is_test_symbol(symbol: object) -> bool:
     if "_" in s:
         return True
     return bool(_BARE_TEST_RE.match(s))
+
+
+def _is_excluded_symbol(symbol: object) -> bool:
+    if symbol is None:
+        return False
+    return str(symbol).strip().upper() in EXCLUDED_SYMBOLS
 
 
 def _db_path() -> str:
@@ -53,10 +69,12 @@ def load_cohort(start_date: Optional[str] = "2026-02-01") -> pd.DataFrame:
     df["decision_date"] = pd.to_datetime(df["timestamp"]).dt.normalize()
     df["intent"] = df["recommendation"].apply(normalize_to_intent)
 
-    # Drop synthetic test symbols
+    # Drop synthetic test symbols and explicitly excluded symbols
     test_mask = df["symbol"].apply(_is_test_symbol)
-    if test_mask.any():
-        df = df.loc[~test_mask].reset_index(drop=True)
+    excluded_mask = df["symbol"].apply(_is_excluded_symbol)
+    drop_mask = test_mask | excluded_mask
+    if drop_mask.any():
+        df = df.loc[~drop_mask].reset_index(drop=True)
 
     if start_date is not None:
         df = df[df["decision_date"] >= pd.Timestamp(start_date)].reset_index(drop=True)

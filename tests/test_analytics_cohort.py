@@ -96,6 +96,8 @@ def test_load_cohort_drops_test_symbols(tmp_path, monkeypatch):
         (7, "MSFT", 300.0, -5.0, "BUY", "2026-03-06 10:00:00"),
         (8, "T8_BUY", 100.0, -5.0, "BUY", "2026-03-07 10:00:00"),  # underscore fixture
         (9, "BRK.B", 400.0, -6.0, "BUY", "2026-03-08 10:00:00"),  # real ticker — kept
+        (10, "PBMRF", 0.003, -86.0, "AVOID", "2026-03-09 10:00:00"),  # explicit exclusion
+        (11, "pbmrf", 0.003, -86.0, "AVOID", "2026-03-10 10:00:00"),  # case-insensitive
     ]
     conn.executemany(
         "INSERT INTO decision_points VALUES (?,?,?,?,?,?)", rows
@@ -105,5 +107,5 @@ def test_load_cohort_drops_test_symbols(tmp_path, monkeypatch):
     monkeypatch.setenv("DB_PATH", str(db_path))
 
     df = load_cohort(start_date=None)
-    # Drop bare TEST and any underscore-containing symbol; keep TESTERA and BRK.B
+    # Drop bare TEST, any underscore-containing symbol, and PBMRF; keep TESTERA and BRK.B
     assert set(df["symbol"]) == {"AAPL", "TESTERA", "MSFT", "BRK.B"}
