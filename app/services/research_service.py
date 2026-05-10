@@ -123,6 +123,8 @@ def _is_real_report(report: Optional[str]) -> bool:
 
 
 from app.services.seeking_alpha_service import seeking_alpha_service
+from app.services.sa_grades_service import sa_grades_service
+from app.services.pm_verdict_formatters import format_rr_block, format_ratings_block
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -517,13 +519,24 @@ class ResearchService:
         # Construct Final Output compatible with existing app expectations
         recommendation = final_decision.get("action", "AVOID").upper()
 
+        # External ratings — looked up AFTER final_decision is finalized.
+        # Never passed into any agent prompt; lives in dedicated dict keys + DB columns.
+        external_ratings = sa_grades_service.lookup(state.ticker)
+
         # --- Print Final Decision to Console (post-guard, post-recompute) ---
         print("\n" + "="*50)
         print(f"  [PORTFOLIO MANAGER DECISION]: {final_decision.get('action')} (Conviction: {final_decision.get('conviction', 'N/A')})")
         print(f"  Drop Type: {final_decision.get('drop_type', 'N/A')}")
         print(f"  Entry Zone: ${final_decision.get('entry_price_low', 'N/A')} - ${final_decision.get('entry_price_high', 'N/A')}")
         print(f"  Stop Loss: ${final_decision.get('stop_loss', 'N/A')} | TP1: ${final_decision.get('take_profit_1', 'N/A')} | TP2: ${final_decision.get('take_profit_2', 'N/A')}")
-        print(f"  Upside: {final_decision.get('upside_percent', 'N/A')}% | Downside: {final_decision.get('downside_risk_percent', 'N/A')}% | R/R: {final_decision.get('risk_reward_ratio', 'N/A')}")
+        print()
+        for line in format_rr_block(
+            upside=final_decision.get("upside_percent"),
+            downside=final_decision.get("downside_risk_percent"),
+            rr=final_decision.get("risk_reward_ratio"),
+        ).splitlines():
+            print(f"  {line}")
+        print()
         print(f"  Sell Zone: ${final_decision.get('sell_price_low', 'N/A')} - ${final_decision.get('sell_price_high', 'N/A')} | Ceiling: ${final_decision.get('ceiling_exit', 'N/A')}")
         print(f"  Entry Trigger: {final_decision.get('entry_trigger', 'N/A')}")
         print(f"  Exit Trigger: {final_decision.get('exit_trigger', 'N/A')}")
@@ -532,6 +545,10 @@ class ResearchService:
         print("  Key Factors:")
         for factor in final_decision.get('key_factors', []):
             print(f"   - {factor}")
+        print()
+        for line in format_ratings_block(external_ratings).splitlines():
+            print(f"  {line}")
+        print()
         print(f"  Total Agent Calls: {state.agent_calls}")
         print("="*50 + "\n")
 
@@ -576,7 +593,13 @@ class ResearchService:
             "key_decision_points": final_decision.get("key_factors", []),  # Mapped for backward compat
             "market_sentiment_report": state.reports.get('market_sentiment', ''),
             "competitive_report": state.reports.get('competitive', ''),
-            "data_depth": data_depth
+            "data_depth": data_depth,
+            # External ratings (informational; never shown to agents).
+            # Sourced from data/SAgrades/SA_Quant_Ranked_Clean.csv after final_decision.
+            "sa_quant_rating": external_ratings.get("sa_quant_rating"),
+            "sa_authors_rating": external_ratings.get("sa_authors_rating"),
+            "wall_street_rating": external_ratings.get("wall_street_rating"),
+            "sa_rank": external_ratings.get("sa_rank"),
         }
 
     def _run_bull_bear_perspectives(self, state: MarketState, drop_str: str):
@@ -1323,6 +1346,11 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
             "market_sentiment_report": state.reports.get("market_sentiment", ""),
             "competitive_report": state.reports.get("competitive", ""),
             "data_depth": {},
+            # External ratings (informational; never shown to agents) — None on the abort path.
+            "sa_quant_rating": None,
+            "sa_authors_rating": None,
+            "wall_street_rating": None,
+            "sa_rank": None,
             # Sentinel field so dashboards/backfill can filter these out
             "aborted_reason": "insufficient_phase1_data",
             "failed_phase1_agents": failed_agents,
