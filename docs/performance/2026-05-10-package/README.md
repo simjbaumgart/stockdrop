@@ -1,6 +1,12 @@
 # Performance analysis package — 2026-02-01
 
-Generated 2026-05-10 12:35. Cohort size: **359 decisions**.
+Generated 2026-05-10. Cohort size: **361 decisions**.
+
+> **For re-running this analysis later** see the playbook:
+> [`../STRATEGY_PLAYBOOK.md`](../STRATEGY_PLAYBOOK.md)
+>
+> **Frozen reference findings from this run:**
+> [`../2026-05-10-checkpoint.md`](../2026-05-10-checkpoint.md)
 
 ## Files
 
