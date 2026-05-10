@@ -33,6 +33,7 @@ from app.services.analytics.charts import (  # noqa: E402
     avg_return_bar,
     cum_pnl_calendar,
     equity_line,
+    multi_horizon_grouped_bar,
     recovery_histogram_by_group,
     rr_boxplot_by_group,
     scatter_with_regression,
@@ -317,6 +318,43 @@ def _generate_charts(payload: Dict[str, Any], enriched: pd.DataFrame, charts_dir
         annotation=_omnibus_annotation((payload.get("stats") or {}).get("dr_rr_by_dr_verdict") or {}),
     )
 
+    # Multi-horizon grouped bars: 1w / 2w / 4w side-by-side
+    by_h = (payload.get("stats") or {}).get("by_horizon") or {}
+
+    def _to_dfs(key):
+        return {h: pd.DataFrame(by_h.get(h, {}).get(key) or []) for h in ("1w", "2w", "4w")}
+
+    out["wr_intent_multi"] = multi_horizon_grouped_bar(
+        _to_dfs("winrate_by_intent"), "intent", "win_rate",
+        "Win rate by intent — 1w vs 2w vs 4w",
+        charts_dir / "24_winrate_by_intent_multi.png",
+        group_order=["ENTER_NOW", "ENTER_LIMIT", "AVOID", "NEUTRAL"],
+    )
+    out["ar_intent_multi"] = multi_horizon_grouped_bar(
+        _to_dfs("winrate_by_intent"), "intent", "avg_return",
+        "Average return by intent — 1w vs 2w vs 4w",
+        charts_dir / "25_avgreturn_by_intent_multi.png",
+        group_order=["ENTER_NOW", "ENTER_LIMIT", "AVOID", "NEUTRAL"],
+    )
+    out["wr_drop_multi"] = multi_horizon_grouped_bar(
+        _to_dfs("winrate_by_drop_bucket"), "bucket", "win_rate",
+        "Win rate by drop-size bucket — 1w vs 2w vs 4w",
+        charts_dir / "26_winrate_by_drop_multi.png",
+        group_order=["<= -15%", "-15 to -8", "-8 to -5", "> -5%"],
+    )
+    out["wr_pmrr_multi"] = multi_horizon_grouped_bar(
+        _to_dfs("winrate_by_pm_rr"), "bucket", "win_rate",
+        "Win rate by PM R/R bucket — 1w vs 2w vs 4w",
+        charts_dir / "27_winrate_by_pm_rr_multi.png",
+        group_order=["<1", "1-2", "2-3", ">=3"],
+    )
+    out["wr_drrr_multi"] = multi_horizon_grouped_bar(
+        _to_dfs("winrate_by_dr_rr"), "bucket", "win_rate",
+        "Win rate by DR R/R bucket — 1w vs 2w vs 4w",
+        charts_dir / "28_winrate_by_dr_rr_multi.png",
+        group_order=["<1", "1-2", "2-3", ">=3"],
+    )
+
     return out
 
 
@@ -399,6 +437,21 @@ def _export_data(payload: Dict[str, Any], enriched: pd.DataFrame,
             pd.DataFrame(records).to_csv(csv_path, index=False)
             out[key] = csv_path
 
+    # Per-horizon CSVs of every aggregation (1w / 2w / 4w side-by-side files)
+    by_horizon = stats.get("by_horizon") or {}
+    for h, h_data in by_horizon.items():
+        for key, records in (h_data or {}).items():
+            if not records:
+                continue
+            if isinstance(records, list):  # tabular rows
+                p = data_dir / f"{key}_{h}.csv"
+                pd.DataFrame(records).to_csv(p, index=False)
+                out[f"{key}_{h}"] = p
+            elif isinstance(records, dict):  # correlation result objects
+                p = data_dir / f"{key}_{h}.json"
+                p.write_text(json.dumps(records, default=str, indent=2))
+                out[f"{key}_{h}"] = p
+
     # 4. Time series + SPY overlay as JSON
     ts = payload.get("time_series") or {}
     if ts:
@@ -451,6 +504,111 @@ def _export_data(payload: Dict[str, Any], enriched: pd.DataFrame,
     return out
 
 
+def _format_corr_horizon_table(by_horizon: Dict[str, Any], corr_key: str) -> str:
+    """Compact 1w/2w/4w side-by-side table of correlation results."""
+    rows = []
+    for h in ("1w", "2w", "4w"):
+        rec = (by_horizon.get(h) or {}).get(corr_key) or {}
+        if rec.get("n", 0) < 5:
+            continue
+        rows.append({
+            "horizon": h,
+            "n": rec.get("n"),
+            "pearson_r": rec.get("pearson_r"),
+            "pearson_p": rec.get("pearson_p"),
+            "pearson_ci": (
+                None if rec.get("pearson_ci_low") is None
+                else (rec["pearson_ci_low"], rec["pearson_ci_high"])
+            ),
+            "spearman_rho": rec.get("spearman_rho"),
+            "spearman_p": rec.get("spearman_p"),
+            "spearman_ci": (
+                None if rec.get("spearman_ci_low") is None
+                else (rec["spearman_ci_low"], rec["spearman_ci_high"])
+            ),
+        })
+    if not rows:
+        return "_no correlation data at any horizon_"
+
+    def _fmt_r(v):
+        return "" if v is None else f"{v:+.3f}"
+
+    def _fmt_ci(v):
+        return "" if v is None else f"[{v[0]:+.3f}, {v[1]:+.3f}]"
+
+    df = pd.DataFrame([
+        {
+            "horizon": r["horizon"],
+            "n": r["n"],
+            "Pearson r": _fmt_r(r["pearson_r"]),
+            "Pearson p": _pf(r["pearson_p"]),
+            "Pearson 95% CI": _fmt_ci(r["pearson_ci"]),
+            "Spearman ρ": _fmt_r(r["spearman_rho"]),
+            "Spearman p": _pf(r["spearman_p"]),
+            "Spearman 95% CI": _fmt_ci(r["spearman_ci"]),
+        }
+        for r in rows
+    ])
+    try:
+        return df.to_markdown(index=False)
+    except ImportError:
+        return _md_table(df)
+
+
+def _format_multi_horizon_winrate(by_horizon: Dict[str, Any], group_col: str) -> str:
+    """Compact 1w/2w/4w side-by-side win-rate / avg-return table per group."""
+    rows = []
+    for h in ("1w", "2w", "4w"):
+        agg = (by_horizon.get(h) or {}).get("winrate_by_intent" if group_col == "intent"
+                                            else f"winrate_by_{group_col}") or []
+        for r in agg:
+            rows.append({
+                "group": r.get(group_col),
+                "horizon": h,
+                "n": r.get("count"),
+                "win_rate": r.get("win_rate"),
+                "win_rate_ci_low": r.get("win_rate_ci_low"),
+                "win_rate_ci_high": r.get("win_rate_ci_high"),
+                "avg_return": r.get("avg_return"),
+                "avg_return_ci_low": r.get("avg_return_ci_low"),
+                "avg_return_ci_high": r.get("avg_return_ci_high"),
+            })
+    if not rows:
+        return "_no data_"
+    df = pd.DataFrame(rows)
+
+    def fmt_pct(v):
+        return "" if v is None or pd.isna(v) else f"{v * 100:.1f}%"
+
+    def fmt_signed(v):
+        return "" if v is None or pd.isna(v) else f"{v * 100:+.2f}%"
+
+    df_disp = pd.DataFrame({
+        "group": df["group"],
+        "horizon": df["horizon"],
+        "n": df["n"],
+        "win_rate": df["win_rate"].apply(fmt_pct),
+        "WR 95% CI": [
+            f"[{fmt_pct(l)}, {fmt_pct(h)}]" if l is not None else ""
+            for l, h in zip(df["win_rate_ci_low"], df["win_rate_ci_high"])
+        ],
+        "avg_return": df["avg_return"].apply(fmt_signed),
+        "AR 95% CI": [
+            f"[{fmt_signed(l)}, {fmt_signed(h)}]" if l is not None else ""
+            for l, h in zip(df["avg_return_ci_low"], df["avg_return_ci_high"])
+        ],
+    })
+    # Sort by group and then horizon (1w, 2w, 4w)
+    horizon_order = {"1w": 1, "2w": 2, "4w": 3}
+    df_disp = df_disp.assign(_h=df_disp["horizon"].map(horizon_order)).sort_values(
+        ["group", "_h"]
+    ).drop(columns=["_h"])
+    try:
+        return df_disp.to_markdown(index=False)
+    except ImportError:
+        return _md_table(df_disp)
+
+
 def _format_pairwise_table(rows: List[Dict[str, Any]]) -> str:
     if not rows:
         return "_no significance data_"
@@ -499,11 +657,13 @@ def _format_high_rr_table(rows: List[Dict[str, Any]], rr_key: str) -> str:
     keep = ["symbol", "decision_date", "intent", "recommendation",
             rr_key, "drop_percent", "price_at_decision",
             "deep_research_verdict",
-            "return_4w", "max_roi_4w", "max_drawdown_4w"]
+            "return_1w", "return_2w", "return_4w",
+            "max_roi_4w", "max_drawdown_4w"]
     df = df[[c for c in keep if c in df.columns]].copy()
     if rr_key in df.columns:
         df[rr_key] = df[rr_key].apply(lambda v: "" if pd.isna(v) else f"{v:.2f}")
-    for c in ("drop_percent", "return_4w", "max_roi_4w", "max_drawdown_4w"):
+    for c in ("drop_percent", "return_1w", "return_2w", "return_4w",
+              "max_roi_4w", "max_drawdown_4w"):
         if c in df.columns:
             df[c] = df[c].apply(lambda v: "" if pd.isna(v) else f"{v * 100:+.2f}%")
     if "price_at_decision" in df.columns:
@@ -822,6 +982,32 @@ def _build_report(
         "(Benjamini-Hochberg) to control the false-discovery rate across the family of "
         "comparisons.",
         "",
+        "### 3.3 Pairwise tests at 1-week and 2-week horizons",
+        "",
+        "**Pairwise PM intent at 1w (n_per_group is much larger):**",
+        "",
+        _format_pairwise_table(
+            ((payload.get("stats") or {}).get("by_horizon") or {}).get("1w", {}).get("pairwise_intent") or []
+        ),
+        "",
+        "**Pairwise PM intent at 2w:**",
+        "",
+        _format_pairwise_table(
+            ((payload.get("stats") or {}).get("by_horizon") or {}).get("2w", {}).get("pairwise_intent") or []
+        ),
+        "",
+        "**Pairwise DR verdict at 1w:**",
+        "",
+        _format_pairwise_table(
+            ((payload.get("stats") or {}).get("by_horizon") or {}).get("1w", {}).get("pairwise_dr_verdict") or []
+        ),
+        "",
+        "**Pairwise DR verdict at 2w:**",
+        "",
+        _format_pairwise_table(
+            ((payload.get("stats") or {}).get("by_horizon") or {}).get("2w", {}).get("pairwise_dr_verdict") or []
+        ),
+        "",
         "## 4. R/R ratio vs realized return",
         "",
         "### 4.1 AI council R/R",
@@ -833,6 +1019,12 @@ def _build_report(
         "",
         findings.get("corr_pm", ""),
         "",
+        "**Correlation at multiple horizons:**",
+        "",
+        _format_corr_horizon_table(
+            (payload.get("stats") or {}).get("by_horizon") or {}, "corr_pm_rr",
+        ),
+        "",
         img("corr_pm"),
         "",
         "### 4.2 Deep Research R/R",
@@ -843,6 +1035,12 @@ def _build_report(
         img("ar_drrr"),
         "",
         findings.get("corr_dr", ""),
+        "",
+        "**Correlation at multiple horizons:**",
+        "",
+        _format_corr_horizon_table(
+            (payload.get("stats") or {}).get("by_horizon") or {}, "corr_dr_rr",
+        ),
         "",
         img("corr_dr"),
         "",
@@ -900,6 +1098,37 @@ def _build_report(
         "## 7. Drop-size buckets",
         "",
         img("wr_drop"),
+        "",
+        "## 7a. Horizon comparison — 1w / 2w / 4w",
+        "",
+        "The 4-week return is small-sample (n=39 with completed bars). 1-week "
+        "and 2-week returns are much better powered (n=272 and n=184). All "
+        "subsequent significance tests and bucket aggregations are now computed "
+        "at every horizon; the bars below show win rate (top) and average return "
+        "(bottom) side-by-side per intent. Wilson + t-CI error bars come along "
+        "for the ride.",
+        "",
+        img("wr_intent_multi"),
+        img("ar_intent_multi"),
+        "",
+        "**Per-intent win rate and avg return at each horizon:**",
+        "",
+        _format_multi_horizon_winrate(
+            (payload.get("stats") or {}).get("by_horizon") or {},
+            group_col="intent",
+        ),
+        "",
+        "**By drop-size bucket at each horizon:**",
+        "",
+        img("wr_drop_multi"),
+        "",
+        "**By PM R/R bucket at each horizon:**",
+        "",
+        img("wr_pmrr_multi"),
+        "",
+        "**By DR R/R bucket at each horizon:**",
+        "",
+        img("wr_drrr_multi"),
         "",
         "## 8a. R/R distribution by verdict (categorical correlation)",
         "",

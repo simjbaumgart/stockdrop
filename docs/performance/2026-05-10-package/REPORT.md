@@ -1,6 +1,6 @@
 # StockDrop Performance Analysis — 2026-02-01 cohort
 
-_Generated 2026-05-10 09:41. Cohort: **363 decisions**._
+_Generated 2026-05-10 12:22. Cohort: **363 decisions**._
 
 ## Executive summary
 
@@ -79,6 +79,46 @@ DR verdicts: **none of the 1 pairwise comparisons** are significant — DR group
 
 **Interpretation.** Welch's t-test compares group means under the (relaxed) assumption that variances may differ. Mann-Whitney U is rank-based and works even when returns are skewed. Both p-values are FDR-adjusted (Benjamini-Hochberg) to control the false-discovery rate across the family of comparisons.
 
+### 3.3 Pairwise tests at 1-week and 2-week horizons
+
+**Pairwise PM intent at 1w (n_per_group is much larger):**
+
+| A           | B           |   n_A |   n_B | Δ mean   |   Cohen d |   Welch p |   Welch p (FDR) |   MWU p |   MWU p (FDR) | Sig?   |
+|:------------|:------------|------:|------:|:---------|----------:|----------:|----------------:|--------:|--------------:|:-------|
+| AVOID       | ENTER_LIMIT |   156 |    27 | +1.96%   |      0.08 |     0.441 |           0.529 |   0.942 |         0.942 | —      |
+| AVOID       | ENTER_NOW   |   156 |    33 | -8.77%   |     -0.27 |     0.366 |           0.529 |   0.274 |         0.761 | —      |
+| AVOID       | NEUTRAL     |   156 |    56 | +2.56%   |      0.11 |     0.283 |           0.529 |   0.554 |         0.831 | —      |
+| ENTER_LIMIT | ENTER_NOW   |    27 |    33 | -10.72%  |     -0.27 |     0.264 |           0.529 |   0.381 |         0.761 | —      |
+| ENTER_LIMIT | NEUTRAL     |    27 |    56 | +0.60%   |      0.08 |     0.733 |           0.733 |   0.8   |         0.942 | —      |
+| ENTER_NOW   | NEUTRAL     |    33 |    56 | +11.32%  |      0.34 |     0.236 |           0.529 |   0.173 |         0.761 | —      |
+
+**Pairwise PM intent at 2w:**
+
+| A           | B           |   n_A |   n_B | Δ mean   |   Cohen d |   Welch p |   Welch p (FDR) |   MWU p |   MWU p (FDR) | Sig?   |
+|:------------|:------------|------:|------:|:---------|----------:|----------:|----------------:|--------:|--------------:|:-------|
+| AVOID       | ENTER_LIMIT |   115 |    16 | +2.74%   |      0.07 |     0.564 |           0.598 |   0.691 |         0.691 | —      |
+| AVOID       | ENTER_NOW   |   115 |    17 | -16.84%  |     -0.36 |     0.371 |           0.598 |   0.043 |         0.257 | —      |
+| AVOID       | NEUTRAL     |   115 |    36 | -6.21%   |     -0.14 |     0.515 |           0.598 |   0.086 |         0.257 | —      |
+| ENTER_LIMIT | ENTER_NOW   |    16 |    17 | -19.58%  |     -0.37 |     0.295 |           0.598 |   0.288 |         0.576 | —      |
+| ENTER_LIMIT | NEUTRAL     |    16 |    36 | -8.95%   |     -0.21 |     0.327 |           0.598 |   0.513 |         0.616 | —      |
+| ENTER_NOW   | NEUTRAL     |    17 |    36 | +10.64%  |      0.18 |     0.598 |           0.598 |   0.481 |         0.616 | —      |
+
+**Pairwise DR verdict at 1w:**
+
+| A     | B         |   n_A |   n_B | Δ mean   |   Cohen d |   Welch p |   Welch p (FDR) |   MWU p |   MWU p (FDR) | Sig?   |
+|:------|:----------|------:|------:|:---------|----------:|----------:|----------------:|--------:|--------------:|:-------|
+| AVOID | BUY       |    16 |     6 | +20.13%  |      0.3  |     0.313 |           0.383 |   0.59  |         0.743 | —      |
+| AVOID | BUY_LIMIT |    16 |    18 | +17.31%  |      0.33 |     0.383 |           0.383 |   0.743 |         0.743 | —      |
+| BUY   | BUY_LIMIT |     6 |    18 | -2.83%   |     -0.44 |     0.279 |           0.383 |   0.415 |         0.743 | —      |
+
+**Pairwise DR verdict at 2w:**
+
+| A     | B         |   n_A |   n_B | Δ mean   |   Cohen d |   Welch p |   Welch p (FDR) |   MWU p |   MWU p (FDR) | Sig?   |
+|:------|:----------|------:|------:|:---------|----------:|----------:|----------------:|--------:|--------------:|:-------|
+| AVOID | BUY       |     8 |     4 | +38.72%  |      0.43 |     0.343 |           0.533 |   0.57  |         0.839 | —      |
+| AVOID | BUY_LIMIT |     8 |    10 | +37.61%  |      0.53 |     0.355 |           0.533 |   0.696 |         0.839 | —      |
+| BUY   | BUY_LIMIT |     4 |    10 | -1.10%   |     -0.12 |     0.839 |           0.839 |   0.839 |         0.839 | —      |
+
 ## 4. R/R ratio vs realized return
 
 ### 4.1 AI council R/R
@@ -98,6 +138,14 @@ DR verdicts: **none of the 1 pairwise comparisons** are significant — DR group
 
 
 PM R/R vs 4w return (n=35): Pearson r=+0.377 (p=0.026) 95% CI [+0.05, +0.63], Spearman ρ=+0.090 (p=0.607) 95% CI [-0.25, +0.41]. Pearson is significant but Spearman is not, meaning the linear correlation is being driven by a few high-R/R outliers rather than a monotonic relationship.
+
+**Correlation at multiple horizons:**
+
+| horizon   |   n |   Pearson r |   Pearson p | Pearson 95% CI   |   Spearman ρ |   Spearman p | Spearman 95% CI   |
+|:----------|----:|------------:|------------:|:-----------------|-------------:|-------------:|:------------------|
+| 1w        | 246 |       0     |       0.999 | [-0.125, +0.125] |        0.03  |        0.645 | [-0.096, +0.154]  |
+| 2w        | 164 |       0.116 |       0.141 | [-0.038, +0.264] |        0.111 |        0.156 | [-0.043, +0.261]  |
+| 4w        |  35 |       0.377 |       0.026 | [+0.050, +0.631] |        0.09  |        0.607 | [-0.251, +0.412]  |
 
 
 ![corr_pm](charts/15_corr_pm_rr_vs_return.png)
@@ -120,6 +168,14 @@ PM R/R vs 4w return (n=35): Pearson r=+0.377 (p=0.026) 95% CI [+0.05, +0.63], Sp
 
 
 DR R/R vs 4w return (n=9): Pearson r=+0.097 (p=0.803), Spearman ρ=-0.332 (p=0.382). Sample size is small — conclusions are tentative.
+
+**Correlation at multiple horizons:**
+
+| horizon   |   n |   Pearson r |   Pearson p | Pearson 95% CI   |   Spearman ρ |   Spearman p | Spearman 95% CI   |
+|:----------|----:|------------:|------------:|:-----------------|-------------:|-------------:|:------------------|
+| 1w        |  38 |      -0.261 |       0.114 | [-0.536, +0.064] |       -0.209 |        0.207 | [-0.498, +0.122]  |
+| 2w        |  19 |      -0.298 |       0.215 | [-0.663, +0.180] |       -0.516 |        0.024 | [-0.798, -0.049]  |
+| 4w        |   9 |       0.097 |       0.803 | [-0.606, +0.715] |       -0.332 |        0.382 |                   |
 
 
 ![corr_dr](charts/16_corr_dr_rr_vs_return.png)
@@ -196,6 +252,52 @@ Light grey lines are individual ENTER_NOW + ENTER_LIMIT decisions; bold lines ar
 ![wr_drop](charts/10_winrate_by_drop_size.png)
 
 
+## 7a. Horizon comparison — 1w / 2w / 4w
+
+The 4-week return is small-sample (n=39 with completed bars). 1-week and 2-week returns are much better powered (n=272 and n=184). All subsequent significance tests and bucket aggregations are now computed at every horizon; the bars below show win rate (top) and average return (bottom) side-by-side per intent. Wilson + t-CI error bars come along for the ride.
+
+
+![wr_intent_multi](charts/24_winrate_by_intent_multi.png)
+
+
+![ar_intent_multi](charts/25_avgreturn_by_intent_multi.png)
+
+
+**Per-intent win rate and avg return at each horizon:**
+
+| group       | horizon   |   n | win_rate   | WR 95% CI       | avg_return   | AR 95% CI           |
+|:------------|:----------|----:|:-----------|:----------------|:-------------|:--------------------|
+| AVOID       | 1w        | 156 | 53.2%      | [45.4%, 60.9%]  | +3.77%       | [-0.40%, +7.95%]    |
+| AVOID       | 2w        | 115 | 50.4%      | [41.4%, 59.4%]  | +6.20%       | [-1.54%, +13.94%]   |
+| AVOID       | 4w        |  18 | 61.1%      | [38.6%, 79.7%]  | +27.45%      | [-8.72%, +63.62%]   |
+| ENTER_LIMIT | 1w        |  27 | 55.6%      | [37.3%, 72.4%]  | +1.82%       | [-1.03%, +4.67%]    |
+| ENTER_LIMIT | 2w        |  16 | 50.0%      | [28.0%, 72.0%]  | +3.46%       | [-2.25%, +9.17%]    |
+| ENTER_LIMIT | 4w        |   4 | 100.0%     | [51.0%, 100.0%] | +37.01%      | [-48.27%, +122.30%] |
+| ENTER_NOW   | 1w        |  33 | 57.6%      | [40.8%, 72.8%]  | +12.54%      | [-6.46%, +31.54%]   |
+| ENTER_NOW   | 2w        |  17 | 76.5%      | [52.7%, 90.4%]  | +23.05%      | [-14.96%, +61.05%]  |
+| ENTER_NOW   | 4w        |   8 | 100.0%     | [67.6%, 100.0%] | +22.08%      | [+7.77%, +36.39%]   |
+| NEUTRAL     | 1w        |  56 | 50.0%      | [37.3%, 62.7%]  | +1.22%       | [-0.93%, +3.37%]    |
+| NEUTRAL     | 2w        |  36 | 69.4%      | [53.1%, 82.0%]  | +12.41%      | [-5.07%, +29.89%]   |
+| NEUTRAL     | 4w        |   9 | 66.7%      | [35.4%, 87.9%]  | +46.59%      | [-34.84%, +128.02%] |
+
+**By drop-size bucket at each horizon:**
+
+
+![wr_drop_multi](charts/26_winrate_by_drop_multi.png)
+
+
+**By PM R/R bucket at each horizon:**
+
+
+![wr_pmrr_multi](charts/27_winrate_by_pm_rr_multi.png)
+
+
+**By DR R/R bucket at each horizon:**
+
+
+![wr_drrr_multi](charts/28_winrate_by_dr_rr_multi.png)
+
+
 ## 8a. R/R distribution by verdict (categorical correlation)
 
 How does each council assign its R/R ratings to its own verdict groups? Below: per-group descriptives, one-way ANOVA (parametric), and Kruskal-Wallis (rank-based) for the omnibus test of "are the group distributions the same?" Plus pairwise Welch t-tests with FDR-adjusted p-values.
@@ -253,63 +355,63 @@ Top 25 rows by R/R ratio for each council, with their realized returns where ava
 
 ### 8b.1 Top by PM R/R (`risk_reward_ratio`)
 
-| symbol   | decision_date   | intent      | recommendation   |   risk_reward_ratio | drop_percent   | price_at_decision   | deep_research_verdict   | return_4w   | max_roi_4w   | max_drawdown_4w   |
-|:---------|:----------------|:------------|:-----------------|--------------------:|:---------------|:--------------------|:------------------------|:------------|:-------------|:------------------|
-| CHKP     | 2026-04-30      | AVOID       | AVOID            |                5.4  | -1694.06%      | $116.25             |                         |             | +7.24%       | -3.46%            |
-| LBRDP    | 2026-04-24      | ENTER_NOW   | BUY              |                4    | -597.17%       | $21.96              | BUY                     |             | +6.58%       | -4.17%            |
-| NICE     | 2026-04-11      | ENTER_NOW   | BUY              |                3.07 | -714.15%       | $97.00              | BUY_LIMIT               |             | +30.41%      | -6.49%            |
-| NOC      | 2026-04-21      | AVOID       | AVOID            |                2.9  | -580.15%       | $618.87             |                         |             | +5.52%       | -12.06%           |
-| FDX      | 2026-05-04      | ENTER_LIMIT | BUY_LIMIT        |                2.9  | -674.68%       | $367.11             | AVOID                   |             | +4.41%       | -3.53%            |
-| TEAM     | 2026-04-09      | ENTER_NOW   | BUY              |                2.8  | -804.78%       | $58.50              |                         | +57.90%     | +64.65%      | -4.26%            |
-| TRUMF    | 2026-04-13      | NEUTRAL     | WATCH            |                2.8  | -528.93%       | $12.40              |                         |             | +8.47%       | -0.00%            |
-| CRC      | 2026-05-06      | ENTER_LIMIT | BUY_LIMIT        |                2.76 | -960.36%       | $63.40              | AVOID                   |             | +8.76%       | -7.80%            |
-| MHK      | 2026-05-04      | AVOID       | AVOID            |                2.6  | -546.88%       | $94.47              |                         |             | +13.50%      | -0.92%            |
-| FIS      | 2026-05-08      | ENTER_NOW   | BUY              |                2.6  | -584.13%       | $44.49              | BUY_LIMIT               |             |              |                   |
-| CE       | 2026-05-06      | ENTER_LIMIT | BUY_LIMIT        |                2.6  | -954.93%       | $62.42              | BUY_LIMIT               |             | +6.92%       | -10.29%           |
-| ALC      | 2026-05-06      | ENTER_NOW   | BUY              |                2.4  | -967.09%       | $67.25              | BUY                     |             | +0.61%       | -7.21%            |
-| HUBS     | 2026-05-08      | ENTER_LIMIT | BUY_LIMIT        |                2.4  | -2333.01%      | $186.86             | BUY_LIMIT               |             |              |                   |
-| REGN     | 2026-04-29      | ENTER_NOW   | BUY              |                2.35 | -621.85%       | $686.26             | BUY                     |             | +5.81%       | -2.54%            |
-| IAG      | 2026-04-21      | ENTER_NOW   | BUY              |                2.33 | -718.53%       | $17.18              | BUY_LIMIT               |             | +13.10%      | -6.69%            |
-| PBMRF    | 2026-04-09      | AVOID       | AVOID            |                2.3  | -8600.00%      | $0.00               |                         | +308.93%    | +308.93%     | -0.00%            |
-| ADSK     | 2026-04-09      | ENTER_NOW   | BUY              |                2.3  | -916.27%       | $218.60             | AVOID                   | +14.84%     | +16.72%      | -2.06%            |
-| POOL     | 2026-05-05      | ENTER_LIMIT | BUY_LIMIT        |                2.3  | -606.21%       | $190.91             | AVOID                   |             | +3.88%       | -3.36%            |
-| NOW      | 2026-04-09      | ENTER_NOW   | BUY              |                2.3  | -793.58%       | $89.73              | BUY_LIMIT               | +4.30%      | +16.45%      | -9.47%            |
-| WTW      | 2026-04-30      | ENTER_NOW   | BUY              |                2.24 | -1417.39%      | $248.99             | BUY_LIMIT               |             | +7.47%       | -0.96%            |
-| CHYM     | 2026-05-07      | ENTER_NOW   | BUY              |                2.2  | -704.10%       | $20.20              |                         |             | +6.19%       | -9.90%            |
-| PPERF    | 2026-04-11      | ENTER_NOW   | BUY              |                2.2  | -2316.78%      | $0.26               | AVOID                   |             | -0.00%       | -0.00%            |
-| CEBCF    | 2026-04-10      | AVOID       | AVOID            |                2.2  | -1436.36%      | $0.38               |                         | +8.81%      | +16.77%      | +0.00%            |
-| ZBH      | 2026-04-28      | ENTER_NOW   | BUY              |                2.16 | -706.34%       | $86.05              | BUY_LIMIT               |             | +3.01%       | -7.23%            |
-| TOST     | 2026-05-08      | ENTER_NOW   | BUY              |                2.11 | -1463.58%      | $25.08              | BUY_LIMIT               |             |              |                   |
+| symbol   | decision_date   | intent      | recommendation   |   risk_reward_ratio | drop_percent   | price_at_decision   | deep_research_verdict   | return_1w   | return_2w   | return_4w   | max_roi_4w   | max_drawdown_4w   |
+|:---------|:----------------|:------------|:-----------------|--------------------:|:---------------|:--------------------|:------------------------|:------------|:------------|:------------|:-------------|:------------------|
+| CHKP     | 2026-04-30      | AVOID       | AVOID            |                5.4  | -1694.06%      | $116.25             |                         | -0.59%      |             |             | +7.24%       | -3.46%            |
+| LBRDP    | 2026-04-24      | ENTER_NOW   | BUY              |                4    | -597.17%       | $21.96              | BUY                     | -0.30%      | +0.89%      |             | +6.58%       | -4.17%            |
+| NICE     | 2026-04-11      | ENTER_NOW   | BUY              |                3.07 | -714.15%       | $97.00              | BUY_LIMIT               | +8.79%      | +4.08%      |             | +30.41%      | -6.49%            |
+| NOC      | 2026-04-21      | AVOID       | AVOID            |                2.9  | -580.15%       | $618.87             |                         | -6.63%      | -9.74%      |             | +5.52%       | -12.06%           |
+| FDX      | 2026-05-04      | ENTER_LIMIT | BUY_LIMIT        |                2.9  | -674.68%       | $367.11             | AVOID                   |             |             |             | +4.41%       | -3.53%            |
+| TEAM     | 2026-04-09      | ENTER_NOW   | BUY              |                2.8  | -804.78%       | $58.50              |                         | +17.49%     | +15.59%     | +57.90%     | +64.65%      | -4.26%            |
+| TRUMF    | 2026-04-13      | NEUTRAL     | WATCH            |                2.8  | -528.93%       | $12.40              |                         | +1.77%      | +1.77%      |             | +8.47%       | -0.00%            |
+| CRC      | 2026-05-06      | ENTER_LIMIT | BUY_LIMIT        |                2.76 | -960.36%       | $63.40              | AVOID                   |             |             |             | +8.76%       | -7.80%            |
+| MHK      | 2026-05-04      | AVOID       | AVOID            |                2.6  | -546.88%       | $94.47              |                         |             |             |             | +13.50%      | -0.92%            |
+| FIS      | 2026-05-08      | ENTER_NOW   | BUY              |                2.6  | -584.13%       | $44.49              | BUY_LIMIT               |             |             |             |              |                   |
+| CE       | 2026-05-06      | ENTER_LIMIT | BUY_LIMIT        |                2.6  | -954.93%       | $62.42              | BUY_LIMIT               |             |             |             | +6.92%       | -10.29%           |
+| ALC      | 2026-05-06      | ENTER_NOW   | BUY              |                2.4  | -967.09%       | $67.25              | BUY                     |             |             |             | +0.61%       | -7.21%            |
+| HUBS     | 2026-05-08      | ENTER_LIMIT | BUY_LIMIT        |                2.4  | -2333.01%      | $186.86             | BUY_LIMIT               |             |             |             |              |                   |
+| REGN     | 2026-04-29      | ENTER_NOW   | BUY              |                2.35 | -621.85%       | $686.26             | BUY                     | +5.07%      |             |             | +5.81%       | -2.54%            |
+| IAG      | 2026-04-21      | ENTER_NOW   | BUY              |                2.33 | -718.53%       | $17.18              | BUY_LIMIT               | -4.02%      | -5.06%      |             | +13.10%      | -6.69%            |
+| PBMRF    | 2026-04-09      | AVOID       | AVOID            |                2.3  | -8600.00%      | $0.00               |                         | -0.00%      | +308.93%    | +308.93%    | +308.93%     | -0.00%            |
+| ADSK     | 2026-04-09      | ENTER_NOW   | BUY              |                2.3  | -916.27%       | $218.60             | AVOID                   | +11.24%     | +6.12%      | +14.84%     | +16.72%      | -2.06%            |
+| POOL     | 2026-05-05      | ENTER_LIMIT | BUY_LIMIT        |                2.3  | -606.21%       | $190.91             | AVOID                   |             |             |             | +3.88%       | -3.36%            |
+| NOW      | 2026-04-09      | ENTER_NOW   | BUY              |                2.3  | -793.58%       | $89.73              | BUY_LIMIT               | +7.47%      | -5.52%      | +4.30%      | +16.45%      | -9.47%            |
+| WTW      | 2026-04-30      | ENTER_NOW   | BUY              |                2.24 | -1417.39%      | $248.99             | BUY_LIMIT               | +3.65%      |             |             | +7.47%       | -0.96%            |
+| CHYM     | 2026-05-07      | ENTER_NOW   | BUY              |                2.2  | -704.10%       | $20.20              |                         |             |             |             | +6.19%       | -9.90%            |
+| PPERF    | 2026-04-11      | ENTER_NOW   | BUY              |                2.2  | -2316.78%      | $0.26               | AVOID                   | -0.00%      | -0.00%      |             | -0.00%       | -0.00%            |
+| CEBCF    | 2026-04-10      | AVOID       | AVOID            |                2.2  | -1436.36%      | $0.38               |                         | +8.81%      | +16.77%     | +8.81%      | +16.77%      | +0.00%            |
+| ZBH      | 2026-04-28      | ENTER_NOW   | BUY              |                2.16 | -706.34%       | $86.05              | BUY_LIMIT               | -3.53%      |             |             | +3.01%       | -7.23%            |
+| TOST     | 2026-05-08      | ENTER_NOW   | BUY              |                2.11 | -1463.58%      | $25.08              | BUY_LIMIT               |             |             |             |              |                   |
 
 ### 8b.2 Top by DR R/R (`deep_research_rr_ratio`)
 
-| symbol   | decision_date   | intent      | recommendation   |   deep_research_rr_ratio | drop_percent   | price_at_decision   | deep_research_verdict   | return_4w   | max_roi_4w   | max_drawdown_4w   |
-|:---------|:----------------|:------------|:-----------------|-------------------------:|:---------------|:--------------------|:------------------------|:------------|:-------------|:------------------|
-| LBRDP    | 2026-04-24      | ENTER_NOW   | BUY              |                     4    | -597.17%       | $21.96              | BUY                     |             | +6.58%       | -4.17%            |
-| NICE     | 2026-04-11      | ENTER_NOW   | BUY              |                     3.07 | -714.15%       | $97.00              | BUY_LIMIT               |             | +30.41%      | -6.49%            |
-| FDX      | 2026-05-04      | ENTER_LIMIT | BUY_LIMIT        |                     2.9  | -674.68%       | $367.11             | AVOID                   |             | +4.41%       | -3.53%            |
-| CRC      | 2026-05-06      | ENTER_LIMIT | BUY_LIMIT        |                     2.76 | -960.36%       | $63.40              | AVOID                   |             | +8.76%       | -7.80%            |
-| CE       | 2026-05-06      | ENTER_LIMIT | BUY_LIMIT        |                     2.6  | -954.93%       | $62.42              | BUY_LIMIT               |             | +6.92%       | -10.29%           |
-| FIS      | 2026-05-08      | ENTER_NOW   | BUY              |                     2.6  | -584.13%       | $44.49              | BUY_LIMIT               |             |              |                   |
-| HUBS     | 2026-05-08      | ENTER_LIMIT | BUY_LIMIT        |                     2.4  | -2333.01%      | $186.86             | BUY_LIMIT               |             |              |                   |
-| ALC      | 2026-05-06      | ENTER_NOW   | BUY              |                     2.4  | -967.09%       | $67.25              | BUY                     |             | +0.61%       | -7.21%            |
-| REGN     | 2026-04-29      | ENTER_NOW   | BUY              |                     2.35 | -621.85%       | $686.26             | BUY                     |             | +5.81%       | -2.54%            |
-| IAG      | 2026-04-21      | ENTER_NOW   | BUY              |                     2.33 | -718.53%       | $17.18              | BUY_LIMIT               |             | +13.10%      | -6.69%            |
-| NOW      | 2026-04-09      | ENTER_NOW   | BUY              |                     2.3  | -793.58%       | $89.73              | BUY_LIMIT               | +4.30%      | +16.45%      | -9.47%            |
-| ADSK     | 2026-04-09      | ENTER_NOW   | BUY              |                     2.3  | -916.27%       | $218.60             | AVOID                   | +14.84%     | +16.72%      | -2.06%            |
-| POOL     | 2026-05-05      | ENTER_LIMIT | BUY_LIMIT        |                     2.3  | -606.21%       | $190.91             | AVOID                   |             | +3.88%       | -3.36%            |
-| WTW      | 2026-04-30      | ENTER_NOW   | BUY              |                     2.24 | -1417.39%      | $248.99             | BUY_LIMIT               |             | +7.47%       | -0.96%            |
-| ZBH      | 2026-04-28      | ENTER_NOW   | BUY              |                     2.16 | -706.34%       | $86.05              | BUY_LIMIT               |             | +3.01%       | -7.23%            |
-| TOST     | 2026-05-08      | ENTER_NOW   | BUY              |                     2.11 | -1463.58%      | $25.08              | BUY_LIMIT               |             |              |                   |
-| DOCN     | 2026-04-10      | ENTER_LIMIT | BUY_LIMIT        |                     2.11 | -1328.44%      | $75.59              | BUY_LIMIT               | +116.89%    | +117.98%     | -4.52%            |
-| SYM      | 2026-05-08      | ENTER_NOW   | BUY              |                     2.03 | -845.30%       | $51.66              | BUY_LIMIT               |             |              |                   |
-| ALLE     | 2026-04-28      | ENTER_NOW   | BUY              |                     2    | -745.96%       | $137.33             | BUY_LIMIT               |             | +2.93%       | -4.45%            |
-| APA      | 2026-04-09      | NEUTRAL     | PENDING          |                     2    | -979.98%       | $38.75              | BUY                     | -6.48%      | +8.62%       | -13.73%           |
-| NMR      | 2026-04-24      | ENTER_NOW   | BUY              |                     2    | -526.00%       | $7.83               | BUY                     |             | +4.79%       | -1.47%            |
-| DPZ      | 2026-04-27      | ENTER_NOW   | BUY              |                     1.96 | -934.67%       | $333.45             | BUY_LIMIT               |             | +3.53%       | -3.65%            |
-| EMBJ     | 2026-05-08      | ENTER_LIMIT | BUY_LIMIT        |                     1.9  | -791.14%       | $62.39              | AVOID                   |             |              |                   |
-| CLX      | 2026-05-01      | ENTER_LIMIT | BUY_LIMIT        |                     1.86 | -895.38%       | $87.81              | AVOID                   |             | +6.44%       | -3.54%            |
-| EXPE     | 2026-05-08      | ENTER_NOW   | BUY              |                     1.8  | -869.50%       | $230.81             | BUY_LIMIT               |             |              |                   |
+| symbol   | decision_date   | intent      | recommendation   |   deep_research_rr_ratio | drop_percent   | price_at_decision   | deep_research_verdict   | return_1w   | return_2w   | return_4w   | max_roi_4w   | max_drawdown_4w   |
+|:---------|:----------------|:------------|:-----------------|-------------------------:|:---------------|:--------------------|:------------------------|:------------|:------------|:------------|:-------------|:------------------|
+| LBRDP    | 2026-04-24      | ENTER_NOW   | BUY              |                     4    | -597.17%       | $21.96              | BUY                     | -0.30%      | +0.89%      |             | +6.58%       | -4.17%            |
+| NICE     | 2026-04-11      | ENTER_NOW   | BUY              |                     3.07 | -714.15%       | $97.00              | BUY_LIMIT               | +8.79%      | +4.08%      |             | +30.41%      | -6.49%            |
+| FDX      | 2026-05-04      | ENTER_LIMIT | BUY_LIMIT        |                     2.9  | -674.68%       | $367.11             | AVOID                   |             |             |             | +4.41%       | -3.53%            |
+| CRC      | 2026-05-06      | ENTER_LIMIT | BUY_LIMIT        |                     2.76 | -960.36%       | $63.40              | AVOID                   |             |             |             | +8.76%       | -7.80%            |
+| CE       | 2026-05-06      | ENTER_LIMIT | BUY_LIMIT        |                     2.6  | -954.93%       | $62.42              | BUY_LIMIT               |             |             |             | +6.92%       | -10.29%           |
+| FIS      | 2026-05-08      | ENTER_NOW   | BUY              |                     2.6  | -584.13%       | $44.49              | BUY_LIMIT               |             |             |             |              |                   |
+| HUBS     | 2026-05-08      | ENTER_LIMIT | BUY_LIMIT        |                     2.4  | -2333.01%      | $186.86             | BUY_LIMIT               |             |             |             |              |                   |
+| ALC      | 2026-05-06      | ENTER_NOW   | BUY              |                     2.4  | -967.09%       | $67.25              | BUY                     |             |             |             | +0.61%       | -7.21%            |
+| REGN     | 2026-04-29      | ENTER_NOW   | BUY              |                     2.35 | -621.85%       | $686.26             | BUY                     | +5.07%      |             |             | +5.81%       | -2.54%            |
+| IAG      | 2026-04-21      | ENTER_NOW   | BUY              |                     2.33 | -718.53%       | $17.18              | BUY_LIMIT               | -4.02%      | -5.06%      |             | +13.10%      | -6.69%            |
+| NOW      | 2026-04-09      | ENTER_NOW   | BUY              |                     2.3  | -793.58%       | $89.73              | BUY_LIMIT               | +7.47%      | -5.52%      | +4.30%      | +16.45%      | -9.47%            |
+| ADSK     | 2026-04-09      | ENTER_NOW   | BUY              |                     2.3  | -916.27%       | $218.60             | AVOID                   | +11.24%     | +6.12%      | +14.84%     | +16.72%      | -2.06%            |
+| POOL     | 2026-05-05      | ENTER_LIMIT | BUY_LIMIT        |                     2.3  | -606.21%       | $190.91             | AVOID                   |             |             |             | +3.88%       | -3.36%            |
+| WTW      | 2026-04-30      | ENTER_NOW   | BUY              |                     2.24 | -1417.39%      | $248.99             | BUY_LIMIT               | +3.65%      |             |             | +7.47%       | -0.96%            |
+| ZBH      | 2026-04-28      | ENTER_NOW   | BUY              |                     2.16 | -706.34%       | $86.05              | BUY_LIMIT               | -3.53%      |             |             | +3.01%       | -7.23%            |
+| TOST     | 2026-05-08      | ENTER_NOW   | BUY              |                     2.11 | -1463.58%      | $25.08              | BUY_LIMIT               |             |             |             |              |                   |
+| DOCN     | 2026-04-10      | ENTER_LIMIT | BUY_LIMIT        |                     2.11 | -1328.44%      | $75.59              | BUY_LIMIT               | +13.28%     | +25.96%     | +116.89%    | +117.98%     | -4.52%            |
+| SYM      | 2026-05-08      | ENTER_NOW   | BUY              |                     2.03 | -845.30%       | $51.66              | BUY_LIMIT               |             |             |             |              |                   |
+| ALLE     | 2026-04-28      | ENTER_NOW   | BUY              |                     2    | -745.96%       | $137.33             | BUY_LIMIT               | -3.67%      |             |             | +2.93%       | -4.45%            |
+| APA      | 2026-04-09      | NEUTRAL     | PENDING          |                     2    | -979.98%       | $38.75              | BUY                     | -2.19%      | -0.23%      | -6.48%      | +8.62%       | -13.73%           |
+| NMR      | 2026-04-24      | ENTER_NOW   | BUY              |                     2    | -526.00%       | $7.83               | BUY                     | -0.32%      | +1.47%      |             | +4.79%       | -1.47%            |
+| DPZ      | 2026-04-27      | ENTER_NOW   | BUY              |                     1.96 | -934.67%       | $333.45             | BUY_LIMIT               | -0.91%      |             |             | +3.53%       | -3.65%            |
+| EMBJ     | 2026-05-08      | ENTER_LIMIT | BUY_LIMIT        |                     1.9  | -791.14%       | $62.39              | AVOID                   |             |             |             |              |                   |
+| CLX      | 2026-05-01      | ENTER_LIMIT | BUY_LIMIT        |                     1.86 | -895.38%       | $87.81              | AVOID                   | +4.96%      |             |             | +6.44%       | -3.54%            |
+| EXPE     | 2026-05-08      | ENTER_NOW   | BUY              |                     1.8  | -869.50%       | $230.81             | BUY_LIMIT               |             |             |             |              |                   |
 
 ## 9. Profit and loss decomposition
 

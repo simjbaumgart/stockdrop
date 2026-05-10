@@ -1,6 +1,6 @@
 # Performance analysis package — 2026-02-01
 
-Generated 2026-05-10 09:41. Cohort size: **363 decisions**.
+Generated 2026-05-10 12:22. Cohort size: **363 decisions**.
 
 ## Files
 
@@ -33,14 +33,31 @@ Generated 2026-05-10 09:41. Cohort size: **363 decisions**.
 - `charts/21_cum_pnl_calendar_by_dr_verdict.png`
 - `charts/22_rr_box_pm_by_intent.png`
 - `charts/23_rr_box_dr_by_verdict.png`
+- `charts/24_winrate_by_intent_multi.png`
+- `charts/25_avgreturn_by_intent_multi.png`
+- `charts/26_winrate_by_drop_multi.png`
+- `charts/27_winrate_by_pm_rr_multi.png`
+- `charts/28_winrate_by_dr_rr_multi.png`
 
 ### Data
 
 - `data/cohort_enriched.csv`
+- `data/corr_dr_rr_1w.json`
+- `data/corr_dr_rr_2w.json`
+- `data/corr_dr_rr_4w.json`
+- `data/corr_pm_rr_1w.json`
+- `data/corr_pm_rr_2w.json`
+- `data/corr_pm_rr_4w.json`
 - `data/cum_pnl_by_dr_verdict.json`
 - `data/cum_pnl_by_intent.json`
 - `data/equity_curve.csv`
 - `data/full_payload.json`
+- `data/pairwise_dr_verdict_1w.csv`
+- `data/pairwise_dr_verdict_2w.csv`
+- `data/pairwise_dr_verdict_4w.csv`
+- `data/pairwise_intent_1w.csv`
+- `data/pairwise_intent_2w.csv`
+- `data/pairwise_intent_4w.csv`
 - `data/spy_bars.csv`
 - `data/stats_corr_dr_rr.json`
 - `data/stats_corr_pm_rr.json`
@@ -69,12 +86,27 @@ Generated 2026-05-10 09:41. Cohort size: **363 decisions**.
 - `data/winloss_by_intent.json`
 - `data/winrate_by_dr_action.csv`
 - `data/winrate_by_dr_rr.csv`
+- `data/winrate_by_dr_rr_1w.csv`
+- `data/winrate_by_dr_rr_2w.csv`
+- `data/winrate_by_dr_rr_4w.csv`
 - `data/winrate_by_dr_verdict.csv`
+- `data/winrate_by_dr_verdict_1w.csv`
+- `data/winrate_by_dr_verdict_2w.csv`
+- `data/winrate_by_dr_verdict_4w.csv`
 - `data/winrate_by_drop_bucket.csv`
+- `data/winrate_by_drop_bucket_1w.csv`
+- `data/winrate_by_drop_bucket_2w.csv`
+- `data/winrate_by_drop_bucket_4w.csv`
 - `data/winrate_by_gatekeeper.csv`
 - `data/winrate_by_horizon.csv`
 - `data/winrate_by_intent.csv`
+- `data/winrate_by_intent_1w.csv`
+- `data/winrate_by_intent_2w.csv`
+- `data/winrate_by_intent_4w.csv`
 - `data/winrate_by_pm_rr.csv`
+- `data/winrate_by_pm_rr_1w.csv`
+- `data/winrate_by_pm_rr_2w.csv`
+- `data/winrate_by_pm_rr_4w.csv`
 - `data/winrate_by_sector.csv`
 
 ### Regenerate
