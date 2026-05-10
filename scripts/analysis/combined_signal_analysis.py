@@ -78,15 +78,18 @@ def load_combined(start_date: str, sa_path: Path) -> pd.DataFrame:
     return merged, ds
 
 
-def fit_ols(merged: pd.DataFrame) -> pd.DataFrame:
+def fit_ols(merged: pd.DataFrame, intent_col: str = "intent",
+            rr_col: str = "risk_reward_ratio") -> pd.DataFrame:
     """OLS regression of return_1w on every signal we have. Standardised
     coefficients so magnitudes are directly comparable.
     """
-    cols_continuous = ["risk_reward_ratio", "drop_percent",
+    cols_continuous = [rr_col, "drop_percent",
                        "Rank", "quant_score", "sa_score", "ws_score", "perf_6m"]
     sub = merged.dropna(subset=["return_1w"]).copy()
-    # Build intent dummies (drop AVOID as reference category)
-    intent_dum = pd.get_dummies(sub["intent"], prefix="intent", drop_first=True)
+    # Build intent dummies (drop the largest group as reference category)
+    if intent_col not in sub.columns:
+        return pd.DataFrame()
+    intent_dum = pd.get_dummies(sub[intent_col].astype(str), prefix=intent_col, drop_first=True)
     X_parts = [sub[cols_continuous], intent_dum]
     X = pd.concat(X_parts, axis=1)
     # Keep rows where ALL predictors are present
@@ -103,7 +106,7 @@ def fit_ols(merged: pd.DataFrame) -> pd.DataFrame:
     # OLS via numpy (with intercept)
     Xmat = np.column_stack([np.ones(len(Xf_z)), Xf_z.values])
     n, k = Xmat.shape
-    if n <= k:
+    if n <= k + 5:  # need enough degrees of freedom
         return pd.DataFrame()
     beta, *_ = np.linalg.lstsq(Xmat, y, rcond=None)
     yhat = Xmat @ beta
@@ -111,8 +114,12 @@ def fit_ols(merged: pd.DataFrame) -> pd.DataFrame:
     rss = float(resid @ resid)
     dof = n - k
     sigma2 = rss / dof
-    XtX_inv = np.linalg.inv(Xmat.T @ Xmat)
-    se = np.sqrt(np.diag(sigma2 * XtX_inv))
+    try:
+        XtX_inv = np.linalg.inv(Xmat.T @ Xmat)
+    except np.linalg.LinAlgError:
+        # near-singular (high collinearity / sparse intent dummies); use pseudo-inverse
+        XtX_inv = np.linalg.pinv(Xmat.T @ Xmat)
+    se = np.sqrt(np.diag(np.abs(sigma2 * XtX_inv)))
     tvals = beta / se
     pvals = 2 * (1 - scipy_stats.t.cdf(np.abs(tvals), df=dof))
     r2 = 1 - rss / ((y - y.mean()) @ (y - y.mean()))
@@ -194,6 +201,10 @@ def main():
     parser.add_argument("--investment", type=float, default=750.0)
     parser.add_argument("--cost-in", type=float, default=3.0)
     parser.add_argument("--cost-out", type=float, default=3.0)
+    parser.add_argument("--council", default="pm", choices=["pm", "dr"],
+                        help="Which council's R/R + verdict to analyse "
+                             "(pm = AI council intent + risk_reward_ratio, "
+                             "dr = deep_research_verdict + deep_research_rr_ratio)")
     args = parser.parse_args()
 
     sa_path = Path(args.sa_file)
@@ -206,13 +217,27 @@ def main():
     cost_total = args.cost_in + args.cost_out
     inv = args.investment
 
+    # Council switch: PM (default) or DR
+    if args.council == "pm":
+        intent_col = "intent"
+        rr_col = "risk_reward_ratio"
+        BUY_INTENTS = ["ENTER_NOW", "ENTER_LIMIT"]
+        council_label = "PM (AI council)"
+    else:
+        intent_col = "deep_research_verdict"
+        rr_col = "deep_research_rr_ratio"
+        BUY_INTENTS = ["BUY", "BUY_LIMIT"]
+        council_label = "DR (Deep Research)"
+    print(f"COUNCIL: {council_label}  | intent={intent_col}, R/R={rr_col}, "
+          f"BUY values={BUY_INTENTS}")
+
     has_sa = merged["Rank"].notna()
     has_ret = merged["return_1w"].notna()
     overlap = merged[has_sa & has_ret]
     print("=" * 100)
-    print(f"COMBINED SIGNAL ANALYSIS — cohort × SA × SPY")
+    print(f"COMBINED SIGNAL ANALYSIS — cohort × SA × SPY  [{council_label}]")
     print(f"Cohort with SA + return_1w: {len(overlap)} rows")
-    print(f"  PM intent breakdown: {dict(overlap['intent'].value_counts())}")
+    print(f"  {intent_col} breakdown: {dict(overlap[intent_col].dropna().value_counts())}")
     print("=" * 100)
 
     # ---------------------------------------------------------------
@@ -224,7 +249,7 @@ def main():
     print(f"  {'signal':<28s} {'n':>4s} {'Pearson r':>11s} {'p':>7s} "
           f"{'Spearman ρ':>12s} {'p':>7s}")
     pairs = [
-        ("risk_reward_ratio", "PM R/R"),
+        (rr_col,             f"{args.council.upper()} R/R"),
         ("drop_percent",     "Drop %"),
         ("Rank",             "SA Rank"),
         ("quant_score",      "SA Quant"),
@@ -257,7 +282,7 @@ def main():
     print("   signal, holding others constant. p < 0.05 means \"adds independent")
     print("   predictive value beyond what the other signals already capture\".")
     print()
-    res = fit_ols(merged)
+    res = fit_ols(merged, intent_col=intent_col, rr_col=rr_col)
     if isinstance(res, tuple):
         ols_df, r2, n_ols = res
         ols_df = ols_df.iloc[1:]  # drop intercept for display
@@ -281,50 +306,39 @@ def main():
     print(f"   €{inv:.0f}/trade, €{cost_total:.0f} round-trip, hold 1w, exit at close")
     print("-" * 100)
 
-    BUY_INTENTS = ["ENTER_NOW", "ENTER_LIMIT"]
+    council_short = args.council.upper()
+    is_buy = merged[intent_col].isin(BUY_INTENTS) if intent_col in merged.columns else pd.Series(False, index=merged.index)
+    rr_series = merged[rr_col] if rr_col in merged.columns else pd.Series(np.nan, index=merged.index)
 
     filters = [
         ("ALL cohort with return_1w",
             merged["return_1w"].notna()),
-        ("PM BUY-only (no R/R or SA filter)",
-            merged["intent"].isin(BUY_INTENTS)),
-        ("PM BUY + R/R > 1.5",
-            merged["intent"].isin(BUY_INTENTS) & (merged["risk_reward_ratio"] > 1.5)),
-        ("PM BUY + R/R > 2.0",
-            merged["intent"].isin(BUY_INTENTS) & (merged["risk_reward_ratio"] > 2.0)),
-        ("PM BUY + WS rating ≥ 4.0",
-            merged["intent"].isin(BUY_INTENTS) & (merged["ws_score"] >= 4.0)),
-        ("PM BUY + WS rating ≥ 4.5",
-            merged["intent"].isin(BUY_INTENTS) & (merged["ws_score"] >= 4.5)),
-        ("PM BUY + R/R > 1.5 + WS ≥ 4.0",
-            merged["intent"].isin(BUY_INTENTS)
-            & (merged["risk_reward_ratio"] > 1.5)
-            & (merged["ws_score"] >= 4.0)),
-        ("PM BUY + R/R > 1.5 + WS ≥ 4.5",
-            merged["intent"].isin(BUY_INTENTS)
-            & (merged["risk_reward_ratio"] > 1.5)
-            & (merged["ws_score"] >= 4.5)),
-        ("PM BUY + R/R > 2.0 + WS ≥ 4.0",
-            merged["intent"].isin(BUY_INTENTS)
-            & (merged["risk_reward_ratio"] > 2.0)
-            & (merged["ws_score"] >= 4.0)),
-        ("PM BUY + R/R > 1.5 + SA Analyst ≥ 4.0",
-            merged["intent"].isin(BUY_INTENTS)
-            & (merged["risk_reward_ratio"] > 1.5)
-            & (merged["sa_score"] >= 4.0)),
-        ("PM BUY + R/R > 1.5 + 6M perf > 0",
-            merged["intent"].isin(BUY_INTENTS)
-            & (merged["risk_reward_ratio"] > 1.5)
-            & (merged["perf_6m"] > 0)),
-        ("PM BUY + R/R > 1.5 + WS ≥ 4.0 + 6M > 0",
-            merged["intent"].isin(BUY_INTENTS)
-            & (merged["risk_reward_ratio"] > 1.5)
-            & (merged["ws_score"] >= 4.0)
-            & (merged["perf_6m"] > 0)),
-        ("CONTRARIAN: PM BUY + SA Quant < 3.0",
-            merged["intent"].isin(BUY_INTENTS) & (merged["quant_score"] < 3.0)),
-        ("CONSENSUS: PM BUY + SA Quant ≥ 4.5",
-            merged["intent"].isin(BUY_INTENTS) & (merged["quant_score"] >= 4.5)),
+        (f"{council_short} BUY-only (no R/R or SA filter)",
+            is_buy),
+        (f"{council_short} BUY + R/R > 1.5",
+            is_buy & (rr_series > 1.5)),
+        (f"{council_short} BUY + R/R > 2.0",
+            is_buy & (rr_series > 2.0)),
+        (f"{council_short} BUY + WS rating ≥ 4.0",
+            is_buy & (merged["ws_score"] >= 4.0)),
+        (f"{council_short} BUY + WS rating ≥ 4.5",
+            is_buy & (merged["ws_score"] >= 4.5)),
+        (f"{council_short} BUY + R/R > 1.5 + WS ≥ 4.0",
+            is_buy & (rr_series > 1.5) & (merged["ws_score"] >= 4.0)),
+        (f"{council_short} BUY + R/R > 1.5 + WS ≥ 4.5",
+            is_buy & (rr_series > 1.5) & (merged["ws_score"] >= 4.5)),
+        (f"{council_short} BUY + R/R > 2.0 + WS ≥ 4.0",
+            is_buy & (rr_series > 2.0) & (merged["ws_score"] >= 4.0)),
+        (f"{council_short} BUY + R/R > 1.5 + SA Analyst ≥ 4.0",
+            is_buy & (rr_series > 1.5) & (merged["sa_score"] >= 4.0)),
+        (f"{council_short} BUY + R/R > 1.5 + 6M perf > 0",
+            is_buy & (rr_series > 1.5) & (merged["perf_6m"] > 0)),
+        (f"{council_short} BUY + R/R > 1.5 + WS ≥ 4.0 + 6M > 0",
+            is_buy & (rr_series > 1.5) & (merged["ws_score"] >= 4.0) & (merged["perf_6m"] > 0)),
+        (f"CONTRARIAN: {council_short} BUY + SA Quant < 3.0",
+            is_buy & (merged["quant_score"] < 3.0)),
+        (f"CONSENSUS: {council_short} BUY + SA Quant ≥ 4.5",
+            is_buy & (merged["quant_score"] >= 4.5)),
     ]
     rows = []
     for name, mask in filters:
@@ -350,24 +364,27 @@ def main():
     # 4. Cross-tab: SA Quant band × PM intent
     # ---------------------------------------------------------------
     print()
-    print("4. CROSS-TAB — SA Quant band × PM intent → mean 1w return")
+    print(f"4. CROSS-TAB — SA Quant band × {council_short} verdict → mean 1w return")
     print("-" * 100)
-    m = merged.dropna(subset=["return_1w", "quant_score"]).copy()
+    m = merged.dropna(subset=["return_1w", "quant_score", intent_col]).copy()
     m["sa_band"] = pd.cut(
         m["quant_score"],
         bins=[0, 3.0, 3.5, 4.0, 5.001],
         labels=["<3.0 SA Sell/Hold", "3.0–3.5 SA Hold", "3.5–4.0 SA Buy", "4.0+ SA Strong Buy"],
     )
-    pivot_mean = m.pivot_table(index="intent", columns="sa_band",
+    pivot_mean = m.pivot_table(index=intent_col, columns="sa_band",
                                values="return_1w", aggfunc="mean", observed=True)
-    pivot_n = m.pivot_table(index="intent", columns="sa_band",
+    pivot_n = m.pivot_table(index=intent_col, columns="sa_band",
                             values="return_1w", aggfunc="size", observed=True)
     print("  Mean 1w return (n in parens):")
     print()
     cols = list(pivot_mean.columns)
-    intents_order = ["ENTER_NOW", "ENTER_LIMIT", "AVOID", "NEUTRAL"]
+    if args.council == "pm":
+        intents_order = ["ENTER_NOW", "ENTER_LIMIT", "AVOID", "NEUTRAL"]
+    else:
+        intents_order = ["BUY", "BUY_LIMIT", "AVOID", "WATCH", "HOLD"]
     intents_seen = [i for i in intents_order if i in pivot_mean.index]
-    print(f"  {'PM intent':<14s} " + "  ".join(f"{str(c):<22s}" for c in cols))
+    print(f"  {council_short + ' verdict':<14s} " + "  ".join(f"{str(c):<22s}" for c in cols))
     for intent in intents_seen:
         cells = []
         for c in cols:
@@ -381,18 +398,63 @@ def main():
         print(f"  {intent:<14s} " + "  ".join(cells))
 
     # ---------------------------------------------------------------
+    # 5. Fine-grained SA Quant band breakdown (does <3.0 bring little return?)
+    # ---------------------------------------------------------------
+    print()
+    print("5. SA QUANT BAND — finer split (1w return for the WHOLE cohort, irrespective of council intent)")
+    print("-" * 100)
+    fine = merged.dropna(subset=["return_1w", "quant_score"]).copy()
+    fine["fine_band"] = pd.cut(
+        fine["quant_score"],
+        bins=[0, 2.0, 2.5, 3.0, 3.25, 3.5, 4.0, 4.5, 5.001],
+        labels=["<2.0", "2.0–2.5", "2.5–3.0", "3.0–3.25", "3.25–3.5",
+                "3.5–4.0", "4.0–4.5", "4.5+"],
+    )
+    fine_agg = fine.groupby("fine_band", observed=True).agg(
+        n=("return_1w", "size"),
+        win_rate=("return_1w", lambda x: (x > 0).mean()),
+        mean_return=("return_1w", "mean"),
+        median_return=("return_1w", "median"),
+    ).reset_index()
+    print(f"  {'SA Quant band':<14s} {'n':>4s} {'win%':>6s} {'mean':>9s} {'median':>9s}")
+    for _, r in fine_agg.iterrows():
+        print(f"  {str(r['fine_band']):<14s} {int(r['n']):>4d} {r['win_rate']:>5.1%} "
+              f"{r['mean_return']*100:>+7.2f}% {r['median_return']*100:>+7.2f}%")
+
+    # Same split but for BUY-only cohort
+    fine_buy = fine[fine[intent_col].isin(BUY_INTENTS)].copy()
+    if not fine_buy.empty:
+        print()
+        print(f"   Same split but {council_short} BUY-only:")
+        fine_agg_buy = fine_buy.groupby("fine_band", observed=True).agg(
+            n=("return_1w", "size"),
+            win_rate=("return_1w", lambda x: (x > 0).mean()),
+            mean_return=("return_1w", "mean"),
+            median_return=("return_1w", "median"),
+        ).reset_index()
+        print(f"  {'SA Quant band':<14s} {'n':>4s} {'win%':>6s} {'mean':>9s} {'median':>9s}")
+        for _, r in fine_agg_buy.iterrows():
+            print(f"  {str(r['fine_band']):<14s} {int(r['n']):>4d} {r['win_rate']:>5.1%} "
+                  f"{r['mean_return']*100:>+7.2f}% {r['median_return']*100:>+7.2f}%")
+
+    # ---------------------------------------------------------------
     # Save artifacts
     # ---------------------------------------------------------------
     out_dir = REPO_ROOT / "docs" / "performance" / f"{datetime.now():%Y-%m-%d}-package" / "data"
     out_dir.mkdir(parents=True, exist_ok=True)
+    suffix = f"_{args.council}"
     if not corr_df.empty:
-        corr_df.to_csv(out_dir / "combined_signal_correlations.csv", index=False)
+        corr_df.to_csv(out_dir / f"combined_signal_correlations{suffix}.csv", index=False)
     if not ols_df.empty:
-        ols_df.to_csv(out_dir / "combined_signal_ols.csv", index=False)
-    filter_df.to_csv(out_dir / "combined_signal_filters.csv", index=False)
+        ols_df.to_csv(out_dir / f"combined_signal_ols{suffix}.csv", index=False)
+    filter_df.to_csv(out_dir / f"combined_signal_filters{suffix}.csv", index=False)
     if not pivot_mean.empty:
-        pivot_mean.to_csv(out_dir / "combined_signal_crosstab_mean.csv")
-        pivot_n.to_csv(out_dir / "combined_signal_crosstab_n.csv")
+        pivot_mean.to_csv(out_dir / f"combined_signal_crosstab_mean{suffix}.csv")
+        pivot_n.to_csv(out_dir / f"combined_signal_crosstab_n{suffix}.csv")
+    if not fine_agg.empty:
+        fine_agg.to_csv(out_dir / f"sa_quant_fine_bands{suffix}.csv", index=False)
+    if not fine_buy.empty and not fine_agg_buy.empty:
+        fine_agg_buy.to_csv(out_dir / f"sa_quant_fine_bands{suffix}_buy_only.csv", index=False)
 
     print()
     print(f"Saved: {out_dir}/combined_signal_*.csv")
