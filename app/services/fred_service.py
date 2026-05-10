@@ -1,12 +1,19 @@
 import os
 import datetime
+import json
 import logging
+import tempfile
 import time
 import requests
 from typing import Dict, Any, Optional, Tuple
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Cross-process snapshot of last-known-good FRED values. Lets a fresh
+# process serve stale data when FRED is down at startup, instead of
+# returning N/A for the entire macro block.
+_SNAPSHOT_PATH = "logs/fred_snapshot.json"
 
 
 class FredService:
@@ -24,6 +31,56 @@ class FredService:
         self.api_key = os.getenv("FRED_API_KEY")
         self.av_api_key = os.getenv("ALPHA_VANTAGE_API_KEY")
         self._cache: Dict[str, Dict[str, Any]] = {}
+        self._load_snapshot()
+
+    def _load_snapshot(self) -> None:
+        path = _SNAPSHOT_PATH
+        if not os.path.exists(path):
+            return
+        try:
+            with open(path) as f:
+                body = json.load(f)
+        except Exception as e:
+            logger.warning(f"FRED snapshot at {path} unreadable: {e}; ignoring")
+            return
+        # Snapshot entries are always loaded as stale — they're from a prior
+        # process and we have no way to know if they're still fresh enough.
+        # The 24h CACHE_TTL check on stale entries forces a refetch attempt;
+        # only if that fails do we serve the stale value.
+        for series_id, entry in (body or {}).items():
+            value = entry.get("value")
+            date = entry.get("date")
+            if value is None or date is None:
+                continue
+            self._cache[series_id] = {
+                "value": value,
+                "date": date,
+                "fetched_at": datetime.datetime.utcnow() - self.CACHE_TTL,
+                "stale": True,
+            }
+
+    def _write_snapshot(self) -> None:
+        path = _SNAPSHOT_PATH
+        body = {
+            sid: {"value": entry["value"], "date": entry["date"]}
+            for sid, entry in self._cache.items()
+            if entry.get("value") not in (None, "N/A")
+        }
+        try:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            # Atomic write via tempfile + rename so a crashed write can't leave
+            # a half-truncated snapshot that breaks the next startup.
+            fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path) or ".", prefix=".fred_snap_")
+            try:
+                with os.fdopen(fd, "w") as f:
+                    json.dump(body, f)
+                os.replace(tmp, path)
+            except Exception:
+                if os.path.exists(tmp):
+                    os.unlink(tmp)
+                raise
+        except Exception as e:
+            logger.warning(f"FRED snapshot write to {path} failed: {e}")
 
     def get_macro_data(self) -> Dict[str, Any]:
         if not self.api_key:
@@ -98,6 +155,7 @@ class FredService:
                         "fetched_at": now,
                         "stale": False,
                     }
+                    self._write_snapshot()
                     return value, date
                 return "N/A", "N/A"
 

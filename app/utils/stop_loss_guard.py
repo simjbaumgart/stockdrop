@@ -16,7 +16,7 @@ Rule:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Dict, Optional
 
 
 @dataclass
@@ -82,3 +82,29 @@ def widen_stop_if_too_tight(
         reason = "widened_to_2x_atr"
 
     return StopLossAdjustment(stop_loss=round(new_stop, 2), adjusted=True, reason=reason)
+
+
+def recompute_risk_metrics(
+    *,
+    entry_low: Optional[float],
+    stop_loss: Optional[float],
+    upside_percent: Optional[float],
+) -> Dict[str, Optional[float]]:
+    """Recompute downside_risk_percent and risk_reward_ratio from a
+    (entry_low, stop_loss) pair after the stop-guard may have widened the stop.
+
+    Returns a dict with keys 'downside_risk_percent' (rounded to 2dp) and
+    'risk_reward_ratio' (rounded to 1dp). Either may be None if inputs are
+    missing or invalid (stop >= entry, missing values, etc.).
+    """
+    if entry_low is None or stop_loss is None or entry_low <= 0:
+        return {"downside_risk_percent": None, "risk_reward_ratio": None}
+    if stop_loss > entry_low:
+        return {"downside_risk_percent": None, "risk_reward_ratio": None}
+
+    downside = round((entry_low - stop_loss) / entry_low * 100.0, 2)
+    if downside <= 0 or upside_percent is None:
+        return {"downside_risk_percent": downside, "risk_reward_ratio": None}
+
+    rr = round(float(upside_percent) / downside, 1)
+    return {"downside_risk_percent": downside, "risk_reward_ratio": rr}

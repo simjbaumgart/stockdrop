@@ -16,30 +16,32 @@ logger = logging.getLogger(__name__)
 
 _CITATION_STRIP_COUNTER = {"stripped": 0}
 
-# Standalone marker (whitespace on both sides) collapses to a single space.
-_STANDALONE_CITATION_RE = re.compile(r"\s+\[Source\s*\d+\]\s+")
-# Edge/mid-word marker (leading or trailing whitespace absorbed) strips fully.
-_EDGE_CITATION_RE = re.compile(r"\s*\[Source\s*\d+\]\s*")
+# Mirrors app/services/research_service.py::_CITATION_RE — see that file for the
+# full contract and the regression history (CAR spacing collapse, COR/ANET
+# numeric-footnote bleed). Two known marker shapes:
+#   1. [Source N]
+#   2. [N], [N.N], [N.N.N]   (bare numeric footnotes)
+# Plus [cite N] / [cite:N] for safety.
+_CITATION_RE = re.compile(
+    r"\[(?:Source\s*\d+|\d+(?:\.\d+)*|cite[:\s]?\s*\d+)\]",
+    re.IGNORECASE,
+)
+_MULTISPACE_RE = re.compile(r"[ \t]{2,}")
 
 
 def _strip_citations(raw: str) -> str:
-    """
-    Remove inline [Source N] markers from deep-research JSON text.
+    """Remove inline citation markers, preserving word boundaries.
 
-    The model sometimes emits these despite instructions; they don't break
-    json.loads but they corrupt the human-readable string values.
-
-    Preserves the word boundary: 'x [Source 1] y' -> 'x y' (standalone
-    between words keeps a single space) but 'signa [Source 1]ling' ->
-    'signaling' (mid-word gets joined).
+    See app/services/research_service.py::_strip_citations for full contract.
     """
-    if "[Source" not in raw:
+    if "[" not in raw:
         return raw
-    cleaned = _STANDALONE_CITATION_RE.sub(" ", raw)
-    cleaned = _EDGE_CITATION_RE.sub("", cleaned)
-    if cleaned != raw:
-        _CITATION_STRIP_COUNTER["stripped"] += 1
-    return cleaned
+    cleaned = _CITATION_RE.sub(" ", raw)
+    if cleaned == raw:
+        return raw
+    cleaned = _MULTISPACE_RE.sub(" ", cleaned)
+    _CITATION_STRIP_COUNTER["stripped"] += 1
+    return cleaned.strip(" ")
 
 _VALID_URL_SCHEMES = ("http://", "https://")
 
@@ -115,6 +117,12 @@ class DeepResearchService:
         
         # Change-detection for file sync (avoid redundant re-syncs)
         self._last_synced_files = set()
+
+        # Dedup: track (symbol, date) tuples currently queued or executing.
+        # Cleared in _handle_completion / _process_individual_task finally.
+        # Backfill sweeps and the live pipeline both consult this set.
+        self._inflight: set = set()
+        self._inflight_lock = threading.Lock()
 
         if not self.api_key:
             logger.warning("GEMINI_API_KEY not found. Deep Research Service will be disabled.")
@@ -332,9 +340,28 @@ class DeepResearchService:
                     
                     logger.info(f"[Deep Research Recovery] Recovering Batch {batch_id} (PENDING). Symbols: {symbols}")
                     
-                    # Reconstruct candidates dict (minimal info needed for execute_batch_comparison)
-                    # execute_batch_comparison only needs symbol key in list of dicts.
-                    candidates = [{'symbol': s} for s in symbols]
+                    # Reconstruct candidates dict with DR fields so the batch prompt
+                    # can apply the HARD RULE against AVOID/OVERRIDDEN verdicts.
+                    candidates = []
+                    cur2 = conn.cursor()
+                    for s in symbols:
+                        cur2.execute(
+                            """
+                            SELECT symbol, deep_research_verdict,
+                                   deep_research_review_verdict,
+                                   deep_research_action, deep_research_score,
+                                   deep_research_reason
+                            FROM decision_points
+                            WHERE symbol = ? AND batch_id = ?
+                            ORDER BY id DESC LIMIT 1
+                            """,
+                            (s, batch_id),
+                        )
+                        row = cur2.fetchone()
+                        if row:
+                            candidates.append(dict(row))
+                        else:
+                            candidates.append({'symbol': s})
                     
                     # Update status to STARTED (to avoid double queueing if we scan again quickly)
                     # Actually, queue_batch_comparison_task will put it in queue. 
@@ -428,18 +455,39 @@ class DeepResearchService:
                 with self.lock:
                     self.active_tasks_count = 0
 
-    def queue_research_task(self, symbol: str, context: dict, decision_id: int):
+    def _today_str(self) -> str:
+        """ISO date used as the dedup key. UTC to match decision_points.timestamp."""
+        return datetime.utcnow().strftime("%Y-%m-%d")
+
+    def queue_research_task(self, symbol: str, context: dict, decision_id: int) -> bool:
         """
         Queues an individual deep research task (HIGH PRIORITY).
         context: Pre-built context dict from StockService._build_deep_research_context()
+
+        Returns True if queued, False if a task for (symbol, today) is already
+        in flight or queued. Dedup is in-memory and per-process — restarting the
+        service clears the set, which is fine because pending DB rows will be
+        picked up by the backfill sweep on the next cycle.
         """
+        key = (symbol, self._today_str())
+        with self._inflight_lock:
+            if key in self._inflight:
+                logger.info(
+                    f"[Deep Research] SKIP duplicate enqueue for {symbol} "
+                    f"(already in-flight or queued for {key[1]})"
+                )
+                return False
+            self._inflight.add(key)
+
         payload = {
             'symbol': symbol,
             'context': context,
             'decision_id': decision_id,
+            '_inflight_key': key,
         }
         self.individual_queue.put({'type': 'individual', 'payload': payload})
         logger.info(f"[Deep Research] Queued INDIVIDUAL task for {symbol} (Priority: High)")
+        return True
 
     def queue_batch_comparison_task(self, candidates: List[Dict], batch_id: int):
         """
@@ -470,6 +518,15 @@ class DeepResearchService:
                 self._handle_completion(payload, result)
         except Exception as e:
             logger.error(f"[Deep Research] Individual Task Failed for {symbol}: {e}")
+        finally:
+            # Sole inflight clear site — runs AFTER _handle_completion (so after
+            # the DB write) and uses the key stored at enqueue time, so a UTC
+            # midnight crossing between enqueue and completion still clears
+            # the right key.
+            inflight_key = payload.get('_inflight_key')
+            if inflight_key:
+                with self._inflight_lock:
+                    self._inflight.discard(inflight_key)
 
     def _process_batch_task(self, payload):
         """
@@ -482,6 +539,41 @@ class DeepResearchService:
              if payload.get('batch_id'):
                  from app.database import update_batch_status
                  update_batch_status(payload['batch_id'], 'FAILED')
+
+    def _validate_trading_levels(self, result: dict) -> tuple:
+        """
+        Sanity-check trading levels parsed from DR output.
+
+        Returns (ok: bool, reason: str). The caller is expected to skip this
+        validation entirely for verdicts that legitimately have no levels
+        (e.g. OVERRIDDEN AVOID). When called for a verdict that should have
+        levels, the rules are:
+          - entry_price_low, entry_price_high, stop_loss are numeric > 0
+          - entry_price_high >= entry_price_low
+          - stop_loss < entry_price_low (stop is strictly below entry for a long;
+            stop == entry is rejected because there is no risk buffer)
+        """
+        try:
+            entry_low = result.get("entry_price_low")
+            entry_high = result.get("entry_price_high")
+            stop = result.get("stop_loss")
+
+            if entry_low is None or entry_high is None or stop is None:
+                return False, "missing entry/stop levels"
+
+            entry_low = float(entry_low)
+            entry_high = float(entry_high)
+            stop = float(stop)
+
+            if entry_low <= 0 or entry_high <= 0 or stop <= 0:
+                return False, f"non-positive level (entry={entry_low}-{entry_high}, stop={stop})"
+            if entry_high < entry_low:
+                return False, f"entry_high {entry_high} < entry_low {entry_low}"
+            if stop >= entry_low:
+                return False, f"stop {stop} >= entry_low {entry_low} (wrong direction for long)"
+            return True, "ok"
+        except (TypeError, ValueError) as e:
+            return False, f"non-numeric level: {e}"
 
     def _calculate_deep_research_score(self, result: dict) -> int:
         """
@@ -544,7 +636,50 @@ class DeepResearchService:
         review_verdict = result.get('review_verdict', 'UNKNOWN')
         action = result.get('action', 'AVOID')
         logger.info(f"[Deep Research] Task Completed for {symbol}. Review Verdict: {review_verdict}, Action: {action}")
-        
+
+        # Validate trading levels for verdicts that should have them. If invalid,
+        # null the level fields in `result` so neither the DB write below nor
+        # _apply_trading_level_overrides persists garbage zeros, and mark the
+        # verdict as INCOMPLETE_TRADING_LEVELS so dashboards/queries can
+        # surface the rejected DR rather than silently believing it.
+        if review_verdict in ("CONFIRMED", "UPGRADED", "ADJUSTED"):
+            levels_ok, levels_reason = self._validate_trading_levels(result)
+            if not levels_ok:
+                logger.warning(
+                    f"[Deep Research] {symbol} verdict={review_verdict} but trading "
+                    f"levels rejected: {levels_reason}. Marking INCOMPLETE_TRADING_LEVELS; "
+                    f"DB level columns left null."
+                )
+                # Forensic snapshot: save the raw rejected result to disk BEFORE
+                # we null the levels for the DB. Operators investigating
+                # "why was this DR rejected?" should see the original zeros.
+                try:
+                    import copy
+                    rejected_snapshot = copy.deepcopy(result)
+                    rejected_snapshot["_validation_rejection"] = {
+                        "reason": levels_reason,
+                        "review_verdict_before": review_verdict,
+                    }
+                    self._save_result_to_file(
+                        symbol, rejected_snapshot, filename_suffix="_rejected_levels"
+                    )
+                except Exception as save_err:
+                    logger.warning(
+                        f"[Deep Research] Failed to save rejected snapshot for {symbol}: {save_err}"
+                    )
+                review_verdict = "INCOMPLETE_TRADING_LEVELS"
+                result["review_verdict"] = "INCOMPLETE_TRADING_LEVELS"
+                # Null the level fields so neither DB-write path persists them.
+                for f in (
+                    "entry_price_low", "entry_price_high", "stop_loss",
+                    "take_profit_1", "take_profit_2",
+                    "upside_percent", "downside_risk_percent", "risk_reward_ratio",
+                    # Sell-range fields share the same JSON-repair root cause —
+                    # if entry/stop are bad, the sell range is suspect too.
+                    "sell_price_low", "sell_price_high", "ceiling_exit", "exit_trigger",
+                ):
+                    result[f] = None
+
         try:
             from app.database import update_deep_research_data
             
@@ -697,6 +832,29 @@ class DeepResearchService:
                 
             print(f"  >> {verdict_icon} [Deep Research] Updated trading levels for {symbol} (Limit: {entry_low}-{entry_high})")
 
+            # Atomically finalize the position status now that DR has resolved.
+            # Mirrors the 3-state machine: Pending DR Review -> Owned / Not Owned.
+            try:
+                from app.database import finalize_position_status_after_dr
+                review_verdict = result.get('review_verdict')
+                final_action = result.get('action', action)
+                advanced = finalize_position_status_after_dr(
+                    decision_id=decision_id,
+                    dr_action=final_action,
+                    dr_review_verdict=review_verdict,
+                )
+                if advanced:
+                    logger.info(
+                        "[Deep Research] Finalized position status for %s "
+                        "(action=%s, review_verdict=%s)",
+                        symbol, final_action, review_verdict,
+                    )
+            except Exception as e:
+                logger.error(
+                    "[Deep Research] Failed to finalize position status for %s: %s",
+                    symbol, e,
+                )
+
         except Exception as e:
             logger.error(f"[Deep Research] Failed to override trading levels for {symbol}: {e}")
 
@@ -801,14 +959,14 @@ class DeepResearchService:
 
         print(f"{'='*60}\n")
 
-    def _save_result_to_file(self, symbol, result):
+    def _save_result_to_file(self, symbol, result, filename_suffix: str = ""):
         try:
             from app.utils.ticker_paths import safe_ticker_path
             output_dir = "data/deep_research_reports"
             os.makedirs(output_dir, exist_ok=True)
 
             date_str = datetime.now().strftime("%Y-%m-%d")
-            filename = f"deep_research_{safe_ticker_path(symbol)}_{date_str}_{int(time.time())}.json"
+            filename = f"deep_research_{safe_ticker_path(symbol)}_{date_str}_{int(time.time())}{filename_suffix}.json"
             filepath = os.path.join(output_dir, filename)
             
             with open(filepath, "w") as f:
@@ -1710,6 +1868,21 @@ REPORT CONTENT:
         """
         try:
             symbols = [x['symbol'] for x in candidates]
+
+            if len(candidates) < 2:
+                logger.info(
+                    "[Deep Research] Skipping batch %s: only %d valid candidate(s) after DR filter.",
+                    batch_id, len(candidates),
+                )
+                print(f"[Deep Research] Skipping batch {batch_id}: < 2 valid candidates.")
+                if batch_id is not None:
+                    try:
+                        from app.database import update_batch_status
+                        update_batch_status(batch_id, "SKIPPED")
+                    except Exception as e:
+                        logger.error(f"[Deep Research] Failed to mark batch {batch_id} as SKIPPED: {e}")
+                return None
+
             logger.info(f"[Deep Research] Starting Batch Comparison for: {symbols}")
             print(f"\n{'='*60}")
             print(f"🚀 [DEEP RESEARCH] STARTING BATCH COMPARISON")
@@ -1730,16 +1903,27 @@ REPORT CONTENT:
 
             for cand in candidates:
                 sym = cand['symbol']
+                # Pull the DR verdict so the batch agent treats AVOID as a hard negative.
+                dr_verdict = cand.get('deep_research_verdict') or 'UNKNOWN'
+                dr_review = cand.get('deep_research_review_verdict') or 'UNKNOWN'
+                dr_action = cand.get('deep_research_action') or 'UNKNOWN'
+                dr_score = cand.get('deep_research_score')
+                dr_reason = cand.get('deep_research_reason') or ''
+
                 report_str = self._load_council_report(sym, date_str)
-                if report_str:
-                    summary = self._summarize_report_context(report_str)
-                    context_data += f"\n--- SUPPLEMENTARY REPORT FOR {sym} ---\n{summary}\n"
-                    
-                    # Console Output for User Verification
-                    print(f"\n[{sym}] SUMMARIZED CONTEXT (Token Optimization):")
-                    print("-" * 40)
-                    print(summary)
-                    print("-" * 40)
+                summary = self._summarize_report_context(report_str) if report_str else "(no council report)"
+                context_data += (
+                    f"\n--- SUPPLEMENTARY REPORT FOR {sym} ---\n"
+                    f"DEEP_RESEARCH_REVIEW: review_verdict={dr_review}, "
+                    f"action={dr_action}, score={dr_score}\n"
+                    f"DEEP_RESEARCH_REASON: {dr_reason[:400]}\n"
+                    f"{summary}\n"
+                )
+
+                print(f"\n[{sym}] SUMMARIZED CONTEXT (DR={dr_review}/{dr_action}):")
+                print("-" * 40)
+                print(summary)
+                print("-" * 40)
 
 
             prompt = f"""
@@ -1757,6 +1941,12 @@ CRITERIA:
 - **Catalyst:** Is there a valid reason for the drop/price action?
 - **Recovery Potential:** Which has the best chance of bouncing back?
 - **Safety:** Avoid bankruptcy risks or falling knives.
+
+HARD RULE:
+- If a candidate's DEEP_RESEARCH_REVIEW shows action=AVOID or
+  review_verdict=OVERRIDDEN, you MUST NOT name it the winner. Treat it as
+  disqualified regardless of how compelling the supplementary report looks.
+  Pick the winner from the remaining candidates.
 
 CONTEXT (Use as Supplementary Info):
 {context_data}

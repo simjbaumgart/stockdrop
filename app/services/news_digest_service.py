@@ -20,11 +20,16 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from app.services.news_digest_parser import parse_finimize_daily, parse_ft_daily
+from app.services.news_digest_parser import (
+    parse_finimize_daily,
+    parse_ft_daily,
+    parse_wsj_daily,
+)
 from app.services.news_digest_prompts import (
     build_finimize_daily_prompt,
     build_ft_daily_prompt,
     build_ft_weekly_prompt,
+    build_wsj_daily_prompt,
 )
 from app.services.news_digest_schema import (
     AGENT_SLICE_MAP,
@@ -34,6 +39,7 @@ from app.services.news_digest_schema import (
     digest_json_path,
     digest_md_path,
     digest_model,
+    digest_thinking_level,
     finimize_weekly_scheduler_path,
     flagged_critical_path,
     ft_weekly_digest_json_path,
@@ -55,11 +61,16 @@ _JSON_FENCE_RE = re.compile(r"^\s*```(?:json)?\s*|\s*```\s*$", re.MULTILINE)
 def _call_thinking_model(prompt: str) -> str:
     """Single-shot call to the configured thinking model."""
     from google import genai as new_genai
+    from google.genai import types as new_types
 
     client = new_genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+    config = new_types.GenerateContentConfig(
+        thinking_config=new_types.ThinkingConfig(thinking_level=digest_thinking_level()),
+    )
     response = client.models.generate_content(
         model=digest_model(),
         contents=prompt,
+        config=config,
     )
     return response.text or ""
 
@@ -214,7 +225,11 @@ def load_finimize_weekly(iso_week: str) -> Optional[str]:
 
 def _parse_raw(source: str, date: str) -> List[Article]:
     path = raw_daily_path(source, date)
-    return parse_ft_daily(path) if source == "ft" else parse_finimize_daily(path)
+    if source == "ft":
+        return parse_ft_daily(path)
+    if source == "wsj":
+        return parse_wsj_daily(path)
+    return parse_finimize_daily(path)
 
 
 def _prior_digest_text(source: str, date: str, days_back: int) -> List[str]:
@@ -262,6 +277,14 @@ def ensure_daily_digest(source: str, date: str) -> Optional[dict]:
             prior_digest_text=prior[0] if prior else None,
             portfolio=portfolio,
         )
+    elif source == "wsj":
+        prior = _prior_digest_text(source, date, days_back=1)
+        prompt = build_wsj_daily_prompt(
+            date=date,
+            articles=articles,
+            prior_digest_text=prior[0] if prior else None,
+            portfolio=portfolio,
+        )
     else:
         prior = _prior_digest_text(source, date, days_back=5)
         prompt = build_finimize_daily_prompt(
@@ -291,7 +314,19 @@ def ensure_daily_digest(source: str, date: str) -> Optional[dict]:
     return digest
 
 
+_DISABLED_LOGGED = False
+
+
 def ensure_news_digests_for_today(date: Optional[str] = None) -> None:
+    global _DISABLED_LOGGED
+    if not digest_enabled():
+        if not _DISABLED_LOGGED:
+            logger.info(
+                "[news-digest] disabled (NEWS_DIGEST_ENABLED=false or NEWS_ARCHIVE_ROOT unset); "
+                "skipping all sources for this process lifetime"
+            )
+            _DISABLED_LOGGED = True
+        return
     d = date or datetime.now().strftime("%Y-%m-%d")
     for source in SOURCES:
         try:
@@ -549,18 +584,23 @@ def format_for_agent(
     ft_daily_md = _load_digest_md("ft", date)
     fin_daily = load_digest("finimize", date)
     fin_daily_md = _load_digest_md("finimize", date)
+    wsj_daily = load_digest("wsj", date)
+    wsj_daily_md = _load_digest_md("wsj", date)
 
     ft_weekly_md = load_ft_weekly(iso_week)
     fin_weekly_md = load_finimize_weekly(iso_week)
 
     ft_block = _daily_slice(ft_daily, ft_daily_md, slices["ft_daily"], ticker)
     fin_block = _daily_slice(fin_daily, fin_daily_md, slices["finimize_daily"], ticker)
+    wsj_block = _daily_slice(wsj_daily, wsj_daily_md, slices.get("wsj_daily", "none"), ticker)
     ft_w_block = _weekly_slice(ft_weekly_md, slices["ft_weekly"])
     fin_w_block = _weekly_slice(fin_weekly_md, slices["finimize_weekly"])
 
     sections: List[str] = []
     if ft_block.strip():
         sections.append(f"--- FT daily digest ({date}) ---\n{ft_block.strip()}")
+    if wsj_block.strip():
+        sections.append(f"--- WSJ daily digest ({date}) ---\n{wsj_block.strip()}")
     if fin_block.strip():
         sections.append(f"--- Finimize daily digest ({date}) ---\n{fin_block.strip()}")
     if ft_w_block.strip():

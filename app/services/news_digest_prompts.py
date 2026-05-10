@@ -1,8 +1,9 @@
 """Prompt builders for the news digest summariser.
 
-Three builders:
+Four builders:
 - build_ft_daily_prompt
 - build_finimize_daily_prompt
+- build_wsj_daily_prompt
 - build_ft_weekly_prompt  (FT weekly only; Finimize weekly is scheduler-written)
 """
 
@@ -14,9 +15,9 @@ from app.services.news_digest_schema import Article
 
 _SCHEMA = """{
   "date": "YYYY-MM-DD",
-  "source": "ft" | "finimize",
+  "source": "ft" | "finimize" | "wsj",
   "generated_at": "ISO8601",
-  "model": "gemini-3.1-pro-thinking",
+  "model": "gemini-3.1-pro-preview",
   "one_liner": "<=20 words — dominant signal of the day",
   "market_tape": "<=60 words — neutral paragraph summarising overall flow",
   "themes": [
@@ -116,6 +117,60 @@ Rules:
    `relevance_to_portfolio` to "high" if held, "medium" if a sector peer, else
    "low".
 6. `macro_signals`: rates, growth, inflation, geopolitics, regulation.
+7. `risk_flags`: items that materially change risk for broad asset classes.
+8. `flagged_critical`: ONLY earnings/guidance event on a HELD ticker, SEC
+   action, takeover bid, sector crash, management change. Be strict.
+9. DO NOT invent tickers, numbers, or events not in the source.
+10. Preserve article ids verbatim.
+11. Respond with ONLY the JSON object — no prose, no markdown fence.
+"""
+
+
+def build_wsj_daily_prompt(
+    *,
+    date: str,
+    articles: List[Article],
+    prior_digest_text: Optional[str],
+    portfolio: Dict[str, str],
+) -> str:
+    articles_text = _articles_block(articles)
+    prior = prior_digest_text or "(no prior digest available — first run)"
+    return f"""You are a markets news summariser producing a structured daily digest from
+today's captured WSJ articles. The Wall Street Journal is a highly reliable
+news source with a US-market and corporate-news bias — treat its framing as
+authoritative. Your output feeds directly into investment decision agents
+alongside an FT-sourced digest, so emphasise WHAT IS DISTINCTIVE about WSJ's
+coverage versus what FT typically covers (US corporate detail, US politics,
+US earnings nuance) rather than re-stating overlapping macro framing.
+
+INPUTS:
+- Date: {date}
+- Today's articles (WSJ):
+
+{articles_text}
+
+- Yesterday's WSJ digest (for direction-change detection):
+
+{prior}
+
+- Current portfolio holdings:
+{_portfolio_block(portfolio)}
+
+PRODUCE a single JSON object matching this schema exactly:
+
+{_SCHEMA}
+
+Rules:
+1. `source` MUST be "wsj". `date` MUST be "{date}".
+2. `one_liner` <= 20 words capturing the day's dominant signal from WSJ specifically.
+3. `market_tape` <= 60 words neutral-toned summary of overall WSJ news flow.
+4. `themes`: up to 5, each supported by at least one article id. Mark
+   `opinion_driven: true` for items sourced from the Opinion section.
+5. `tickers_mentioned`: include every explicit ticker. Set
+   `relevance_to_portfolio` to "high" if held, "medium" if a sector peer, else
+   "low".
+6. `macro_signals`: rates, growth, inflation, geopolitics, regulation —
+   prefer US-market angles WSJ tends to cover deeper than FT.
 7. `risk_flags`: items that materially change risk for broad asset classes.
 8. `flagged_critical`: ONLY earnings/guidance event on a HELD ticker, SEC
    action, takeover bid, sector crash, management change. Be strict.

@@ -4,6 +4,9 @@
 # Dependencies
 venv/
 
+# Git worktrees
+.worktrees/
+
 # Python cache
 __pycache__/
 *.pyc

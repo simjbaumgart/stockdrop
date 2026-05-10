@@ -1,5 +1,5 @@
 import sqlite3
-from typing import List
+from typing import List, Optional
 
 import os
 
@@ -125,6 +125,13 @@ def init_db():
             "batch_id": "INTEGER",
             # Tiered Bollinger gate label
             "gatekeeper_tier": "TEXT",
+            # Pre-fetched EPS facts (canonical, from Finnhub)
+            "reported_eps": "REAL",
+            "consensus_eps": "REAL",
+            "surprise_pct": "REAL",
+            "earnings_fiscal_quarter": "TEXT",
+            # Deterministic post-PM earnings narrative consistency check
+            "earnings_narrative_flag": "TEXT",
         }
         
         
@@ -177,8 +184,23 @@ def init_db():
                 migrations_applied.append(f"batch_comparisons.{col_name}")
 
     except Exception as e:
-        print(f"Error during batch table migration: {e}") 
-        
+        print(f"Error during batch table migration: {e}")
+
+    # Transcript cache: immutable rows of (symbol, fiscal_quarter) -> transcript text.
+    # Populated by StockService.get_latest_transcript when the AV fallback fires.
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS transcript_cache (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            symbol TEXT NOT NULL,
+            fiscal_quarter TEXT NOT NULL,
+            source TEXT NOT NULL,
+            text TEXT NOT NULL,
+            report_date TEXT,
+            fetched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(symbol, fiscal_quarter)
+        )
+    ''')
+
     # Migration: Add batch_winner to decision_points
     try:
         cursor.execute("PRAGMA table_info(decision_points)")
@@ -272,6 +294,10 @@ def update_decision_point(decision_id: int, recommendation: str, reasoning: str,
             "reassess_sell_price_low", "reassess_sell_price_high",
             "reassess_ceiling_exit", "reassess_updated_stop_loss",
             "reassess_exit_trigger", "reassess_timestamp", "reassess_reasoning",
+            # Pre-fetched EPS facts (canonical, from Finnhub)
+            "reported_eps", "consensus_eps", "surprise_pct", "earnings_fiscal_quarter",
+            # Deterministic post-PM earnings narrative consistency check
+            "earnings_narrative_flag",
         ]
         for field in trading_fields:
             if field in kwargs and kwargs[field] is not None:
@@ -443,6 +469,65 @@ def update_deep_research_data(decision_id: int, verdict: str, risk: str, catalys
         print(f"Error updating deep research data: {e}")
         return False
 
+def finalize_position_status_after_dr(
+    *,
+    decision_id: int,
+    dr_action: Optional[str],
+    dr_review_verdict: Optional[str],
+) -> bool:
+    """Atomically transition a `Pending DR Review` row to its final status
+    based on the deep-research outcome.
+
+    Rules:
+        - dr_review_verdict in {OVERRIDDEN, INCOMPLETE_TRADING_LEVELS,
+          ERROR_PARSING, PENDING_REVIEW}                  -> Not Owned
+          (these signal DR did not produce a clean usable verdict; do not
+          enter the position regardless of the action label)
+        - dr_action in {BUY, BUY_LIMIT}                  -> Owned
+        - dr_action in {AVOID, WATCH, HOLD, SELL, ...}    -> Not Owned
+
+    Only updates rows whose current status is 'Pending DR Review' so that
+    rows demoted by an earlier deterministic check (e.g. earnings narrative
+    inconsistency) are not silently re-promoted. Returns True if a row was
+    updated, False otherwise.
+    """
+    action_norm = (dr_action or "").upper().strip()
+    review_norm = (dr_review_verdict or "").upper().strip()
+
+    # Non-clean DR verdicts: never promote to Owned, even if the action
+    # label looks like BUY (the trading-level overrides may have nulled
+    # entry_price_low/high, so 'Owned' would point at no entry zone).
+    _NON_CLEAN_VERDICTS = {
+        "OVERRIDDEN",
+        "INCOMPLETE_TRADING_LEVELS",
+        "ERROR_PARSING",
+        "PENDING_REVIEW",
+    }
+    if review_norm in _NON_CLEAN_VERDICTS:
+        new_status = "Not Owned"
+    elif action_norm in ("BUY", "BUY_LIMIT", "STRONG_BUY", "SPECULATIVE_BUY"):
+        new_status = "Owned"
+    else:
+        new_status = "Not Owned"
+
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        cursor.execute(
+            """UPDATE decision_points
+               SET status = ?
+               WHERE id = ? AND status = 'Pending DR Review'""",
+            (new_status, decision_id),
+        )
+        conn.commit()
+        updated = cursor.rowcount > 0
+        conn.close()
+        return updated
+    except Exception as e:
+        print(f"[finalize_position_status_after_dr] error for decision_id={decision_id}: {e}")
+        return False
+
+
 def get_todays_strong_buy_candidates(date_str: str = None) -> List[dict]:
     """
     Get today's candidates eligible for Batch Comparison.
@@ -611,6 +696,9 @@ def get_unbatched_candidates_by_date(date_str: str) -> List[dict]:
             AND deep_research_verdict != 'PENDING_REVIEW'
             AND deep_research_verdict != 'ERROR_PARSING'
             AND deep_research_verdict NOT LIKE 'UNKNOWN%'
+            AND deep_research_verdict != 'AVOID'
+            AND (deep_research_review_verdict IS NULL OR deep_research_review_verdict != 'OVERRIDDEN')
+            AND (deep_research_action IS NULL OR deep_research_action != 'AVOID')
             AND (recommendation IN ('BUY', 'STRONG BUY', 'SPECULATIVE BUY') OR recommendation LIKE '%BUY%')
             AND (batch_id IS NULL OR batch_id = '')
             ORDER BY deep_research_score DESC
@@ -661,7 +749,7 @@ def get_distinct_dates_with_unbatched_candidates() -> List[str]:
     try:
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
-        
+
         cursor.execute('''
             SELECT DISTINCT date(timestamp) FROM decision_points
             WHERE deep_research_verdict IS NOT NULL
@@ -670,10 +758,13 @@ def get_distinct_dates_with_unbatched_candidates() -> List[str]:
             AND deep_research_verdict != 'PENDING_REVIEW'
             AND deep_research_verdict != 'ERROR_PARSING'
             AND deep_research_verdict NOT LIKE 'UNKNOWN%'
+            AND deep_research_verdict != 'AVOID'
+            AND (deep_research_review_verdict IS NULL OR deep_research_review_verdict != 'OVERRIDDEN')
+            AND (deep_research_action IS NULL OR deep_research_action != 'AVOID')
             AND (recommendation IN ('BUY', 'STRONG BUY', 'SPECULATIVE BUY') OR recommendation LIKE '%BUY%')
             AND (batch_id IS NULL OR batch_id = '')
         ''')
-        
+
         rows = cursor.fetchall()
         conn.close()
         return [row[0] for row in rows if row[0]]
@@ -681,4 +772,42 @@ def get_distinct_dates_with_unbatched_candidates() -> List[str]:
         print(f"Error fetching distinct dates: {e}")
         return []
 
+
+def get_cached_transcript(symbol: str, fiscal_quarter: str) -> dict | None:
+    """Look up a cached transcript by (symbol, fiscal_quarter).
+
+    Returns a dict with keys {text, source, report_date} or None on miss.
+    """
+    conn = sqlite3.connect(DB_NAME)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            "SELECT text, source, report_date FROM transcript_cache "
+            "WHERE symbol=? AND fiscal_quarter=?",
+            (symbol, fiscal_quarter),
+        )
+        row = cur.fetchone()
+        if row is None:
+            return None
+        return {"text": row["text"], "source": row["source"], "report_date": row["report_date"]}
+    finally:
+        conn.close()
+
+
+def save_cached_transcript(symbol: str, fiscal_quarter: str, source: str,
+                           text: str, report_date: str | None) -> None:
+    """Insert a transcript into the cache. Silently no-ops if (symbol, fiscal_quarter)
+    is already present (first writer wins — transcripts are immutable per quarter)."""
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            "INSERT OR IGNORE INTO transcript_cache "
+            "(symbol, fiscal_quarter, source, text, report_date) VALUES (?, ?, ?, ?, ?)",
+            (symbol, fiscal_quarter, source, text, report_date),
+        )
+        conn.commit()
+    finally:
+        conn.close()
 

@@ -12,3 +12,4 @@ class MarketState:
     final_decision: Optional[dict] = None
     agent_calls: int = 0
     gatekeeper_tier: Optional[str] = None
+    earnings_facts: Optional[dict] = None

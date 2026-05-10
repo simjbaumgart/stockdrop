@@ -11,7 +11,7 @@ from app.services.email_service import email_service
 from app.services.research_service import research_service
 from app.services.alpaca_service import alpaca_service
 from app.services.tradingview_service import tradingview_service
-from app.database import add_decision_point, get_today_decision_symbols, update_decision_point, get_decision_points
+from app.database import add_decision_point, get_today_decision_symbols, update_decision_point, get_decision_points, get_cached_transcript, save_cached_transcript
 from app.services.storage_service import storage_service
 from app.services.gatekeeper_service import gatekeeper_service
 from app.utils import get_git_version
@@ -38,6 +38,10 @@ try:
     from defeatbeta_api.data.ticker import Ticker as _DBTicker
 except ImportError:
     _DBTicker = None  # gracefully degrade if package missing
+
+# Age threshold (in days) above which a DefeatBeta transcript is considered stale
+# and triggers an Alpha Vantage fallback fetch.
+STALE_TRANSCRIPT_DAYS = 75
 
 # Minimum average daily volume (shares) for a ticker to be considered tradeable.
 # Paired with the gatekeeper's $5 price floor to catch above-$5 tickers that
@@ -155,7 +159,11 @@ class StockService:
 
         # Initialize Yahoo Ticker Resolver
         self.resolver = YahooTickerResolver()
-        
+
+        # Service singletons used by transcript orchestration
+        self.alpha_vantage_service = alpha_vantage_service
+        self._finnhub_service = finnhub_service
+
         # Batch Candidates for Deep Research (Deprecated)
         # self.deep_research_candidates = []
 
@@ -596,7 +604,8 @@ class StockService:
         """
         Trigger deep research for buy decisions:
         - BUY: always trigger (any conviction, any R/R)
-        - BUY_LIMIT: trigger when R/R > 1.25 (any conviction)
+        - BUY_LIMIT: trigger when R/R > 1.0 (any conviction). Mirrors the
+          Pending DR Review status gate so rows are never stranded.
         """
         action = report_data.get("recommendation", "AVOID").upper()
         risk_reward = report_data.get("risk_reward_ratio", 0)
@@ -605,10 +614,11 @@ class StockService:
         if action == "BUY":
             return True
 
-        # BUY_LIMIT: trigger when risk/reward ratio exceeds 1.25
+        # BUY_LIMIT: trigger when R/R > 1.0. The Pending DR Review status
+        # gate uses the same threshold; raising it would strand rows.
         if action == "BUY_LIMIT":
             try:
-                if float(risk_reward) > 1.25:
+                if float(risk_reward) > 1.0:
                     return True
             except (TypeError, ValueError):
                 return False
@@ -774,12 +784,15 @@ class StockService:
                 }
                 
                 print(f"  > Triggering Backfill for {symbol} (Conviction: {c.get('conviction')}, R/R: {c.get('risk_reward_ratio')})...")
-                deep_research_service.queue_research_task(
+                queued = deep_research_service.queue_research_task(
                     symbol=symbol,
                     context=context,
                     decision_id=decision_id
                 )
-                print(f"  > Queued backfill task for {symbol}")
+                if queued:
+                    print(f"  > Queued backfill task for {symbol}")
+                else:
+                    print(f"  > Skipped {symbol}: already in-flight (live trigger beat the backfill)")
                 
         except Exception as e:
             print(f"[Backfill] Error processing backfill: {e}")
@@ -1272,43 +1285,149 @@ class StockService:
             print(f"Error fetching filing for {symbol}: {e}")
             return ""
 
-    def get_latest_transcript(self, symbol: str) -> dict:
-        """Fetch the most recent earnings-call transcript via DefeatBeta.
+    def _finnhub_latest_quarter_for(self, symbol: str) -> str | None:
+        """Indirection so tests can patch quarter discovery without touching FinnhubService.
 
-        Returns a dict with shape:
-            {"text": str, "date": str | None, "warning": str}
-        On any failure, returns {"text": "", "date": None, "warning": ""}
-        so callers degrade gracefully (existing call site at ~line 1320 already
-        handles both dict and str returns)."""
+        Returns 'YYYYQN' (e.g. '2026Q1') for the most recently reported quarter, or None.
+        """
+        return self._finnhub_service.get_latest_reported_quarter(symbol)
+
+    @staticmethod
+    def _transcript_matches_company(transcript_text: str, expected_company: str) -> bool:
+        """
+        Defensive match: does the transcript text reference the expected company?
+
+        DefeatBeta's HuggingFace dataset has known ticker-collision bugs (e.g.
+        'L' returns Loblaw instead of Loews). We verify the first 1500 chars
+        of the transcript mention either the full expected name or its first
+        significant token (modulo case and common corporate suffixes).
+
+        Returns True if no expected_company was provided (backward compat).
+        """
+        if not expected_company:
+            return True
+        if not transcript_text:
+            return False
+
+        head = transcript_text[:1500].lower()
+        expected_lower = expected_company.lower()
+        # Strip common corporate suffixes that may not appear in the call.
+        for suffix in (
+            " corporation", " corp", " incorporated", " inc.", " inc",
+            " plc", " ltd", " limited", " companies", " company", " co.",
+            " holdings", " group",
+        ):
+            if expected_lower.endswith(suffix):
+                expected_lower = expected_lower[: -len(suffix)]
+        expected_lower = expected_lower.strip(" ,.")
+
+        if not expected_lower:
+            return True  # nothing meaningful left to match — accept
+
+        # Match either the full stripped name or its first significant token.
+        first_token = expected_lower.split()[0]
+        return expected_lower in head or (len(first_token) >= 3 and first_token in head)
+
+    def get_latest_transcript(self, symbol: str, company_name: str = "") -> dict:
+        """Fetch the most recent earnings-call transcript with Alpha Vantage fallback.
+
+        Source priority:
+            1. DefeatBeta (HuggingFace parquet) — primary source, fast and free.
+               If fresh (<= STALE_TRANSCRIPT_DAYS days old) return immediately.
+            2. SQLite cache, keyed by (symbol, fiscal_quarter) — checked when DefeatBeta
+               is empty or stale, before any AV call.
+            3. Alpha Vantage EARNINGS_CALL_TRANSCRIPT — fires only when both DefeatBeta
+               is stale/empty AND the cache has nothing for the latest reported quarter.
+
+        Returns a dict with shape: {"text": str, "date": str | None, "warning": str}
+        On any failure, returns {"text": "", "date": None, "warning": ""} so callers
+        degrade gracefully.
+
+        AV calls are bounded by an in-memory daily counter (see AlphaVantageService).
+        """
         empty = {"text": "", "date": None, "warning": ""}
-        if _DBTicker is None:
+
+        # Step 1: Try DefeatBeta first (no quarter parameter needed; fast & free).
+        db_text = ""
+        db_date_str = None
+        db_age_days = None
+        if _DBTicker is not None:
+            try:
+                df = _DBTicker(symbol).earning_call_transcripts().get_transcripts_list()
+                if df is not None and not df.empty:
+                    df = df.sort_values("report_date", ascending=False)
+                    row = df.iloc[0]
+                    db_date_str = str(row.get("report_date", "")).split(" ")[0]
+                    paragraphs = row.get("transcripts")
+                    if hasattr(paragraphs, "tolist"):
+                        paragraphs = paragraphs.tolist()
+                    if isinstance(paragraphs, list):
+                        db_text = "\n".join(
+                            p.get("content", "")
+                            for p in paragraphs
+                            if isinstance(p, dict) and p.get("content")
+                        )
+                    # Defensive: DefeatBeta returns wrong-company transcripts for
+                    # some ambiguous tickers (e.g. 'L' → Loblaw). Reject if the
+                    # transcript text doesn't reference the expected company.
+                    if db_text and not self._transcript_matches_company(db_text, company_name):
+                        print(
+                            f"[StockService] DefeatBeta company mismatch for {symbol}: "
+                            f"expected '{company_name}', transcript head did not match. "
+                            f"Discarding and falling through to AV."
+                        )
+                        db_text = ""
+                        db_date_str = None
+                        db_age_days = None
+                    if db_date_str:
+                        try:
+                            db_dt = datetime.strptime(db_date_str, "%Y-%m-%d").date()
+                            db_age_days = (datetime.utcnow().date() - db_dt).days
+                        except ValueError:
+                            db_age_days = None
+            except Exception as e:
+                print(f"[StockService] DefeatBeta transcript fetch failed for {symbol}: {e}")
+
+        # Step 2: If DefeatBeta gave us fresh data, we're done — no Finnhub, no cache, no AV.
+        needs_fallback = (not db_text) or (db_age_days is not None and db_age_days > STALE_TRANSCRIPT_DAYS)
+        if not needs_fallback:
+            return {"text": db_text, "date": db_date_str, "warning": ""}
+
+        # Step 3: Resolve the quarter. Without it we cannot use the cache or call AV.
+        quarter = self._finnhub_latest_quarter_for(symbol)
+        if not quarter:
+            if db_text:
+                return {"text": db_text, "date": db_date_str, "warning": ""}
             return empty
-        try:
-            df = _DBTicker(symbol).earning_call_transcripts().get_transcripts_list()
-            if df is None or df.empty:
-                return empty
-            df = df.sort_values("report_date", ascending=False)
-            row = df.iloc[0]
-            date_str = str(row.get("report_date", "")).split(" ")[0]
 
-            paragraphs = row.get("transcripts")
-            # Pandas may hand back numpy arrays of dicts
-            if hasattr(paragraphs, "tolist"):
-                paragraphs = paragraphs.tolist()
-            if not isinstance(paragraphs, list):
-                return empty
+        # Step 4: Cache lookup before any AV call.
+        cached = get_cached_transcript(symbol, quarter)
+        if cached and cached.get("text"):
+            return {
+                "text": cached["text"],
+                "date": cached.get("report_date"),
+                "warning": "",
+            }
 
-            text = "\n".join(
-                p.get("content", "")
-                for p in paragraphs
-                if isinstance(p, dict) and p.get("content")
+        # Step 5: Call Alpha Vantage.
+        av = self.alpha_vantage_service.get_earnings_call_transcript(symbol, quarter)
+        av_text = av.get("text", "")
+
+        if av_text:
+            # Persist for future scans (immutable per quarter — first-write-wins).
+            save_cached_transcript(
+                symbol=symbol,
+                fiscal_quarter=quarter,
+                source="alpha_vantage",
+                text=av_text,
+                report_date=av.get("report_date"),
             )
-            if not text:
-                return empty
-            return {"text": text, "date": date_str, "warning": ""}
-        except Exception as e:
-            print(f"[StockService] DefeatBeta transcript fetch failed for {symbol}: {e}")
-            return empty
+            return {"text": av_text, "date": av.get("report_date"), "warning": ""}
+
+        # Step 6: AV gave us nothing — fall back to whatever DefeatBeta had (even if stale).
+        if db_text:
+            return {"text": db_text, "date": db_date_str, "warning": ""}
+        return empty
 
     def _is_market_open(self, region: str = "US") -> bool:
         """
@@ -1366,7 +1485,7 @@ class StockService:
         # Fetch Filings & Transcript
         print(f"Fetching filings/transcript for {symbol}...")
         filings_text = self.get_latest_filing_text(symbol)
-        transcript_data = self.get_latest_transcript(symbol)
+        transcript_data = self.get_latest_transcript(symbol, company_name=company_name)
         transcript_text = ""
         transcript_date = None
         transcript_warning = ""
@@ -1390,6 +1509,16 @@ class StockService:
                 if k not in indicators:
                     indicators[k] = v
 
+        # Pre-fetch structured EPS facts so the PM sees a canonical earnings
+        # dict instead of relying on the News Agent to summarize from news
+        # articles (different articles cite different consensus numbers).
+        try:
+            from app.services.finnhub_service import finnhub_service
+            earnings_facts = finnhub_service.get_earnings_facts(symbol)
+        except Exception as e:
+            print(f"[Earnings Facts] Failed to fetch for {symbol}: {e}")
+            earnings_facts = None
+
         # Prepare Raw Data dictionary
         raw_data = {
             "metrics": {
@@ -1407,6 +1536,7 @@ class StockService:
             "market_context": market_context,
             "change_percent": stock.get("change_percent", 0.0),
             "gatekeeper_tier": reasons.get("tier"),
+            "earnings_facts": earnings_facts,
         }
 
         # Pass raw_data to research service
@@ -1451,9 +1581,22 @@ class StockService:
         
         self.research_reports[symbol] = reasoning
         
-        # Update Status — gate on recommendation text, not score
-        if "BUY" in recommendation.upper():
-            status = "Owned"
+        # 3-state position lifecycle: BUY/BUY_LIMIT with R/R > 1.0 advances
+        # to 'Pending DR Review' until deep research finalizes the verdict.
+        # _should_trigger_deep_research mirrors this threshold so rows are
+        # never stranded in the pending state.
+        rec_upper = recommendation.upper()
+        try:
+            rr_value = float(report_data.get("risk_reward_ratio") or 0.0)
+        except (TypeError, ValueError):
+            rr_value = 0.0
+        will_trigger_dr = self._should_trigger_deep_research(report_data)
+        if rec_upper in ("BUY", "BUY_LIMIT", "STRONG BUY", "STRONG_BUY", "SPECULATIVE BUY", "SPECULATIVE_BUY") and will_trigger_dr and rr_value > 1.0:
+            status = "Pending DR Review"
+        elif "BUY" in rec_upper and rr_value > 1.0:
+            # BUY-flavored verdict that won't trigger DR (edge case): leave
+            # as Pending too so it surfaces in the UI as awaiting review.
+            status = "Pending DR Review"
         else:
             status = "Not Owned"
 
@@ -1485,6 +1628,12 @@ class StockService:
                 sell_price_high=report_data.get("sell_price_high"),
                 ceiling_exit=report_data.get("ceiling_exit"),
                 exit_trigger=report_data.get("exit_trigger"),
+                # Pre-fetched EPS facts (canonical, from Finnhub)
+                reported_eps=(earnings_facts or {}).get("reported_eps"),
+                consensus_eps=(earnings_facts or {}).get("consensus_eps"),
+                surprise_pct=(earnings_facts or {}).get("surprise_pct"),
+                earnings_fiscal_quarter=(earnings_facts or {}).get("fiscal_quarter"),
+                earnings_narrative_flag=report_data.get("earnings_narrative_flag"),
             )
             print(f"Updated decision point for {symbol}: {recommendation} -> {status} (Conviction: {report_data.get('conviction', 'N/A')})")
             print(f"  > Saved trading levels and Data Depth metrics to DB.")

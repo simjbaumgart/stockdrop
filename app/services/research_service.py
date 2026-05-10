@@ -22,18 +22,43 @@ from app.services.gatekeeper_service import (
 from app.utils.ticker_paths import safe_ticker_path
 from app.utils.agent_call_counter import counter as agent_call_counter
 
-# Citation strip — Gemini grounding injects [Source N] markers that corrupt JSON
-_STANDALONE_CITATION_RE = re.compile(r"\s+\[Source\s*\d+\]\s+")
-_EDGE_CITATION_RE = re.compile(r"\s*\[Source\s*\d+\]\s*")
+# Citation strip — Gemini grounding injects footnote markers that corrupt JSON
+# AND mid-sentence text. Two known shapes:
+#   1. [Source N]            — original grounding format
+#   2. [N], [N.N], [N.N.N]   — bare-number footnotes (COR/ANET regression, May 2026)
+# We also accept [cite N] / [cite:N]. We replace each marker with a single space,
+# then collapse runs of whitespace, so word boundaries are preserved. Joined-vs-
+# separated cases ('signaling' vs 'signa ling') are indistinguishable from the raw
+# text alone; we deliberately favor word-boundary preservation. The CAR-style
+# 'Massivestructuralunwind' production failure was the original trigger.
+#
+# The numeric branch is deliberately narrow: digits + optional dotted sub-sections
+# only. This avoids eating real bracketed content like [BUY], [N/A], [YoY 5%],
+# [low-high], or ISO dates [2026-05-06].
+_CITATION_RE = re.compile(
+    r"\[(?:Source\s*\d+|\d+(?:\.\d+)*|cite[:\s]?\s*\d+)\]",
+    re.IGNORECASE,
+)
+_MULTISPACE_RE = re.compile(r"[ \t]{2,}")
 
 
 def _strip_citations(raw: str) -> str:
-    """Remove inline [Source N] markers that break JSON parsing."""
-    if "[Source" not in raw:
+    """Remove inline citation markers, replacing each with a single space.
+
+    'word [Source 1] word' → 'word word'   (collapses double space)
+    'word [Source 1]word'  → 'word word'   (boundary preserved)
+    '[Source 1][Source 2]' → ''            (leading/trailing trimmed)
+    'word[Source 1]word'   → 'word word'   (always inserts a space)
+    'growth[1.1]across'    → 'growth across' (numeric footnote)
+    """
+    # Cheap-rejection: skip work for the common case (no '[' at all).
+    if "[" not in raw:
         return raw
-    cleaned = _STANDALONE_CITATION_RE.sub(" ", raw)
-    cleaned = _EDGE_CITATION_RE.sub("", cleaned)
-    return cleaned
+    cleaned = _CITATION_RE.sub(" ", raw)
+    if cleaned == raw:
+        return raw
+    cleaned = _MULTISPACE_RE.sub(" ", cleaned)
+    return cleaned.strip(" ")
 
 
 # Grounding retry policy: 1 initial attempt + up to MAX_GROUNDING_RETRIES retries
@@ -155,6 +180,7 @@ class ResearchService:
             ticker=ticker,
             date=datetime.now().strftime("%Y-%m-%d"),
             gatekeeper_tier=raw_data.get("gatekeeper_tier"),
+            earnings_facts=raw_data.get("earnings_facts"),
         )
 
         # Extract drop percent for context (default to generic if missing)
@@ -387,24 +413,6 @@ class ResearchService:
         final_decision = self._run_risk_council_and_decision(state, drop_str)
         state.final_decision = final_decision
         
-        # --- Print Final Decision to Console ---
-        print("\n" + "="*50)
-        print(f"  [PORTFOLIO MANAGER DECISION]: {final_decision.get('action')} (Conviction: {final_decision.get('conviction', 'N/A')})")
-        print(f"  Drop Type: {final_decision.get('drop_type', 'N/A')}")
-        print(f"  Entry Zone: ${final_decision.get('entry_price_low', 'N/A')} - ${final_decision.get('entry_price_high', 'N/A')}")
-        print(f"  Stop Loss: ${final_decision.get('stop_loss', 'N/A')} | TP1: ${final_decision.get('take_profit_1', 'N/A')} | TP2: ${final_decision.get('take_profit_2', 'N/A')}")
-        print(f"  Upside: {final_decision.get('upside_percent', 'N/A')}% | Downside: {final_decision.get('downside_risk_percent', 'N/A')}% | R/R: {final_decision.get('risk_reward_ratio', 'N/A')}")
-        print(f"  Sell Zone: ${final_decision.get('sell_price_low', 'N/A')} - ${final_decision.get('sell_price_high', 'N/A')} | Ceiling: ${final_decision.get('ceiling_exit', 'N/A')}")
-        print(f"  Entry Trigger: {final_decision.get('entry_trigger', 'N/A')}")
-        print(f"  Exit Trigger: {final_decision.get('exit_trigger', 'N/A')}")
-        print(f"  Reassess In: {final_decision.get('reassess_in_days', 'N/A')} trading days")
-        print(f"  Reason: {final_decision.get('reason')}")
-        print("  Key Factors:")
-        for factor in final_decision.get('key_factors', []):
-            print(f"   - {factor}")
-        print(f"  Total Agent Calls: {state.agent_calls}")
-        print("="*50 + "\n")
-        
         # --- Phase 4: deep reasoning check for BUY signals ---
         deep_reasoning_report = ""
         action = final_decision.get('action', 'AVOID').upper()
@@ -430,9 +438,6 @@ class ResearchService:
         #          # but we will append a major warning to the executive summary.
         #          final_decision['reason'] += " [WARNING: Deep Reasoning Model suggests caution/downgrade - see report]"
         
-        # Construct Final Output compatible with existing app expectations
-        recommendation = final_decision.get("action", "AVOID").upper()
-        
         # Extract checklist metadata
         economics_run = "NEEDS_ECONOMICS: TRUE" in news_report and economics_report != "" and "failed to fetch" not in economics_report
         drop_reason_identified = "REASON_FOR_DROP_IDENTIFIED: YES" in news_report
@@ -442,11 +447,12 @@ class ResearchService:
         from app.services.evidence_service import evidence_service
         data_depth = evidence_service.collect_barometer(raw_data, state.reports)
 
-        # Deterministic stop-loss guardrail: widen if PM placed it too tight.
-        from app.utils.stop_loss_guard import widen_stop_if_too_tight
+        # Deterministic stop-loss guardrail: widen if PM placed it too tight,
+        # then recompute R/R so the print line + DB row + dashboard reflect
+        # the new (wider) stop instead of the PM's stale numbers.
+        from app.utils.stop_loss_guard import widen_stop_if_too_tight, recompute_risk_metrics
         _tv_inds = raw_data.get("indicators", {})
         _entry_low = final_decision.get("entry_price_low")
-        # Fallback to current close if entry_price_low is missing or looks like a pct
         if _entry_low is None or (isinstance(_entry_low, (int, float)) and _entry_low < 0):
             _entry_low = _tv_inds.get("close")
         if _entry_low is not None:
@@ -465,6 +471,69 @@ class ResearchService:
                 )
                 final_decision["stop_loss"] = _guard.stop_loss
                 final_decision["stop_loss_guard_reason"] = _guard.reason
+
+            # Recompute downside / R/R against (possibly-new) stop_loss so the
+            # value the user sees matches the value the user takes risk on.
+            _metrics = recompute_risk_metrics(
+                entry_low=float(_entry_low),
+                stop_loss=final_decision.get("stop_loss"),
+                upside_percent=final_decision.get("upside_percent"),
+            )
+            if _metrics["downside_risk_percent"] is not None:
+                final_decision["downside_risk_percent"] = _metrics["downside_risk_percent"]
+            if _metrics["risk_reward_ratio"] is not None:
+                final_decision["risk_reward_ratio"] = _metrics["risk_reward_ratio"]
+
+        # Deterministic earnings-narrative consistency check.
+        # If the PM narrates "beat" but surprise is negative (or vice versa),
+        # flag and downgrade by one tier — see TOST 2026-05 incident.
+        from app.utils.earnings_consistency import check_narrative_consistency, downgrade_action
+        ef = raw_data.get("earnings_facts") or {}
+        consistency = check_narrative_consistency(
+            reasoning=final_decision.get("reason", ""),
+            surprise_pct=ef.get("surprise_pct"),
+        )
+        if consistency.inconsistent:
+            original_action = final_decision.get("action", "")
+            new_action = downgrade_action(original_action)
+            logger.warning(
+                "[Earnings Consistency] %s: %s. Action %s -> %s",
+                state.ticker, consistency.reason, original_action, new_action,
+            )
+            print(
+                f"  > [Earnings Consistency Flag] {state.ticker}: {consistency.reason}. "
+                f"Downgrading {original_action} -> {new_action}"
+            )
+            final_decision["action"] = new_action
+            final_decision["earnings_narrative_flag"] = consistency.flag
+            existing_factors = final_decision.get("key_factors") or []
+            if isinstance(existing_factors, list):
+                existing_factors.append(
+                    f"[FLAG] {consistency.flag}: {consistency.reason}. "
+                    f"Verdict downgraded from {original_action} to {new_action}."
+                )
+                final_decision["key_factors"] = existing_factors
+
+        # Construct Final Output compatible with existing app expectations
+        recommendation = final_decision.get("action", "AVOID").upper()
+
+        # --- Print Final Decision to Console (post-guard, post-recompute) ---
+        print("\n" + "="*50)
+        print(f"  [PORTFOLIO MANAGER DECISION]: {final_decision.get('action')} (Conviction: {final_decision.get('conviction', 'N/A')})")
+        print(f"  Drop Type: {final_decision.get('drop_type', 'N/A')}")
+        print(f"  Entry Zone: ${final_decision.get('entry_price_low', 'N/A')} - ${final_decision.get('entry_price_high', 'N/A')}")
+        print(f"  Stop Loss: ${final_decision.get('stop_loss', 'N/A')} | TP1: ${final_decision.get('take_profit_1', 'N/A')} | TP2: ${final_decision.get('take_profit_2', 'N/A')}")
+        print(f"  Upside: {final_decision.get('upside_percent', 'N/A')}% | Downside: {final_decision.get('downside_risk_percent', 'N/A')}% | R/R: {final_decision.get('risk_reward_ratio', 'N/A')}")
+        print(f"  Sell Zone: ${final_decision.get('sell_price_low', 'N/A')} - ${final_decision.get('sell_price_high', 'N/A')} | Ceiling: ${final_decision.get('ceiling_exit', 'N/A')}")
+        print(f"  Entry Trigger: {final_decision.get('entry_trigger', 'N/A')}")
+        print(f"  Exit Trigger: {final_decision.get('exit_trigger', 'N/A')}")
+        print(f"  Reassess In: {final_decision.get('reassess_in_days', 'N/A')} trading days")
+        print(f"  Reason: {final_decision.get('reason')}")
+        print("  Key Factors:")
+        for factor in final_decision.get('key_factors', []):
+            print(f"   - {factor}")
+        print(f"  Total Agent Calls: {state.agent_calls}")
+        print("="*50 + "\n")
 
         return {
             "recommendation": recommendation,
@@ -492,6 +561,7 @@ class ResearchService:
             "ceiling_exit": final_decision.get("ceiling_exit"),
             "exit_trigger": final_decision.get("exit_trigger"),
             "key_factors": final_decision.get("key_factors", []),
+            "earnings_narrative_flag": final_decision.get("earnings_narrative_flag"),
             # Legacy compatibility fields
             "technician_report": state.reports.get('technical', ''),
             "bull_report": state.reports.get('bull', ''),
@@ -1009,6 +1079,28 @@ REALISTIC EXIT CEILING (Bear's Upside Limit):
             ),
         }.get(tier, "UNKNOWN — gatekeeper tier missing; treat as STANDARD_DIP.")
 
+        ef = getattr(state, "earnings_facts", None) or {}
+        if ef and ef.get("reported_eps") is not None:
+            _sp = ef.get("surprise_pct")
+            if _sp is None:
+                _surprise_line = "- Surprise: N/A (estimate was 0 or missing)\n"
+            else:
+                _beat_miss = "BEAT" if _sp > 0 else "MISS" if _sp < 0 else "INLINE"
+                _surprise_line = f"- Surprise: {_sp:+.1f}% ({_beat_miss})\n"
+            earnings_block = (
+                "\nEARNINGS_FACTS (canonical, from Finnhub — DO NOT infer EPS from news articles below):\n"
+                f"- Reported EPS: ${ef['reported_eps']:.2f}\n"
+                f"- Consensus EPS: ${ef['consensus_eps']:.2f}\n"
+                + _surprise_line +
+                f"- Fiscal quarter: {ef.get('fiscal_quarter')}\n"
+                f"- Source: {ef.get('source')} (fetched {ef.get('fetched_at')})\n"
+                "Whenever your reasoning describes whether the company beat or missed, "
+                "use the surprise sign above. News articles may cite stale consensus numbers; "
+                "the values above are the ground truth."
+            )
+        else:
+            earnings_block = "\nEARNINGS_FACTS: (no recent reported quarter available — drop is not earnings-driven, or facts unavailable)"
+
         return f"""
 You are the **Portfolio Manager**. You have the final vote.
 You must weigh the arguments from the Bull Agent and the Bear Agent, cross-reference with the original Agent Reports, and produce a concrete, actionable trading plan.
@@ -1025,6 +1117,7 @@ RISK FACTORS (For Consideration):
 - News Flags: {risky_support}
 - **RISK AGENT ASSESSMENT**:
 {risk_report}
+{earnings_block}
 
 BULL CASE:
 {bull_report}
@@ -1057,7 +1150,12 @@ Note: No explicit support/resistance levels are provided. Use Bollinger Bands, S
 
 INSTRUCTIONS FOR TRADING LEVELS:
 - **entry_price_low / entry_price_high**: The price zone where buying makes sense. Use bb_lower and the current close price as guides. If "BUY" (immediate), set this to the current close price +/- 1%.
-- **stop_loss**: Set at 2x ATR below entry_price_low, or below the bb_lower if that is tighter. This is the "thesis is broken" level. Must be a concrete number.
+- **stop_loss**: REQUIRED. Place at the *farther* (lower) of:
+    (a) entry_price_low - 2.0 * ATR  (use TradingView ATR provided above)
+    (b) nearest technical support below entry_price_low (prior swing low,
+        SMA_50, or SMA_200 — whichever is below entry).
+  Never place the stop closer than 1.5 * ATR below entry_price_low. Stops
+  tighter than this floor will be programmatically widened.
 - **take_profit_1**: Conservative target. Typically the pre-drop price (calculate from close and drop_percent) or the BB middle (average of bb_lower and bb_upper). This is the recovery target.
 - **take_profit_2**: Optimistic target. bb_upper, SMA50, or SMA200 — whichever is above TP1 and realistic. Set to null if no clear upside beyond TP1.
 - **upside_percent**: Calculate from current close to take_profit_1. Example: close is $100, TP1 is $112 → upside is 12.0.
@@ -1522,6 +1620,12 @@ Process continuing but this agent's output is compromised.
                         citation_string = " " + "".join(citation_refs)
                         text = text[:end_index] + citation_string + text[end_index:]
             
+            # Strip [Source N] markers from the inline body before appending
+            # the clean Sources appendix. Markers in the prose corrupt downstream
+            # consumers (DB, dashboard, PM prompt); the Sources list below is the
+            # canonical reference.
+            text = _strip_citations(text)
+
             # Add a clean Source List at the bottom (titles only, no raw URLs)
             text += "\n\n### Sources:\n"
             for i, chunk in enumerate(chunks):

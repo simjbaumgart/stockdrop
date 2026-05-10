@@ -198,6 +198,8 @@ def _seed_decision_points(db_path: str, rows):
             conviction TEXT,
             risk_reward_ratio REAL,
             deep_research_verdict TEXT,
+            deep_research_review_verdict TEXT,
+            deep_research_action TEXT,
             deep_research_score INTEGER,
             batch_id TEXT
         )

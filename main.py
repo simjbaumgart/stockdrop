@@ -110,7 +110,7 @@ async def run_shutdown_timer(minutes: int):
 @app.on_event("startup")
 async def startup_event_handler():
     print(f"\n{'='*50}")
-    print(f"  StockDrop v{VERSION}")
+    print(f"  StockDrop {VERSION}")
     if run_for_minutes:
         print(f"  Mode: Timed run ({run_for_minutes} minutes)")
     print(f"  Started at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
