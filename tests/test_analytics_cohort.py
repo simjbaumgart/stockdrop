@@ -69,3 +69,41 @@ def test_load_cohort_columns(tmp_db):
     assert expected.issubset(set(df.columns))
     assert df["intent"].iloc[0] in {"ENTER_NOW", "ENTER_LIMIT", "AVOID", "NEUTRAL"}
     assert pd.api.types.is_datetime64_any_dtype(df["decision_date"])
+
+
+def test_load_cohort_drops_test_symbols(tmp_path, monkeypatch):
+    db_path = tmp_path / "test_drop.db"
+    conn = sqlite3.connect(db_path)
+    conn.execute(
+        """
+        CREATE TABLE decision_points (
+            id INTEGER PRIMARY KEY,
+            symbol TEXT,
+            price_at_decision REAL,
+            drop_percent REAL,
+            recommendation TEXT,
+            timestamp TEXT
+        )
+        """
+    )
+    rows = [
+        (1, "AAPL", 150.0, -6.0, "BUY", "2026-03-01 10:00:00"),
+        (2, "TEST", 100.0, -10.0, "BUY", "2026-03-02 10:00:00"),
+        (3, "TEST_T3", 100.0, -10.0, "BUY_LIMIT", "2026-03-03 10:00:00"),
+        (4, "TEST_T12", 100.0, -10.0, "AVOID", "2026-03-03 10:00:00"),
+        (5, "test", 100.0, -10.0, "BUY", "2026-03-04 10:00:00"),  # case-insensitive
+        (6, "TESTERA", 50.0, -8.0, "BUY", "2026-03-05 10:00:00"),  # NO underscore — kept
+        (7, "MSFT", 300.0, -5.0, "BUY", "2026-03-06 10:00:00"),
+        (8, "T8_BUY", 100.0, -5.0, "BUY", "2026-03-07 10:00:00"),  # underscore fixture
+        (9, "BRK.B", 400.0, -6.0, "BUY", "2026-03-08 10:00:00"),  # real ticker — kept
+    ]
+    conn.executemany(
+        "INSERT INTO decision_points VALUES (?,?,?,?,?,?)", rows
+    )
+    conn.commit()
+    conn.close()
+    monkeypatch.setenv("DB_PATH", str(db_path))
+
+    df = load_cohort(start_date=None)
+    # Drop bare TEST and any underscore-containing symbol; keep TESTERA and BRK.B
+    assert set(df["symbol"]) == {"AAPL", "TESTERA", "MSFT", "BRK.B"}
