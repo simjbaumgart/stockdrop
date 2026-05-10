@@ -1634,6 +1634,11 @@ class StockService:
                 surprise_pct=(earnings_facts or {}).get("surprise_pct"),
                 earnings_fiscal_quarter=(earnings_facts or {}).get("fiscal_quarter"),
                 earnings_narrative_flag=report_data.get("earnings_narrative_flag"),
+                # External ratings (informational; never seen by agents).
+                sa_quant_rating=report_data.get("sa_quant_rating"),
+                sa_authors_rating=report_data.get("sa_authors_rating"),
+                wall_street_rating=report_data.get("wall_street_rating"),
+                sa_rank=report_data.get("sa_rank"),
             )
             print(f"Updated decision point for {symbol}: {recommendation} -> {status} (Conviction: {report_data.get('conviction', 'N/A')})")
             print(f"  > Saved trading levels and Data Depth metrics to DB.")

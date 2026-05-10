@@ -132,6 +132,12 @@ def init_db():
             "earnings_fiscal_quarter": "TEXT",
             # Deterministic post-PM earnings narrative consistency check
             "earnings_narrative_flag": "TEXT",
+            # External ratings — informational only, NEVER passed into any LLM agent prompt.
+            # Sourced from data/SAgrades/SA_Quant_Ranked_Clean.csv at decision time.
+            "sa_quant_rating": "REAL",
+            "sa_authors_rating": "REAL",
+            "wall_street_rating": "REAL",
+            "sa_rank": "INTEGER",
         }
         
         
@@ -298,6 +304,8 @@ def update_decision_point(decision_id: int, recommendation: str, reasoning: str,
             "reported_eps", "consensus_eps", "surprise_pct", "earnings_fiscal_quarter",
             # Deterministic post-PM earnings narrative consistency check
             "earnings_narrative_flag",
+            # External ratings — informational only, NEVER fed into any LLM prompt.
+            "sa_quant_rating", "sa_authors_rating", "wall_street_rating", "sa_rank",
         ]
         for field in trading_fields:
             if field in kwargs and kwargs[field] is not None:
