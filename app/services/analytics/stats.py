@@ -181,6 +181,120 @@ def correlation(
     return out
 
 
+def rr_by_group(
+    df: pd.DataFrame,
+    group_col: str,
+    rr_col: str,
+    min_n: int = 3,
+) -> Dict[str, Any]:
+    """Distribution of an R/R column across categorical groups.
+
+    Returns:
+        {
+            "group_col": str, "rr_col": str,
+            "per_group": [{group, n, mean, se, ci_low, ci_high, median,
+                          std, min, max}, ...],
+            "anova_f": float, "anova_p": float,           # one-way ANOVA
+            "kw_h": float, "kw_p": float,                  # Kruskal-Wallis (rank)
+            "pairwise": [...]                              # Welch + MWU + FDR
+        }
+
+    Skips groups with fewer than `min_n` rows when running the omnibus and
+    pairwise tests.
+    """
+    out: Dict[str, Any] = {
+        "group_col": group_col, "rr_col": rr_col, "per_group": [],
+        "anova_f": None, "anova_p": None,
+        "kw_h": None, "kw_p": None,
+        "pairwise": [],
+    }
+    if df.empty or group_col not in df.columns or rr_col not in df.columns:
+        return out
+
+    sub = df.dropna(subset=[group_col, rr_col]).copy()
+    if sub.empty:
+        return out
+
+    # Per-group descriptives (always emitted, even tiny groups)
+    per_group_rows: List[Dict[str, Any]] = []
+    for grp, frame in sub.groupby(group_col, dropna=False):
+        values = frame[rr_col].astype(float).values
+        n = int(len(values))
+        ci = mean_ci(values)
+        per_group_rows.append({
+            "group": str(grp) if grp is not None else "(none)",
+            "n": n,
+            "mean": ci["mean"],
+            "se": ci["se"],
+            "ci_low": ci["ci_low"],
+            "ci_high": ci["ci_high"],
+            "median": float(np.median(values)) if n else None,
+            "std": float(values.std(ddof=1)) if n > 1 else None,
+            "min": float(values.min()) if n else None,
+            "max": float(values.max()) if n else None,
+        })
+    per_group_rows.sort(key=lambda r: r["n"], reverse=True)
+    out["per_group"] = per_group_rows
+
+    # Build the per-group arrays for the omnibus tests; require min_n
+    grouped = {
+        str(g): np.asarray(v[rr_col].astype(float).values)
+        for g, v in sub.groupby(group_col, dropna=False) if len(v) >= min_n
+    }
+    if len(grouped) >= 2:
+        try:
+            anova = stats.f_oneway(*grouped.values())
+            out["anova_f"] = float(anova.statistic)
+            out["anova_p"] = float(anova.pvalue)
+        except Exception:
+            pass
+        try:
+            kw = stats.kruskal(*grouped.values())
+            out["kw_h"] = float(kw.statistic)
+            out["kw_p"] = float(kw.pvalue)
+        except Exception:
+            pass
+
+        # Pairwise on the same R/R column (re-uses the existing pairwise machinery)
+        pairs = pairwise_welch(sub, group_col=group_col, value_col=rr_col, min_n=min_n)
+        if not pairs.empty:
+            out["pairwise"] = pairs.to_dict(orient="records")
+
+    return out
+
+
+def top_rr_decisions(
+    df: pd.DataFrame,
+    rr_col: str,
+    n: int = 25,
+    min_value: Optional[float] = None,
+) -> pd.DataFrame:
+    """Return the top-`n` rows of `df` sorted by `rr_col` desc.
+
+    Filters: keep only rows where `rr_col` is non-null and (if given) >= `min_value`.
+    Output columns are a curated subset useful for an at-a-glance list.
+    """
+    cols = [
+        "id", "symbol", "decision_date", "recommendation", "intent",
+        "drop_percent", "price_at_decision", "sector",
+        "risk_reward_ratio", "deep_research_rr_ratio",
+        "deep_research_verdict", "deep_research_action",
+        "entry_price_low", "entry_price_high", "stop_loss",
+        "return_1w", "return_2w", "return_4w",
+        "max_roi_4w", "max_drawdown_4w",
+    ]
+    if df.empty or rr_col not in df.columns:
+        return pd.DataFrame(columns=[c for c in cols if c in df.columns])
+    sub = df.dropna(subset=[rr_col]).copy()
+    if min_value is not None:
+        sub = sub[sub[rr_col] >= min_value]
+    if sub.empty:
+        return pd.DataFrame(columns=[c for c in cols if c in df.columns])
+    sub = sub.sort_values(rr_col, ascending=False).head(n)
+    keep = [c for c in cols if c in sub.columns]
+    return sub[keep].reset_index(drop=True)
+
+
 def recovery_stats(df: pd.DataFrame, group_col: str = "intent") -> pd.DataFrame:
     """Per-group recovery descriptives.
 

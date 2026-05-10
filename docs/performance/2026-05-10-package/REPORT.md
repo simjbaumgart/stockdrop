@@ -1,6 +1,6 @@
 # StockDrop Performance Analysis — 2026-02-01 cohort
 
-_Generated 2026-05-10 09:25. Cohort: **363 decisions**._
+_Generated 2026-05-10 09:41. Cohort: **363 decisions**._
 
 ## Executive summary
 
@@ -196,7 +196,122 @@ Light grey lines are individual ENTER_NOW + ENTER_LIMIT decisions; bold lines ar
 ![wr_drop](charts/10_winrate_by_drop_size.png)
 
 
-## 8. Profit and loss decomposition
+## 8a. R/R distribution by verdict (categorical correlation)
+
+How does each council assign its R/R ratings to its own verdict groups? Below: per-group descriptives, one-way ANOVA (parametric), and Kruskal-Wallis (rank-based) for the omnibus test of "are the group distributions the same?" Plus pairwise Welch t-tests with FDR-adjusted p-values.
+
+### 8a.1 PM R/R by AI council intent
+
+| group       |   n |   mean |    SE |   CI low |   CI high |   median |   std |   min |   max |
+|:------------|----:|-------:|------:|---------:|----------:|---------:|------:|------:|------:|
+| AVOID       | 178 |  0.658 | 0.045 |    0.569 |     0.748 |     0.5  | 0.604 |   0   |   5.4 |
+| NEUTRAL     |  51 |  0.886 | 0.084 |    0.718 |     1.054 |     0.7  | 0.598 |   0.1 |   2.8 |
+| ENTER_LIMIT |  50 |  1.144 | 0.095 |    0.952 |     1.335 |     1    | 0.673 |   0   |   2.9 |
+| ENTER_NOW   |  50 |  1.473 | 0.128 |    1.217 |     1.73  |     1.53 | 0.903 |   0   |   4   |
+
+**Omnibus:** ANOVA: F=22.32, p=<0.001 · Kruskal-Wallis: H=59.22, p=<0.001.
+
+
+![rr_box_pm](charts/22_rr_box_pm_by_intent.png)
+
+
+| A           | B           |   n_A |   n_B | Δ mean   |   Cohen d | Welch p   | Welch p (FDR)   | MWU p   | MWU p (FDR)   | Sig?   |
+|:------------|:------------|------:|------:|:---------|----------:|:----------|:----------------|:--------|:--------------|:-------|
+| AVOID       | ENTER_LIMIT |   178 |    50 | -48.52%  |     -0.78 | <0.001    | <0.001          | <0.001  | <0.001        | ✅     |
+| AVOID       | ENTER_NOW   |   178 |    50 | -81.50%  |     -1.2  | <0.001    | <0.001          | <0.001  | <0.001        | ✅     |
+| AVOID       | NEUTRAL     |   178 |    51 | -22.78%  |     -0.38 | 0.019     | 0.028           | 0.003   | 0.004         | ✅     |
+| ENTER_LIMIT | ENTER_NOW   |    50 |    50 | -32.98%  |     -0.41 | 0.041     | 0.045           | 0.018   | 0.022         | ✅     |
+| ENTER_LIMIT | NEUTRAL     |    50 |    51 | +25.73%  |      0.4  | 0.045     | 0.045           | 0.022   | 0.022         | ✅     |
+| ENTER_NOW   | NEUTRAL     |    50 |    51 | +58.71%  |      0.77 | <0.001    | <0.001          | <0.001  | <0.001        | ✅     |
+
+### 8a.2 DR R/R by Deep Research verdict
+
+| group     |   n |   mean | SE    | CI low   | CI high   |   median | std   |   min |   max |
+|:----------|----:|-------:|:------|:---------|:----------|---------:|:------|------:|------:|
+| BUY_LIMIT |  32 |  1.634 | 0.131 | 1.366    | 1.902     |    1.675 | 0.743 |  0    |  3.07 |
+| AVOID     |  24 |  1.18  | 0.184 | 0.800    | 1.560     |    1.015 | 0.900 |  0    |  2.9  |
+| BUY       |   8 |  1.952 | 0.402 | 1.002    | 2.903     |    2     | 1.137 |  0    |  4    |
+| WATCH     |   1 |  0.82  |       |          |           |    0.82  |       |  0.82 |  0.82 |
+
+**Omnibus:** ANOVA: F=3.18, p=0.049 · Kruskal-Wallis: H=6.11, p=0.047.
+
+
+![rr_box_dr](charts/23_rr_box_dr_by_verdict.png)
+
+
+| A     | B         |   n_A |   n_B | Δ mean   |   Cohen d |   Welch p |   Welch p (FDR) |   MWU p |   MWU p (FDR) | Sig?   |
+|:------|:----------|------:|------:|:---------|----------:|----------:|----------------:|--------:|--------------:|:-------|
+| AVOID | BUY       |    24 |     8 | -77.25%  |     -0.8  |     0.111 |           0.166 |   0.057 |         0.085 | —      |
+| AVOID | BUY_LIMIT |    24 |    32 | -45.41%  |     -0.56 |     0.051 |           0.152 |   0.04  |         0.085 | —      |
+| BUY   | BUY_LIMIT |     8 |    32 | +31.84%  |      0.38 |     0.472 |           0.472 |   0.37  |         0.37  | —      |
+
+**Interpretation.** ANOVA and Kruskal-Wallis answer the question "is *any* group different from the others?" If both omnibus tests fail to reach p<0.05 the council is not assigning systematically different R/R to different verdict groups (and the pairwise tests will reflect that).
+
+## 8b. High-R/R decisions in the cohort
+
+Top 25 rows by R/R ratio for each council, with their realized returns where available. Full lists exported as `data/top_pm_rr.csv` and `data/top_dr_rr.csv`.
+
+### 8b.1 Top by PM R/R (`risk_reward_ratio`)
+
+| symbol   | decision_date   | intent      | recommendation   |   risk_reward_ratio | drop_percent   | price_at_decision   | deep_research_verdict   | return_4w   | max_roi_4w   | max_drawdown_4w   |
+|:---------|:----------------|:------------|:-----------------|--------------------:|:---------------|:--------------------|:------------------------|:------------|:-------------|:------------------|
+| CHKP     | 2026-04-30      | AVOID       | AVOID            |                5.4  | -1694.06%      | $116.25             |                         |             | +7.24%       | -3.46%            |
+| LBRDP    | 2026-04-24      | ENTER_NOW   | BUY              |                4    | -597.17%       | $21.96              | BUY                     |             | +6.58%       | -4.17%            |
+| NICE     | 2026-04-11      | ENTER_NOW   | BUY              |                3.07 | -714.15%       | $97.00              | BUY_LIMIT               |             | +30.41%      | -6.49%            |
+| NOC      | 2026-04-21      | AVOID       | AVOID            |                2.9  | -580.15%       | $618.87             |                         |             | +5.52%       | -12.06%           |
+| FDX      | 2026-05-04      | ENTER_LIMIT | BUY_LIMIT        |                2.9  | -674.68%       | $367.11             | AVOID                   |             | +4.41%       | -3.53%            |
+| TEAM     | 2026-04-09      | ENTER_NOW   | BUY              |                2.8  | -804.78%       | $58.50              |                         | +57.90%     | +64.65%      | -4.26%            |
+| TRUMF    | 2026-04-13      | NEUTRAL     | WATCH            |                2.8  | -528.93%       | $12.40              |                         |             | +8.47%       | -0.00%            |
+| CRC      | 2026-05-06      | ENTER_LIMIT | BUY_LIMIT        |                2.76 | -960.36%       | $63.40              | AVOID                   |             | +8.76%       | -7.80%            |
+| MHK      | 2026-05-04      | AVOID       | AVOID            |                2.6  | -546.88%       | $94.47              |                         |             | +13.50%      | -0.92%            |
+| FIS      | 2026-05-08      | ENTER_NOW   | BUY              |                2.6  | -584.13%       | $44.49              | BUY_LIMIT               |             |              |                   |
+| CE       | 2026-05-06      | ENTER_LIMIT | BUY_LIMIT        |                2.6  | -954.93%       | $62.42              | BUY_LIMIT               |             | +6.92%       | -10.29%           |
+| ALC      | 2026-05-06      | ENTER_NOW   | BUY              |                2.4  | -967.09%       | $67.25              | BUY                     |             | +0.61%       | -7.21%            |
+| HUBS     | 2026-05-08      | ENTER_LIMIT | BUY_LIMIT        |                2.4  | -2333.01%      | $186.86             | BUY_LIMIT               |             |              |                   |
+| REGN     | 2026-04-29      | ENTER_NOW   | BUY              |                2.35 | -621.85%       | $686.26             | BUY                     |             | +5.81%       | -2.54%            |
+| IAG      | 2026-04-21      | ENTER_NOW   | BUY              |                2.33 | -718.53%       | $17.18              | BUY_LIMIT               |             | +13.10%      | -6.69%            |
+| PBMRF    | 2026-04-09      | AVOID       | AVOID            |                2.3  | -8600.00%      | $0.00               |                         | +308.93%    | +308.93%     | -0.00%            |
+| ADSK     | 2026-04-09      | ENTER_NOW   | BUY              |                2.3  | -916.27%       | $218.60             | AVOID                   | +14.84%     | +16.72%      | -2.06%            |
+| POOL     | 2026-05-05      | ENTER_LIMIT | BUY_LIMIT        |                2.3  | -606.21%       | $190.91             | AVOID                   |             | +3.88%       | -3.36%            |
+| NOW      | 2026-04-09      | ENTER_NOW   | BUY              |                2.3  | -793.58%       | $89.73              | BUY_LIMIT               | +4.30%      | +16.45%      | -9.47%            |
+| WTW      | 2026-04-30      | ENTER_NOW   | BUY              |                2.24 | -1417.39%      | $248.99             | BUY_LIMIT               |             | +7.47%       | -0.96%            |
+| CHYM     | 2026-05-07      | ENTER_NOW   | BUY              |                2.2  | -704.10%       | $20.20              |                         |             | +6.19%       | -9.90%            |
+| PPERF    | 2026-04-11      | ENTER_NOW   | BUY              |                2.2  | -2316.78%      | $0.26               | AVOID                   |             | -0.00%       | -0.00%            |
+| CEBCF    | 2026-04-10      | AVOID       | AVOID            |                2.2  | -1436.36%      | $0.38               |                         | +8.81%      | +16.77%      | +0.00%            |
+| ZBH      | 2026-04-28      | ENTER_NOW   | BUY              |                2.16 | -706.34%       | $86.05              | BUY_LIMIT               |             | +3.01%       | -7.23%            |
+| TOST     | 2026-05-08      | ENTER_NOW   | BUY              |                2.11 | -1463.58%      | $25.08              | BUY_LIMIT               |             |              |                   |
+
+### 8b.2 Top by DR R/R (`deep_research_rr_ratio`)
+
+| symbol   | decision_date   | intent      | recommendation   |   deep_research_rr_ratio | drop_percent   | price_at_decision   | deep_research_verdict   | return_4w   | max_roi_4w   | max_drawdown_4w   |
+|:---------|:----------------|:------------|:-----------------|-------------------------:|:---------------|:--------------------|:------------------------|:------------|:-------------|:------------------|
+| LBRDP    | 2026-04-24      | ENTER_NOW   | BUY              |                     4    | -597.17%       | $21.96              | BUY                     |             | +6.58%       | -4.17%            |
+| NICE     | 2026-04-11      | ENTER_NOW   | BUY              |                     3.07 | -714.15%       | $97.00              | BUY_LIMIT               |             | +30.41%      | -6.49%            |
+| FDX      | 2026-05-04      | ENTER_LIMIT | BUY_LIMIT        |                     2.9  | -674.68%       | $367.11             | AVOID                   |             | +4.41%       | -3.53%            |
+| CRC      | 2026-05-06      | ENTER_LIMIT | BUY_LIMIT        |                     2.76 | -960.36%       | $63.40              | AVOID                   |             | +8.76%       | -7.80%            |
+| CE       | 2026-05-06      | ENTER_LIMIT | BUY_LIMIT        |                     2.6  | -954.93%       | $62.42              | BUY_LIMIT               |             | +6.92%       | -10.29%           |
+| FIS      | 2026-05-08      | ENTER_NOW   | BUY              |                     2.6  | -584.13%       | $44.49              | BUY_LIMIT               |             |              |                   |
+| HUBS     | 2026-05-08      | ENTER_LIMIT | BUY_LIMIT        |                     2.4  | -2333.01%      | $186.86             | BUY_LIMIT               |             |              |                   |
+| ALC      | 2026-05-06      | ENTER_NOW   | BUY              |                     2.4  | -967.09%       | $67.25              | BUY                     |             | +0.61%       | -7.21%            |
+| REGN     | 2026-04-29      | ENTER_NOW   | BUY              |                     2.35 | -621.85%       | $686.26             | BUY                     |             | +5.81%       | -2.54%            |
+| IAG      | 2026-04-21      | ENTER_NOW   | BUY              |                     2.33 | -718.53%       | $17.18              | BUY_LIMIT               |             | +13.10%      | -6.69%            |
+| NOW      | 2026-04-09      | ENTER_NOW   | BUY              |                     2.3  | -793.58%       | $89.73              | BUY_LIMIT               | +4.30%      | +16.45%      | -9.47%            |
+| ADSK     | 2026-04-09      | ENTER_NOW   | BUY              |                     2.3  | -916.27%       | $218.60             | AVOID                   | +14.84%     | +16.72%      | -2.06%            |
+| POOL     | 2026-05-05      | ENTER_LIMIT | BUY_LIMIT        |                     2.3  | -606.21%       | $190.91             | AVOID                   |             | +3.88%       | -3.36%            |
+| WTW      | 2026-04-30      | ENTER_NOW   | BUY              |                     2.24 | -1417.39%      | $248.99             | BUY_LIMIT               |             | +7.47%       | -0.96%            |
+| ZBH      | 2026-04-28      | ENTER_NOW   | BUY              |                     2.16 | -706.34%       | $86.05              | BUY_LIMIT               |             | +3.01%       | -7.23%            |
+| TOST     | 2026-05-08      | ENTER_NOW   | BUY              |                     2.11 | -1463.58%      | $25.08              | BUY_LIMIT               |             |              |                   |
+| DOCN     | 2026-04-10      | ENTER_LIMIT | BUY_LIMIT        |                     2.11 | -1328.44%      | $75.59              | BUY_LIMIT               | +116.89%    | +117.98%     | -4.52%            |
+| SYM      | 2026-05-08      | ENTER_NOW   | BUY              |                     2.03 | -845.30%       | $51.66              | BUY_LIMIT               |             |              |                   |
+| ALLE     | 2026-04-28      | ENTER_NOW   | BUY              |                     2    | -745.96%       | $137.33             | BUY_LIMIT               |             | +2.93%       | -4.45%            |
+| APA      | 2026-04-09      | NEUTRAL     | PENDING          |                     2    | -979.98%       | $38.75              | BUY                     | -6.48%      | +8.62%       | -13.73%           |
+| NMR      | 2026-04-24      | ENTER_NOW   | BUY              |                     2    | -526.00%       | $7.83               | BUY                     |             | +4.79%       | -1.47%            |
+| DPZ      | 2026-04-27      | ENTER_NOW   | BUY              |                     1.96 | -934.67%       | $333.45             | BUY_LIMIT               |             | +3.53%       | -3.65%            |
+| EMBJ     | 2026-05-08      | ENTER_LIMIT | BUY_LIMIT        |                     1.9  | -791.14%       | $62.39              | AVOID                   |             |              |                   |
+| CLX      | 2026-05-01      | ENTER_LIMIT | BUY_LIMIT        |                     1.86 | -895.38%       | $87.81              | AVOID                   |             | +6.44%       | -3.54%            |
+| EXPE     | 2026-05-08      | ENTER_NOW   | BUY              |                     1.8  | -869.50%       | $230.81             | BUY_LIMIT               |             |              |                   |
+
+## 9. Profit and loss decomposition
 
 Two complementary views of how each group's wins and losses played out *over time*.
 
@@ -228,14 +343,14 @@ Useful for seeing *when* the P&L accrued (early jump? steady drift?) and how eac
 ![cum_pnl_dr](charts/21_cum_pnl_calendar_by_dr_verdict.png)
 
 
-## 9. Limitations
+## 10. Limitations
 
 - **Forward-window coverage.** With current `decision_date` range, no decision   has more than ~22 trading days of forward data, which means the 4-week and   8-week return columns are NaN for most rows. Re-running this script after   more time elapses extends every horizon naturally.
 - **Sample size.** After dropping rows without 4w returns, intent groups have   n=4–18 and DR-verdict groups have n=1–6. The pairwise significance tests are   honest about this — they refuse to call differences "real" until the data   catches up.
 - **Market regime.** Cohort window appears to coincide with a broad SPY rally   (+7.6% median over 20 trading days). Many AVOIDs would have been profitable   passive holdings; that is a property of this regime and should not be   generalized.
 - **Storage duplication.** `deep_research_action` and `deep_research_verdict`   carry identical values in this DB; the Q2/3.1 sections are therefore   redundant against the underlying signal.
 
-## 10. Recommendations
+## 11. Recommendations
 
 - **Wait, then re-run.** The single largest analytical lift is more time.   Once the earliest decisions reach their 8-week mark, re-run   `build_package.py` and the same charts will tell a much sharper story.
 - **Investigate AVOID hits.** AVOIDs with high `+20d` post-recovery returns   are worth pulling individually — was the AVOID a calibration bug, or did   the model correctly price in higher risk that didn't materialize this regime?

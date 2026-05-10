@@ -34,6 +34,7 @@ from app.services.analytics.charts import (  # noqa: E402
     cum_pnl_calendar,
     equity_line,
     recovery_histogram_by_group,
+    rr_boxplot_by_group,
     scatter_with_regression,
     spaghetti_plot,
     time_series_lines,
@@ -298,6 +299,24 @@ def _generate_charts(payload: Dict[str, Any], enriched: pd.DataFrame, charts_dir
         palette=DR_COLORS,
     )
 
+    # R/R distribution by verdict (verdict ↔ R/R correlation)
+    out["rr_box_pm"] = rr_boxplot_by_group(
+        enriched, "intent", "risk_reward_ratio",
+        "PM R/R distribution by AI council intent",
+        charts_dir / "22_rr_box_pm_by_intent.png",
+        palette=INTENT_COLORS,
+        group_order=["ENTER_NOW", "ENTER_LIMIT", "AVOID", "NEUTRAL"],
+        annotation=_omnibus_annotation((payload.get("stats") or {}).get("pm_rr_by_intent") or {}),
+    )
+    out["rr_box_dr"] = rr_boxplot_by_group(
+        enriched, "deep_research_verdict", "deep_research_rr_ratio",
+        "DR R/R distribution by Deep Research verdict",
+        charts_dir / "23_rr_box_dr_by_verdict.png",
+        palette=DR_COLORS,
+        group_order=["BUY", "BUY_LIMIT", "AVOID", "WATCH", "HOLD"],
+        annotation=_omnibus_annotation((payload.get("stats") or {}).get("dr_rr_by_dr_verdict") or {}),
+    )
+
     return out
 
 
@@ -354,6 +373,31 @@ def _export_data(payload: Dict[str, Any], enriched: pd.DataFrame,
             path = data_dir / f"stats_{key}.json"
             path.write_text(json.dumps(record, default=str, indent=2))
             out[f"stats_{key}"] = path
+
+    # R/R-by-verdict per-group descriptives + omnibus + pairwise
+    for key in ("pm_rr_by_intent", "dr_rr_by_dr_verdict",
+                "pm_rr_by_dr_verdict", "dr_rr_by_intent"):
+        record = stats.get(key)
+        if record:
+            json_path = data_dir / f"stats_{key}.json"
+            json_path.write_text(json.dumps(record, default=str, indent=2))
+            out[f"stats_{key}_json"] = json_path
+            if record.get("per_group"):
+                csv_path = data_dir / f"stats_{key}_per_group.csv"
+                pd.DataFrame(record["per_group"]).to_csv(csv_path, index=False)
+                out[f"stats_{key}_per_group"] = csv_path
+            if record.get("pairwise"):
+                pcsv = data_dir / f"stats_{key}_pairwise.csv"
+                pd.DataFrame(record["pairwise"]).to_csv(pcsv, index=False)
+                out[f"stats_{key}_pairwise"] = pcsv
+
+    # Top high-R/R decisions
+    for key in ("top_pm_rr", "top_dr_rr"):
+        records = stats.get(key) or []
+        if records:
+            csv_path = data_dir / f"{key}.csv"
+            pd.DataFrame(records).to_csv(csv_path, index=False)
+            out[key] = csv_path
 
     # 4. Time series + SPY overlay as JSON
     ts = payload.get("time_series") or {}
@@ -429,6 +473,75 @@ def _format_pairwise_table(rows: List[Dict[str, Any]]) -> str:
         return df.to_markdown(index=False)
     except ImportError:
         return _md_table(df)
+
+
+def _format_rr_per_group_table(rows: List[Dict[str, Any]]) -> str:
+    if not rows:
+        return "_no data_"
+    df = pd.DataFrame(rows)
+    keep = ["group", "n", "mean", "se", "ci_low", "ci_high", "median", "std", "min", "max"]
+    df = df[[c for c in keep if c in df.columns]].copy()
+    for c in ("mean", "se", "ci_low", "ci_high", "median", "std", "min", "max"):
+        if c in df.columns:
+            df[c] = df[c].apply(lambda v: "" if pd.isna(v) else f"{v:.3f}")
+    df.columns = ["group", "n", "mean", "SE",
+                  "CI low", "CI high", "median", "std", "min", "max"]
+    try:
+        return df.to_markdown(index=False)
+    except ImportError:
+        return _md_table(df)
+
+
+def _format_high_rr_table(rows: List[Dict[str, Any]], rr_key: str) -> str:
+    if not rows:
+        return "_no high-R/R rows_"
+    df = pd.DataFrame(rows)
+    keep = ["symbol", "decision_date", "intent", "recommendation",
+            rr_key, "drop_percent", "price_at_decision",
+            "deep_research_verdict",
+            "return_4w", "max_roi_4w", "max_drawdown_4w"]
+    df = df[[c for c in keep if c in df.columns]].copy()
+    if rr_key in df.columns:
+        df[rr_key] = df[rr_key].apply(lambda v: "" if pd.isna(v) else f"{v:.2f}")
+    for c in ("drop_percent", "return_4w", "max_roi_4w", "max_drawdown_4w"):
+        if c in df.columns:
+            df[c] = df[c].apply(lambda v: "" if pd.isna(v) else f"{v * 100:+.2f}%")
+    if "price_at_decision" in df.columns:
+        df["price_at_decision"] = df["price_at_decision"].apply(
+            lambda v: "" if pd.isna(v) else f"${v:.2f}")
+    try:
+        return df.to_markdown(index=False)
+    except ImportError:
+        return _md_table(df)
+
+
+def _omnibus_annotation(record: Dict[str, Any]) -> Optional[str]:
+    """Compact one-line ANOVA + KW annotation for the boxplot corner box."""
+    if not record or record.get("anova_f") is None:
+        return None
+    f = record.get("anova_f")
+    af_p = _pf(record.get("anova_p"))
+    h = record.get("kw_h")
+    kw_p = _pf(record.get("kw_p"))
+    return f"ANOVA F={f:.2f}, p={af_p}\nKW H={h:.2f}, p={kw_p}"
+
+
+def _omnibus_line(record: Dict[str, Any]) -> str:
+    """Render the ANOVA + Kruskal-Wallis omnibus line for an `rr_by_group` payload."""
+    if not record:
+        return ""
+    if record.get("anova_f") is None and record.get("kw_h") is None:
+        return "_omnibus tests skipped (need >=2 groups with min_n samples)_"
+    parts = []
+    if record.get("anova_f") is not None:
+        parts.append(
+            f"ANOVA: F={record['anova_f']:.2f}, p={_pf(record.get('anova_p'))}"
+        )
+    if record.get("kw_h") is not None:
+        parts.append(
+            f"Kruskal-Wallis: H={record['kw_h']:.2f}, p={_pf(record.get('kw_p'))}"
+        )
+    return "**Omnibus:** " + " · ".join(parts) + "."
 
 
 def _format_recovery_table(rows: List[Dict[str, Any]]) -> str:
@@ -788,7 +901,68 @@ def _build_report(
         "",
         img("wr_drop"),
         "",
-        "## 8. Profit and loss decomposition",
+        "## 8a. R/R distribution by verdict (categorical correlation)",
+        "",
+        "How does each council assign its R/R ratings to its own verdict groups? "
+        "Below: per-group descriptives, one-way ANOVA (parametric), and "
+        "Kruskal-Wallis (rank-based) for the omnibus test of \"are the group "
+        "distributions the same?\" Plus pairwise Welch t-tests with FDR-adjusted "
+        "p-values.",
+        "",
+        "### 8a.1 PM R/R by AI council intent",
+        "",
+        _format_rr_per_group_table(
+            ((payload.get("stats") or {}).get("pm_rr_by_intent") or {}).get("per_group") or []
+        ),
+        "",
+        _omnibus_line((payload.get("stats") or {}).get("pm_rr_by_intent") or {}),
+        "",
+        img("rr_box_pm"),
+        "",
+        _format_pairwise_table(
+            ((payload.get("stats") or {}).get("pm_rr_by_intent") or {}).get("pairwise") or []
+        ),
+        "",
+        "### 8a.2 DR R/R by Deep Research verdict",
+        "",
+        _format_rr_per_group_table(
+            ((payload.get("stats") or {}).get("dr_rr_by_dr_verdict") or {}).get("per_group") or []
+        ),
+        "",
+        _omnibus_line((payload.get("stats") or {}).get("dr_rr_by_dr_verdict") or {}),
+        "",
+        img("rr_box_dr"),
+        "",
+        _format_pairwise_table(
+            ((payload.get("stats") or {}).get("dr_rr_by_dr_verdict") or {}).get("pairwise") or []
+        ),
+        "",
+        "**Interpretation.** ANOVA and Kruskal-Wallis answer the question \"is "
+        "*any* group different from the others?\" If both omnibus tests fail to "
+        "reach p<0.05 the council is not assigning systematically different R/R "
+        "to different verdict groups (and the pairwise tests will reflect that).",
+        "",
+        "## 8b. High-R/R decisions in the cohort",
+        "",
+        "Top 25 rows by R/R ratio for each council, with their realized returns "
+        "where available. Full lists exported as `data/top_pm_rr.csv` and "
+        "`data/top_dr_rr.csv`.",
+        "",
+        "### 8b.1 Top by PM R/R (`risk_reward_ratio`)",
+        "",
+        _format_high_rr_table(
+            (payload.get("stats") or {}).get("top_pm_rr") or [],
+            "risk_reward_ratio",
+        ),
+        "",
+        "### 8b.2 Top by DR R/R (`deep_research_rr_ratio`)",
+        "",
+        _format_high_rr_table(
+            (payload.get("stats") or {}).get("top_dr_rr") or [],
+            "deep_research_rr_ratio",
+        ),
+        "",
+        "## 9. Profit and loss decomposition",
         "",
         "Two complementary views of how each group's wins and losses played out "
         "*over time*.",
@@ -820,7 +994,7 @@ def _build_report(
         "",
         img("cum_pnl_dr"),
         "",
-        "## 9. Limitations",
+        "## 10. Limitations",
         "",
         "- **Forward-window coverage.** With current `decision_date` range, no decision "
         "  has more than ~22 trading days of forward data, which means the 4-week and "
@@ -838,7 +1012,7 @@ def _build_report(
         "  carry identical values in this DB; the Q2/3.1 sections are therefore "
         "  redundant against the underlying signal.",
         "",
-        "## 10. Recommendations",
+        "## 11. Recommendations",
         "",
         "- **Wait, then re-run.** The single largest analytical lift is more time. "
         "  Once the earliest decisions reach their 8-week mark, re-run "

@@ -335,6 +335,73 @@ def recovery_histogram_by_group(
     return _save(fig, out_path)
 
 
+def rr_boxplot_by_group(
+    df: pd.DataFrame,
+    group_col: str,
+    rr_col: str,
+    title: str,
+    out_path: Path,
+    palette: Optional[Dict[str, str]] = None,
+    group_order: Optional[List[str]] = None,
+    annotation: Optional[str] = None,
+) -> Path:
+    """Box plot of an R/R column across verdict groups, with mean marker."""
+    fig, ax = plt.subplots(figsize=(9, 4.8))
+    if df.empty or group_col not in df.columns or rr_col not in df.columns:
+        ax.text(0.5, 0.5, "no data", ha="center", va="center", transform=ax.transAxes)
+        ax.set_axis_off()
+        return _save(fig, out_path)
+
+    sub = df.dropna(subset=[group_col, rr_col]).copy()
+    if sub.empty:
+        ax.text(0.5, 0.5, "no data", ha="center", va="center", transform=ax.transAxes)
+        ax.set_axis_off()
+        return _save(fig, out_path)
+
+    if group_order:
+        groups = [g for g in group_order if g in set(sub[group_col].astype(str))]
+    else:
+        groups = sorted(sub[group_col].astype(str).unique())
+
+    data = [sub.loc[sub[group_col].astype(str) == g, rr_col].astype(float).values
+            for g in groups]
+    counts = [len(d) for d in data]
+    palette = palette or {}
+    box_colors = [palette.get(g, "#cbd5e1") for g in groups]
+
+    bp = ax.boxplot(
+        data, labels=groups, patch_artist=True, showmeans=True,
+        meanprops=dict(marker="D", markerfacecolor="#fbbf24", markeredgecolor="#1f2937",
+                       markersize=7),
+        medianprops=dict(color="#1f2937", linewidth=2),
+        whiskerprops=dict(color="#475569"),
+        capprops=dict(color="#475569"),
+        flierprops=dict(marker="o", markerfacecolor="#94a3b8",
+                        markeredgecolor="#475569", markersize=4, alpha=0.6),
+    )
+    for patch, color in zip(bp["boxes"], box_colors):
+        patch.set_facecolor(color)
+        patch.set_alpha(0.55)
+        patch.set_edgecolor("#1f2937")
+
+    # n= labels under each box
+    for i, n in enumerate(counts, start=1):
+        ax.text(i, ax.get_ylim()[0] + 0.02, f"n={n}",
+                ha="center", va="bottom", fontsize=8, color="#475569")
+
+    if annotation:
+        ax.text(0.02, 0.98, annotation,
+                transform=ax.transAxes, ha="left", va="top",
+                fontsize=9, family="monospace",
+                bbox=dict(facecolor="white", alpha=0.85, edgecolor="#cbd5e1"))
+
+    ax.set_ylabel(rr_col)
+    ax.set_xlabel(group_col)
+    ax.set_title(title)
+    ax.grid(True, axis="y", linestyle=":", alpha=0.3)
+    return _save(fig, out_path)
+
+
 def equity_curve_chart(curve_df: pd.DataFrame, title: str, out_path: Path) -> Path:
     """Convenience wrapper around `equity_line` that takes a list of records."""
     return equity_line(curve_df, title, out_path)
