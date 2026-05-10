@@ -1,0 +1,5 @@
+intent,<3.0 SA Sell/Hold,3.0–3.5 SA Hold,3.5–4.0 SA Buy,4.0+ SA Strong Buy
+AVOID,47.0,44.0,1.0,12.0
+ENTER_LIMIT,7.0,13.0,,3.0
+ENTER_NOW,12.0,10.0,1.0,5.0
+NEUTRAL,12.0,22.0,2.0,7.0
