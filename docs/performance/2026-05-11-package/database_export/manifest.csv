@@ -1,0 +1,8 @@
+table,row_count,columns,file
+batch_comparisons,10,6,batch_comparisons.csv
+decision_points,373,84,decision_points.csv
+decision_tracking,0,4,decision_tracking.csv
+desk_positions,42,24,desk_positions.csv
+desk_reviews,110,18,desk_reviews.csv
+subscribers,0,2,subscribers.csv
+transcript_cache,3,7,transcript_cache.csv
