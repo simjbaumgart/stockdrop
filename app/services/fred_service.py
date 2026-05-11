@@ -123,7 +123,7 @@ class FredService:
 
     def _fetch_latest_observation(self, series_id: str) -> Tuple[str, str]:
         cached = self._cache.get(series_id)
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.now(datetime.timezone.utc)
         if cached and not cached.get("stale"):
             age = now - cached["fetched_at"]
             if age < self.CACHE_TTL:

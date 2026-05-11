@@ -42,7 +42,13 @@ class GoogleDriveService:
                     state = json.load(f)
                 self._consecutive_quota_failures = int(state.get("consecutive_quota_failures", 0))
                 dis = state.get("disabled_until")
-                self._disabled_until = datetime.datetime.fromisoformat(dis) if dis else None
+                if dis:
+                    parsed = datetime.datetime.fromisoformat(dis)
+                    if parsed.tzinfo is None:
+                        parsed = parsed.replace(tzinfo=datetime.timezone.utc)
+                    self._disabled_until = parsed
+                else:
+                    self._disabled_until = None
         except Exception as e:
             print(f"[Google Drive] Could not load breaker state: {e}")
 
@@ -73,7 +79,7 @@ class GoogleDriveService:
     def _breaker_tripped(self) -> bool:
         if self._disabled_until is None:
             return False
-        if datetime.datetime.utcnow() >= self._disabled_until:
+        if datetime.datetime.now(datetime.timezone.utc) >= self._disabled_until:
             self._consecutive_quota_failures = 0
             self._disabled_until = None
             self._save_breaker_state()
@@ -83,7 +89,7 @@ class GoogleDriveService:
     def _record_quota_failure(self):
         self._consecutive_quota_failures += 1
         if self._consecutive_quota_failures >= self.QUOTA_FAILURES_TO_TRIP:
-            self._disabled_until = datetime.datetime.utcnow() + self.DISABLED_DURATION
+            self._disabled_until = datetime.datetime.now(datetime.timezone.utc) + self.DISABLED_DURATION
             print(
                 f"[Google Drive] Circuit breaker tripped after "
                 f"{self._consecutive_quota_failures} consecutive quota errors. "
