@@ -40,3 +40,10 @@ def test_normalization_still_rejects_wrong_company():
     # expected company is Loews.
     transcript = "Welcome to the Loblaw Companies earnings call. " + "x" * 500
     assert not StockService._transcript_matches_company(transcript, "Loews Corporation")
+
+
+def test_normalization_rejects_degenerate_parenthetical_only_input():
+    """If the expected_company strips to empty (or near-empty) after
+    normalization, fall through to AV rather than accept any transcript."""
+    transcript = "Apple Inc. earnings call transcript. " + "x" * 500
+    assert not StockService._transcript_matches_company(transcript, "(The)")

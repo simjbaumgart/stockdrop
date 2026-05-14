@@ -1341,8 +1341,12 @@ class StockService:
                     changed = True
                     break
 
-        if not expected_lower:
-            return True  # nothing meaningful left to match — accept
+        if len(expected_lower) < 3:
+            # After normalization the name is too short to disambiguate
+            # reliably (e.g., degenerate input like "(The)" or a name that
+            # is only legal-suffix tokens). Conservatively reject — better
+            # to fall through to AV than accept any transcript.
+            return False
 
         # Match either the full stripped name or its first significant token.
         first_token = expected_lower.split()[0]
