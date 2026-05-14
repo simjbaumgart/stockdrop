@@ -92,6 +92,48 @@ def _is_retryable_grounding_error(e: Exception) -> bool:
 # when a transient 503 + exponential backoff combine to loop for hours.
 AGENT_WALL_CLOCK_BUDGET_SEC = 600
 
+# When the wall clock advances much faster than the monotonic clock between
+# two budget checks, we assume the machine slept. The budget should not be
+# eaten by sleep time (laptop lid closed mid-cycle), so we re-stamp it.
+SLEEP_DETECTION_THRESHOLD_SEC = 90
+
+
+class BudgetClock:
+    """Tracks wall-clock deadline with sleep-aware re-stamping.
+
+    The grounded-call retry loop creates one BudgetClock per top-level call
+    and ticks it on every (re)entry. If wall-clock time has advanced more
+    than monotonic time by >= SLEEP_DETECTION_THRESHOLD_SEC, the deadline is
+    pushed forward to (current wall time + AGENT_WALL_CLOCK_BUDGET_SEC).
+    """
+
+    __slots__ = ("deadline", "_last_now", "_last_monotonic")
+
+    def __init__(self, now: Optional[float] = None, monotonic: Optional[float] = None):
+        now = time.time() if now is None else now
+        monotonic = time.monotonic() if monotonic is None else monotonic
+        self.deadline = now + AGENT_WALL_CLOCK_BUDGET_SEC
+        self._last_now = now
+        self._last_monotonic = monotonic
+
+    def tick(self, now: Optional[float] = None, monotonic: Optional[float] = None) -> None:
+        now = time.time() if now is None else now
+        monotonic = time.monotonic() if monotonic is None else monotonic
+        elapsed_wall = now - self._last_now
+        elapsed_mono = monotonic - self._last_monotonic
+        if (elapsed_wall - elapsed_mono) >= SLEEP_DETECTION_THRESHOLD_SEC:
+            logger.warning(
+                "[BudgetClock] wake-from-sleep detected (wall+%.1fs vs mono+%.1fs); "
+                "resetting deadline.",
+                elapsed_wall, elapsed_mono,
+            )
+            self.deadline = now + AGENT_WALL_CLOCK_BUDGET_SEC
+        self._last_now = now
+        self._last_monotonic = monotonic
+
+    def expired(self) -> bool:
+        return time.time() >= self.deadline
+
 
 # Phase 1 quality gate: abort if fewer than this many core agents return real reports.
 # Four-of-five is deliberate: we tolerate a single flaky sensor (e.g. seeking_alpha
@@ -1584,7 +1626,7 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
         model_name: str,
         agent_context: str = "",
         retry_count: int = 0,
-        budget_deadline: Optional[float] = None,
+        budget_clock: Optional["BudgetClock"] = None,
     ) -> str:
         """
         Generic helper to call a model with Google Search Grounding enabled.
@@ -1599,16 +1641,20 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
           (model-availability issue, no point burning retries on a known-bad preview).
 
         Wall-clock budget:
-        - First call stamps ``budget_deadline = time.time() + AGENT_WALL_CLOCK_BUDGET_SEC``.
-        - Every recursive retry inherits that deadline; if it has already passed
-          we abort immediately with an error stub, regardless of remaining
-          retry_count. This prevents the QXO/PB 04-22 multi-hour stall where a
-          transient 503 + exponential backoff looped for ~17 hours.
+        - The first call creates a BudgetClock stamped at time.time() +
+          AGENT_WALL_CLOCK_BUDGET_SEC. Every recursive retry inherits that
+          BudgetClock and calls tick() on entry so sleep-from-sleep gaps can be
+          detected and the deadline re-stamped. If the clock has expired we abort
+          immediately with an error stub, regardless of remaining retry_count.
+          This prevents the QXO/PB 04-22 multi-hour stall where a transient 503 +
+          exponential backoff looped for ~17 hours.
         """
-        if budget_deadline is None:
-            budget_deadline = time.time() + AGENT_WALL_CLOCK_BUDGET_SEC
+        if budget_clock is None:
+            budget_clock = BudgetClock()
+        else:
+            budget_clock.tick()
 
-        if time.time() >= budget_deadline:
+        if budget_clock.expired():
             logger.warning(
                 f"[{agent_context}] Wall-clock budget exhausted after {retry_count} retries; giving up."
             )
@@ -1641,7 +1687,7 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
 
                 if retry_count < MAX_GROUNDING_RETRIES:
                     logger.warning(f"Model {model_name} returned FunctionCall ({attempt_label}) in {agent_context}. Retrying...")
-                    return self._call_grounded_model(prompt, model_name, agent_context, retry_count=retry_count + 1, budget_deadline=budget_deadline)
+                    return self._call_grounded_model(prompt, model_name, agent_context, retry_count=retry_count + 1, budget_clock=budget_clock)
 
                 msg = f"""
 ################################################################################
@@ -1669,14 +1715,14 @@ Process continuing but this agent's output is compromised.
             # Both models being unavailable is a real outage; let the fallback run its own retry budget.
             if is_503 and "pro" in model_name and "3.1" in model_name and retry_count == 0:
                 logger.warning(f"503 UNAVAILABLE for {model_name} in {agent_context} ({err_type}). Falling back to gemini-3-pro-preview...")
-                if time.time() + 2 >= budget_deadline:
+                if time.time() + 2 >= budget_clock.deadline:
                     return (
                         f"[Error: {agent_context} exceeded {AGENT_WALL_CLOCK_BUDGET_SEC}s wall-clock "
                         f"budget before 503 fallback]"
                     )
                 time.sleep(2)
                 try:
-                    return self._call_grounded_model(prompt, "gemini-3-pro-preview", agent_context, retry_count=0, budget_deadline=budget_deadline)
+                    return self._call_grounded_model(prompt, "gemini-3-pro-preview", agent_context, retry_count=0, budget_clock=budget_clock)
                 except Exception as fallback_e:
                     logger.error(f"Fallback model also failed for {agent_context} ({type(fallback_e).__name__}): {fallback_e}")
                     return f"[Error in {agent_context} (Fallback): {type(fallback_e).__name__}: {fallback_e}]"
@@ -1688,7 +1734,7 @@ Process continuing but this agent's output is compromised.
                 wait = 2 ** (retry_count + 1)  # 2s, 4s
                 # If the upcoming sleep would blow the wall-clock budget, bail now
                 # rather than sleeping pointlessly before the recursive call aborts.
-                if time.time() + wait >= budget_deadline:
+                if time.time() + wait >= budget_clock.deadline:
                     logger.warning(
                         f"[{agent_context}] Skipping {wait}s backoff; wall-clock budget would expire."
                     )
@@ -1698,7 +1744,7 @@ Process continuing but this agent's output is compromised.
                     )
                 logger.info(f"Retrying {agent_context} ({model_name}) in {wait}s ({err_type})...")
                 time.sleep(wait)
-                return self._call_grounded_model(prompt, model_name, agent_context, retry_count=retry_count + 1, budget_deadline=budget_deadline)
+                return self._call_grounded_model(prompt, model_name, agent_context, retry_count=retry_count + 1, budget_clock=budget_clock)
 
             if not retryable:
                 logger.warning(f"Non-retryable exception for {agent_context} ({err_type}); failing fast.")
