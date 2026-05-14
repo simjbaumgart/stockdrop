@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import re
 import sqlite3
 import json
 import requests
@@ -1300,7 +1301,13 @@ class StockService:
         DefeatBeta's HuggingFace dataset has known ticker-collision bugs (e.g.
         'L' returns Loblaw instead of Loews). We verify the first 1500 chars
         of the transcript mention either the full expected name or its first
-        significant token (modulo case and common corporate suffixes).
+        significant token (modulo case, common corporate suffixes, and
+        trailing punctuation/parentheticals).
+
+        Real-world failures this normalization addresses:
+        - 'MP Materials Corp.'  (trailing dot defeated endswith ' corp')
+        - 'Gap, Inc. (The)'     (trailing parenthetical)
+        - 'Vodafone Group Plc'  (case-only ' plc' suffix)
 
         Returns True if no expected_company was provided (backward compat).
         """
@@ -1310,16 +1317,29 @@ class StockService:
             return False
 
         head = transcript_text[:1500].lower()
-        expected_lower = expected_company.lower()
-        # Strip common corporate suffixes that may not appear in the call.
-        for suffix in (
-            " corporation", " corp", " incorporated", " inc.", " inc",
-            " plc", " ltd", " limited", " companies", " company", " co.",
-            " holdings", " group",
-        ):
-            if expected_lower.endswith(suffix):
-                expected_lower = expected_lower[: -len(suffix)]
-        expected_lower = expected_lower.strip(" ,.")
+        expected_lower = expected_company.lower().strip()
+
+        # Strip a trailing parenthetical like "(the)" or "(holdings)" first.
+        expected_lower = re.sub(r"\s*\([^)]*\)\s*$", "", expected_lower).strip()
+
+        # Strip trailing punctuation so " corp." matches the " corp" suffix.
+        expected_lower = expected_lower.rstrip(" ,.")
+
+        # Suffix list (no trailing dots — we already stripped them above).
+        suffixes = (
+            " corporation", " corp", " incorporated", " inc",
+            " plc", " ltd", " limited", " companies", " company", " co",
+            " holdings", " group", " ag", " sa", " nv", " se",
+        )
+        # Strip repeatedly so "Holdings Corp" -> "Holdings" -> "" cleanly.
+        changed = True
+        while changed:
+            changed = False
+            for suffix in suffixes:
+                if expected_lower.endswith(suffix):
+                    expected_lower = expected_lower[: -len(suffix)].rstrip(" ,.")
+                    changed = True
+                    break
 
         if not expected_lower:
             return True  # nothing meaningful left to match — accept
