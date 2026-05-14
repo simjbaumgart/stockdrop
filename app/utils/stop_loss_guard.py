@@ -84,6 +84,38 @@ def widen_stop_if_too_tight(
     return StopLossAdjustment(stop_loss=round(new_stop, 2), adjusted=True, reason=reason)
 
 
+# Maximum downside% (entry → stop) we're willing to print as a real trade. Beyond
+# this, the widened stop is no longer a "risk band" — it's a hope. Reject the
+# trade so the printed panel + DB row + dashboard don't show a 0.1 R/R panel
+# (FJIKY 2026-05-14: -30.6% downside vs +3.3% upside).
+MAX_ACCEPTABLE_DOWNSIDE_PCT = 15.0
+
+
+@dataclass
+class StopAcceptability:
+    acceptable: bool
+    downside_pct: Optional[float]
+    reason: str
+
+
+def evaluate_stop_acceptability(
+    entry_low: Optional[float], stop_loss: Optional[float]
+) -> StopAcceptability:
+    """Return whether the given (entry_low, stop_loss) pair implies a tolerable
+    downside%. When either input is None we conservatively accept — the caller
+    has nothing better to do."""
+    if entry_low is None or stop_loss is None or entry_low <= 0:
+        return StopAcceptability(True, None, "insufficient_data")
+    downside_pct = abs(entry_low - stop_loss) / entry_low * 100.0
+    if downside_pct > MAX_ACCEPTABLE_DOWNSIDE_PCT:
+        return StopAcceptability(
+            False,
+            downside_pct,
+            f"downside {downside_pct:.1f}% exceeds ceiling {MAX_ACCEPTABLE_DOWNSIDE_PCT:.1f}%",
+        )
+    return StopAcceptability(True, downside_pct, "within_ceiling")
+
+
 def recompute_risk_metrics(
     *,
     entry_low: Optional[float],

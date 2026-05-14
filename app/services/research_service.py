@@ -494,7 +494,11 @@ class ResearchService:
         # Deterministic stop-loss guardrail: widen if PM placed it too tight,
         # then recompute R/R so the print line + DB row + dashboard reflect
         # the new (wider) stop instead of the PM's stale numbers.
-        from app.utils.stop_loss_guard import widen_stop_if_too_tight, recompute_risk_metrics
+        from app.utils.stop_loss_guard import (
+            widen_stop_if_too_tight,
+            recompute_risk_metrics,
+            evaluate_stop_acceptability,
+        )
         _tv_inds = raw_data.get("indicators", {})
         _entry_low = final_decision.get("entry_price_low")
         if _entry_low is None or (isinstance(_entry_low, (int, float)) and _entry_low < 0):
@@ -527,6 +531,27 @@ class ResearchService:
                 final_decision["downside_risk_percent"] = _metrics["downside_risk_percent"]
             if _metrics["risk_reward_ratio"] is not None:
                 final_decision["risk_reward_ratio"] = _metrics["risk_reward_ratio"]
+
+            acceptability = evaluate_stop_acceptability(
+                entry_low=float(_entry_low),
+                stop_loss=final_decision.get("stop_loss"),
+            )
+            if not acceptability.acceptable and final_decision.get("action", "").upper().startswith("BUY"):
+                logger.warning(
+                    "[Stop-acceptability] %s: %s — overriding %s to AVOID/NONE.",
+                    state.ticker, acceptability.reason, final_decision.get("action"),
+                )
+                print(
+                    f"  > [Stop-acceptability] {state.ticker}: {acceptability.reason}. "
+                    f"Overriding to AVOID/NONE (no tradable R/R panel)."
+                )
+                final_decision["action"] = "AVOID"
+                final_decision["conviction"] = "NONE"
+                final_decision["rejected_reason"] = "stop_too_wide"
+                existing_reason = final_decision.get("reason") or ""
+                final_decision["reason"] = (
+                    f"[STOP-REJECTED] {acceptability.reason}. {existing_reason}"
+                ).strip()
 
         # Deterministic earnings-narrative consistency check (see TOST 2026-05 incident).
         final_decision = self._apply_earnings_consistency(

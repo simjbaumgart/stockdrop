@@ -7,7 +7,11 @@ Rule: if stop > (entry_low - 1.5 * ATR), widen the stop to the farther of:
 
 import pytest
 
-from app.utils.stop_loss_guard import widen_stop_if_too_tight
+from app.utils.stop_loss_guard import (
+    widen_stop_if_too_tight,
+    evaluate_stop_acceptability,
+    MAX_ACCEPTABLE_DOWNSIDE_PCT,
+)
 
 
 def test_stop_already_far_enough_is_returned_unchanged():
@@ -95,3 +99,24 @@ def test_2x_atr_picks_atr_when_atr_is_lower_than_nearest_sma():
     assert result.adjusted is True
     assert result.stop_loss == 80.0
     assert "atr" in result.reason.lower()
+
+
+def test_acceptable_when_downside_within_ceiling():
+    result = evaluate_stop_acceptability(entry_low=100.0, stop_loss=92.0)
+    # downside = 8% — well within ceiling
+    assert result.acceptable is True
+    assert result.downside_pct == pytest.approx(8.0, abs=0.1)
+
+
+def test_rejected_when_downside_exceeds_ceiling():
+    # FJIKY case: entry 19.20, stop 11.08 → -42% downside
+    result = evaluate_stop_acceptability(entry_low=19.20, stop_loss=11.08)
+    assert result.acceptable is False
+    assert result.downside_pct > MAX_ACCEPTABLE_DOWNSIDE_PCT
+    assert "exceeds" in result.reason.lower() or "ceiling" in result.reason.lower()
+
+
+def test_none_values_are_acceptable():
+    # If we don't have data, do not reject.
+    assert evaluate_stop_acceptability(entry_low=None, stop_loss=10.0).acceptable is True
+    assert evaluate_stop_acceptability(entry_low=10.0, stop_loss=None).acceptable is True
