@@ -97,3 +97,36 @@ def test_earnings_consistency_flags_avoid_even_without_downgrade(monkeypatch):
     assert out["reason"].startswith("[FLAGGED]")
     # Conviction should drop one tier on a flag, even if action is unchanged.
     assert out["conviction"] == "LOW"
+
+
+def test_earnings_consistency_is_idempotent(monkeypatch):
+    """Calling _apply_earnings_consistency twice on the same dict must not
+    drop conviction twice or duplicate the [FLAG] key_factors entry."""
+    from app.services import research_service as rs
+
+    svc = rs.ResearchService()
+    monkeypatch.setattr(
+        rs,
+        "check_narrative_consistency",
+        lambda **kw: ConsistencyResult(
+            inconsistent=True,
+            flag="EARNINGS_NARRATIVE_INCONSISTENT",
+            reason="reasoning narrates beat but surprise_pct=-3.2",
+        ),
+    )
+    final = {
+        "action": "BUY",
+        "conviction": "HIGH",
+        "reason": "Earnings beat.",
+        "key_factors": [],
+    }
+    once = svc._apply_earnings_consistency(final, ticker="TOST", earnings_facts={"surprise_pct": -3.2})
+    twice = svc._apply_earnings_consistency(once, ticker="TOST", earnings_facts={"surprise_pct": -3.2})
+
+    # Conviction dropped once (HIGH -> MEDIUM), not twice.
+    assert twice["conviction"] == "MEDIUM"
+    # Only one [FLAG] entry in key_factors.
+    flag_entries = [kf for kf in twice["key_factors"] if str(kf).startswith("[FLAG]")]
+    assert len(flag_entries) == 1
+    # Reason still prefixed [FLAGGED] exactly once.
+    assert twice["reason"].count("[FLAGGED]") == 1

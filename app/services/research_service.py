@@ -694,6 +694,9 @@ class ResearchService:
         if not consistency.inconsistent:
             return final_decision
 
+        if final_decision.get("earnings_narrative_flag"):
+            return final_decision  # already applied; idempotent
+
         original_action = final_decision.get("action", "")
         new_action = downgrade_action(original_action)
 
@@ -703,7 +706,11 @@ class ResearchService:
             idx = self._CONVICTION_LADDER.index(old_conviction)
             new_conviction = self._CONVICTION_LADDER[min(idx + 1, len(self._CONVICTION_LADDER) - 1)]
         except ValueError:
-            new_conviction = "LOW"
+            logger.warning(
+                "[Earnings Consistency] %s: unknown conviction %r — leaving unchanged.",
+                ticker, old_conviction,
+            )
+            new_conviction = old_conviction
 
         logger.warning(
             "[Earnings Consistency] %s: %s. Action %s -> %s; Conviction %s -> %s",
