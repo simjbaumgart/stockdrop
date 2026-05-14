@@ -414,7 +414,25 @@ class ResearchService:
         print("  > Phase 3: Portfolio Manager Decision...")
         final_decision = self._run_risk_council_and_decision(state, drop_str)
         state.final_decision = final_decision
-        
+
+        if final_decision.get("aborted_reason") == "fund_manager_failed":
+            logger.error(
+                "[FM Abort] %s: Fund Manager failed; skipping Deep Research + "
+                "downstream formatting and returning PASS_INSUFFICIENT_DATA.",
+                state.ticker,
+            )
+            print(
+                f"\n{'=' * 50}\n  [ABORT] Fund Manager failed for {state.ticker}; "
+                f"recording PASS_INSUFFICIENT_DATA instead of AVOID/LOW.\n{'=' * 50}\n"
+            )
+            response = self._build_insufficient_data_response(
+                state,
+                failed_agents=["fund_manager"],
+                real_count=len(PHASE1_CORE_AGENTS),
+            )
+            response["aborted_reason"] = "fund_manager_failed"
+            return response
+
         # --- Phase 4: deep reasoning check for BUY signals ---
         deep_reasoning_report = ""
         action = final_decision.get('action', 'AVOID').upper()
@@ -686,11 +704,39 @@ class ResearchService:
         manager_prompt = self._create_fund_manager_prompt(state, safe_concerns, risky_support, drop_str)
         agent_call_counter.record("pm")
         decision_json_str = self._call_agent(manager_prompt, "Fund Manager", state)
-        decision = self._extract_json(decision_json_str)
-        
+
+        # FM transport/timeout failures return error stubs starting with one of
+        # the documented markers. Don't fall back to AVOID/LOW — that produces
+        # a plausible-looking decision out of a network error (LSTR 2026-05-14).
+        fm_failed = (
+            not decision_json_str
+            or any(
+                decision_json_str.lstrip().startswith(m)
+                for m in _FAILED_REPORT_MARKERS
+            )
+        )
+
+        decision = None if fm_failed else self._extract_json(decision_json_str)
+
         if not decision:
-            decision = {"action": "AVOID", "conviction": "LOW", "reason": "Failed to generate decision JSON.", "drop_type": "UNKNOWN"}
-            
+            logger.error(
+                "[Fund Manager] %s: failed to produce a usable decision (%s). "
+                "Marking PASS_INSUFFICIENT_DATA instead of defaulting to AVOID/LOW.",
+                state.ticker,
+                "error stub" if fm_failed else "JSON parse failure",
+            )
+            return {
+                "action": "PASS_INSUFFICIENT_DATA",
+                "conviction": "NONE",
+                "reason": (
+                    "Fund Manager call failed or returned unparseable JSON — "
+                    "no decision rendered."
+                ),
+                "drop_type": "UNKNOWN",
+                "aborted_reason": "fund_manager_failed",
+                "key_factors": [],
+            }
+
         return decision
 
     def _run_deep_reasoning_check(self, state: MarketState, drop_str: str, raw_data: Dict) -> str:
