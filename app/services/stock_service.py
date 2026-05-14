@@ -1537,6 +1537,7 @@ class StockService:
             "change_percent": stock.get("change_percent", 0.0),
             "gatekeeper_tier": reasons.get("tier"),
             "earnings_facts": earnings_facts,
+            "company_name": company_name,
         }
 
         # Pass raw_data to research service

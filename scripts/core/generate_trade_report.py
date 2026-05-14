@@ -229,9 +229,10 @@ def main():
 
         # Benchmark Calculations
         bench_data = {}
+        sp500_perf_num = None
         for bench_ticker, bench_name in [('^GSPC', 'SP500'), ('^DJI', 'Dow'), ('^GDAXI', 'DAX')]:
             bench_start = get_price_from_history(bench_ticker, decision_dt)
-            
+
             # Determine end date for benchmark
             if is_future:
                  bench_end = get_latest_price(bench_ticker)
@@ -239,14 +240,33 @@ def main():
                  bench_end = get_price_from_history(bench_ticker, target_dt)
                  # Fallback if no data on exact target date (e.g. holiday), try latest
                  if bench_end is None:
-                      bench_end = get_latest_price(bench_ticker) 
+                      bench_end = get_latest_price(bench_ticker)
 
             bench_label = f"{bench_name} {window_days}d"
             if bench_start and bench_end:
                 bench_perf = ((bench_end - bench_start) / bench_start) * 100
                 bench_data[bench_label] = f"{bench_perf:+.2f}%"
+                if bench_name == 'SP500':
+                    sp500_perf_num = bench_perf
             else:
                 bench_data[bench_label] = "-"
+
+        # Alpha vs S&P 500 over the same window (Performance - SP500 perf)
+        if price_at_decision and target_price and sp500_perf_num is not None:
+            alpha_vs_sp500 = perf_pct - sp500_perf_num
+            alpha_str = f"{alpha_vs_sp500:+.2f}%"
+        else:
+            alpha_str = "-"
+
+        # Seeking Alpha quant rank (lower = better)
+        sa_rank_val = d.get('sa_rank')
+        if sa_rank_val is not None:
+            try:
+                sa_rank_str = f"#{int(sa_rank_val)}"
+            except (TypeError, ValueError):
+                sa_rank_str = "-"
+        else:
+            sa_rank_str = "-"
 
         deep_research_verdict = d.get('deep_research_verdict')
         batch_id = d.get('batch_id')
@@ -300,20 +320,35 @@ def main():
         else:
             limit_str = "-"
 
+        # Risk/Reward ratio at decision time (PM's planned R/R)
+        rr_val = d.get('risk_reward_ratio')
+        if rr_val is not None:
+            try:
+                rr_str = f"{float(rr_val):.2f}x"
+            except (TypeError, ValueError):
+                rr_str = "-"
+        else:
+            rr_str = "-"
+
         row = {
             "Date": decision_dt.strftime("%Y-%m-%d"),
             "Symbol": symbol,
             "Market": region if region else "Unknown",
             "Rec": recommendation,
+            "R/R": rr_str,
+            "Conv": (d.get('conviction') or "-")[:4],
+            "Drop Type": (d.get('drop_type') or "-")[:14],
             "Limit": limit_str,
             "Price @ Dec": f"{price_at_decision:.2f}" if price_at_decision else "-",
             f"Price +{window_days}d": f"{target_price:.2f}" if target_price else "-",
             "Performance": f"{perf_pct:+.2f}%" if price_at_decision and target_price else "-",
+            f"Alpha vs SP500 {window_days}d": alpha_str,
             f"Price +14d": f"{price_2w:.2f}" if price_2w else "-",
             "Perf 2W": f"{perf_2w_pct:+.2f}%" if price_at_decision and price_2w else "-",
             f"Price +28d": f"{price_4w:.2f}" if price_4w else "-",
             "Perf 4W": f"{perf_4w_pct:+.2f}%" if price_at_decision and price_4w else "-",
             "Verdict": deep_research_verdict if deep_research_verdict else "-",
+            "SA Rank": sa_rank_str,
             "Batch": batch_status,
             "Status": status,
             "Evidence": evidence_str
@@ -334,7 +369,7 @@ def main():
     LIMIT = 100
     shown_data = report_data[:LIMIT]
     
-    headers = ["Date", "Symbol", "Market", "Rec", "Limit", "Price @ Dec", f"Price +{window_days}d", "Performance", "Price +14d", "Perf 2W", "Price +28d", "Perf 4W", f"SP500 {window_days}d", f"Dow {window_days}d", f"DAX {window_days}d", "Verdict", "Batch", "Status", "Evidence"]
+    headers = ["Date", "Symbol", "Market", "Rec", "R/R", "Conv", "Drop Type", "Limit", "Price @ Dec", f"Price +{window_days}d", "Performance", f"Alpha vs SP500 {window_days}d", "Price +14d", "Perf 2W", "Price +28d", "Perf 4W", f"SP500 {window_days}d", f"Dow {window_days}d", f"DAX {window_days}d", "Verdict", "SA Rank", "Batch", "Status", "Evidence"]
     widths = {h: len(h) for h in headers}
     for row in shown_data:
         for h in headers:

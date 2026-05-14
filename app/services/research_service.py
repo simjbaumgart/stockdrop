@@ -524,7 +524,9 @@ class ResearchService:
         external_ratings = sa_grades_service.lookup(state.ticker)
 
         # --- Print Final Decision to Console (post-guard, post-recompute) ---
+        _company_name = raw_data.get("company_name") or state.ticker
         print("\n" + "="*50)
+        print(f"  Stock: {_company_name} ({state.ticker})")
         print(f"  [PORTFOLIO MANAGER DECISION]: {final_decision.get('action')} (Conviction: {final_decision.get('conviction', 'N/A')})")
         print(f"  Drop Type: {final_decision.get('drop_type', 'N/A')}")
         print(f"  Entry Zone: ${final_decision.get('entry_price_low', 'N/A')} - ${final_decision.get('entry_price_high', 'N/A')}")
