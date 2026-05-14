@@ -1519,6 +1519,23 @@ class StockService:
             print(f"[Earnings Facts] Failed to fetch for {symbol}: {e}")
             earnings_facts = None
 
+        # Fetch SA article counts for source-depth gate in research_service.
+        # get_counts() reads from the JSON cache that was populated during
+        # get_aggregated_news(), so this does NOT trigger an extra API call.
+        try:
+            _sa_c = seeking_alpha_service.get_counts(symbol)
+            _sa_local_counts = {
+                "analysis": _sa_c.get("analysis", 0),
+                "news": _sa_c.get("news", 0),
+                # NOTE: seeking_alpha_service.get_counts() returns key "pr"; the depth gate
+                # expects "press_releases". Translate here so a future SA-service cleanup
+                # (renaming to "press_releases") cannot silently zero out PR counts.
+                "press_releases": _sa_c.get("pr", 0),
+            }
+        except Exception as _sa_exc:
+            print(f"  > [SA counts] Failed to fetch counts for {symbol}: {_sa_exc}")
+            _sa_local_counts = {"analysis": 0, "news": 0, "press_releases": 0}
+
         # Prepare Raw Data dictionary
         raw_data = {
             "metrics": {
@@ -1530,7 +1547,7 @@ class StockService:
             },
             "indicators": indicators,
             "news_items": news_data,
-            "transcript_text": transcript_text or "", 
+            "transcript_text": transcript_text or "",
             "transcript_date": transcript_date,
             "transcript_warning": transcript_warning,
             "market_context": market_context,
@@ -1538,6 +1555,7 @@ class StockService:
             "gatekeeper_tier": reasons.get("tier"),
             "earnings_facts": earnings_facts,
             "company_name": company_name,
+            "seeking_alpha_local_counts": _sa_local_counts,
         }
 
         # Pass raw_data to research service

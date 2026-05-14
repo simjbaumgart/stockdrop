@@ -7,7 +7,7 @@ import logging
 import json
 import re
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 from app.models.market_state import MarketState
 from app.services.analyst_service import analyst_service
 from app.services.fred_service import fred_service
@@ -101,6 +101,13 @@ MIN_REAL_PHASE1_REPORTS = 4
 
 # Phase 1 core agents counted by the quality gate (economics is conditional and excluded).
 PHASE1_CORE_AGENTS = ("technical", "news", "market_sentiment", "competitive", "seeking_alpha")
+
+# Source-depth gate: agents are happy to summarize a single headline, so the
+# Phase 1 liveness check (MIN_REAL_PHASE1_REPORTS) doesn't catch tickers with
+# essentially no specific coverage (FJIKY 2026-05-14: SA 0/0/0, news = 7
+# total, 5/5 agents returned text). Abort when BOTH source signals are thin.
+MIN_SA_ITEMS_FOR_DECISION = 1   # at least 1 SA article/news/PR specific to ticker
+MIN_TICKER_NEWS_FOR_DECISION = 10  # OR at least 10 news items in raw_data
 
 # Report-content markers that signal a failed agent output.
 _FAILED_REPORT_MARKERS = (
@@ -390,6 +397,22 @@ class ResearchService:
             print(f"\n{'=' * 50}\n  {msg}\n{'=' * 50}\n")
             logger.error(msg)
             return self._build_insufficient_data_response(state, failed_agents, real_count)
+
+        # --- Phase 1 Source-Depth Gate ---
+        # Catches thin-coverage tickers where all 5 agents passed the liveness
+        # check by summarizing a Wall Street Breakfast headline (FJIKY 2026-05-14:
+        # SA 0/0/0, total news = 7, yet 5/5 agents returned text).
+        depth_aborted, depth_reason = self._source_depth_insufficient(raw_data)
+        if depth_aborted:
+            msg = f"[ABORT] Phase 1 source-depth gate failed for {state.ticker}: {depth_reason}"
+            print(f"\n{'=' * 50}\n  {msg}\n{'=' * 50}\n")
+            logger.error(msg)
+            response = self._build_insufficient_data_response(
+                state, failed_agents=["source_depth"], real_count=real_count
+            )
+            response["aborted_reason"] = "insufficient_source_depth"
+            response["executive_summary"] = depth_reason
+            return response
 
         # --- Phase 2: Bull & Bear Perspectives (Brain) ---
         self._run_bull_bear_perspectives(state, drop_str)
@@ -1327,6 +1350,28 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
             else:
                 failed.append(key)
         return real, failed
+
+    def _source_depth_insufficient(self, raw_data: Dict) -> Tuple[bool, str]:
+        """Return (True, reason) when both SA coverage AND news count are
+        below their floors. Either signal alone is enough to proceed."""
+        sa_counts = raw_data.get("seeking_alpha_local_counts") or {}
+        sa_items = (
+            int(sa_counts.get("analysis", 0) or 0)
+            + int(sa_counts.get("news", 0) or 0)
+            + int(sa_counts.get("press_releases", 0) or 0)
+        )
+        news_count = len(raw_data.get("news_items") or [])
+
+        if sa_items >= MIN_SA_ITEMS_FOR_DECISION:
+            return False, ""
+        if news_count >= MIN_TICKER_NEWS_FOR_DECISION:
+            return False, ""
+
+        return True, (
+            f"source-depth insufficient: SA items={sa_items} "
+            f"(min {MIN_SA_ITEMS_FOR_DECISION}), news_items={news_count} "
+            f"(min {MIN_TICKER_NEWS_FOR_DECISION})"
+        )
 
     def _build_insufficient_data_response(
         self,
