@@ -21,6 +21,7 @@ from app.services.gatekeeper_service import (
 )
 from app.utils.ticker_paths import safe_ticker_path
 from app.utils.agent_call_counter import counter as agent_call_counter
+from app.utils.earnings_consistency import check_narrative_consistency, downgrade_action
 
 # Citation strip — Gemini grounding injects footnote markers that corrupt JSON
 # AND mid-sentence text. Two known shapes:
@@ -527,35 +528,12 @@ class ResearchService:
             if _metrics["risk_reward_ratio"] is not None:
                 final_decision["risk_reward_ratio"] = _metrics["risk_reward_ratio"]
 
-        # Deterministic earnings-narrative consistency check.
-        # If the PM narrates "beat" but surprise is negative (or vice versa),
-        # flag and downgrade by one tier — see TOST 2026-05 incident.
-        from app.utils.earnings_consistency import check_narrative_consistency, downgrade_action
-        ef = raw_data.get("earnings_facts") or {}
-        consistency = check_narrative_consistency(
-            reasoning=final_decision.get("reason", ""),
-            surprise_pct=ef.get("surprise_pct"),
+        # Deterministic earnings-narrative consistency check (see TOST 2026-05 incident).
+        final_decision = self._apply_earnings_consistency(
+            final_decision,
+            ticker=state.ticker,
+            earnings_facts=raw_data.get("earnings_facts"),
         )
-        if consistency.inconsistent:
-            original_action = final_decision.get("action", "")
-            new_action = downgrade_action(original_action)
-            logger.warning(
-                "[Earnings Consistency] %s: %s. Action %s -> %s",
-                state.ticker, consistency.reason, original_action, new_action,
-            )
-            print(
-                f"  > [Earnings Consistency Flag] {state.ticker}: {consistency.reason}. "
-                f"Downgrading {original_action} -> {new_action}"
-            )
-            final_decision["action"] = new_action
-            final_decision["earnings_narrative_flag"] = consistency.flag
-            existing_factors = final_decision.get("key_factors") or []
-            if isinstance(existing_factors, list):
-                existing_factors.append(
-                    f"[FLAG] {consistency.flag}: {consistency.reason}. "
-                    f"Verdict downgraded from {original_action} to {new_action}."
-                )
-                final_decision["key_factors"] = existing_factors
 
         # Construct Final Output compatible with existing app expectations
         recommendation = final_decision.get("action", "AVOID").upper()
@@ -694,6 +672,67 @@ class ResearchService:
         state.reports['bull'] = bull_report
         state.reports['bear'] = bear_report
         state.reports['risk'] = risk_report
+
+    _CONVICTION_LADDER = ["HIGH", "MEDIUM", "LOW", "NONE"]
+
+    def _apply_earnings_consistency(self, final_decision: Dict, ticker: str, earnings_facts: Optional[Dict]) -> Dict:
+        """Apply the earnings-narrative consistency check.
+
+        Behavior:
+        - If narrative is consistent: no-op.
+        - If inconsistent:
+            * Downgrade action if the ladder maps it (BUY -> BUY_LIMIT -> WATCH).
+            * Always set `earnings_narrative_flag`.
+            * Always prepend `[FLAGGED]` to the reason field.
+            * Always drop conviction one tier (HIGH -> MEDIUM -> LOW -> NONE).
+        """
+        ef = earnings_facts or {}
+        consistency = check_narrative_consistency(
+            reasoning=final_decision.get("reason", ""),
+            surprise_pct=ef.get("surprise_pct"),
+        )
+        if not consistency.inconsistent:
+            return final_decision
+
+        original_action = final_decision.get("action", "")
+        new_action = downgrade_action(original_action)
+
+        # Drop conviction one notch (HIGH -> MEDIUM -> LOW -> NONE).
+        old_conviction = (final_decision.get("conviction") or "LOW").upper()
+        try:
+            idx = self._CONVICTION_LADDER.index(old_conviction)
+            new_conviction = self._CONVICTION_LADDER[min(idx + 1, len(self._CONVICTION_LADDER) - 1)]
+        except ValueError:
+            new_conviction = "LOW"
+
+        logger.warning(
+            "[Earnings Consistency] %s: %s. Action %s -> %s; Conviction %s -> %s",
+            ticker, consistency.reason, original_action, new_action, old_conviction, new_conviction,
+        )
+        print(
+            f"  > [Earnings Consistency Flag] {ticker}: {consistency.reason}. "
+            f"{original_action} -> {new_action}, conviction {old_conviction} -> {new_conviction}"
+        )
+
+        final_decision["action"] = new_action
+        final_decision["conviction"] = new_conviction
+        final_decision["earnings_narrative_flag"] = consistency.flag
+
+        existing_reason = final_decision.get("reason") or ""
+        if not existing_reason.startswith("[FLAGGED]"):
+            final_decision["reason"] = (
+                f"[FLAGGED] {consistency.flag}: {consistency.reason}. {existing_reason}"
+            ).strip()
+
+        existing_factors = final_decision.get("key_factors") or []
+        if isinstance(existing_factors, list):
+            existing_factors.append(
+                f"[FLAG] {consistency.flag}: {consistency.reason}. "
+                f"Verdict {original_action} -> {new_action}, conviction {old_conviction} -> {new_conviction}."
+            )
+            final_decision["key_factors"] = existing_factors
+
+        return final_decision
 
     def _run_risk_council_and_decision(self, state: MarketState, drop_str: str) -> Dict:
         """

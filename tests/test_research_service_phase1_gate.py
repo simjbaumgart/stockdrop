@@ -64,3 +64,36 @@ def test_source_depth_passes_when_only_press_releases_present():
     }
     aborted, _ = svc._source_depth_insufficient(raw_data)
     assert aborted is False
+
+
+from app.utils.earnings_consistency import ConsistencyResult
+
+
+def test_earnings_consistency_flags_avoid_even_without_downgrade(monkeypatch):
+    from app.services import research_service as rs
+
+    svc = rs.ResearchService()
+
+    # Simulate an inconsistent narrative.
+    monkeypatch.setattr(
+        rs,
+        "check_narrative_consistency",
+        lambda **kw: ConsistencyResult(
+            inconsistent=True,
+            flag="EARNINGS_NARRATIVE_INCONSISTENT",
+            reason="reasoning narrates beat but surprise_pct=-3.2",
+        ),
+    )
+    # downgrade_action of AVOID returns AVOID (no-op) — we still want a flag visible.
+    final = {
+        "action": "AVOID",
+        "conviction": "MEDIUM",
+        "reason": "Earnings beat strongly.",
+    }
+    out = svc._apply_earnings_consistency(final, ticker="TOST", earnings_facts={"surprise_pct": -3.2})
+
+    # Action stays AVOID, but the row should be visibly flagged.
+    assert out["earnings_narrative_flag"] == "EARNINGS_NARRATIVE_INCONSISTENT"
+    assert out["reason"].startswith("[FLAGGED]")
+    # Conviction should drop one tier on a flag, even if action is unchanged.
+    assert out["conviction"] == "LOW"
