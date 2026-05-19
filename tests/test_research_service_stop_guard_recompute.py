@@ -24,6 +24,11 @@ def _make_raw_data():
     stop from PM (222) is < 1 ATR below entry so the guard will widen it."""
     return {
         "change_percent": -7.0,
+        # The Phase 1 source-depth gate (research_service._source_depth_insufficient)
+        # aborts before the stop-guard runs unless SA coverage OR news count clears
+        # its floor. One local SA analysis item is enough to let this integration
+        # test reach the stop-guard path it is meant to exercise.
+        "seeking_alpha_local_counts": {"analysis": 1, "news": 0, "press_releases": 0},
         "indicators": {
             "close": 227.0,
             "atr": 12.55,
