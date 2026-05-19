@@ -11,6 +11,7 @@ from app.utils.stop_loss_guard import (
     widen_stop_if_too_tight,
     evaluate_stop_acceptability,
     MAX_ACCEPTABLE_DOWNSIDE_PCT,
+    sanitize_unreliable_stop,
 )
 
 
@@ -182,3 +183,28 @@ def test_dataclass_carries_rr_through():
         entry_low=100.0, stop_loss=90.0, risk_reward_ratio=1.5
     )
     assert result.risk_reward_ratio == 1.5
+
+
+def test_widen_exposes_candidate_values():
+    adj = widen_stop_if_too_tight(
+        stop_loss=137.0, entry_low=140.0, atr=3.0,
+        sma_50=120.0, sma_200=59.93, bb_lower=130.0,
+    )
+    assert adj.adjusted is True
+    assert adj.pm_stop == 137.0
+    assert adj.atr_floor == 140.0 - 2.0 * 3.0   # 134.0
+    assert adj.sma_floor == 120.0               # max sub-entry SMA
+
+
+def test_sanitize_unreliable_stop_nulls_numbers():
+    out = sanitize_unreliable_stop(entry_low=140.0, widened_stop=59.93)
+    assert out["stop_unreliable"] is True
+    assert out["stop_loss"] is None
+    assert out["stop_loss_raw"] == 59.93
+    assert out["downside_risk_percent"] is None
+    assert out["risk_reward_ratio"] is None
+
+
+def test_sanitize_acceptable_stop_is_passthrough():
+    out = sanitize_unreliable_stop(entry_low=140.0, widened_stop=134.0)
+    assert out is None  # within ceiling -> caller keeps existing values

@@ -24,6 +24,9 @@ class StopLossAdjustment:
     stop_loss: Optional[float]
     adjusted: bool
     reason: str
+    pm_stop: Optional[float] = None
+    atr_floor: Optional[float] = None
+    sma_floor: Optional[float] = None
 
 
 def widen_stop_if_too_tight(
@@ -50,14 +53,14 @@ def widen_stop_if_too_tight(
         a boolean indicating whether an adjustment was made, and a reason string.
     """
     if stop_loss is None:
-        return StopLossAdjustment(stop_loss=None, adjusted=False, reason="missing_stop")
+        return StopLossAdjustment(None, False, "missing_stop", pm_stop=stop_loss)
     if not atr or atr <= 0:
-        return StopLossAdjustment(stop_loss=stop_loss, adjusted=False, reason="missing_atr")
+        return StopLossAdjustment(stop_loss, False, "missing_atr", pm_stop=stop_loss)
 
     tolerance = entry_low - 1.5 * atr
     if stop_loss <= tolerance:
         return StopLossAdjustment(
-            stop_loss=stop_loss, adjusted=False, reason="within_tolerance",
+            stop_loss, False, "within_tolerance", pm_stop=stop_loss,
         )
 
     # Candidate 1: 2x ATR below entry
@@ -81,7 +84,14 @@ def widen_stop_if_too_tight(
         new_stop = atr_floor
         reason = "widened_to_2x_atr"
 
-    return StopLossAdjustment(stop_loss=round(new_stop, 2), adjusted=True, reason=reason)
+    return StopLossAdjustment(
+        stop_loss=round(new_stop, 2),
+        adjusted=True,
+        reason=reason,
+        pm_stop=stop_loss,
+        atr_floor=round(atr_floor, 2),
+        sma_floor=round(sma_floor, 2) if sma_floor is not None else None,
+    )
 
 
 # Maximum downside% (entry → stop) we're willing to publish as a real trade.
@@ -144,6 +154,26 @@ def evaluate_stop_acceptability(
             f"R/R {risk_reward_ratio:.1f}x below floor {MIN_ACCEPTABLE_RR:.1f}x",
         )
     return StopAcceptability(True, downside_pct, risk_reward_ratio, "within_acceptable")
+
+
+def sanitize_unreliable_stop(
+    entry_low: Optional[float], widened_stop: Optional[float]
+) -> Optional[Dict[str, object]]:
+    """If (entry_low, widened_stop) exceeds the downside ceiling, return the
+    field overrides that blank the stop + R/R and flag the row. Returns None
+    when the stop is acceptable (caller keeps existing values).
+    """
+    verdict = evaluate_stop_acceptability(entry_low, widened_stop)
+    if verdict.acceptable:
+        return None
+    return {
+        "stop_unreliable": True,
+        "stop_loss": None,
+        "stop_loss_raw": widened_stop,
+        "downside_risk_percent": None,
+        "risk_reward_ratio": None,
+        "stop_unreliable_reason": verdict.reason,
+    }
 
 
 def recompute_risk_metrics(
