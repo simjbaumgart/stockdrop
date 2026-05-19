@@ -11,6 +11,8 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.6
+      - key: DRIVE_UPLOAD_ENABLED
+        value: "false"
       - key: DB_PATH
         value: /var/lib/data/subscribers.db
       - key: DATA_DIR
