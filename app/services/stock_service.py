@@ -1348,9 +1348,16 @@ class StockService:
             # to fall through to AV than accept any transcript.
             return False
 
-        # Match either the full stripped name or its first significant token.
+        # Match the full stripped name or its first significant token, but
+        # only on a word boundary — naive `in` containment caused false
+        # positives ("arco" inside "marco", "mp" inside "company").
+        def _has_word(term: str) -> bool:
+            return re.search(r"\b" + re.escape(term) + r"\b", head) is not None
+
         first_token = expected_lower.split()[0]
-        return expected_lower in head or (len(first_token) >= 3 and first_token in head)
+        if _has_word(expected_lower):
+            return True
+        return len(first_token) >= 3 and _has_word(first_token)
 
     def get_latest_transcript(self, symbol: str, company_name: str = "") -> dict:
         """Fetch the most recent earnings-call transcript with Alpha Vantage fallback.
