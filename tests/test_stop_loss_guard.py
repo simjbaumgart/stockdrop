@@ -117,6 +117,13 @@ def test_rejected_when_downside_exceeds_ceiling():
     assert "exceeds" in result.reason.lower() or "ceiling" in result.reason.lower()
 
 
+def test_downside_exactly_at_ceiling_is_accepted():
+    """Downside 50.0% exactly (strict >, not >=) should be accepted."""
+    result = evaluate_stop_acceptability(entry_low=100.0, stop_loss=50.0)
+    assert result.acceptable is True
+    assert result.downside_pct == pytest.approx(50.0, abs=0.1)
+
+
 def test_none_values_are_acceptable():
     # If we don't have data, do not reject.
     assert evaluate_stop_acceptability(entry_low=None, stop_loss=10.0).acceptable is True
