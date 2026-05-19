@@ -109,8 +109,8 @@ def test_acceptable_when_downside_within_ceiling():
 
 
 def test_rejected_when_downside_exceeds_ceiling():
-    # FJIKY case: entry 19.20, stop 11.08 → -42% downside
-    result = evaluate_stop_acceptability(entry_low=19.20, stop_loss=11.08)
+    # entry 100.0, stop 49.0 → -51% downside, exceeds new 50% ceiling
+    result = evaluate_stop_acceptability(entry_low=100.0, stop_loss=49.0)
     assert result.acceptable is False
     assert result.downside_pct > MAX_ACCEPTABLE_DOWNSIDE_PCT
     assert "exceeds" in result.reason.lower() or "ceiling" in result.reason.lower()
@@ -120,3 +120,65 @@ def test_none_values_are_acceptable():
     # If we don't have data, do not reject.
     assert evaluate_stop_acceptability(entry_low=None, stop_loss=10.0).acceptable is True
     assert evaluate_stop_acceptability(entry_low=10.0, stop_loss=None).acceptable is True
+
+
+def test_rr_below_floor_is_rejected():
+    """R/R 0.2x with mild downside should still reject on the R/R gate."""
+    result = evaluate_stop_acceptability(
+        entry_low=100.0, stop_loss=90.0, risk_reward_ratio=0.2
+    )
+    assert not result.acceptable
+    assert "R/R" in result.reason
+
+
+def test_rr_exactly_at_floor_is_accepted():
+    """R/R 0.3x exactly (strict <) should be accepted."""
+    result = evaluate_stop_acceptability(
+        entry_low=100.0, stop_loss=90.0, risk_reward_ratio=0.3
+    )
+    assert result.acceptable
+
+
+def test_rr_above_floor_with_moderate_downside_accepted():
+    """R/R 0.5x, -20% downside passes under new rules (would have failed old)."""
+    result = evaluate_stop_acceptability(
+        entry_low=100.0, stop_loss=80.0, risk_reward_ratio=0.5
+    )
+    assert result.acceptable
+
+
+def test_asymmetric_high_rr_trade_accepted():
+    """Motivating case: 3.0x R/R with -40% downside is now publishable."""
+    result = evaluate_stop_acceptability(
+        entry_low=100.0, stop_loss=60.0, risk_reward_ratio=3.0
+    )
+    assert result.acceptable
+
+
+def test_downside_backstop_fires_even_with_high_rr():
+    """5.0x R/R, -60% downside → reject on backstop, not R/R."""
+    result = evaluate_stop_acceptability(
+        entry_low=100.0, stop_loss=40.0, risk_reward_ratio=5.0
+    )
+    assert not result.acceptable
+    assert "downside" in result.reason.lower()
+
+
+def test_rr_none_skips_rr_gate():
+    """When R/R is None, only the downside backstop applies."""
+    ok = evaluate_stop_acceptability(
+        entry_low=100.0, stop_loss=80.0, risk_reward_ratio=None
+    )
+    assert ok.acceptable
+    rej = evaluate_stop_acceptability(
+        entry_low=100.0, stop_loss=40.0, risk_reward_ratio=None
+    )
+    assert not rej.acceptable
+
+
+def test_dataclass_carries_rr_through():
+    """The returned dataclass should expose the R/R that was evaluated."""
+    result = evaluate_stop_acceptability(
+        entry_low=100.0, stop_loss=90.0, risk_reward_ratio=1.5
+    )
+    assert result.risk_reward_ratio == 1.5

@@ -84,36 +84,66 @@ def widen_stop_if_too_tight(
     return StopLossAdjustment(stop_loss=round(new_stop, 2), adjusted=True, reason=reason)
 
 
-# Maximum downside% (entry → stop) we're willing to print as a real trade. Beyond
-# this, the widened stop is no longer a "risk band" — it's a hope. Reject the
-# trade so the printed panel + DB row + dashboard don't show a 0.1 R/R panel
-# (FJIKY 2026-05-14: -30.6% downside vs +3.3% upside).
-MAX_ACCEPTABLE_DOWNSIDE_PCT = 15.0
+# Maximum downside% (entry → stop) we're willing to publish as a real trade.
+# Beyond this, the widened stop is effectively no stop at all — a hard
+# portfolio-risk backstop, applied regardless of R/R.
+MAX_ACCEPTABLE_DOWNSIDE_PCT = 50.0
+
+# Minimum R/R below which we treat the PM output as mathematically broken
+# and refuse to publish it as a BUY (historical offenders: AAOI 0.2x,
+# FORM 0.2x, VICR 0.1x). The R/R floor is the PRIMARY gate; the downside
+# ceiling above is only a catastrophic-widen backstop.
+MIN_ACCEPTABLE_RR = 0.3
 
 
 @dataclass
 class StopAcceptability:
     acceptable: bool
     downside_pct: Optional[float]
+    risk_reward_ratio: Optional[float]
     reason: str
 
 
 def evaluate_stop_acceptability(
-    entry_low: Optional[float], stop_loss: Optional[float]
+    entry_low: Optional[float],
+    stop_loss: Optional[float],
+    risk_reward_ratio: Optional[float] = None,
 ) -> StopAcceptability:
-    """Return whether the given (entry_low, stop_loss) pair implies a tolerable
-    downside%. When either input is None we conservatively accept — the caller
-    has nothing better to do."""
+    """Two-gate acceptability check on a (possibly post-widen) trade.
+
+    Gates (any failure → reject):
+        1. Downside backstop: reject if downside_pct > MAX_ACCEPTABLE_DOWNSIDE_PCT
+           (50%). Always applied when entry_low and stop_loss are present.
+        2. R/R primary gate: reject if risk_reward_ratio < MIN_ACCEPTABLE_RR
+           (0.3x). Only applied when risk_reward_ratio is provided
+           (None → R/R gate skipped, legacy behavior).
+
+    Conservative defaults: when entry_low or stop_loss is None / invalid, we
+    accept and return reason="insufficient_data". Caller has nothing better
+    to do.
+
+    Boundary semantics:
+        - Downside 50.0% exactly → accept (strict `>`)
+        - R/R 0.3x exactly → accept (strict `<`)
+    """
     if entry_low is None or stop_loss is None or entry_low <= 0:
-        return StopAcceptability(True, None, "insufficient_data")
+        return StopAcceptability(True, None, risk_reward_ratio, "insufficient_data")
     downside_pct = abs(entry_low - stop_loss) / entry_low * 100.0
     if downside_pct > MAX_ACCEPTABLE_DOWNSIDE_PCT:
         return StopAcceptability(
             False,
             downside_pct,
+            risk_reward_ratio,
             f"downside {downside_pct:.1f}% exceeds ceiling {MAX_ACCEPTABLE_DOWNSIDE_PCT:.1f}%",
         )
-    return StopAcceptability(True, downside_pct, "within_ceiling")
+    if risk_reward_ratio is not None and risk_reward_ratio < MIN_ACCEPTABLE_RR:
+        return StopAcceptability(
+            False,
+            downside_pct,
+            risk_reward_ratio,
+            f"R/R {risk_reward_ratio:.1f}x below floor {MIN_ACCEPTABLE_RR:.1f}x",
+        )
+    return StopAcceptability(True, downside_pct, risk_reward_ratio, "within_acceptable")
 
 
 def recompute_risk_metrics(

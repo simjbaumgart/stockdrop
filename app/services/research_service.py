@@ -577,6 +577,7 @@ class ResearchService:
             acceptability = evaluate_stop_acceptability(
                 entry_low=float(_entry_low),
                 stop_loss=final_decision.get("stop_loss"),
+                risk_reward_ratio=final_decision.get("risk_reward_ratio"),
             )
             if not acceptability.acceptable and final_decision.get("action", "").upper().startswith("BUY"):
                 logger.warning(
