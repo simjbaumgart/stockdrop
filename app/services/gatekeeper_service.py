@@ -4,6 +4,7 @@ import numpy as np
 from datetime import datetime, timedelta
 from typing import Dict, Tuple, Optional
 from app.services.tradingview_service import tradingview_service
+from app.services.volatility_service import volatility_service
 
 # Minimum share price (USD) for a ticker to be considered tradeable.
 # Filters out OTC penny stocks (e.g. PBMRF $0.003, BKRKF $0.17, PPERF $0.26,
@@ -62,44 +63,55 @@ class GatekeeperService:
 
     def check_market_regime(self) -> Dict[str, str]:
         """
-        Checks the global market regime (Rising Tide Rule).
-        Returns a dict with 'regime' ('BULL' or 'BEAR') and 'details'.
+        Checks the global market regime (Rising Tide Rule) and merges the
+        volatility-regime signal (VIX, term structure, Fear & Greed, score).
+
+        Returns a dict with legacy keys 'regime' ('BULL'/'BEAR'/'UNKNOWN') and
+        'details', plus the volatility fields documented in
+        PLAN_volatility_regime_signal.md.
         """
         # Simple cache to avoid fetching SPY every time
         if self.regime_cache and self.regime_cache_time and \
            datetime.now() - self.regime_cache_time < self.cache_duration:
             return self.regime_cache
 
+        regime = "UNKNOWN"
+        details = "No data"
         try:
-            # Use TradingView TA to get SPY SMA200
-            # Assuming US market for SPY
-            indicators = tradingview_service.get_technical_indicators(self.benchmark_symbol, region="US")
-            
+            indicators = tradingview_service.get_technical_indicators(
+                self.benchmark_symbol, region="US")
+
             if not indicators:
                 print(f"Error: Could not fetch indicators for {self.benchmark_symbol}")
-                return {"regime": "UNKNOWN", "details": "No data"}
-
-            current_close = indicators.get("close", 0.0)
-            current_sma = indicators.get("sma200", 0.0)
-            
-            if current_close == 0.0 or current_sma == 0.0:
-                 return {"regime": "UNKNOWN", "details": "Missing Price or SMA data"}
-
-            # Rising Tide Rule: Close > SMA 200 = BULL
-            regime = "BULL" if current_close > current_sma else "BEAR"
-            
-            result = {
-                "regime": regime,
-                "details": f"{self.benchmark_symbol} Close ({current_close:.2f}) {'above' if regime == 'BULL' else 'below'} 200 SMA ({current_sma:.2f})"
-            }
-            
-            self.regime_cache = result
-            self.regime_cache_time = datetime.now()
-            return result
-
+                details = "No data"
+            else:
+                current_close = indicators.get("close", 0.0)
+                current_sma = indicators.get("sma200", 0.0)
+                if current_close == 0.0 or current_sma == 0.0:
+                    details = "Missing Price or SMA data"
+                else:
+                    regime = "BULL" if current_close > current_sma else "BEAR"
+                    details = (
+                        f"{self.benchmark_symbol} Close ({current_close:.2f}) "
+                        f"{'above' if regime == 'BULL' else 'below'} "
+                        f"200 SMA ({current_sma:.2f})"
+                    )
         except Exception as e:
             print(f"Error checking market regime: {e}")
-            return {"regime": "UNKNOWN", "details": str(e)}
+            details = str(e)
+
+        result = {"regime": regime, "details": details}
+        try:
+            result.update(volatility_service.get_regime(trend=regime))
+        except Exception as e:
+            print(f"Error merging volatility regime: {e}")
+        # get_regime sets 'trend' == regime; keep legacy 'regime' authoritative.
+        result["regime"] = regime
+        result["details"] = details
+
+        self.regime_cache = result
+        self.regime_cache_time = datetime.now()
+        return result
 
     def check_technical_filters(
         self,
