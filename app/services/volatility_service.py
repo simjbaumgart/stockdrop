@@ -18,6 +18,15 @@ VIX_PANIC = 30.0
 _CNN_URL = "https://production.dataviz.cnn.io/index/fearandgreed/graphdata"
 _CNN_HEADERS = {"User-Agent": "Mozilla/5.0 (StockDrop volatility probe)"}
 
+# Favorability of each VIX class for dip-buy mean reversion (0-1).
+# Low VIX = slow grind, drops continue. Elevated VIX = real panic, real reversion.
+_VIX_FAVORABILITY = {
+    "COMPLACENT": 0.30,
+    "NORMAL": 0.50,
+    "ELEVATED": 0.85,
+    "PANIC": 0.70,  # extreme panic: still favorable but outcome variance rises
+}
+
 
 def classify_vix(level: float) -> str:
     """Map a VIX level to a regime band."""
@@ -38,7 +47,25 @@ def _percentile_rank(window: List[float], value: float) -> float:
     return 100.0 * below / len(window)
 
 
+def _format_summary(r: Dict[str, Any]) -> str:
+    vix = r.get("vix")
+    vix_txt = f"VIX {vix} ({r.get('vix_class')})" if vix is not None else "VIX unavailable"
+    term_txt = r.get("term_structure") or "term structure unavailable"
+    fg = r.get("fear_greed")
+    fg_txt = (f", Fear&Greed {fg} ({r.get('fear_greed_rating')})"
+              if fg is not None else "")
+    return (f"{vix_txt}, {term_txt}, trend {r.get('trend')}{fg_txt} — "
+            f"regime {r.get('regime_label')} ({r.get('regime_score')}) for dip-buying.")
+
+
 class VolatilityService:
+    CACHE_TTL = datetime.timedelta(hours=1)
+
+    def __init__(self):
+        self._cache: Optional[Dict[str, Any]] = None
+        self._cache_time: Optional[datetime.datetime] = None
+        self._cache_trend: Optional[str] = None
+
     def get_vix_context(self) -> Dict[str, Any]:
         """Latest VIX level + 5/20-day percentile from FRED VIXCLS."""
         try:
@@ -108,6 +135,76 @@ class VolatilityService:
         except Exception as e:
             logger.warning(f"CNN Fear & Greed fetch failed (non-fatal): {e}")
             return {"fear_greed": None, "fear_greed_rating": None}
+
+    @staticmethod
+    def score_regime(trend: str, vix_class: str,
+                     term_spread: Optional[float]) -> float:
+        """Combine trend, VIX class, and term structure into a 0-1 score.
+        Higher = more favorable for dip-buying.
+        """
+        trend_component = {"BULL": 0.65, "BEAR": 0.35}.get(trend, 0.50)
+        vix_component = _VIX_FAVORABILITY.get(vix_class, 0.50)
+        if term_spread is None:
+            term_component = 0.50
+        else:
+            # spread 0 -> 0.5, +2 -> 1.0, -2 -> 0.0
+            term_component = min(1.0, max(0.0, 0.5 + term_spread / 4.0))
+        score = (0.40 * trend_component
+                 + 0.35 * vix_component
+                 + 0.25 * term_component)
+        return round(score, 3)
+
+    def get_regime(self, trend: str = "UNKNOWN") -> Dict[str, Any]:
+        """Assemble the unified volatility-regime dict. Cached for CACHE_TTL
+        per trend value.
+        """
+        now = datetime.datetime.utcnow()
+        if (self._cache is not None and self._cache_time is not None
+                and self._cache_trend == trend
+                and now - self._cache_time < self.CACHE_TTL):
+            return self._cache
+
+        errors: List[str] = []
+        vix_ctx = self.get_vix_context()
+        if vix_ctx.get("error"):
+            errors.append(f"vix: {vix_ctx['error']}")
+        term_ctx = self.get_term_structure()
+        if term_ctx.get("error"):
+            errors.append(f"term: {term_ctx['error']}")
+        fg_ctx = self.get_fear_greed()
+
+        vix_class = vix_ctx.get("vix_class") or "NORMAL"
+        term_spread = term_ctx.get("term_spread")
+        score = self.score_regime(trend, vix_class, term_spread)
+        if score >= 0.60:
+            label = "FAVORABLE"
+        elif score >= 0.40:
+            label = "NEUTRAL"
+        else:
+            label = "UNFAVORABLE"
+
+        regime = {
+            "trend": trend,
+            "vix": vix_ctx.get("vix"),
+            "vix_date": vix_ctx.get("vix_date"),
+            "vix_class": vix_ctx.get("vix_class"),
+            "vix_pctile_5d": vix_ctx.get("vix_pctile_5d"),
+            "vix_pctile_20d": vix_ctx.get("vix_pctile_20d"),
+            "vix3m": term_ctx.get("vix3m"),
+            "term_spread": term_spread,
+            "term_structure": term_ctx.get("term_structure"),
+            "fear_greed": fg_ctx.get("fear_greed"),
+            "fear_greed_rating": fg_ctx.get("fear_greed_rating"),
+            "regime_score": score,
+            "regime_label": label,
+            "errors": errors,
+        }
+        regime["summary"] = _format_summary(regime)
+
+        self._cache = regime
+        self._cache_time = now
+        self._cache_trend = trend
+        return regime
 
 
 volatility_service = VolatilityService()

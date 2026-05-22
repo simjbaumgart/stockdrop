@@ -114,3 +114,85 @@ class TestGetFearGreed:
             fg = svc.get_fear_greed()
         assert fg["fear_greed"] is None
         assert fg["fear_greed_rating"] is None
+
+
+class TestScoreRegime:
+    def test_bull_elevated_backwardation_scores_favorable(self):
+        # trend 0.65, vix ELEVATED 0.85, term spread +2 -> 1.0
+        score = VolatilityService.score_regime("BULL", "ELEVATED", 2.0)
+        assert score == round(0.40 * 0.65 + 0.35 * 0.85 + 0.25 * 1.0, 3)
+        assert score >= 0.60
+
+    def test_bear_complacent_contango_scores_unfavorable(self):
+        # trend 0.35, vix COMPLACENT 0.30, term spread -3 -> clamped 0.0
+        score = VolatilityService.score_regime("BEAR", "COMPLACENT", -3.0)
+        assert score == round(0.40 * 0.35 + 0.35 * 0.30 + 0.25 * 0.0, 3)
+        assert score < 0.40
+
+    def test_unknown_trend_and_missing_spread_use_neutral_defaults(self):
+        score = VolatilityService.score_regime("UNKNOWN", "NORMAL", None)
+        assert score == round(0.40 * 0.50 + 0.35 * 0.50 + 0.25 * 0.50, 3)
+
+
+class TestGetRegime:
+    def _patch_all(self, vix_ctx, term_ctx, fg_ctx):
+        return [
+            patch.object(VolatilityService, "get_vix_context", return_value=vix_ctx),
+            patch.object(VolatilityService, "get_term_structure", return_value=term_ctx),
+            patch.object(VolatilityService, "get_fear_greed", return_value=fg_ctx),
+        ]
+
+    def test_assembles_full_regime_dict(self):
+        svc = VolatilityService()
+        patches = self._patch_all(
+            {"vix": 16.75, "vix_date": "2026-05-21", "vix_class": "NORMAL",
+             "vix_pctile_5d": 80.0, "vix_pctile_20d": 65.0},
+            {"vix3m": 18.20, "term_spread": -1.45, "term_structure": "CONTANGO"},
+            {"fear_greed": 42, "fear_greed_rating": "Fear"},
+        )
+        for p in patches:
+            p.start()
+        try:
+            regime = svc.get_regime(trend="BULL")
+        finally:
+            for p in patches:
+                p.stop()
+        assert regime["vix"] == 16.75
+        assert regime["term_structure"] == "CONTANGO"
+        assert regime["fear_greed"] == 42
+        assert regime["trend"] == "BULL"
+        assert 0.0 <= regime["regime_score"] <= 1.0
+        assert regime["regime_label"] in ("FAVORABLE", "NEUTRAL", "UNFAVORABLE")
+        assert "VIX 16.75" in regime["summary"]
+        assert regime["errors"] == []
+
+    def test_collects_component_errors(self):
+        svc = VolatilityService()
+        patches = self._patch_all(
+            {"vix": None, "error": "FRED down"},
+            {"term_spread": None, "error": "yahoo down"},
+            {"fear_greed": None, "fear_greed_rating": None},
+        )
+        for p in patches:
+            p.start()
+        try:
+            regime = svc.get_regime(trend="UNKNOWN")
+        finally:
+            for p in patches:
+                p.stop()
+        assert any("FRED down" in e for e in regime["errors"])
+        assert any("yahoo down" in e for e in regime["errors"])
+        # vix_class falls back to NORMAL so scoring still produces a number
+        assert regime["regime_score"] is not None
+
+    def test_caches_within_ttl_for_same_trend(self):
+        svc = VolatilityService()
+        with patch.object(VolatilityService, "get_vix_context",
+                          return_value={"vix": 16.0, "vix_class": "NORMAL"}) as m, \
+             patch.object(VolatilityService, "get_term_structure",
+                          return_value={"term_spread": 0.0, "term_structure": "CONTANGO"}), \
+             patch.object(VolatilityService, "get_fear_greed",
+                          return_value={"fear_greed": None, "fear_greed_rating": None}):
+            svc.get_regime(trend="BULL")
+            svc.get_regime(trend="BULL")
+            assert m.call_count == 1  # second call served from cache
