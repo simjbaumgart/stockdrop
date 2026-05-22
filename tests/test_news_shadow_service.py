@@ -1,4 +1,3 @@
-import importlib
 import pytest
 
 from app import database

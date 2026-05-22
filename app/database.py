@@ -847,51 +847,54 @@ def count_news_shadow_runs() -> int:
     """Number of completed shadow pairs (shadow call succeeded)."""
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    cursor.execute(
-        "SELECT COUNT(*) FROM news_shadow_runs "
-        "WHERE shadow_report IS NOT NULL AND shadow_error IS NULL"
-    )
-    count = cursor.fetchone()[0]
-    conn.close()
-    return count
+    try:
+        cursor.execute(
+            "SELECT COUNT(*) FROM news_shadow_runs "
+            "WHERE shadow_report IS NOT NULL AND shadow_error IS NULL"
+        )
+        return cursor.fetchone()[0]
+    finally:
+        conn.close()
 
 
 def insert_news_shadow_run(decision_point_id: Optional[int], record: dict) -> None:
     """Persist one production/shadow comparison pair."""
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    cursor.execute(
-        '''
-        INSERT INTO news_shadow_runs (
-            decision_point_id, symbol, decision_date,
-            production_model, production_report, production_tokens_in,
-            production_tokens_out, production_latency_ms, production_needs_economics,
-            shadow_model, shadow_report, shadow_tokens_in,
-            shadow_tokens_out, shadow_latency_ms, shadow_needs_economics,
-            shadow_error
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''',
-        (
-            decision_point_id,
-            record.get("symbol"),
-            record.get("decision_date"),
-            record.get("production_model"),
-            record.get("production_report"),
-            record.get("production_tokens_in"),
-            record.get("production_tokens_out"),
-            record.get("production_latency_ms"),
-            record.get("production_needs_economics"),
-            record.get("shadow_model"),
-            record.get("shadow_report"),
-            record.get("shadow_tokens_in"),
-            record.get("shadow_tokens_out"),
-            record.get("shadow_latency_ms"),
-            record.get("shadow_needs_economics"),
-            record.get("shadow_error"),
-        ),
-    )
-    conn.commit()
-    conn.close()
+    try:
+        cursor.execute(
+            '''
+            INSERT INTO news_shadow_runs (
+                decision_point_id, symbol, decision_date,
+                production_model, production_report, production_tokens_in,
+                production_tokens_out, production_latency_ms, production_needs_economics,
+                shadow_model, shadow_report, shadow_tokens_in,
+                shadow_tokens_out, shadow_latency_ms, shadow_needs_economics,
+                shadow_error
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''',
+            (
+                decision_point_id,
+                record.get("symbol"),
+                record.get("decision_date"),
+                record.get("production_model"),
+                record.get("production_report"),
+                record.get("production_tokens_in"),
+                record.get("production_tokens_out"),
+                record.get("production_latency_ms"),
+                record.get("production_needs_economics"),
+                record.get("shadow_model"),
+                record.get("shadow_report"),
+                record.get("shadow_tokens_in"),
+                record.get("shadow_tokens_out"),
+                record.get("shadow_latency_ms"),
+                record.get("shadow_needs_economics"),
+                record.get("shadow_error"),
+            ),
+        )
+        conn.commit()
+    finally:
+        conn.close()
 
 
 def get_news_shadow_runs() -> List[dict]:
@@ -899,8 +902,9 @@ def get_news_shadow_runs() -> List[dict]:
     conn = sqlite3.connect(DB_NAME)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM news_shadow_runs ORDER BY id ASC")
-    rows = [dict(r) for r in cursor.fetchall()]
-    conn.close()
-    return rows
+    try:
+        cursor.execute("SELECT * FROM news_shadow_runs ORDER BY id ASC")
+        return [dict(r) for r in cursor.fetchall()]
+    finally:
+        conn.close()
 
