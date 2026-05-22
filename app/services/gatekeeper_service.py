@@ -24,12 +24,21 @@ PCT_B_STANDARD = 0.50
 PCT_B_SHALLOW = 0.70
 SHALLOW_MIN_DROP_PCT = 8.0
 
+# How long a BB-NaN rejection is remembered before the ticker is retried.
+# Recent IPOs need ~20 trading days of history for the Bollinger window; a
+# 24h skip then daily retry avoids re-screening them every 20-minute cycle
+# while still picking them up once they have accumulated enough history.
+BB_NAN_CACHE_TTL = timedelta(hours=24)
+
+
 class GatekeeperService:
     def __init__(self):
         self.benchmark_symbol = "SPY" # Can be switched to QQQ
         self.regime_cache = None
         self.regime_cache_time = None
         self.cache_duration = timedelta(hours=1)
+        # ticker -> datetime at which the cached BB-NaN rejection expires.
+        self._bb_nan_cache: Dict[str, datetime] = {}
 
     def classify_tier(self, pct_b: float, drop_pct: float) -> str:
         """
@@ -127,6 +136,25 @@ class GatekeeperService:
         Returns (is_valid, reasons_dict). reasons['tier'] is always set.
         """
         try:
+            # --- BB-NaN skip-cache ---
+            # If this ticker was recently rejected for NaN Bollinger bands
+            # (insufficient price history — typically a recent IPO), skip the
+            # whole check including the indicator fetch until the TTL expires.
+            cached_until = self._bb_nan_cache.get(symbol)
+            if cached_until is not None:
+                if datetime.now() < cached_until:
+                    return False, {
+                        "bb_status": (
+                            "%B (nan) — cached BB-NaN skip "
+                            "(insufficient price history)"
+                        ),
+                        "bb_pct_b": float("nan"),
+                        "bb_nan_cached": True,
+                        "tier": TIER_REJECT,
+                    }
+                # Entry expired — drop it and re-evaluate normally.
+                del self._bb_nan_cache[symbol]
+
             if cached_indicators:
                 indicators = cached_indicators
             else:
@@ -162,6 +190,7 @@ class GatekeeperService:
                 reasons["lower_bb"] = bb_lower
                 reasons["bb_pct_b"] = float("nan")
                 reasons["tier"] = TIER_REJECT
+                self._bb_nan_cache[symbol] = datetime.now() + BB_NAN_CACHE_TTL
                 return False, reasons
 
             if bb_upper != bb_lower:
@@ -178,6 +207,7 @@ class GatekeeperService:
                 reasons["lower_bb"] = bb_lower
                 reasons["bb_pct_b"] = float("nan")
                 reasons["tier"] = TIER_REJECT
+                self._bb_nan_cache[symbol] = datetime.now() + BB_NAN_CACHE_TTL
                 return False, reasons
 
             tier = self.classify_tier(pct_b=curr_pct_b, drop_pct=drop_pct)

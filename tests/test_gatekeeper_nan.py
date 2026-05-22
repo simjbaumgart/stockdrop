@@ -56,6 +56,7 @@ def test_nan_only_in_lower_band_still_rejected():
 def test_normal_path_unchanged_when_bands_are_valid():
     """Sanity: a real low-%B reading still classifies as a Deep Dip."""
     # price = 90, lower = 95, upper = 105 → %B = (90-95)/(105-95) = -0.5 (deep)
+    # Distinct symbol: the NaN test above caches "X" in the BB-NaN skip-cache.
     fake_indicators = {
         "close": 90.0,
         "bb_lower": 95.0,
@@ -67,7 +68,7 @@ def test_normal_path_unchanged_when_bands_are_valid():
         return_value=fake_indicators,
     ):
         is_valid, reasons = gatekeeper_service.check_technical_filters(
-            symbol="X", drop_pct=-10.0
+            symbol="GOODSTK", drop_pct=-10.0
         )
 
     assert is_valid is True
