@@ -52,3 +52,32 @@ def test_render_report_contains_sections():
     assert "# News Agent Shadow Comparison Report" in md
     assert "Cost per decision point" in md
     assert "SYM1" in md
+
+
+from scripts.analysis import news_shadow_judge as nsj
+
+
+def test_parse_judge_response_valid():
+    raw = '''```json
+{"source_classification": "tie",
+ "hard_event_detection": "production_better",
+ "production_coherence": "high",
+ "shadow_coherence": "medium",
+ "disagreements": "shadow misclassified a wire source as official"}
+```'''
+    parsed = nsj.parse_judge_response(raw)
+    assert parsed["hard_event_detection"] == "production_better"
+    assert parsed["production_coherence"] == "high"
+
+
+def test_parse_judge_response_malformed_returns_fallback():
+    parsed = nsj.parse_judge_response("not json at all")
+    assert parsed["source_classification"] == "parse_error"
+    assert "disagreements" in parsed
+
+
+def test_build_judge_prompt_includes_both_reports():
+    prompt = nsj.build_judge_prompt("PROD TEXT HERE", "SHADOW TEXT HERE")
+    assert "PROD TEXT HERE" in prompt
+    assert "SHADOW TEXT HERE" in prompt
+    assert "source" in prompt.lower()
