@@ -1776,6 +1776,8 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
             )
 
             if metrics_sink is not None:
+                # Token counts reflect the final successful attempt only; on a retry
+                # or 503 fallback earlier attempts' tokens are not summed.
                 try:
                     um = getattr(response, "usage_metadata", None)
                     metrics_sink["model"] = model_name
