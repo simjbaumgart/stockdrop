@@ -12,8 +12,7 @@ from app.services.email_service import email_service
 from app.services.research_service import research_service
 from app.services.alpaca_service import alpaca_service
 from app.services.tradingview_service import tradingview_service
-from app.database import add_decision_point, get_today_decision_symbols, update_decision_point, get_decision_points, get_cached_transcript, save_cached_transcript
-from app import database
+from app.database import add_decision_point, get_today_decision_symbols, update_decision_point, get_decision_points, get_cached_transcript, save_cached_transcript, insert_news_shadow_run
 from app.services.storage_service import storage_service
 from app.services.gatekeeper_service import gatekeeper_service
 from app.utils import get_git_version
@@ -1622,9 +1621,9 @@ class StockService:
 
         # Persist the News Agent shadow comparison, if one was run.
         shadow_data = report_data.get("news_shadow_data")
-        if shadow_data:
+        if shadow_data and decision_id:
             try:
-                database.insert_news_shadow_run(decision_id, shadow_data)
+                insert_news_shadow_run(decision_id, shadow_data)
             except Exception as e:
                 print(f"Failed to persist News Agent shadow run: {e}")
 
