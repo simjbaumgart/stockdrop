@@ -186,6 +186,29 @@ class FredService:
                     return value, date
             return "N/A", "N/A"
 
+    def fetch_series_history(self, series_id: str, limit: int = 30) -> list:
+        """Fetch up to `limit` most-recent observations for a FRED series.
+
+        Returns a list of (value_str, date_str) tuples, newest first. FRED's
+        missing-value marker "." is passed through unchanged — the caller
+        filters non-numeric values. Returns [] when no API key is configured.
+        Raises on a persistent HTTP failure (caller decides the fallback).
+        """
+        if not self.api_key:
+            logger.warning("FRED_API_KEY not found. Cannot fetch series history.")
+            return []
+        params = {
+            "series_id": series_id,
+            "api_key": self.api_key,
+            "file_type": "json",
+            "sort_order": "desc",
+            "limit": limit,
+        }
+        response = requests.get(self.BASE_URL, params=params, timeout=10)
+        response.raise_for_status()
+        observations = response.json().get("observations", [])
+        return [(o.get("value", "."), o.get("date", "")) for o in observations]
+
     def _fetch_av_treasury_yield(self, maturity: str) -> Optional[Tuple[str, str]]:
         try:
             params = {

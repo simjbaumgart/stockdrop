@@ -145,3 +145,26 @@ class TestFredPersistentSnapshot:
         monkeypatch.setattr("app.services.fred_service._SNAPSHOT_PATH", str(snap))
         s = FredService()  # must not raise
         assert s._cache == {}
+
+
+class TestFredSeriesHistory:
+    def test_fetch_series_history_returns_tuples_newest_first(self, svc):
+        body = {"observations": [
+            {"value": "16.75", "date": "2026-05-21"},
+            {"value": "17.10", "date": "2026-05-20"},
+            {"value": ".", "date": "2026-05-19"},
+        ]}
+        with patch("app.services.fred_service.requests.get") as mget:
+            mget.return_value.raise_for_status = MagicMock()
+            mget.return_value.json = MagicMock(return_value=body)
+            result = svc.fetch_series_history("VIXCLS", limit=3)
+        assert result == [
+            ("16.75", "2026-05-21"),
+            ("17.10", "2026-05-20"),
+            (".", "2026-05-19"),
+        ]
+
+    def test_fetch_series_history_no_api_key_returns_empty(self, monkeypatch):
+        monkeypatch.delenv("FRED_API_KEY", raising=False)
+        s = FredService()
+        assert s.fetch_series_history("VIXCLS") == []
