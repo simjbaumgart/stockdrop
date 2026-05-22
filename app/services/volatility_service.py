@@ -14,6 +14,10 @@ VIX_COMPLACENT = 15.0
 VIX_ELEVATED = 20.0
 VIX_PANIC = 30.0
 
+# CNN Fear & Greed — unofficial endpoint, must fail gracefully.
+_CNN_URL = "https://production.dataviz.cnn.io/index/fearandgreed/graphdata"
+_CNN_HEADERS = {"User-Agent": "Mozilla/5.0 (StockDrop volatility probe)"}
+
 
 def classify_vix(level: float) -> str:
     """Map a VIX level to a regime band."""
@@ -87,6 +91,23 @@ class VolatilityService:
             "term_spread": round(spread, 2),
             "term_structure": "BACKWARDATION" if spread > 0 else "CONTANGO",
         }
+
+    def get_fear_greed(self) -> Dict[str, Any]:
+        """CNN Fear & Greed composite (0-100). Unofficial endpoint —
+        every failure path returns None rather than raising.
+        """
+        try:
+            r = requests.get(_CNN_URL, headers=_CNN_HEADERS, timeout=10)
+            r.raise_for_status()
+            fg = r.json().get("fear_and_greed", {})
+            score = fg.get("score")
+            return {
+                "fear_greed": round(float(score)) if score is not None else None,
+                "fear_greed_rating": fg.get("rating"),
+            }
+        except Exception as e:
+            logger.warning(f"CNN Fear & Greed fetch failed (non-fatal): {e}")
+            return {"fear_greed": None, "fear_greed_rating": None}
 
 
 volatility_service = VolatilityService()

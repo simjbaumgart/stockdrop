@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pandas as pd
 import pytest
@@ -92,3 +92,25 @@ class TestGetTermStructure:
             ts = svc.get_term_structure()
         assert ts["term_spread"] is None
         assert "yahoo down" in ts["error"]
+
+
+class TestGetFearGreed:
+    def test_parses_score_and_rating(self):
+        svc = VolatilityService()
+        resp = MagicMock()
+        resp.raise_for_status = MagicMock()
+        resp.json = MagicMock(return_value={
+            "fear_and_greed": {"score": 41.6, "rating": "Fear"}
+        })
+        with patch("app.services.volatility_service.requests.get", return_value=resp):
+            fg = svc.get_fear_greed()
+        assert fg["fear_greed"] == 42  # rounded
+        assert fg["fear_greed_rating"] == "Fear"
+
+    def test_failure_is_non_fatal_returns_none(self):
+        svc = VolatilityService()
+        with patch("app.services.volatility_service.requests.get",
+                   side_effect=RuntimeError("cnn 418")):
+            fg = svc.get_fear_greed()
+        assert fg["fear_greed"] is None
+        assert fg["fear_greed_rating"] is None
