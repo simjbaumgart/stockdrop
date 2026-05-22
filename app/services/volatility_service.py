@@ -65,5 +65,28 @@ class VolatilityService:
             "vix_pctile_20d": round(_percentile_rank(series[:20], latest), 1),
         }
 
+    def get_term_structure(self) -> Dict[str, Any]:
+        """VIX vs 3-month VIX (^VIX, ^VIX3M) spread from yfinance.
+
+        spread > 0 (backwardation) is historically a strong mean-reversion
+        signal — directly relevant to the dip-recovery thesis.
+        """
+        try:
+            data = yf.download(["^VIX", "^VIX3M"], period="5d", progress=False)
+            closes = data["Close"].dropna()
+            vix = float(closes["^VIX"].iloc[-1])
+            vix3m = float(closes["^VIX3M"].iloc[-1])
+        except Exception as e:
+            logger.warning(f"VIX term structure fetch failed: {e}")
+            return {"term_spread": None, "error": str(e)}
+
+        spread = vix - vix3m
+        return {
+            "vix_spot": round(vix, 2),
+            "vix3m": round(vix3m, 2),
+            "term_spread": round(spread, 2),
+            "term_structure": "BACKWARDATION" if spread > 0 else "CONTANGO",
+        }
+
 
 volatility_service = VolatilityService()
