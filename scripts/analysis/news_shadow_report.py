@@ -17,8 +17,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 
 from app import database  # noqa: E402
 
-# $ per 1,000,000 tokens. CONFIRM against current Gemini pricing before
-# trusting the dollar figures in the report.
+# $ per 1,000,000 tokens. PLACEHOLDER RATES — confirm against current Gemini
+# pricing before trusting the dollar figures. The two models currently carry
+# identical rates, so the production-vs-shadow cost delta reflects token-count
+# differences only until real per-model rates are filled in.
 PRICING: Dict[str, Dict[str, float]] = {
     "gemini-3.5-flash-preview": {"in": 0.30, "out": 2.50},
     "gemini-3-flash-preview": {"in": 0.30, "out": 2.50},
