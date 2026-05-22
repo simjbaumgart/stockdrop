@@ -1328,6 +1328,11 @@ class StockService:
         # Strip trailing punctuation so " corp." matches the " corp" suffix.
         expected_lower = expected_lower.rstrip(" ,.")
 
+        # Keep the pre-suffix-strip name as a fallback: short names like
+        # "XP Inc." reduce to "XP" (2 chars) once " inc" is stripped, which
+        # is below the disambiguation floor — but "xp inc" still matches.
+        pre_strip_name = expected_lower
+
         # Suffix list (no trailing dots — we already stripped them above).
         suffixes = (
             " corporation", " corp", " incorporated", " inc",
@@ -1345,11 +1350,15 @@ class StockService:
                     break
 
         if len(expected_lower) < 3:
-            # After normalization the name is too short to disambiguate
-            # reliably (e.g., degenerate input like "(The)" or a name that
-            # is only legal-suffix tokens). Conservatively reject — better
-            # to fall through to AV than accept any transcript.
-            return False
+            # Suffix stripping shrank the name below the disambiguation
+            # floor. If the pre-strip name (suffix included) is long enough,
+            # match on that instead — handles short names like "XP Inc.".
+            # Otherwise the input is degenerate (e.g. "(The)") — reject and
+            # fall through to AV rather than accept any transcript.
+            if len(pre_strip_name) >= 3:
+                expected_lower = pre_strip_name
+            else:
+                return False
 
         # Match the full stripped name or its first significant token, but
         # only on a word boundary — naive `in` containment caused false

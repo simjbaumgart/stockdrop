@@ -23,6 +23,7 @@ from app.services.gatekeeper_service import (
 from app.utils.ticker_paths import safe_ticker_path
 from app.utils.agent_call_counter import counter as agent_call_counter
 from app.utils.earnings_consistency import check_narrative_consistency, downgrade_action
+from app.utils.json_repair import repair_json_via_flash
 
 # Citation strip — Gemini grounding injects footnote markers that corrupt JSON
 # AND mid-sentence text. Two known shapes:
@@ -161,6 +162,34 @@ _FAILED_REPORT_MARKERS = (
     "Market Sentiment Analysis Failed",
     "[Grounding Error",
 )
+
+
+# Schema for the Fund Manager JSON-repair pass. Mirrors the OUTPUT block of
+# _create_fund_manager_prompt — kept in sync with that prompt's JSON spec.
+_FM_OUTPUT_SCHEMA = """
+{
+  "action": "BUY | BUY_LIMIT | WATCH | AVOID",
+  "conviction": "HIGH | MODERATE | LOW",
+  "drop_type": "EARNINGS_MISS | ANALYST_DOWNGRADE | SECTOR_ROTATION | MACRO_SELLOFF | COMPANY_SPECIFIC | TECHNICAL_BREAKDOWN | UNKNOWN",
+  "entry_price_low": 0.0,
+  "entry_price_high": 0.0,
+  "stop_loss": 0.0,
+  "take_profit_1": 0.0,
+  "take_profit_2": null,
+  "upside_percent": 0.0,
+  "downside_risk_percent": 0.0,
+  "risk_reward_ratio": 0.0,
+  "pre_drop_price": 0.0,
+  "entry_trigger": "string",
+  "reassess_in_days": 5,
+  "sell_price_low": 0.0,
+  "sell_price_high": 0.0,
+  "ceiling_exit": 0.0,
+  "exit_trigger": "string",
+  "reason": "string",
+  "key_factors": ["list", "of", "strings"]
+}
+"""
 
 
 def _is_real_report(report: Optional[str]) -> bool:
@@ -744,6 +773,9 @@ class ResearchService:
         state.reports['risk'] = risk_report
 
     _CONVICTION_LADDER = ["HIGH", "MEDIUM", "LOW", "NONE"]
+    # The PM/DR prompts emit "MODERATE"; the ladder uses "MEDIUM". Normalize
+    # before indexing so the downgrade doesn't silently no-op (TTWO 2026-05-22).
+    _CONVICTION_ALIASES = {"MODERATE": "MEDIUM", "MED": "MEDIUM"}
 
     def _apply_earnings_consistency(self, final_decision: Dict, ticker: str, earnings_facts: Optional[Dict]) -> Dict:
         """Apply the earnings-narrative consistency check.
@@ -772,8 +804,9 @@ class ResearchService:
 
         # Drop conviction one notch (HIGH -> MEDIUM -> LOW -> NONE).
         old_conviction = (final_decision.get("conviction") or "LOW").upper()
+        ladder_conviction = self._CONVICTION_ALIASES.get(old_conviction, old_conviction)
         try:
-            idx = self._CONVICTION_LADDER.index(old_conviction)
+            idx = self._CONVICTION_LADDER.index(ladder_conviction)
             new_conviction = self._CONVICTION_LADDER[min(idx + 1, len(self._CONVICTION_LADDER) - 1)]
         except ValueError:
             logger.warning(
@@ -856,6 +889,35 @@ class ResearchService:
         )
 
         decision = None if fm_failed else self._extract_json(decision_json_str)
+
+        # FM produced real output but it didn't parse — commonly truncated
+        # mid-JSON (NIO 2026-05-22: clean through risk_reward_ratio, cut mid
+        # sell_price_low). Attempt a Gemini Flash repair pass before giving
+        # up, mirroring the Deep Research repair path. Never attempt this for
+        # error stubs (fm_failed) — a transport failure has nothing to repair.
+        if decision is None and not fm_failed and decision_json_str:
+            logger.warning(
+                "[Fund Manager] %s: JSON parse failed — attempting Gemini Flash repair.",
+                state.ticker,
+            )
+            repaired = repair_json_via_flash(
+                decision_json_str,
+                _FM_OUTPUT_SCHEMA,
+                self.api_key,
+                log_prefix="[Fund Manager]",
+                label="fund_manager",
+            )
+            if repaired and repaired.get("action") and repaired.get("conviction"):
+                logger.info(
+                    "[Fund Manager] %s: successfully repaired JSON output.",
+                    state.ticker,
+                )
+                decision = repaired
+            else:
+                logger.warning(
+                    "[Fund Manager] %s: repair did not yield a usable decision.",
+                    state.ticker,
+                )
 
         if not decision:
             logger.error(

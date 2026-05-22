@@ -336,7 +336,7 @@ def main():
             "Market": region if region else "Unknown",
             "Rec": recommendation,
             "R/R": rr_str,
-            "Conv": (d.get('conviction') or "-")[:4],
+            "Conv": d.get('conviction') or "-",
             "Drop Type": (d.get('drop_type') or "-")[:14],
             "Limit": limit_str,
             "Price @ Dec": f"{price_at_decision:.2f}" if price_at_decision else "-",

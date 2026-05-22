@@ -42,6 +42,21 @@ def test_normalization_still_rejects_wrong_company():
     assert not StockService._transcript_matches_company(transcript, "Loews Corporation")
 
 
+def test_short_name_after_suffix_strip_still_matches():
+    """'XP Inc.' strips to 'XP' (2 chars) under suffix normalization, which
+    is below the 3-char disambiguation floor. The short-name fallback must
+    still match it against the transcript head rather than false-rejecting."""
+    transcript = "Welcome to the XP Inc. fourth-quarter earnings call. " + "x" * 500
+    assert StockService._transcript_matches_company(transcript, "XP Inc.")
+
+
+def test_short_name_fallback_still_rejects_wrong_company():
+    """The short-name fallback must not turn into a blanket accept — a
+    transcript for a different company is still rejected."""
+    transcript = "Welcome to the Apple Inc. earnings call. " + "x" * 500
+    assert not StockService._transcript_matches_company(transcript, "XP Inc.")
+
+
 def test_normalization_rejects_degenerate_parenthetical_only_input():
     """If the expected_company strips to empty (or near-empty) after
     normalization, fall through to AV rather than accept any transcript."""
