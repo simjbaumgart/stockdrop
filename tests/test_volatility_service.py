@@ -196,3 +196,16 @@ class TestGetRegime:
             svc.get_regime(trend="BULL")
             svc.get_regime(trend="BULL")
             assert m.call_count == 1  # second call served from cache
+
+
+class TestMarketStateField:
+    def test_market_state_accepts_volatility_regime(self):
+        from app.models.market_state import MarketState
+        st = MarketState(ticker="AAPL", date="2026-05-22",
+                         volatility_regime={"regime_score": 0.5})
+        assert st.volatility_regime == {"regime_score": 0.5}
+
+    def test_market_state_volatility_regime_defaults_none(self):
+        from app.models.market_state import MarketState
+        st = MarketState(ticker="AAPL", date="2026-05-22")
+        assert st.volatility_regime is None

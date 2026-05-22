@@ -13,3 +13,4 @@ class MarketState:
     agent_calls: int = 0
     gatekeeper_tier: Optional[str] = None
     earnings_facts: Optional[dict] = None
+    volatility_regime: Optional[dict] = None

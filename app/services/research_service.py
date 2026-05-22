@@ -18,6 +18,7 @@ from app.services.gatekeeper_service import (
     TIER_DEEP_DIP,
     TIER_STANDARD_DIP,
     TIER_SHALLOW_DIP,
+    gatekeeper_service,
 )
 from app.utils.ticker_paths import safe_ticker_path
 from app.utils.agent_call_counter import counter as agent_call_counter
@@ -233,6 +234,7 @@ class ResearchService:
             date=datetime.now().strftime("%Y-%m-%d"),
             gatekeeper_tier=raw_data.get("gatekeeper_tier"),
             earnings_facts=raw_data.get("earnings_facts"),
+            volatility_regime=gatekeeper_service.check_market_regime(),
         )
 
         # Extract drop percent for context (default to generic if missing)
