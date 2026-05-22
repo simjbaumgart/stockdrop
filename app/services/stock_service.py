@@ -664,6 +664,9 @@ class StockService:
             "transcript_date": raw_data.get("transcript_date"),
             # Evidence quality
             "data_depth": report_data.get("data_depth", {}),
+            # Volatility regime (VIX, term structure, Fear & Greed, score) —
+            # cached in gatekeeper_service so this is cheap.
+            "volatility_regime": gatekeeper_service.check_market_regime(),
         }
 
     def _extract_transcript_summary(self, report_data: dict) -> str:
