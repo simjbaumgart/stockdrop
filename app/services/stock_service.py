@@ -25,20 +25,35 @@ from app.services.deep_research_service import deep_research_service
 from app.services.seeking_alpha_service import seeking_alpha_service
 from app.services.news_digest_service import ensure_news_digests_for_today
 
-# --- DefeatBeta SSL bypass (pinned to 0.0.29; pandas-2.x compatible) ---
-# DefeatBeta lazy-downloads NLTK 'punkt_tab' on import; macOS Python often
-# can't find the system CA bundle, so we provide an unverified context just
-# for that one download. This is intentionally narrow.
-import ssl as _ssl
+# --- DefeatBeta NLTK setup ---
+# defeatbeta_api/__init__.py calls nltk.download('punkt_tab') at import time.
+# On macOS the runtime CA bundle is often missing, so that download failed —
+# the previous workaround disabled SSL verification *process-wide*, which
+# silently left every HTTPS call in the app unverified.
+#
+# Instead we vendor punkt_tab in-repo (.nltk_data/) and add it to
+# nltk.data.path, then neutralize DefeatBeta's import-time download so no
+# network call — and no SSL bypass — is needed. SSL verification stays on.
 try:
-    _ssl._create_default_https_context = _ssl._create_unverified_context
-except AttributeError:
-    pass
+    import nltk
 
-try:
-    from defeatbeta_api.data.ticker import Ticker as _DBTicker
+    _VENDORED_NLTK_DATA = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+        ".nltk_data",
+    )
+    if os.path.isdir(_VENDORED_NLTK_DATA) and _VENDORED_NLTK_DATA not in nltk.data.path:
+        nltk.data.path.insert(0, _VENDORED_NLTK_DATA)
+
+    # Suppress DefeatBeta's import-time nltk.download('punkt_tab') — the data
+    # is vendored above, so the network fetch (and its SSL failure) is moot.
+    _orig_nltk_download = nltk.download
+    nltk.download = lambda *args, **kwargs: True
+    try:
+        from defeatbeta_api.data.ticker import Ticker as _DBTicker
+    finally:
+        nltk.download = _orig_nltk_download
 except ImportError:
-    _DBTicker = None  # gracefully degrade if package missing
+    _DBTicker = None  # gracefully degrade if defeatbeta_api / nltk missing
 
 # Age threshold (in days) above which a DefeatBeta transcript is considered stale
 # and triggers an Alpha Vantage fallback fetch.
