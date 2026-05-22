@@ -365,7 +365,10 @@ class ResearchService:
                 logger.warning(f"News Agent shadow call failed (non-fatal): {e}")
             finally:
                 if _shadow_executor is not None:
-                    _shadow_executor.shutdown(wait=False)
+                    # wait=False: on a timeout the shadow worker may keep running
+                    # until its Gemini call's own request timeout — intended, so
+                    # the live pipeline never blocks on the shadow.
+                    _shadow_executor.shutdown(wait=False, cancel_futures=True)
             try:
                 news_shadow_data = news_shadow_service.build_shadow_record(
                     ticker=state.ticker,
