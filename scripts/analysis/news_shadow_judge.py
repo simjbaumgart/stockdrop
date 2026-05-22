@@ -36,7 +36,11 @@ def build_judge_prompt(production_report: str, shadow_report: str) -> str:
 
 
 def parse_judge_response(raw: str) -> Dict[str, Any]:
-    """Extract the JSON object from the judge response, tolerant of code fences."""
+    """Extract the JSON object from the judge response, tolerant of code fences.
+
+    Tries a direct parse of the fence-stripped text first, then falls back to a
+    greedy brace search. Returns an all-"parse_error" dict if nothing parses.
+    """
     fallback = {
         "source_classification": "parse_error",
         "hard_event_detection": "parse_error",
@@ -46,16 +50,24 @@ def parse_judge_response(raw: str) -> Dict[str, Any]:
     }
     if not raw:
         return fallback
+    # Candidate 1: text with an optional leading markdown code fence stripped.
+    stripped = re.sub(r"^```[^\n]*\n?", "", raw.strip(), flags=re.MULTILINE)
+    stripped = stripped.strip().strip("`").strip()
+    candidates = [stripped]
+    # Candidate 2: greedy first-brace-to-last-brace span.
     match = re.search(r"\{.*\}", raw, re.DOTALL)
-    if not match:
-        return fallback
-    try:
-        data = json.loads(match.group(0))
-    except json.JSONDecodeError:
-        return fallback
-    for key in fallback:
-        data.setdefault(key, "n/a")
-    return data
+    if match:
+        candidates.append(match.group(0))
+    for candidate in candidates:
+        try:
+            data = json.loads(candidate)
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if isinstance(data, dict):
+            for key in fallback:
+                data.setdefault(key, "n/a")
+            return data
+    return fallback
 
 
 def _make_client():
@@ -71,6 +83,8 @@ def judge_all_pairs(rows: List[Dict[str, Any]]) -> Dict[int, Dict[str, Any]]:
     """Judge every completed pair. Returns a dict keyed by row id."""
     client = _make_client()
     results: Dict[int, Dict[str, Any]] = {}
+    pairs = [r for r in rows if r.get("shadow_report") and not r.get("shadow_error")]
+    print(f"Judging {len(pairs)} completed pairs ({len(rows) - len(pairs)} skipped)...")
     for r in rows:
         if not r.get("shadow_report") or r.get("shadow_error"):
             continue
@@ -81,8 +95,9 @@ def judge_all_pairs(rows: List[Dict[str, Any]]) -> Dict[int, Dict[str, Any]]:
                 model=JUDGE_MODEL, contents=prompt
             )
             results[r["id"]] = parse_judge_response(getattr(response, "text", ""))
+            print(f"  judged pair {r['id']} ({r.get('symbol')})")
         except Exception as e:
             results[r["id"]] = parse_judge_response("")
             results[r["id"]]["disagreements"] = f"judge call failed: {e}"
-        time.sleep(1)
+        time.sleep(1)  # sync/CLI-only pacing — do not call judge_all_pairs from an async context
     return results

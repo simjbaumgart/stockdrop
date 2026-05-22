@@ -1,6 +1,7 @@
 import pytest
 
 from scripts.analysis import news_shadow_report as nsr
+from scripts.analysis import news_shadow_judge as nsj
 
 
 def _row(idx, prod_econ, shadow_econ, perr=None):
@@ -54,9 +55,6 @@ def test_render_report_contains_sections():
     assert "SYM1" in md
 
 
-from scripts.analysis import news_shadow_judge as nsj
-
-
 def test_parse_judge_response_valid():
     raw = '''```json
 {"source_classification": "tie",
@@ -74,6 +72,11 @@ def test_parse_judge_response_malformed_returns_fallback():
     parsed = nsj.parse_judge_response("not json at all")
     assert parsed["source_classification"] == "parse_error"
     assert "disagreements" in parsed
+
+
+def test_parse_judge_response_empty_returns_fallback():
+    parsed = nsj.parse_judge_response("")
+    assert parsed["source_classification"] == "parse_error"
 
 
 def test_build_judge_prompt_includes_both_reports():
