@@ -7,10 +7,11 @@ import logging
 import json
 import re
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from app.models.market_state import MarketState
 from app.services.analyst_service import analyst_service
 from app.services.fred_service import fred_service
+from app.services import news_shadow_service
 import time
 import requests
 from app.services.deep_research_service import deep_research_service
@@ -1647,7 +1648,7 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
             "failed_phase1_agents": failed_agents,
         }
 
-    def _call_agent(self, prompt: str, agent_name: str, state: Optional[MarketState] = None) -> str:
+    def _call_agent(self, prompt: str, agent_name: str, state: Optional[MarketState] = None, metrics_sink: Optional[Dict[str, Any]] = None) -> str:
         if not self.model:
             return "Mock Output"
         try:
@@ -1675,13 +1676,23 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
 
             if agent_name in grounded_agents and self.grounding_client:
                  model_to_use = "gemini-3-flash-preview"
-                 
+
                  # Bull, Bear, and Fund Manager should use Gemini 3 Pro
                  if agent_name in ["Bull Researcher", "Bear Researcher", "Fund Manager", "Risk Management Agent"]:
                      model_to_use = "gemini-3.1-pro-preview"
-                 
+                 elif agent_name == "News Agent":
+                     # Production News Agent runs on the upgraded Gemini 3.5 Flash model.
+                     model_to_use = news_shadow_service.PRODUCTION_NEWS_MODEL
+
                  logger.info(f"Calling {agent_name} with {model_to_use} + Grounding...")
-                 return self._call_grounded_model(prompt, model_name=model_to_use, agent_context=agent_name)
+                 _t0 = time.monotonic()
+                 _result = self._call_grounded_model(
+                     prompt, model_name=model_to_use, agent_context=agent_name,
+                     metrics_sink=metrics_sink,
+                 )
+                 if metrics_sink is not None:
+                     metrics_sink["latency_ms"] = int((time.monotonic() - _t0) * 1000)
+                 return _result
 
             # Default (Bull, Bear, Manager) -> Main Model (Gemini 3 Pro) without grounding
             # Using standard generate_content (old SDK)
@@ -1712,6 +1723,7 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
         agent_context: str = "",
         retry_count: int = 0,
         budget_clock: Optional["BudgetClock"] = None,
+        metrics_sink: Optional[Dict[str, Any]] = None,
     ) -> str:
         """
         Generic helper to call a model with Google Search Grounding enabled.
@@ -1763,6 +1775,15 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
                 config=config
             )
 
+            if metrics_sink is not None:
+                try:
+                    um = getattr(response, "usage_metadata", None)
+                    metrics_sink["model"] = model_name
+                    metrics_sink["tokens_in"] = getattr(um, "prompt_token_count", 0) or 0
+                    metrics_sink["tokens_out"] = getattr(um, "candidates_token_count", 0) or 0
+                except Exception:
+                    metrics_sink.setdefault("model", model_name)
+
             # Check for FunctionCall (finish_reason 10) which indicates failure to auto-ground
             candidate = response.candidates[0] if response.candidates else None
             finish_reason = candidate.finish_reason if candidate else None
@@ -1772,7 +1793,7 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
 
                 if retry_count < MAX_GROUNDING_RETRIES:
                     logger.warning(f"Model {model_name} returned FunctionCall ({attempt_label}) in {agent_context}. Retrying...")
-                    return self._call_grounded_model(prompt, model_name, agent_context, retry_count=retry_count + 1, budget_clock=budget_clock)
+                    return self._call_grounded_model(prompt, model_name, agent_context, retry_count=retry_count + 1, budget_clock=budget_clock, metrics_sink=metrics_sink)
 
                 msg = f"""
 ################################################################################
@@ -1807,7 +1828,7 @@ Process continuing but this agent's output is compromised.
                     )
                 time.sleep(2)
                 try:
-                    return self._call_grounded_model(prompt, "gemini-3-pro-preview", agent_context, retry_count=0, budget_clock=budget_clock)
+                    return self._call_grounded_model(prompt, "gemini-3-pro-preview", agent_context, retry_count=0, budget_clock=budget_clock, metrics_sink=metrics_sink)
                 except Exception as fallback_e:
                     logger.error(f"Fallback model also failed for {agent_context} ({type(fallback_e).__name__}): {fallback_e}")
                     return f"[Error in {agent_context} (Fallback): {type(fallback_e).__name__}: {fallback_e}]"
@@ -1829,7 +1850,7 @@ Process continuing but this agent's output is compromised.
                     )
                 logger.info(f"Retrying {agent_context} ({model_name}) in {wait}s ({err_type})...")
                 time.sleep(wait)
-                return self._call_grounded_model(prompt, model_name, agent_context, retry_count=retry_count + 1, budget_clock=budget_clock)
+                return self._call_grounded_model(prompt, model_name, agent_context, retry_count=retry_count + 1, budget_clock=budget_clock, metrics_sink=metrics_sink)
 
             if not retryable:
                 logger.warning(f"Non-retryable exception for {agent_context} ({err_type}); failing fast.")
