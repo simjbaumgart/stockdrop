@@ -42,8 +42,10 @@ def is_shadow_active() -> bool:
 def run_shadow_call(call_fn: Callable[..., str], prompt: str) -> Dict[str, Any]:
     """Run the shadow model on the identical prompt.
 
-    `call_fn` must be ResearchService._call_grounded_model. Raises on failure;
-    the caller is responsible for catching so the live pipeline is unaffected.
+    `call_fn` must be ResearchService._call_grounded_model, which accepts a
+    `metrics_sink` keyword argument (added in the model-swap task). Raises on
+    failure; the caller is responsible for catching so the live pipeline is
+    unaffected.
     """
     metrics: Dict[str, Any] = {}
     t0 = time.monotonic()

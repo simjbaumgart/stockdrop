@@ -1,6 +1,7 @@
 import pytest
 
 from app import database
+from app.services import news_shadow_service as nss
 
 
 @pytest.fixture
@@ -55,9 +56,6 @@ def test_get_returns_inserted_rows(temp_db):
     assert len(rows) == 2
     assert {r["symbol"] for r in rows} == {"AAPL", "MSFT"}
     assert rows[0]["decision_point_id"] == 1
-
-
-from app.services import news_shadow_service as nss
 
 
 def test_extract_needs_economics_true():
