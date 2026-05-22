@@ -189,6 +189,9 @@ def main() -> None:
                         help="Skip the LLM-judged accuracy dimensions")
     args = parser.parse_args()
 
+    # Idempotent — ensures the news_shadow_runs table exists on a fresh DB.
+    database.init_db()
+
     rows = database.get_news_shadow_runs()
     if not rows:
         print("No news_shadow_runs found. Nothing to report.")
