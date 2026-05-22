@@ -1289,6 +1289,26 @@ REALISTIC EXIT CEILING (Bear's Upside Limit):
             ),
         }.get(tier, "UNKNOWN — gatekeeper tier missing; treat as STANDARD_DIP.")
 
+        vol = getattr(state, "volatility_regime", None) or {}
+        if vol.get("regime_score") is not None:
+            vol_block = (
+                "\nVOLATILITY REGIME (numeric ground truth — dip-buys "
+                "mean-revert better when volatility is elevated and the term "
+                "structure is in backwardation):\n"
+                f"- VIX: {vol.get('vix')} ({vol.get('vix_class')}), "
+                f"20-day percentile {vol.get('vix_pctile_20d')}%\n"
+                f"- Term structure: {vol.get('term_structure')} "
+                f"(VIX - VIX3M spread {vol.get('term_spread')})\n"
+                f"- CNN Fear & Greed: {vol.get('fear_greed')} "
+                f"({vol.get('fear_greed_rating')})\n"
+                f"- Regime: {vol.get('regime_label')} "
+                f"(score {vol.get('regime_score')} of 1.0) — higher favors "
+                "dip-buying. Weigh this against the bull/bear cases; a "
+                "FAVORABLE regime is a tailwind, UNFAVORABLE a headwind.\n"
+            )
+        else:
+            vol_block = ""
+
         ef = getattr(state, "earnings_facts", None) or {}
         if ef and ef.get("reported_eps") is not None:
             _sp = ef.get("surprise_pct")
@@ -1321,7 +1341,7 @@ DECISION CONTEXT:
 - This is a "Buy the Dip" evaluation. We are looking for oversold large-cap stocks with recovery potential.
 - The investor holds positions until recovery (weeks to months), not day-trading.
 - Gatekeeper Tier: {tier_line}
-
+{vol_block}
 RISK FACTORS (For Consideration):
 - Technical Flags: {safe_concerns}
 - News Flags: {risky_support}
