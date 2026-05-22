@@ -62,5 +62,37 @@ class TestMarketSentimentAgent(unittest.TestCase):
         self.assertNotIn("Unrelated", prompt)
         print("Test Passed: market-news-only items are included.")
 
+class TestMarketSentimentVolatilityBlock(unittest.TestCase):
+
+    def setUp(self):
+        with patch.dict('os.environ', {'GEMINI_API_KEY': 'fake_key'}):
+            self.service = ResearchService()
+            self.service.grounding_client = MagicMock()
+            self.service.model = MagicMock()
+            self.service.flash_model = MagicMock()
+
+    def _regime(self):
+        return {
+            "vix": 16.75, "vix_class": "NORMAL", "vix_pctile_20d": 65.0,
+            "term_structure": "CONTANGO", "term_spread": -1.45,
+            "fear_greed": 42, "fear_greed_rating": "Fear",
+            "regime_score": 0.48, "regime_label": "NEUTRAL",
+            "summary": "VIX 16.75 (NORMAL), CONTANGO, trend BULL — regime NEUTRAL (0.48).",
+        }
+
+    def test_volatility_block_present_when_regime_set(self):
+        state = MarketState(ticker="AAPL", date="2026-05-22", volatility_regime=self._regime())
+        prompt = self.service._create_market_sentiment_prompt(state, {})
+        self.assertIn("VOLATILITY REGIME", prompt)
+        self.assertIn("16.75", prompt)
+        self.assertIn("CONTANGO", prompt)
+        self.assertIn("NEUTRAL", prompt)
+
+    def test_no_volatility_block_when_regime_missing(self):
+        state = MarketState(ticker="AAPL", date="2026-05-22")
+        prompt = self.service._create_market_sentiment_prompt(state, {})
+        self.assertNotIn("VOLATILITY REGIME", prompt)
+
+
 if __name__ == "__main__":
     unittest.main()

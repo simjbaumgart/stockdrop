@@ -1774,6 +1774,23 @@ Process continuing but this agent's output is compromised.
         if found_market_news:
             market_news_str = f"\n        PROVIDED BROAD MARKET CONTEXT (Important):\n{market_news_str}\n"
 
+        vol = getattr(state, "volatility_regime", None) or {}
+        vol_block = ""
+        if vol.get("regime_score") is not None:
+            vol_block = (
+                "\n        VOLATILITY REGIME (numeric ground truth — do NOT "
+                "contradict this with news prose; cite these exact numbers):\n"
+                f"        - VIX: {vol.get('vix')} ({vol.get('vix_class')}), "
+                f"20-day percentile {vol.get('vix_pctile_20d')}%\n"
+                f"        - VIX term structure: {vol.get('term_structure')} "
+                f"(VIX - VIX3M spread {vol.get('term_spread')})\n"
+                f"        - CNN Fear & Greed: {vol.get('fear_greed')} "
+                f"({vol.get('fear_greed_rating')})\n"
+                f"        - Regime: {vol.get('regime_label')} "
+                f"(score {vol.get('regime_score')} of 1.0)\n"
+                f"        {vol.get('summary')}\n"
+            )
+
         return f"""
         You are the **Market Sentiment Agent**.
         Your goal is to analyze the general market sentiment and specifically the markets relevant to {ticker}.
@@ -1783,7 +1800,7 @@ Process continuing but this agent's output is compromised.
         CONTEXT:
         - Date: {state.date}
         - Focus: TODAY and YESTERDAY only.
-        {market_news_str}
+        {vol_block}{market_news_str}
 
         TASK:
         1. **Identify Markets**:
