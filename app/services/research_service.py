@@ -312,11 +312,28 @@ class ResearchService:
         # real outcomes, not just "future completed without raising".
         completed_agents: List[tuple] = []
 
+        # --- News Agent shadow comparison (non-blocking, isolated) ---
+        news_metrics: Dict[str, Any] = {}
+        news_shadow_data = None
+        _shadow_executor = None
+        _shadow_future = None
+        if news_shadow_service.is_shadow_active():
+            try:
+                _shadow_executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+                _shadow_future = _shadow_executor.submit(
+                    news_shadow_service.run_shadow_call,
+                    self._call_grounded_model,
+                    news_prompt,
+                )
+            except Exception as e:
+                logger.warning(f"Could not start News Agent shadow call: {e}")
+                _shadow_future = None
+
         # Increase max_workers to prevent starvation when agents hit 503 and retry
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
             futures = {
                 executor.submit(run_agent, "Technical Agent", self._call_agent, tech_prompt, "Technical Agent", state): "technical",
-                executor.submit(run_agent, "News Agent", self._call_agent, news_prompt, "News Agent", state): "news",
+                executor.submit(run_agent, "News Agent", self._call_agent, news_prompt, "News Agent", state, news_metrics): "news",
                 executor.submit(run_agent, "Market Sentiment Agent", self._call_agent, sentiment_prompt, "Market Sentiment Agent", state): "sentiment",
                 executor.submit(run_agent, "Competitive Landscape Agent", self._call_agent, comp_prompt, "Competitive Landscape Agent", state): "competitive",
                 executor.submit(run_agent, "Seeking Alpha Agent", seeking_alpha_service.get_evidence, state.ticker): "seeking_alpha"
@@ -337,6 +354,29 @@ class ResearchService:
                     comp_report = result
                 elif agent_name == "Seeking Alpha Agent":
                     sa_report = result
+
+        # Collect the shadow result. Any failure here is non-fatal — the live
+        # News Agent output (news_report) is already final and unaffected.
+        if _shadow_future is not None:
+            _shadow_result = None
+            try:
+                _shadow_result = _shadow_future.result(timeout=120)
+            except Exception as e:
+                logger.warning(f"News Agent shadow call failed (non-fatal): {e}")
+            finally:
+                if _shadow_executor is not None:
+                    _shadow_executor.shutdown(wait=False)
+            try:
+                news_shadow_data = news_shadow_service.build_shadow_record(
+                    ticker=state.ticker,
+                    date=state.date,
+                    production_report=news_report,
+                    production_metrics=news_metrics,
+                    shadow_result=_shadow_result,
+                )
+            except Exception as e:
+                logger.warning(f"Could not build News shadow record: {e}")
+                news_shadow_data = None
 
         # Print compact agent progress summary — ✓ for real reports, ✗ for error stubs
         agent_status = " ".join([f"[{name}{'✓' if ok else '✗'}]" for name, ok in completed_agents])
@@ -711,6 +751,7 @@ class ResearchService:
                 "economics_run": economics_run,
                 "drop_reason_identified": drop_reason_identified
             },
+            "news_shadow_data": news_shadow_data,
             "key_decision_points": final_decision.get("key_factors", []),  # Mapped for backward compat
             "market_sentiment_report": state.reports.get('market_sentiment', ''),
             "competitive_report": state.reports.get('competitive', ''),
