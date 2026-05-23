@@ -70,33 +70,19 @@ total_llm_calls   INTEGER
 
 These are **derived** — `agent_token_usage` is the source of truth. The denormalized totals are always recomputable by re-running the rollup query against the source table. If the pipeline crashes between calls and the rollup, the four columns stay stale but no data is lost.
 
-### `decision_points.status` column (also new)
+### `decision_points.status` — already exists, leave alone
 
-```
-status   TEXT NOT NULL DEFAULT 'complete'
-         -- 'in_progress' | 'complete' | 'failed' | 'gated_out'
-         -- Default is 'complete' so existing rows backfill cleanly.
-         -- New stub inserts at pipeline start explicitly write 'in_progress'.
-```
+`decision_points` already has a `status` column with the existing vocabulary (`'Pending'` at insert time, updated later by the pipeline). Earlier drafts of this spec proposed a new enum (`in_progress` / `complete` / `failed` / `gated_out`). That is out of scope here — introducing a parallel vocabulary now would break existing readers.
 
-Needed because the row is now inserted as a stub at pipeline start (see "decision_id ordering" below) and will sometimes never reach PM. Reports filter by `status = 'complete'` for valid recommendation data, but `agent_token_usage` joins on all statuses — partial runs still consumed tokens and should appear in cost totals.
+`agent_token_usage` joins on `decision_id` regardless of `status`. Partial runs that never reach PM still consumed tokens and should appear in cost totals.
 
-## decision_id ordering — stub-first
+## decision_id ordering — already solved
 
-**The decision_points row is inserted at the very start of the pipeline, before gatekeeper.** It contains:
+`app/services/stock_service.py:1517` already does `add_decision_point()` at pipeline start with `status='Pending'`, returning a `decision_id` before any LLM call fires. The pipeline later updates the same row at `stock_service.py:1692` with final verdicts and prices.
 
-```
-id          (autoincrement)
-ticker
-run_date
-created_at
-status      'in_progress'
--- all other columns NULL / default
-```
+The work here is just to **thread `decision_id` through to every Gemini call site** so `record_llm_call` can write to a valid FK. No new stub-insert is needed.
 
-Every downstream stage receives `decision_id` and writes `agent_token_usage` rows against a valid FK from its first call onward. At pipeline end the existing decision-write logic does an `UPDATE` instead of an `INSERT` to fill in verdicts, prices, etc. Final status transitions to `complete` (or `failed` / `gated_out`).
-
-Alternative considered: buffer token records in memory and bulk-insert at run end. Rejected — buffering loses data on crash, and stub-insert is a one-line change at a single chokepoint.
+Alternative considered (buffer in memory, bulk-insert at run end): unnecessary given the existing stub-insert; would also lose data on crash.
 
 ## Thread safety
 
@@ -180,10 +166,10 @@ def record_llm_call(
 
 Called immediately after every Gemini response in:
 
-- `app/services/research_service.py` — 5 sensors, 3 debate agents, PM
-- `app/services/deep_research_service.py` — deep research reviewer
+- `app/services/research_service.py` — 4 sensors (technical/news/market_sentiment/competitive — Seeking Alpha is deterministic and skipped), 3 debate agents, PM
+- `app/services/deep_research_service.py` — best-effort: deep research uses the REST API at `https://generativelanguage.googleapis.com/v1beta/interactions` (line 1103) which may return `usageMetadata` in the JSON. If present, record it with `agent_name='deep_research'`. If not, log a warning and skip — DR is already documented as a lower bound in the out-of-scope section.
 
-The existing `metrics_sink` plumbing in `research_service.py:1828-1829` already pulls the two counts out of `usage_metadata`; we extend rather than replace it — `record_llm_call` is invoked alongside the existing sink write.
+The existing `metrics_sink` plumbing in `research_service.py:1828-1829` already pulls the two counts out of `usage_metadata` inside `_call_grounded_model`; we extend the same chokepoint rather than instrumenting each agent individually. The plan threads `decision_id`, `ticker`, `run_date`, and `agent_name` into `_call_grounded_model` (or its caller `_call_agent`) so the helper has everything it needs at the moment of the call.
 
 ### Run-end rollup
 
@@ -213,10 +199,9 @@ Idempotent — safe to re-run.
 
 `app/database.py` already runs migrations at startup. Add:
 
-1. `CREATE TABLE IF NOT EXISTS agent_token_usage (...)` plus three indexes.
-2. `ALTER TABLE decision_points ADD COLUMN total_tokens_in INTEGER` (and the other three).
-3. `ALTER TABLE decision_points ADD COLUMN status TEXT NOT NULL DEFAULT 'complete'` — existing rows are stamped `'complete'` since the pipeline was end-to-end before this change; new rows start as `'in_progress'`.
-4. `PRAGMA journal_mode=WAL` (if not already set).
+1. `CREATE TABLE IF NOT EXISTS agent_token_usage (...)` plus three indexes — add inside `init_db()` after the existing `news_shadow_runs` block (~line 198).
+2. Add the four denormalized total columns (`total_tokens_in`, `total_tokens_out`, `total_cost_usd`, `total_llm_calls`) to the existing `new_columns` dict at `app/database.py:55` — the idempotent ALTER loop at line 144 handles them.
+3. `PRAGMA journal_mode=WAL` once at startup inside `init_db()` (not currently set).
 
 `decision_points` already has 40+ columns with migration history; follow the existing pattern in `app/database.py`.
 
