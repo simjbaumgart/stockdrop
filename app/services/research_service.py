@@ -245,13 +245,16 @@ class ResearchService:
     # ... (skipping methods until _call_agent)
 
 
-    def analyze_stock(self, ticker: str, raw_data: Dict) -> dict:
+    def analyze_stock(self, ticker: str, raw_data: Dict, decision_id: Optional[int] = None) -> dict:
         """
         Orchestrates the new 3-Phase Agent Flow:
         1. Agents (Technical + News) -> MarketState.reports
         1. Agents (Technical + News) -> MarketState.reports
         2. Bull & Bear Perspectives (Parallel) -> MarketState.reports['bull'/'bear']
         3. Portfolio Manager (Internet Verification) -> Final Decision
+
+        `decision_id` (optional): FK into decision_points; threaded onto MarketState
+        so downstream LLM calls can record per-call token usage.
         """
         if not self._check_and_increment_usage():
             return {"recommendation": "SKIP", "reasoning": "Daily limit reached."}
@@ -265,6 +268,7 @@ class ResearchService:
             gatekeeper_tier=raw_data.get("gatekeeper_tier"),
             earnings_facts=raw_data.get("earnings_facts"),
             volatility_regime=gatekeeper_service.check_market_regime(),
+            decision_id=decision_id,
         )
 
         # Extract drop percent for context (default to generic if missing)

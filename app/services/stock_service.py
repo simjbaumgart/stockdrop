@@ -1617,7 +1617,7 @@ class StockService:
         }
 
         # Pass raw_data to research service
-        report_data = research_service.analyze_stock(symbol, raw_data)
+        report_data = research_service.analyze_stock(symbol, raw_data, decision_id=decision_id)
 
         # Persist the News Agent shadow comparison, if one was run.
         shadow_data = report_data.get("news_shadow_data")

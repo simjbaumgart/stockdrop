@@ -14,3 +14,4 @@ class MarketState:
     gatekeeper_tier: Optional[str] = None
     earnings_facts: Optional[dict] = None
     volatility_regime: Optional[dict] = None
+    decision_id: Optional[int] = None   # FK into decision_points for token tracking
