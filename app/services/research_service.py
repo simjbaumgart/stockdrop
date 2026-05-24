@@ -211,6 +211,25 @@ from app.services.pm_verdict_formatters import format_rr_block, format_ratings_b
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Maps the human-readable agent_name used in _call_agent to the stable
+# (stage, tracker_agent_name) pair stored in agent_token_usage.
+# These tracker names are immutable once shipped — renaming silently
+# breaks every historical per-agent trend query.
+TOKEN_TRACKER_AGENT_MAP = {
+    "Technical Agent":             ("sensor", "sensor_technical"),
+    "News Agent":                  ("sensor", "sensor_news"),
+    "Market Sentiment Agent":      ("sensor", "sensor_market_sentiment"),
+    "Competitive Landscape Agent": ("sensor", "sensor_competitive"),
+    "Bull Researcher":             ("debate", "debate_bull"),
+    "Bear Researcher":             ("debate", "debate_bear"),
+    "Risk Management Agent":       ("debate", "debate_risk"),
+    "Fund Manager":                ("pm",     "pm"),
+    # Note: Economics Agent and any retry-loop agents are not tracked
+    # here. The Seeking Alpha agent is deterministic (no LLM call) and
+    # is correctly absent.
+}
+
+
 class ResearchService:
     MAX_DAILY_REPORTS = 1000
     USAGE_FILE = "usage_stats.json"
@@ -1704,7 +1723,22 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
             if state:
                 with self.lock:
                     state.agent_calls += 1
-            
+
+            # Build tracker context only if we have everything we need.
+            # If decision_id is missing (e.g. direct unit-test invocation),
+            # skip tracking silently — the live pipeline always provides it.
+            tracker_context = None
+            mapping = TOKEN_TRACKER_AGENT_MAP.get(agent_name)
+            if state and state.decision_id is not None and mapping is not None:
+                stage, tracker_name = mapping
+                tracker_context = {
+                    "decision_id": state.decision_id,
+                    "ticker": state.ticker,
+                    "run_date": state.date,
+                    "stage": stage,
+                    "agent_name": tracker_name,
+                }
+
             # List of agents that should use Grounding (Internet Search)
             # Technical and Economics added as per user request
             # Bull, Bear, and Fund Manager added as per user request
@@ -1737,6 +1771,7 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
                  _result = self._call_grounded_model(
                      prompt, model_name=model_to_use, agent_context=agent_name,
                      metrics_sink=metrics_sink,
+                     tracker_context=tracker_context,
                  )
                  if metrics_sink is not None:
                      metrics_sink["latency_ms"] = int((time.monotonic() - _t0) * 1000)
@@ -1772,6 +1807,7 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
         retry_count: int = 0,
         budget_clock: Optional["BudgetClock"] = None,
         metrics_sink: Optional[Dict[str, Any]] = None,
+        tracker_context: Optional[Dict[str, Any]] = None,
     ) -> str:
         """
         Generic helper to call a model with Google Search Grounding enabled.
@@ -1843,7 +1879,7 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
 
                 if retry_count < MAX_GROUNDING_RETRIES:
                     logger.warning(f"Model {model_name} returned FunctionCall ({attempt_label}) in {agent_context}. Retrying...")
-                    return self._call_grounded_model(prompt, model_name, agent_context, retry_count=retry_count + 1, budget_clock=budget_clock, metrics_sink=metrics_sink)
+                    return self._call_grounded_model(prompt, model_name, agent_context, retry_count=retry_count + 1, budget_clock=budget_clock, metrics_sink=metrics_sink, tracker_context=tracker_context)
 
                 msg = f"""
 ################################################################################
@@ -1856,6 +1892,29 @@ Process continuing but this agent's output is compromised.
                 print(msg)
                 logger.error(msg)
                 return f"[SYSTEM ERROR: Grounding failed for {agent_context}. Model returned invalid Function Call.]"
+
+            # --- token tracking: persist to agent_token_usage on every successful call ---
+            # Placed AFTER the FunctionCall early-return retry so failed-grounding
+            # attempts don't get recorded; only genuinely successful (non-FunctionCall)
+            # responses reach this point.
+            if tracker_context is not None:
+                try:
+                    um = getattr(response, "usage_metadata", None)
+                    tokens_in  = (getattr(um, "prompt_token_count", 0) or 0) if um else 0
+                    tokens_out = (getattr(um, "candidates_token_count", 0) or 0) if um else 0
+                    from app.services.token_tracker import record_llm_call
+                    record_llm_call(
+                        decision_id=tracker_context["decision_id"],
+                        ticker=tracker_context["ticker"],
+                        run_date=tracker_context["run_date"],
+                        stage=tracker_context["stage"],
+                        agent_name=tracker_context["agent_name"],
+                        model=model_name,
+                        tokens_in=tokens_in,
+                        tokens_out=tokens_out,
+                    )
+                except Exception as e:
+                    logger.warning("token tracker invocation failed: %s", e)
 
             # Format and return with citations
             report_text = self._format_citations(response)
@@ -1878,7 +1937,7 @@ Process continuing but this agent's output is compromised.
                     )
                 time.sleep(2)
                 try:
-                    return self._call_grounded_model(prompt, "gemini-3-pro-preview", agent_context, retry_count=0, budget_clock=budget_clock, metrics_sink=metrics_sink)
+                    return self._call_grounded_model(prompt, "gemini-3-pro-preview", agent_context, retry_count=0, budget_clock=budget_clock, metrics_sink=metrics_sink, tracker_context=tracker_context)
                 except Exception as fallback_e:
                     logger.error(f"Fallback model also failed for {agent_context} ({type(fallback_e).__name__}): {fallback_e}")
                     return f"[Error in {agent_context} (Fallback): {type(fallback_e).__name__}: {fallback_e}]"
@@ -1900,7 +1959,7 @@ Process continuing but this agent's output is compromised.
                     )
                 logger.info(f"Retrying {agent_context} ({model_name}) in {wait}s ({err_type})...")
                 time.sleep(wait)
-                return self._call_grounded_model(prompt, model_name, agent_context, retry_count=retry_count + 1, budget_clock=budget_clock, metrics_sink=metrics_sink)
+                return self._call_grounded_model(prompt, model_name, agent_context, retry_count=retry_count + 1, budget_clock=budget_clock, metrics_sink=metrics_sink, tracker_context=tracker_context)
 
             if not retryable:
                 logger.warning(f"Non-retryable exception for {agent_context} ({err_type}); failing fast.")
