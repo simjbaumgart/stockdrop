@@ -78,6 +78,14 @@ The HTML dashboard surfaces live recommendations, decision history, and performa
 
 ---
 
+## 📊 Monthly snapshot
+
+Want to see what the system actually produces? **[docs/performance/2026-05-24-package/](docs/performance/2026-05-24-package/README.md)** is a curated, browsable snapshot of the last 30 days: headline stats, four charts, four case studies, and the raw structured data behind every decision. LLM free-text reasoning is deliberately excluded — this snapshot is about the numbers.
+
+Regenerate with `python scripts/build_monthly_snapshot.py --as-of YYYY-MM-DD`.
+
+---
+
 ## 🚀 Getting Started
 
 ### Prerequisites

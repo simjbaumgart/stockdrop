@@ -1,0 +1,63 @@
+
+# Data dictionary
+
+Generated 2026-05-24 from `subscribers.db` (last 30 days).
+
+## Files
+
+| File | Source table | Rows | Notes |
+|---|---|---:|---|
+| `decisions.csv` | `decision_points` | 404 | Structured columns only — every free-text LLM field is dropped |
+| `positions.csv` | `desk_positions` | 45 | All columns are structured |
+| `monthly_summary.csv` | (aggregated) | 5 | One row per recommendation × outcome stats |
+| `schema.sql` | (DDL) | — | `CREATE TABLE` statements for the two shipped tables |
+| `manifest.csv` | (this file's listing) | — | Generated-at timestamp + file row counts |
+
+## `decisions.csv` columns
+
+| Column | Type | Description |
+|---|---|---|
+| `id` | int | Primary key from `decision_points` |
+| `symbol` | str | Ticker symbol |
+| `company_name` | str | Issuer name |
+| `sector` | str | GICS sector |
+| `timestamp` | str | When the decision was made (UTC) |
+| `price_at_decision` | float | Last trade price when the screener flagged the drop |
+| `drop_percent` | float | Single-day % drop that triggered the screener |
+| `recommendation` | str | PM verdict: `BUY` / `BUY_LIMIT` / `WATCH` / `AVOID` / `PASS_INSUFFICIENT_DATA` |
+| `ai_score` | float | PM score, 0–100 |
+| `conviction` | str | PM conviction band |
+| `drop_type` | str | PM's classification of the drop (e.g. earnings, sector, idiosyncratic) |
+| `entry_price_low` / `entry_price_high` | float | PM's recommended entry range |
+| `stop_loss` | float | Recommended stop price |
+| `take_profit_1` / `take_profit_2` | float | First and second take-profit targets |
+| `deep_research_action` | str | DR's overriding action (may differ from PM) |
+| `deep_research_score` | int | DR's 0–100 score |
+| `deep_research_conviction` | str | DR conviction band |
+| `deep_research_entry_low/high`, `deep_research_tp1/tp2` | float | DR's price plan (may differ from PM's) |
+| `sa_quant_rating`, `wall_street_rating` | float | External ratings snapshotted at decision time |
+| `gatekeeper_tier` | str | Pre-filter tier (TIER_1 = strongest setup) |
+| `batch_winner` | bool | True if the candidate won its batch comparison |
+
+## `positions.csv` columns
+
+| Column | Type | Description |
+|---|---|---|
+| `id` | int | Primary key |
+| `decision_point_id` | int | FK to `decisions.csv` `id` |
+| `ticker` | str | Position ticker |
+| `status` | str | `ACTIVE` or `CLOSED` |
+| `entry_date`, `entry_price` | str / float | Fill information |
+| `position_size` | float | Dollar size of the position |
+| `attractiveness_score` | float | Composite score used at sizing time |
+| `current_price`, `unrealized_pnl_pct` | float | Snapshot of current state (NULL when closed) |
+| `exit_date`, `exit_price`, `realized_pnl_pct`, `exit_reason` | str / float | Closeout information (NULL when active) |
+
+## What's NOT in this snapshot
+
+| Excluded | Why |
+|---|---|
+| Free-text agent reasoning (`reasoning`, `deep_research_*_analysis`, `deep_research_swot`, etc.) | This snapshot is about numbers — the prose belongs in the case studies, hand-curated, not bulk-dumped |
+| `subscribers` table | PII guardrail, regardless of row count |
+| `decision_tracking` | Currently empty in the live DB; outcome data comes from `positions.csv` |
+| `batch_comparisons`, `desk_reviews`, `transcript_cache` | Internal bookkeeping, not useful to external readers |
