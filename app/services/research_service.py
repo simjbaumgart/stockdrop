@@ -1783,6 +1783,31 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
             time.sleep(2)
             
             response = self.model.generate_content(prompt, request_options=RequestOptions(timeout=600))
+
+            # Record token usage if we have the context to attribute it.
+            if tracker_context is not None:
+                try:
+                    um = getattr(response, "usage_metadata", None)
+                    tokens_in  = (getattr(um, "prompt_token_count", 0) or 0) if um else 0
+                    tokens_out = (getattr(um, "candidates_token_count", 0) or 0) if um else 0
+                    model_used = getattr(self.model, "model_name", "unknown")
+                    # Old-SDK model_name comes back as 'models/<name>' — strip prefix.
+                    if model_used.startswith("models/"):
+                        model_used = model_used[len("models/"):]
+                    from app.services.token_tracker import record_llm_call
+                    record_llm_call(
+                        decision_id=tracker_context["decision_id"],
+                        ticker=tracker_context["ticker"],
+                        run_date=tracker_context["run_date"],
+                        stage=tracker_context["stage"],
+                        agent_name=tracker_context["agent_name"],
+                        model=model_used,
+                        tokens_in=tokens_in,
+                        tokens_out=tokens_out,
+                    )
+                except Exception as e:
+                    logger.warning("token tracker invocation failed (fallback path): %s", e)
+
             return response.text
         except Exception as e:
             # Check for 503 Unavailable inside generic exception (for GenAI v1 SDK)
@@ -1791,6 +1816,26 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
                 try:
                     fallback_model = genai.GenerativeModel('gemini-3-pro-preview')
                     fallback_response = fallback_model.generate_content(prompt, request_options=RequestOptions(timeout=600))
+
+                    if tracker_context is not None:
+                        try:
+                            um = getattr(fallback_response, "usage_metadata", None)
+                            tokens_in  = (getattr(um, "prompt_token_count", 0) or 0) if um else 0
+                            tokens_out = (getattr(um, "candidates_token_count", 0) or 0) if um else 0
+                            from app.services.token_tracker import record_llm_call
+                            record_llm_call(
+                                decision_id=tracker_context["decision_id"],
+                                ticker=tracker_context["ticker"],
+                                run_date=tracker_context["run_date"],
+                                stage=tracker_context["stage"],
+                                agent_name=tracker_context["agent_name"],
+                                model="gemini-3-pro-preview",
+                                tokens_in=tokens_in,
+                                tokens_out=tokens_out,
+                            )
+                        except Exception as e:
+                            logger.warning("token tracker invocation failed (503-fallback path): %s", e)
+
                     return fallback_response.text
                 except Exception as fallback_e:
                     logger.error(f"Fallback model also failed for {agent_name}: {fallback_e}")
