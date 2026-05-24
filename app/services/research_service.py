@@ -213,20 +213,27 @@ logger = logging.getLogger(__name__)
 
 # Maps the human-readable agent_name used in _call_agent to the stable
 # (stage, tracker_agent_name) pair stored in agent_token_usage.
-# These tracker names are immutable once shipped — renaming silently
+# These tracker names are IMMUTABLE once shipped — renaming silently
 # breaks every historical per-agent trend query.
+#
+# Inclusion policy:
+#   - Every grounded LLM call site whose first attempt belongs to the
+#     decision pipeline goes in. That's the 5 sensors + 3 debate + PM.
+#   - Phase 1 retry-loop calls reach _call_agent with the SAME agent_name
+#     as their first attempt. They naturally re-record under the same row
+#     vocabulary — the spec calls this out: only the final successful
+#     attempt is recorded (retry-tax invisible).
+#   - The Seeking Alpha agent is deterministic (no LLM call) — correctly absent.
 TOKEN_TRACKER_AGENT_MAP = {
     "Technical Agent":             ("sensor", "sensor_technical"),
     "News Agent":                  ("sensor", "sensor_news"),
     "Market Sentiment Agent":      ("sensor", "sensor_market_sentiment"),
     "Competitive Landscape Agent": ("sensor", "sensor_competitive"),
+    "Economics Agent":             ("sensor", "sensor_economics"),
     "Bull Researcher":             ("debate", "debate_bull"),
     "Bear Researcher":             ("debate", "debate_bear"),
     "Risk Management Agent":       ("debate", "debate_risk"),
     "Fund Manager":                ("pm",     "pm"),
-    # Note: Economics Agent and any retry-loop agents are not tracked
-    # here. The Seeking Alpha agent is deterministic (no LLM call) and
-    # is correctly absent.
 }
 
 
