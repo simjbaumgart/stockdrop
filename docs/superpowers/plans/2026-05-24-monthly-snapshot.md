@@ -595,12 +595,16 @@ def build_monthly_summary(decisions: pd.DataFrame, positions: pd.DataFrame) -> p
         .reset_index()
     )
 
-    # join positions on decision_point_id -> id
+    # join positions on decision_point_id -> id.
+    # suffixes=("", "_dec") keeps positions.id as "id" (and renames
+    # decisions.id to "id_dec") so the agg below can reference "id"
+    # without a column-collision KeyError.
     joined = positions.merge(
         decisions[["id", "recommendation"]],
         left_on="decision_point_id",
         right_on="id",
         how="inner",
+        suffixes=("", "_dec"),
     )
     closed = joined[joined["status"] == "CLOSED"]
     pos_agg = (
