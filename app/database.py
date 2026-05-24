@@ -9,6 +9,10 @@ def init_db():
     """Initialize the database with the subscribers and decision_points tables."""
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
+    # Enable WAL so the 5+3 ThreadPoolExecutor agent fan-out doesn't
+    # serialize on a global write lock when each thread opens its own
+    # short-lived connection to insert a token_usage row.
+    cursor.execute("PRAGMA journal_mode=WAL")
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS subscribers (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -138,6 +142,11 @@ def init_db():
             "sa_authors_rating": "REAL",
             "wall_street_rating": "REAL",
             "sa_rank": "INTEGER",
+            # --- token usage tracking (2026-05-23) ---
+            "total_tokens_in":  "INTEGER",
+            "total_tokens_out": "INTEGER",
+            "total_cost_usd":   "REAL",
+            "total_llm_calls":  "INTEGER",
         }
         
         
@@ -196,6 +205,26 @@ def init_db():
             FOREIGN KEY (decision_point_id) REFERENCES decision_points (id)
         )
     ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS agent_token_usage (
+            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            decision_id   INTEGER NOT NULL,
+            ticker        TEXT    NOT NULL,
+            run_date      TEXT    NOT NULL,
+            stage         TEXT    NOT NULL,
+            agent_name    TEXT    NOT NULL,
+            model         TEXT    NOT NULL,
+            tokens_in     INTEGER NOT NULL,
+            tokens_out    INTEGER NOT NULL,
+            cost_usd      REAL,
+            created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (decision_id) REFERENCES decision_points (id)
+        )
+    ''')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_atu_decision_id ON agent_token_usage(decision_id)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_atu_run_date    ON agent_token_usage(run_date)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_atu_agent_date  ON agent_token_usage(agent_name, run_date)')
 
     # Migration for batch_comparisons
     try:

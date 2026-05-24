@@ -1617,7 +1617,7 @@ class StockService:
         }
 
         # Pass raw_data to research service
-        report_data = research_service.analyze_stock(symbol, raw_data)
+        report_data = research_service.analyze_stock(symbol, raw_data, decision_id=decision_id)
 
         # Persist the News Agent shadow comparison, if one was run.
         shadow_data = report_data.get("news_shadow_data")
@@ -1688,7 +1688,14 @@ class StockService:
         if decision_id:
             import json
             data_depth_str = json.dumps(report_data.get('data_depth', {}))
-            
+
+            # Re-roll token totals to include the deep_research row (if any).
+            try:
+                from app.services.token_tracker import rollup_decision_totals
+                rollup_decision_totals(decision_id)
+            except Exception as e:
+                print(f"rollup_decision_totals failed post-DR: {e}")
+
             update_decision_point(
                 decision_id, 
                 recommendation, 

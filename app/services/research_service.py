@@ -211,6 +211,32 @@ from app.services.pm_verdict_formatters import format_rr_block, format_ratings_b
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Maps the human-readable agent_name used in _call_agent to the stable
+# (stage, tracker_agent_name) pair stored in agent_token_usage.
+# These tracker names are IMMUTABLE once shipped — renaming silently
+# breaks every historical per-agent trend query.
+#
+# Inclusion policy:
+#   - Every grounded LLM call site whose first attempt belongs to the
+#     decision pipeline goes in. That's the 5 sensors + 3 debate + PM.
+#   - Phase 1 retry-loop calls reach _call_agent with the SAME agent_name
+#     as their first attempt. They naturally re-record under the same row
+#     vocabulary — the spec calls this out: only the final successful
+#     attempt is recorded (retry-tax invisible).
+#   - The Seeking Alpha agent is deterministic (no LLM call) — correctly absent.
+TOKEN_TRACKER_AGENT_MAP = {
+    "Technical Agent":             ("sensor", "sensor_technical"),
+    "News Agent":                  ("sensor", "sensor_news"),
+    "Market Sentiment Agent":      ("sensor", "sensor_market_sentiment"),
+    "Competitive Landscape Agent": ("sensor", "sensor_competitive"),
+    "Economics Agent":             ("sensor", "sensor_economics"),
+    "Bull Researcher":             ("debate", "debate_bull"),
+    "Bear Researcher":             ("debate", "debate_bear"),
+    "Risk Management Agent":       ("debate", "debate_risk"),
+    "Fund Manager":                ("pm",     "pm"),
+}
+
+
 class ResearchService:
     MAX_DAILY_REPORTS = 1000
     USAGE_FILE = "usage_stats.json"
@@ -245,13 +271,16 @@ class ResearchService:
     # ... (skipping methods until _call_agent)
 
 
-    def analyze_stock(self, ticker: str, raw_data: Dict) -> dict:
+    def analyze_stock(self, ticker: str, raw_data: Dict, decision_id: Optional[int] = None) -> dict:
         """
         Orchestrates the new 3-Phase Agent Flow:
         1. Agents (Technical + News) -> MarketState.reports
         1. Agents (Technical + News) -> MarketState.reports
         2. Bull & Bear Perspectives (Parallel) -> MarketState.reports['bull'/'bear']
         3. Portfolio Manager (Internet Verification) -> Final Decision
+
+        `decision_id` (optional): FK into decision_points; threaded onto MarketState
+        so downstream LLM calls can record per-call token usage.
         """
         if not self._check_and_increment_usage():
             return {"recommendation": "SKIP", "reasoning": "Daily limit reached."}
@@ -265,6 +294,7 @@ class ResearchService:
             gatekeeper_tier=raw_data.get("gatekeeper_tier"),
             earnings_facts=raw_data.get("earnings_facts"),
             volatility_regime=gatekeeper_service.check_market_regime(),
+            decision_id=decision_id,
         )
 
         # Extract drop percent for context (default to generic if missing)
@@ -715,6 +745,15 @@ class ResearchService:
         print()
         print(f"  Total Agent Calls: {state.agent_calls}")
         print("="*50 + "\n")
+
+        # Rollup token totals onto decision_points so per-run queries don't
+        # need a GROUP BY. Safe to call multiple times — idempotent.
+        if state.decision_id is not None:
+            try:
+                from app.services.token_tracker import rollup_decision_totals
+                rollup_decision_totals(state.decision_id)
+            except Exception as e:
+                logger.warning("rollup_decision_totals failed in analyze_stock: %s", e)
 
         return {
             "recommendation": recommendation,
@@ -1700,7 +1739,22 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
             if state:
                 with self.lock:
                     state.agent_calls += 1
-            
+
+            # Build tracker context only if we have everything we need.
+            # If decision_id is missing (e.g. direct unit-test invocation),
+            # skip tracking silently — the live pipeline always provides it.
+            tracker_context = None
+            mapping = TOKEN_TRACKER_AGENT_MAP.get(agent_name)
+            if state and state.decision_id is not None and mapping is not None:
+                stage, tracker_name = mapping
+                tracker_context = {
+                    "decision_id": state.decision_id,
+                    "ticker": state.ticker,
+                    "run_date": state.date,
+                    "stage": stage,
+                    "agent_name": tracker_name,
+                }
+
             # List of agents that should use Grounding (Internet Search)
             # Technical and Economics added as per user request
             # Bull, Bear, and Fund Manager added as per user request
@@ -1733,6 +1787,7 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
                  _result = self._call_grounded_model(
                      prompt, model_name=model_to_use, agent_context=agent_name,
                      metrics_sink=metrics_sink,
+                     tracker_context=tracker_context,
                  )
                  if metrics_sink is not None:
                      metrics_sink["latency_ms"] = int((time.monotonic() - _t0) * 1000)
@@ -1744,6 +1799,31 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
             time.sleep(2)
             
             response = self.model.generate_content(prompt, request_options=RequestOptions(timeout=600))
+
+            # Record token usage if we have the context to attribute it.
+            if tracker_context is not None:
+                try:
+                    um = getattr(response, "usage_metadata", None)
+                    tokens_in  = (getattr(um, "prompt_token_count", 0) or 0) if um else 0
+                    tokens_out = (getattr(um, "candidates_token_count", 0) or 0) if um else 0
+                    model_used = getattr(self.model, "model_name", "unknown")
+                    # Old-SDK model_name comes back as 'models/<name>' — strip prefix.
+                    if model_used.startswith("models/"):
+                        model_used = model_used[len("models/"):]
+                    from app.services.token_tracker import record_llm_call
+                    record_llm_call(
+                        decision_id=tracker_context["decision_id"],
+                        ticker=tracker_context["ticker"],
+                        run_date=tracker_context["run_date"],
+                        stage=tracker_context["stage"],
+                        agent_name=tracker_context["agent_name"],
+                        model=model_used,
+                        tokens_in=tokens_in,
+                        tokens_out=tokens_out,
+                    )
+                except Exception as e:
+                    logger.warning("token tracker invocation failed (fallback path): %s", e)
+
             return response.text
         except Exception as e:
             # Check for 503 Unavailable inside generic exception (for GenAI v1 SDK)
@@ -1752,6 +1832,26 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
                 try:
                     fallback_model = genai.GenerativeModel('gemini-3-pro-preview')
                     fallback_response = fallback_model.generate_content(prompt, request_options=RequestOptions(timeout=600))
+
+                    if tracker_context is not None:
+                        try:
+                            um = getattr(fallback_response, "usage_metadata", None)
+                            tokens_in  = (getattr(um, "prompt_token_count", 0) or 0) if um else 0
+                            tokens_out = (getattr(um, "candidates_token_count", 0) or 0) if um else 0
+                            from app.services.token_tracker import record_llm_call
+                            record_llm_call(
+                                decision_id=tracker_context["decision_id"],
+                                ticker=tracker_context["ticker"],
+                                run_date=tracker_context["run_date"],
+                                stage=tracker_context["stage"],
+                                agent_name=tracker_context["agent_name"],
+                                model="gemini-3-pro-preview",
+                                tokens_in=tokens_in,
+                                tokens_out=tokens_out,
+                            )
+                        except Exception as e:
+                            logger.warning("token tracker invocation failed (503-fallback path): %s", e)
+
                     return fallback_response.text
                 except Exception as fallback_e:
                     logger.error(f"Fallback model also failed for {agent_name}: {fallback_e}")
@@ -1768,6 +1868,7 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
         retry_count: int = 0,
         budget_clock: Optional["BudgetClock"] = None,
         metrics_sink: Optional[Dict[str, Any]] = None,
+        tracker_context: Optional[Dict[str, Any]] = None,
     ) -> str:
         """
         Generic helper to call a model with Google Search Grounding enabled.
@@ -1839,7 +1940,7 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
 
                 if retry_count < MAX_GROUNDING_RETRIES:
                     logger.warning(f"Model {model_name} returned FunctionCall ({attempt_label}) in {agent_context}. Retrying...")
-                    return self._call_grounded_model(prompt, model_name, agent_context, retry_count=retry_count + 1, budget_clock=budget_clock, metrics_sink=metrics_sink)
+                    return self._call_grounded_model(prompt, model_name, agent_context, retry_count=retry_count + 1, budget_clock=budget_clock, metrics_sink=metrics_sink, tracker_context=tracker_context)
 
                 msg = f"""
 ################################################################################
@@ -1852,6 +1953,29 @@ Process continuing but this agent's output is compromised.
                 print(msg)
                 logger.error(msg)
                 return f"[SYSTEM ERROR: Grounding failed for {agent_context}. Model returned invalid Function Call.]"
+
+            # --- token tracking: persist to agent_token_usage on every successful call ---
+            # Placed AFTER the FunctionCall early-return retry so failed-grounding
+            # attempts don't get recorded; only genuinely successful (non-FunctionCall)
+            # responses reach this point.
+            if tracker_context is not None:
+                try:
+                    um = getattr(response, "usage_metadata", None)
+                    tokens_in  = (getattr(um, "prompt_token_count", 0) or 0) if um else 0
+                    tokens_out = (getattr(um, "candidates_token_count", 0) or 0) if um else 0
+                    from app.services.token_tracker import record_llm_call
+                    record_llm_call(
+                        decision_id=tracker_context["decision_id"],
+                        ticker=tracker_context["ticker"],
+                        run_date=tracker_context["run_date"],
+                        stage=tracker_context["stage"],
+                        agent_name=tracker_context["agent_name"],
+                        model=model_name,
+                        tokens_in=tokens_in,
+                        tokens_out=tokens_out,
+                    )
+                except Exception as e:
+                    logger.warning("token tracker invocation failed: %s", e)
 
             # Format and return with citations
             report_text = self._format_citations(response)
@@ -1874,7 +1998,7 @@ Process continuing but this agent's output is compromised.
                     )
                 time.sleep(2)
                 try:
-                    return self._call_grounded_model(prompt, "gemini-3-pro-preview", agent_context, retry_count=0, budget_clock=budget_clock, metrics_sink=metrics_sink)
+                    return self._call_grounded_model(prompt, "gemini-3-pro-preview", agent_context, retry_count=0, budget_clock=budget_clock, metrics_sink=metrics_sink, tracker_context=tracker_context)
                 except Exception as fallback_e:
                     logger.error(f"Fallback model also failed for {agent_context} ({type(fallback_e).__name__}): {fallback_e}")
                     return f"[Error in {agent_context} (Fallback): {type(fallback_e).__name__}: {fallback_e}]"
@@ -1896,7 +2020,7 @@ Process continuing but this agent's output is compromised.
                     )
                 logger.info(f"Retrying {agent_context} ({model_name}) in {wait}s ({err_type})...")
                 time.sleep(wait)
-                return self._call_grounded_model(prompt, model_name, agent_context, retry_count=retry_count + 1, budget_clock=budget_clock, metrics_sink=metrics_sink)
+                return self._call_grounded_model(prompt, model_name, agent_context, retry_count=retry_count + 1, budget_clock=budget_clock, metrics_sink=metrics_sink, tracker_context=tracker_context)
 
             if not retryable:
                 logger.warning(f"Non-retryable exception for {agent_context} ({err_type}); failing fast.")

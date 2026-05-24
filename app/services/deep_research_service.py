@@ -1133,7 +1133,38 @@ class DeepResearchService:
                     # Our script will need to handle the DB update or we pass decision_id here and do it?
                     # The original code returns the result and _process_individual_task calls _handle_completion.
                     # So we should just return result.
-                    
+
+                    # Best-effort token tracking. The REST response shape may not
+                    # include usageMetadata; if it doesn't, log and skip — DR cost
+                    # is already documented as a lower bound (spec out-of-scope).
+                    if decision_id is not None:
+                        try:
+                            um = poll_data.get("usageMetadata") or {}
+                            tokens_in  = int(um.get("promptTokenCount", 0) or 0)
+                            tokens_out = int(um.get("candidatesTokenCount", 0) or 0)
+                            if tokens_in or tokens_out:
+                                from app.services.token_tracker import record_llm_call
+                                from datetime import datetime
+                                record_llm_call(
+                                    decision_id=decision_id,
+                                    ticker=symbol,
+                                    run_date=datetime.now().strftime("%Y-%m-%d"),
+                                    stage="deep_research",
+                                    agent_name="deep_research",
+                                    model="deep-research-pro",
+                                    tokens_in=tokens_in,
+                                    tokens_out=tokens_out,
+                                )
+                            else:
+                                logger.info(
+                                    "[Deep Research] No usageMetadata in poll response for %s — "
+                                    "skipping token record (expected; see spec out-of-scope).",
+                                    symbol,
+                                )
+                        except Exception as e:
+                            logger.warning("[Deep Research] token tracking failed for %s: %s",
+                                           symbol, e)
+
                     return self._parse_output(poll_data, schema_type='individual')
                 elif status in ['failed', 'FAILED']:
                     logger.error(f"[Deep Research] Task Failed for {symbol}: {poll_data}")
