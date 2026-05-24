@@ -739,6 +739,15 @@ class ResearchService:
         print(f"  Total Agent Calls: {state.agent_calls}")
         print("="*50 + "\n")
 
+        # Rollup token totals onto decision_points so per-run queries don't
+        # need a GROUP BY. Safe to call multiple times — idempotent.
+        if state.decision_id is not None:
+            try:
+                from app.services.token_tracker import rollup_decision_totals
+                rollup_decision_totals(state.decision_id)
+            except Exception as e:
+                logger.warning("rollup_decision_totals failed in analyze_stock: %s", e)
+
         return {
             "recommendation": recommendation,
             "executive_summary": final_decision.get("reason", "No reason provided."),
