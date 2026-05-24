@@ -921,7 +921,7 @@ git commit -m "feat(snapshot): four PNG chart renderers with empty-data fallback
 {# app/services/snapshot/templates/README.md.j2 #}
 # StockDrop — Monthly Snapshot ({{ window_start }} → {{ window_end }})
 
-> Generated {{ as_of }} from `subscribers.db`. Browse the data, charts, and case studies below.
+> Generated {{ as_of }} from the project SQLite database. Browse the data, charts, and case studies below.
 
 This snapshot captures **{{ total_decisions }} decisions** the AI council made over the trailing 30 days, plus the realized/unrealized outcomes of every position the desk took during that window.
 
@@ -973,7 +973,7 @@ The free-text reasoning from the LLM agents is **deliberately excluded** — thi
 python scripts/build_monthly_snapshot.py --as-of {{ as_of }}
 ```
 
-The script reads `subscribers.db` in read-only mode (`?mode=ro`), filters to the last 30 days, drops every free-text LLM column, renders the charts, fills this template, and writes everything to `docs/performance/{{ as_of }}-package/`.
+The script reads the project SQLite database in read-only mode (`?mode=ro`), filters to the last 30 days, drops every free-text LLM column, renders the charts, fills this template, and writes everything to `docs/performance/{{ as_of }}-package/`.
 
 [Spec](../../superpowers/specs/2026-05-24-monthly-snapshot-design.md) · [Plan](../../superpowers/plans/2026-05-24-monthly-snapshot.md)
 ```
