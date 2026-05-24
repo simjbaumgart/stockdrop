@@ -14,7 +14,7 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -61,7 +61,7 @@ _SLOT_FILES = {
 def _write_manifest(out_dir: Path, file_rows: dict[str, int]) -> None:
     rows = [{"file": f, "rows": n} for f, n in file_rows.items()]
     df = pd.DataFrame(rows)
-    df["generated_at"] = datetime.utcnow().isoformat(timespec="seconds") + "Z"
+    df["generated_at"] = datetime.now(timezone.utc).replace(tzinfo=None).isoformat(timespec="seconds") + "Z"
     df.to_csv(out_dir / "data" / "manifest.csv", index=False)
 
 

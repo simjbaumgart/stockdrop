@@ -11,6 +11,24 @@ from typing import Any, Dict, Optional
 import pandas as pd
 
 
+def _is_missing(v: Any) -> bool:
+    """True for None and any pandas/numpy NaN (including float, str, datetime)."""
+    if v is None:
+        return True
+    try:
+        return bool(pd.isna(v))
+    except (TypeError, ValueError):
+        return False
+
+
+def _clean(v: Any, default: str = "—") -> str:
+    """Return v as a clean string, or `default` if it's missing/NaN."""
+    if _is_missing(v):
+        return default
+    s = str(v).strip()
+    return s if s and s.lower() != "nan" else default
+
+
 def _row_to_dict(row: pd.Series, decision_row: Optional[pd.Series]) -> Dict[str, Any]:
     d: Dict[str, Any] = {
         "ticker": row.get("ticker"),
@@ -62,22 +80,43 @@ def pick_candidates(
         "best": None, "worst": None, "avoided": None, "open": None,
     }
 
+    # Restrict best/worst/open candidates to positions whose decision is
+    # in the in-window decisions DataFrame, so the case study's "setup"
+    # section is populated. Falls back to the unfiltered pool only if no
+    # in-window candidate exists for a slot.
     if not positions.empty:
-        closed = positions[positions["status"] == "CLOSED"].dropna(subset=["realized_pnl_pct"])
-        if not closed.empty:
-            best = closed.loc[closed["realized_pnl_pct"].idxmax()]
-            worst = closed.loc[closed["realized_pnl_pct"].idxmin()]
+        in_window_ids = set(decisions["id"]) if not decisions.empty else set()
+        in_window_pos = positions[positions["decision_point_id"].isin(in_window_ids)]
+
+        def _pick_best_worst(pool: pd.DataFrame):
+            closed = pool[pool["status"] == "CLOSED"].dropna(subset=["realized_pnl_pct"])
+            if closed.empty:
+                return None, None
+            return (
+                closed.loc[closed["realized_pnl_pct"].idxmax()],
+                closed.loc[closed["realized_pnl_pct"].idxmin()],
+            )
+
+        best, worst = _pick_best_worst(in_window_pos)
+        if best is None:
+            best, worst = _pick_best_worst(positions)
+        if best is not None:
             out["best"] = _join_one(best, decisions)
             out["worst"] = _join_one(worst, decisions)
 
-        active = positions[positions["status"] == "ACTIVE"]
-        if not active.empty:
-            # Pick the one with the highest unrealized P&L, or the most recent entry as tiebreaker.
+        def _pick_open(pool: pd.DataFrame):
+            active = pool[pool["status"] == "ACTIVE"]
+            if active.empty:
+                return None
             if active["unrealized_pnl_pct"].notna().any():
-                pick = active.loc[active["unrealized_pnl_pct"].idxmax()]
-            else:
-                pick = active.iloc[0]
-            out["open"] = _join_one(pick, decisions)
+                return active.loc[active["unrealized_pnl_pct"].idxmax()]
+            return active.iloc[0]
+
+        open_pick = _pick_open(in_window_pos)
+        if open_pick is None:
+            open_pick = _pick_open(positions)
+        if open_pick is not None:
+            out["open"] = _join_one(open_pick, decisions)
 
     if not decisions.empty:
         avoids = decisions[decisions["recommendation"] == "AVOID"]
@@ -106,13 +145,13 @@ def draft_case_study(slot: str, candidate: Optional[Dict[str, Any]]) -> str:
     if candidate is None:
         return f"# {title}\n\nNo candidate available for this slot in the current window.\n"
 
-    ticker = candidate.get("ticker") or candidate.get("company_name") or "?"
-    company = candidate.get("company_name") or ticker
-    sector = candidate.get("sector") or "—"
+    ticker = _clean(candidate.get("ticker"), _clean(candidate.get("company_name"), "?"))
+    company = _clean(candidate.get("company_name"), ticker)
+    sector = _clean(candidate.get("sector"))
     drop = candidate.get("drop_percent")
-    rec = candidate.get("recommendation") or "—"
+    rec = _clean(candidate.get("recommendation"))
     ai_score = candidate.get("ai_score")
-    dr_action = candidate.get("deep_research_action") or "—"
+    dr_action = _clean(candidate.get("deep_research_action"))
     dr_score = candidate.get("deep_research_score")
 
     entry_low = candidate.get("entry_price_low")
@@ -121,17 +160,18 @@ def draft_case_study(slot: str, candidate: Optional[Dict[str, Any]]) -> str:
     tp1 = candidate.get("take_profit_1")
     tp2 = candidate.get("take_profit_2")
 
-    entry_date = candidate.get("entry_date") or "—"
+    entry_date = _clean(candidate.get("entry_date"))
     entry_price = candidate.get("entry_price")
-    exit_date = candidate.get("exit_date")
+    exit_date_raw = candidate.get("exit_date")
+    exit_date = _clean(exit_date_raw)
     exit_price = candidate.get("exit_price")
     realized = candidate.get("realized_pnl_pct")
     unrealized = candidate.get("unrealized_pnl_pct")
     cur_price = candidate.get("current_price")
-    exit_reason = candidate.get("exit_reason") or "—"
+    exit_reason = _clean(candidate.get("exit_reason"))
 
     def fmt(v, suffix=""):
-        if v is None or (isinstance(v, float) and pd.isna(v)):
+        if _is_missing(v):
             return "—"
         if isinstance(v, float):
             return f"{v:.2f}{suffix}"
@@ -156,7 +196,7 @@ def draft_case_study(slot: str, candidate: Optional[Dict[str, Any]]) -> str:
         "## What happened",
         f"- **Entry date / price:** {entry_date} @ {fmt(entry_price)}",
     ]
-    if exit_date:
+    if not _is_missing(exit_date_raw):
         lines += [
             f"- **Exit date / price:** {exit_date} @ {fmt(exit_price)}",
             f"- **Realized P&L:** {fmt(realized, '%')}",
