@@ -10,7 +10,7 @@ def _row(idx, prod_econ, shadow_econ, perr=None):
         "decision_point_id": idx,
         "symbol": f"SYM{idx}",
         "decision_date": "2026-05-22",
-        "production_model": "gemini-3.5-flash-preview",
+        "production_model": "gemini-3.5-flash",
         "production_report": "Prod report",
         "production_tokens_in": 1000,
         "production_tokens_out": 400,
@@ -36,7 +36,7 @@ def test_economics_flag_agreement():
 def test_cost_math_uses_pricing():
     rows = [_row(1, 1, 1)]
     stats = nsr.compute_deterministic_stats(rows)
-    pin, pout = nsr.PRICING["gemini-3.5-flash-preview"]["in"], nsr.PRICING["gemini-3.5-flash-preview"]["out"]
+    pin, pout = nsr.PRICING["gemini-3.5-flash"]["in"], nsr.PRICING["gemini-3.5-flash"]["out"]
     expected = (1000 / 1_000_000) * pin + (400 / 1_000_000) * pout
     assert stats["production_cost_per_dp"] == pytest.approx(expected)
 

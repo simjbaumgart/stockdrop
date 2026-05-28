@@ -20,7 +20,7 @@ GEMINI_PRICING = {
     "gemini-3-pro-preview":     {"in": 0.0, "out": 0.0},  # TODO verify
     "gemini-3.1-pro-preview":   {"in": 0.0, "out": 0.0},  # TODO verify
     "gemini-3-flash-preview":   {"in": 0.0, "out": 0.0},  # TODO verify
-    "gemini-3.5-flash-preview": {"in": 0.0, "out": 0.0},  # TODO verify (news shadow prod model)
+    "gemini-3.5-flash":         {"in": 0.0, "out": 0.0},  # TODO verify (news shadow prod model)
     "deep-research-pro":        {"in": 0.0, "out": 0.0},  # TODO verify (if separately priced)
 }
 

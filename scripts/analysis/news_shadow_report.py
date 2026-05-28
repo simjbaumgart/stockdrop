@@ -22,7 +22,7 @@ from app import database  # noqa: E402
 # identical rates, so the production-vs-shadow cost delta reflects token-count
 # differences only until real per-model rates are filled in.
 PRICING: Dict[str, Dict[str, float]] = {
-    "gemini-3.5-flash-preview": {"in": 0.30, "out": 2.50},
+    "gemini-3.5-flash":       {"in": 0.30, "out": 2.50},
     "gemini-3-flash-preview": {"in": 0.30, "out": 2.50},
 }
 
@@ -88,7 +88,7 @@ def render_report(rows: List[Dict[str, Any]],
     lines.append("")
     lines.append(f"Generated: {datetime.datetime.now().isoformat(timespec='seconds')}")
     lines.append("")
-    lines.append("- Production model: `gemini-3.5-flash-preview`")
+    lines.append("- Production model: `gemini-3.5-flash`")
     lines.append("- Shadow model: `gemini-3-flash-preview`")
     lines.append(f"- Completed paired runs: **{n}**")
     if errored:
@@ -196,6 +196,17 @@ def main() -> None:
     if not rows:
         print("No news_shadow_runs found. Nothing to report.")
         return
+
+    # Drop rows where the production call itself errored. Early rows captured
+    # the buggy `gemini-3.5-flash-preview` id and stored a 404 error string as
+    # the production report; comparing a 404 to a real shadow report is noise.
+    total = len(rows)
+    rows = [r for r in rows
+            if r.get("production_report")
+            and not r["production_report"].lstrip().startswith("[Error")]
+    dropped = total - len(rows)
+    if dropped:
+        print(f"Filtered out {dropped} row(s) with errored production reports.")
 
     judge_results = None
     if not args.no_judge:

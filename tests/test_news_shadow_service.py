@@ -16,7 +16,7 @@ def _sample_record(symbol="AAPL"):
     return {
         "symbol": symbol,
         "decision_date": "2026-05-22",
-        "production_model": "gemini-3.5-flash-preview",
+        "production_model": "gemini-3.5-flash",
         "production_report": "Production report. NEEDS_ECONOMICS: TRUE",
         "production_tokens_in": 1000,
         "production_tokens_out": 400,
@@ -68,21 +68,31 @@ def test_extract_needs_economics_false():
     assert nss.extract_needs_economics(None) is False
 
 
-def test_models_differ():
-    assert nss.PRODUCTION_NEWS_MODEL != nss.SHADOW_NEWS_MODEL
+def test_shadow_inactive_when_models_match(monkeypatch):
+    # No upgrade in flight: production == shadow, so shadow comparison is a no-op.
+    monkeypatch.setattr(nss, "PRODUCTION_NEWS_MODEL", "gemini-3-flash-preview")
+    monkeypatch.setattr(nss, "SHADOW_NEWS_MODEL", "gemini-3-flash-preview")
+    monkeypatch.setattr(nss.database, "count_news_shadow_runs", lambda: 0)
+    assert nss.is_shadow_active() is False
 
 
 def test_is_shadow_active_under_target(monkeypatch):
+    monkeypatch.setattr(nss, "PRODUCTION_NEWS_MODEL", "gemini-X-new")
+    monkeypatch.setattr(nss, "SHADOW_NEWS_MODEL", "gemini-3-flash-preview")
     monkeypatch.setattr(nss.database, "count_news_shadow_runs", lambda: 5)
     assert nss.is_shadow_active() is True
 
 
 def test_is_shadow_active_at_target(monkeypatch):
+    monkeypatch.setattr(nss, "PRODUCTION_NEWS_MODEL", "gemini-X-new")
+    monkeypatch.setattr(nss, "SHADOW_NEWS_MODEL", "gemini-3-flash-preview")
     monkeypatch.setattr(nss.database, "count_news_shadow_runs", lambda: 20)
     assert nss.is_shadow_active() is False
 
 
 def test_is_shadow_active_swallows_errors(monkeypatch):
+    monkeypatch.setattr(nss, "PRODUCTION_NEWS_MODEL", "gemini-X-new")
+    monkeypatch.setattr(nss, "SHADOW_NEWS_MODEL", "gemini-3-flash-preview")
     def boom():
         raise RuntimeError("db down")
     monkeypatch.setattr(nss.database, "count_news_shadow_runs", boom)
@@ -109,7 +119,7 @@ def test_run_shadow_call_passes_shadow_model():
 
 
 def test_build_shadow_record_with_success():
-    prod_metrics = {"model": "gemini-3.5-flash-preview",
+    prod_metrics = {"model": "gemini-3.5-flash",
                     "tokens_in": 900, "tokens_out": 300, "latency_ms": 4000}
     shadow_result = {"report": "Shadow. NEEDS_ECONOMICS: TRUE",
                      "metrics": {"tokens_in": 950, "tokens_out": 310, "latency_ms": 5000}}
@@ -124,7 +134,7 @@ def test_build_shadow_record_with_success():
 
 
 def test_build_shadow_record_with_failure():
-    prod_metrics = {"model": "gemini-3.5-flash-preview",
+    prod_metrics = {"model": "gemini-3.5-flash",
                     "tokens_in": 900, "tokens_out": 300, "latency_ms": 4000}
     rec = nss.build_shadow_record("AAPL", "2026-05-22",
                                   "Prod report", prod_metrics, None)

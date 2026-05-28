@@ -14,9 +14,11 @@ from app import database
 
 logger = logging.getLogger(__name__)
 
-# Production News Agent model (the upgrade target).
-# NOTE: confirm this id against the live Gemini model list before deploying.
-PRODUCTION_NEWS_MODEL = "gemini-3.5-flash-preview"
+# Production News Agent model.
+# The earlier id "gemini-3.5-flash-preview" was wrong — Gemini 3.5 Flash is
+# the stable release, no "-preview" suffix — and every News Agent call 404'd
+# until this was corrected.
+PRODUCTION_NEWS_MODEL = "gemini-3.5-flash"
 
 # Previous News Agent model, kept running in shadow for validation.
 SHADOW_NEWS_MODEL = "gemini-3-flash-preview"
@@ -31,7 +33,13 @@ def extract_needs_economics(report_text: Optional[str]) -> bool:
 
 
 def is_shadow_active() -> bool:
-    """True while fewer than SHADOW_RUN_TARGET completed pairs exist."""
+    """True while fewer than SHADOW_RUN_TARGET completed pairs exist.
+
+    Also returns False when production and shadow point to the same model:
+    in that state the shadow call is a wasteful a/a comparison.
+    """
+    if PRODUCTION_NEWS_MODEL == SHADOW_NEWS_MODEL:
+        return False
     try:
         return database.count_news_shadow_runs() < SHADOW_RUN_TARGET
     except Exception as e:
