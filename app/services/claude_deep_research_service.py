@@ -131,6 +131,11 @@ class ClaudeDeepResearchService:
                 continue
             break  # end_turn / max_tokens / refusal
 
+        if getattr(resp, "stop_reason", None) == "pause_turn":
+            logger.warning(
+                "[Claude DR] research hit MAX_CONTINUATIONS (%d) still paused — "
+                "transcript may be truncated.", MAX_CONTINUATIONS)
+
         transcript = "\n".join(
             b.text for b in all_blocks if getattr(b, "type", None) == "text" and getattr(b, "text", None)
         )
@@ -192,35 +197,48 @@ class ClaudeDeepResearchService:
     def execute_deep_research(self, symbol: str, context: dict,
                               decision_id: int = None) -> Optional[Dict]:
         from app.services.deep_research_service import deep_research_service
-        prompt = _deglooglify(deep_research_service._construct_prompt(symbol, context))
-        research = self._run_research(prompt)
-        result = self._synthesize(research["transcript_text"],
-                                  research["source_urls"], INDIVIDUAL_SCHEMA)
-        if result is None:
+        try:
+            prompt = _deglooglify(deep_research_service._construct_prompt(symbol, context))
+            research = self._run_research(prompt)
+            if not research["transcript_text"].strip():
+                logger.warning("[Claude DR] empty research transcript for %s — skipping synthesis.", symbol)
+                return None
+            result = self._synthesize(research["transcript_text"],
+                                      research["source_urls"], INDIVIDUAL_SCHEMA)
+            if result is None:
+                return None
+            self._record_cost(decision_id, symbol, "deep_research", research, {})
+            result["_claude_research_meta"] = {
+                "source_urls": research["source_urls"],
+                "search_count": research["search_count"],
+                "latency_s": research["latency_s"],
+                "thinking": research["thinking"],
+                "usage": research["usage"],
+            }
+            return result
+        except Exception as e:
+            logger.error("[Claude DR] execute_deep_research failed for %s: %s", symbol, e)
             return None
-        synth_usage = {}  # synthesis usage folded into research cost approximation
-        self._record_cost(decision_id, symbol, "deep_research", research, synth_usage)
-        result["_claude_research_meta"] = {
-            "source_urls": research["source_urls"],
-            "search_count": research["search_count"],
-            "latency_s": research["latency_s"],
-            "thinking": research["thinking"],
-            "usage": research["usage"],
-        }
-        return result
 
     def execute_sell_reassessment(self, symbol: str, context: dict,
                                   decision_id: int = None) -> Optional[Dict]:
         from app.services.deep_research_service import deep_research_service
-        prompt = _deglooglify(
-            deep_research_service._construct_sell_reassessment_prompt(symbol, context))
-        research = self._run_research(prompt)
-        result = self._synthesize(research["transcript_text"],
-                                  research["source_urls"], SELL_SCHEMA)
-        if result is None:
+        try:
+            prompt = _deglooglify(
+                deep_research_service._construct_sell_reassessment_prompt(symbol, context))
+            research = self._run_research(prompt)
+            if not research["transcript_text"].strip():
+                logger.warning("[Claude DR] empty sell-research transcript for %s — skipping synthesis.", symbol)
+                return None
+            result = self._synthesize(research["transcript_text"],
+                                      research["source_urls"], SELL_SCHEMA)
+            if result is None:
+                return None
+            self._record_cost(decision_id, symbol, "sell_reassessment", research, {})
+            return result
+        except Exception as e:
+            logger.error("[Claude DR] execute_sell_reassessment failed for %s: %s", symbol, e)
             return None
-        self._record_cost(decision_id, symbol, "sell_reassessment", research, {})
-        return result
 
     def execute_batch_comparison(self, candidates: List[Dict], batch_id=None):
         # Batch comparison stays on Gemini for now (low priority, no trading-level
