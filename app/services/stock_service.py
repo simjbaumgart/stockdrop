@@ -651,10 +651,10 @@ class StockService:
         builder and ignored by Gemini's _construct_prompt, so they are safe
         to include unconditionally.
 
-        Note on seeking_alpha: report_data does NOT contain a seeking_alpha
-        sensor report (it is stored only in state.reports during the pipeline
-        run and is not propagated to report_data). We include the four that
-        ARE available: Technical, News, Market Sentiment, Competitive.
+        All five Phase-1 sensors are forwarded into report_data by
+        research_service.analyze_stock (Technical, News, Market Sentiment,
+        Competitive, Seeking Alpha) and condensed into sensor_summaries here.
+        Keys absent/empty are simply skipped (no fabrication).
         """
         from app.services.claude_dr_prompts import condense_sensor_report
 
@@ -665,6 +665,7 @@ class StockService:
             "News Analysis": report_data.get("macro_report", ""),
             "Market Sentiment": report_data.get("market_sentiment_report", ""),
             "Competitive Landscape": report_data.get("competitive_report", ""),
+            "Seeking Alpha": report_data.get("seeking_alpha_report", ""),
         }
         sensor_summaries = {
             name: condense_sensor_report(text)

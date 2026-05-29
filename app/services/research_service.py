@@ -797,6 +797,7 @@ class ResearchService:
             "key_decision_points": final_decision.get("key_factors", []),  # Mapped for backward compat
             "market_sentiment_report": state.reports.get('market_sentiment', ''),
             "competitive_report": state.reports.get('competitive', ''),
+            "seeking_alpha_report": state.reports.get('seeking_alpha', ''),
             "data_depth": data_depth,
             # External ratings (informational; never shown to agents).
             # Sourced from data/SAgrades/SA_Quant_Ranked_Clean.csv after final_decision.
