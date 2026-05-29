@@ -11,7 +11,6 @@ NOTE: provider routing is via DEEP_RESEARCH_PROVIDER=claude. Backfill is
 out of scope — see memory/no-backfilling-deep-research.md.
 """
 import os
-import re
 import json
 import time
 import logging
@@ -31,13 +30,6 @@ CODE_EXEC_TOOL = {"type": "code_execution_20260120", "name": "code_execution"}
 MAX_CONTINUATIONS = 12   # outer pause_turn resumes; hard backstop on the multi-hop loop
 RESEARCH_MAX_TOKENS = 32000
 SYNTHESIS_MAX_TOKENS = 16000
-
-_GOOGLE_RE = re.compile(r"Google Search", re.IGNORECASE)
-
-
-def _deglooglify(prompt: str) -> str:
-    """Swap Gemini-era 'Google Search' references for provider-neutral 'web search'."""
-    return _GOOGLE_RE.sub("web search", prompt)
 
 
 def _collect_source_urls(blocks: List[Any]) -> List[str]:
@@ -60,8 +52,8 @@ def _collect_source_urls(blocks: List[Any]) -> List[str]:
 
 
 class ClaudeDeepResearchService:
-    """Claude provider. Reuses the Gemini service's prompt builders verbatim
-    (then de-Google'd) so prompt wording stays in one place."""
+    """Claude provider. Uses purpose-built Claude-native prompts from
+    app.services.claude_dr_prompts (build_individual_prompt / build_sell_prompt)."""
 
     def __init__(self):
         self.api_key = os.getenv("CLAUDE_API_KEY")
@@ -196,9 +188,9 @@ class ClaudeDeepResearchService:
     # ---- Public interface (mirrors DeepResearchService) --------------------
     def execute_deep_research(self, symbol: str, context: dict,
                               decision_id: int = None) -> Optional[Dict]:
-        from app.services.deep_research_service import deep_research_service
         try:
-            prompt = _deglooglify(deep_research_service._construct_prompt(symbol, context))
+            from app.services.claude_dr_prompts import build_individual_prompt
+            prompt = build_individual_prompt(symbol, context)
             research = self._run_research(prompt)
             if not research["transcript_text"].strip():
                 logger.warning("[Claude DR] empty research transcript for %s — skipping synthesis.", symbol)
@@ -222,10 +214,9 @@ class ClaudeDeepResearchService:
 
     def execute_sell_reassessment(self, symbol: str, context: dict,
                                   decision_id: int = None) -> Optional[Dict]:
-        from app.services.deep_research_service import deep_research_service
         try:
-            prompt = _deglooglify(
-                deep_research_service._construct_sell_reassessment_prompt(symbol, context))
+            from app.services.claude_dr_prompts import build_sell_prompt
+            prompt = build_sell_prompt(symbol, context)
             research = self._run_research(prompt)
             if not research["transcript_text"].strip():
                 logger.warning("[Claude DR] empty sell-research transcript for %s — skipping synthesis.", symbol)

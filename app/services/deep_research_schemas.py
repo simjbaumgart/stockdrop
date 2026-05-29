@@ -64,6 +64,7 @@ INDIVIDUAL_SCHEMA = {
         "council_blindspots": {"type": "array", "items": _STR},
         "knife_catch_warning": {"type": "boolean"},
         "reason": _STR,
+        "could_not_verify": {"type": "array", "items": _STR},
     },
     "required": [
         "review_verdict", "action", "conviction", "drop_type", "risk_level",
@@ -73,6 +74,7 @@ INDIVIDUAL_SCHEMA = {
         "sell_price_low", "sell_price_high", "ceiling_exit", "exit_trigger",
         "global_market_analysis", "local_market_analysis", "swot_analysis",
         "verification_results", "council_blindspots", "knife_catch_warning", "reason",
+        "could_not_verify",
     ],
 }
 

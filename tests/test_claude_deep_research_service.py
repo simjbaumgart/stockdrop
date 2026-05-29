@@ -19,16 +19,7 @@ def test_verification_results_items_carry_source_url():
     assert item["additionalProperties"] is False
 
 
-from app.services.claude_deep_research_service import (
-    _deglooglify, _collect_source_urls,
-)
-
-
-def test_deglooglify_replaces_google_search_references():
-    src = "Verify their key claims using fresh Google Search data."
-    out = _deglooglify(src)
-    assert "Google Search" not in out
-    assert "web search" in out
+from app.services.claude_deep_research_service import _collect_source_urls
 
 
 class _FakeBlock:
