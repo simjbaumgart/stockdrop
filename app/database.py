@@ -1353,3 +1353,20 @@ def finalize_dr_comparison(comparison_id: int) -> None:
             comparison_id, e,
         )
 
+
+def set_dr_comparison_status(comparison_id: int, status: str) -> None:
+    """Update only the status column of a dr_comparison row."""
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE dr_comparison SET status = ? WHERE id = ?",
+            (status, comparison_id),
+        )
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logger.error(
+            "[set_dr_comparison_status] comparison_id=%s status=%s error: %s",
+            comparison_id, status, e,
+        )

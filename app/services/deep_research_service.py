@@ -487,6 +487,14 @@ class DeepResearchService:
         }
         self.individual_queue.put({'type': 'individual', 'payload': payload})
         logger.info(f"[Deep Research] Queued INDIVIDUAL task for {symbol} (Priority: High)")
+
+        if os.getenv("DR_DUAL_RUN", "").strip().lower() in ("1", "true", "yes"):
+            try:
+                from app.services.dr_comparison_service import dr_comparison_service
+                dr_comparison_service.trigger(decision_id, symbol, context)
+            except Exception as e:
+                logger.error("[Dual-Run] challenger trigger failed (live path unaffected): %s", e)
+
         return True
 
     def queue_batch_comparison_task(self, candidates: List[Dict], batch_id: int):
