@@ -645,8 +645,34 @@ class StockService:
         """
         Builds a condensed but complete context package for deep research.
         Passes SYNTHESIZED council output, not raw data.
+
+        The returned dict is shared by both Gemini and Claude providers.
+        Additive keys (sensor_summaries) are consumed by the Claude prompt
+        builder and ignored by Gemini's _construct_prompt, so they are safe
+        to include unconditionally.
+
+        Note on seeking_alpha: report_data does NOT contain a seeking_alpha
+        sensor report (it is stored only in state.reports during the pipeline
+        run and is not propagated to report_data). We include the four that
+        ARE available: Technical, News, Market Sentiment, Competitive.
         """
-        return {
+        from app.services.claude_dr_prompts import condense_sensor_report
+
+        # Build sensor_summaries from available report_data fields.
+        # Keys absent in report_data are simply skipped (no fabrication).
+        _sensor_map = {
+            "Technical Analysis": report_data.get("technician_report", ""),
+            "News Analysis": report_data.get("macro_report", ""),
+            "Market Sentiment": report_data.get("market_sentiment_report", ""),
+            "Competitive Landscape": report_data.get("competitive_report", ""),
+        }
+        sensor_summaries = {
+            name: condense_sensor_report(text)
+            for name, text in _sensor_map.items()
+            if text and text.strip()
+        }
+
+        context: dict = {
             # PM Decision (new structured output)
             "pm_decision": {
                 "action": report_data.get("recommendation"),
@@ -682,7 +708,16 @@ class StockService:
             # Volatility regime (VIX, term structure, Fear & Greed, score) —
             # cached in gatekeeper_service so this is cheap.
             "volatility_regime": gatekeeper_service.check_market_regime(),
+            # Step 2b: condensed sensor summaries for Claude provider.
+            # Omitted (not included) when no reports are available so the
+            # Claude prompt falls back gracefully to its agent-name listing.
         }
+        if sensor_summaries:
+            context["sensor_summaries"] = sensor_summaries
+        # disagreement_points: not cleanly derivable from report_data without
+        # an LLM call — omitted here. The Claude prompt builds disagreement
+        # from the full bull/bear cases when this key is absent.
+        return context
 
     def _extract_transcript_summary(self, report_data: dict) -> str:
         """

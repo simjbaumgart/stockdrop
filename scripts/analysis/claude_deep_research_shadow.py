@@ -49,8 +49,18 @@ def _rebuild_context(row: dict) -> dict:
     mirroring the live backfill at app/services/stock_service.py:776-803.
     raw_news cannot be reconstructed (paywalled list not persisted) -> []. Claude
     web-searches for news itself, which partly compensates; recorded as a caveat.
+
+    Step 2b additions:
+    - sensor_summaries: built from council1/council2 sensor keys (technical, news,
+      market_sentiment, competitive, seeking_alpha) using condense_sensor_report().
+      All five keys are available in council files, unlike the live pipeline where
+      seeking_alpha is absent from report_data.
+    - disagreement_points: best-effort from bull/bear first ~200 chars each.
+      Included only when both are available; the Claude prompt falls back to
+      full-text bull/bear analysis when this key is absent.
     """
     from app.utils.ticker_paths import safe_ticker_path
+    from app.services.claude_dr_prompts import condense_sensor_report
     symbol = row["symbol"]
     date_str = (row.get("timestamp") or "").split(" ")[0]  # 'YYYY-MM-DD'
     safe = safe_ticker_path(symbol)
@@ -66,7 +76,37 @@ def _rebuild_context(row: dict) -> dict:
             except Exception as e:
                 print(f"  WARN: could not read {path}: {e}")
 
-    return {
+    # ── sensor_summaries (Step 2b) ──────────────────────────────────────────
+    _sensor_map = {
+        "Technical Analysis": council.get("technical", ""),
+        "News Analysis": council.get("news", ""),
+        "Market Sentiment": council.get("market_sentiment", ""),
+        "Competitive Landscape": council.get("competitive", ""),
+        "Seeking Alpha": council.get("seeking_alpha", ""),
+    }
+    sensor_summaries = {
+        name: condense_sensor_report(text)
+        for name, text in _sensor_map.items()
+        if text and (text.strip() if isinstance(text, str) else False)
+    }
+
+    # ── disagreement_points (Step 2b) — best-effort, no LLM ───────────────
+    bull = council.get("bull", "") or ""
+    bear = council.get("bear", "") or ""
+    disagreement_points: list = []
+    if bull and bear and bull != "Not available from shadow." and bear != "Not available from shadow.":
+        # Cheap heuristic: opening of each case often states the core thesis.
+        # Provide as a short prompt hint so Claude targets the gap, not as a
+        # structured list (we can't reliably extract structured disagreements
+        # without an LLM call).
+        bull_lead = bull.strip()[:200].replace("\n", " ")
+        bear_lead = bear.strip()[:200].replace("\n", " ")
+        disagreement_points = [
+            f"Bull opening thesis: {bull_lead}",
+            f"Bear opening thesis: {bear_lead}",
+        ]
+
+    context: dict = {
         "pm_decision": {
             "action": row.get("recommendation"),
             "conviction": row.get("conviction"),
@@ -80,8 +120,8 @@ def _rebuild_context(row: dict) -> dict:
             "entry_trigger": row.get("entry_trigger"),
             "reason": (row.get("reasoning") or "")[:500],
         },
-        "bull_case": council.get("bull", "Not available from shadow."),
-        "bear_case": council.get("bear", "Not available from shadow."),
+        "bull_case": bull or "Not available from shadow.",
+        "bear_case": bear or "Not available from shadow.",
         "technical_data": council.get("technical", {}),
         "drop_percent": row.get("drop_percent", 0) or 0,
         "raw_news": [],   # paywalled list not persisted; Claude searches for news itself
@@ -90,6 +130,11 @@ def _rebuild_context(row: dict) -> dict:
         "data_depth": {},
         "_council_files_found": bool(council),  # surfaced in the shadow record
     }
+    if sensor_summaries:
+        context["sensor_summaries"] = sensor_summaries
+    if disagreement_points:
+        context["disagreement_points"] = disagreement_points
+    return context
 
 
 def main():

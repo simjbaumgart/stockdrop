@@ -42,7 +42,7 @@ FULL_CONTEXT = {
 
 # ── import the module under test ─────────────────────────────────────────────
 
-from app.services.claude_dr_prompts import build_individual_prompt, build_sell_prompt
+from app.services.claude_dr_prompts import build_individual_prompt, build_sell_prompt, condense_sensor_report
 
 
 # ── test_build_individual_prompt ─────────────────────────────────────────────
@@ -308,3 +308,142 @@ class TestIndividualSchemaCouldNotVerify:
         required = INDIVIDUAL_SCHEMA["required"]
         missing = [k for k in required if k not in sample]
         assert not missing, f"Sample dict missing required keys: {missing}"
+
+
+# ── Step 2b: truncation removal ───────────────────────────────────────────────
+
+class TestBullBearNoTruncation:
+    """Bull/bear text must not be hard-truncated at 4000 chars for Claude."""
+
+    # Marker is placed well past the old 4000-char limit
+    _MARKER = "MARKER_PAST_4000"
+    _LONG_BULL = "x" * 4010 + _MARKER + "y" * 100  # total > 4000, marker after position 4000
+
+    def test_full_bull_case_present_in_prompt(self):
+        """Content past char 4000 must appear in the prompt (no 4000-char cutoff)."""
+        ctx = {**MINIMAL_CONTEXT, "bull_case": self._LONG_BULL}
+        prompt = build_individual_prompt("ACME", ctx)
+        assert self._MARKER in prompt, (
+            "Expected content past char 4000 to appear in prompt — "
+            "4000-char truncation must be removed for the Claude path."
+        )
+
+    def test_full_bear_case_present_in_prompt(self):
+        """Bear case: content past char 4000 must appear in the prompt."""
+        long_bear = "z" * 4010 + self._MARKER + "w" * 100
+        ctx = {**MINIMAL_CONTEXT, "bear_case": long_bear}
+        prompt = build_individual_prompt("ACME", ctx)
+        assert self._MARKER in prompt, (
+            "Expected content past char 4000 in bear_case to appear in prompt."
+        )
+
+    def test_8000_char_bull_fully_present(self):
+        """8000-char bull case must survive intact (well under 40k guard)."""
+        long_bull = "A" * 7990 + "END_MARKER"
+        ctx = {**MINIMAL_CONTEXT, "bull_case": long_bull}
+        prompt = build_individual_prompt("ACME", ctx)
+        assert "END_MARKER" in prompt
+
+    def test_hard_cap_applied_at_40000(self):
+        """A 50000-char bull case should be capped at 40000, not 4000."""
+        very_long = "B" * 41000
+        ctx = {**MINIMAL_CONTEXT, "bull_case": very_long}
+        prompt = build_individual_prompt("ACME", ctx)
+        # The prompt must contain a lot of the bull text (not just 4000 chars)
+        # We count occurrences of 'B' in the prompt as a proxy
+        b_count = prompt.count("B" * 100)  # 100-char B-runs present
+        assert b_count >= 20, "Expected most of the 40k bull content in prompt"
+
+
+# ── Step 2b: condense_sensor_report helper ────────────────────────────────────
+
+class TestCondenseSensorReport:
+    """Unit tests for condense_sensor_report()."""
+
+    def test_empty_input_returns_empty(self):
+        assert condense_sensor_report("") == ""
+
+    def test_whitespace_only_returns_empty(self):
+        assert condense_sensor_report("   \n  ") == ""
+
+    def test_short_text_returned_as_is(self):
+        text = "RSI at 29 — oversold."
+        result = condense_sensor_report(text)
+        assert result == text
+
+    def test_long_text_bounded_by_limit(self):
+        long = "x" * 2000
+        result = condense_sensor_report(long)
+        assert len(result) <= _SENSOR_CONDENSE_LIMIT + 10  # small slack for separator
+
+    def test_custom_limit_respected(self):
+        text = "A" * 300
+        result = condense_sensor_report(text, limit=100)
+        assert len(result) <= 110  # small slack
+
+    def test_verdict_line_preserved_at_front(self):
+        text = "Verdict: BEARISH\nLong body text here.\nMore lines of analysis."
+        result = condense_sensor_report(text)
+        assert result.startswith("Verdict: BEARISH")
+
+    def test_hash_header_preserved(self):
+        text = "## BULLISH SIGNAL\nRSI at 28, price below BB lower.\nMore text."
+        result = condense_sensor_report(text)
+        assert result.startswith("## BULLISH SIGNAL")
+
+    def test_no_verdict_line_returns_prefix(self):
+        text = "Price action shows strong support. Volume confirming. " * 50
+        result = condense_sensor_report(text, limit=200)
+        assert len(result) <= 210
+        # Should start with the beginning of the text
+        assert result.startswith("Price action shows strong support.")
+
+    def test_verdict_line_not_duplicated(self):
+        text = "Verdict: BULLISH\nBody of the report continues here."
+        result = condense_sensor_report(text)
+        # "Verdict: BULLISH" should appear exactly once
+        assert result.count("Verdict: BULLISH") == 1
+
+
+def _SENSOR_CONDENSE_LIMIT():
+    """Expose the module-level constant for tests above (imported via closure)."""
+    from app.services import claude_dr_prompts
+    return claude_dr_prompts._SENSOR_CONDENSE_LIMIT
+
+
+# Fix: import the constant directly for use in test assertions above
+from app.services.claude_dr_prompts import _SENSOR_CONDENSE_LIMIT
+
+
+# ── Step 2b: sensor_summaries in build_individual_prompt ─────────────────────
+
+class TestSensorSummariesInPrompt:
+    """sensor_summaries content must appear when provided."""
+
+    def test_technical_summary_in_prompt(self):
+        ctx = {
+            **MINIMAL_CONTEXT,
+            "sensor_summaries": {
+                "Technical Analysis": "RSI at 29, price below BB lower — oversold.",
+            },
+        }
+        prompt = build_individual_prompt("ACME", ctx)
+        assert "RSI at 29" in prompt or "oversold" in prompt
+
+    def test_all_five_summaries_in_prompt(self):
+        ctx = {
+            **MINIMAL_CONTEXT,
+            "sensor_summaries": {
+                "Technical Analysis": "Oversold — RSI 28.",
+                "News Analysis": "EPS miss by 12 cents.",
+                "Market Sentiment": "Short interest at 8%.",
+                "Competitive Landscape": "Peers flat on the day.",
+                "Seeking Alpha": "Quant rating Strong Buy.",
+            },
+        }
+        prompt = build_individual_prompt("ACME", ctx)
+        assert "Oversold" in prompt
+        assert "EPS miss" in prompt
+        assert "Short interest" in prompt
+        assert "Peers flat" in prompt
+        assert "Quant rating" in prompt

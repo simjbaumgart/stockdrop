@@ -1,9 +1,9 @@
 """Claude-native deep-research prompts.
 
-Provides build_individual_prompt() and build_sell_prompt() — purpose-built for
-Claude Opus (with web_search + web_fetch tools) rather than the Gemini Deep
-Research API.  These replace the regex _deglooglify() shim that was reusing
-Gemini's prompt verbatim.
+Provides build_individual_prompt(), build_sell_prompt(), and
+condense_sensor_report() — purpose-built for Claude Opus (with web_search +
+web_fetch tools) rather than the Gemini Deep Research API.  These replace the
+regex _deglooglify() shim that was reusing Gemini's prompt verbatim.
 
 Context dict keys (all optional except those noted):
   Individual:
@@ -189,6 +189,57 @@ Required fields:
 """
 
 
+_SENSOR_CONDENSE_LIMIT = 700  # chars per agent condensed summary
+
+# Verdict/header markers to prefer when extracting a leading line
+_VERDICT_PREFIXES = (
+    "verdict:", "signal:", "recommendation:", "rating:", "summary:",
+    "overall:", "conclusion:", "assessment:", "status:",
+    "## ", "# ",
+)
+
+
+def condense_sensor_report(text: str, limit: int = _SENSOR_CONDENSE_LIMIT) -> str:
+    """Deterministically condense a sensor-agent report string.
+
+    Strategy:
+    1. Find a verdict/header line in the first 30 lines if present.
+    2. Prepend that line, then fill up to ``limit`` chars from the start
+       of the text (deduplicated if the verdict line was already there).
+    3. If no verdict line found, just return ``text[:limit]``.
+
+    No LLM calls — fully deterministic. Returns empty string for empty input.
+    """
+    if not text or not text.strip():
+        return ""
+
+    text = text.strip()
+    lines = text.splitlines()
+
+    verdict_line = ""
+    for line in lines[:30]:
+        stripped = line.strip()
+        lower = stripped.lower()
+        if any(lower.startswith(p) for p in _VERDICT_PREFIXES):
+            verdict_line = stripped
+            break
+
+    if verdict_line:
+        # Build condensed: verdict line first, then remaining text up to limit
+        remaining = text
+        # Avoid duplicating the verdict line at the start
+        if text.startswith(verdict_line):
+            body = text[len(verdict_line):].lstrip("\n").strip()
+        else:
+            body = text.strip()
+        budget = limit - len(verdict_line) - 2  # "  " separator
+        if budget > 0:
+            return f"{verdict_line}  {body[:budget]}"
+        return verdict_line[:limit]
+    else:
+        return text[:limit]
+
+
 def build_individual_prompt(symbol: str, context: dict) -> str:
     """Build a Claude-native deep-research prompt for buy-the-dip individual review.
 
@@ -318,9 +369,12 @@ forming your verdict. Typical areas of disagreement: is the drop-cause
 one-time or structural? Is guidance realistic? Do insider / institutional
 actions confirm or deny the bull thesis?"""
 
-    # ── Bull/bear truncation (match Gemini service: 4000 chars in live mode) ─
-    bull_display = bull_case[:4000]
-    bear_display = bear_case[:4000]
+    # ── Bull/bear: pass full text to Claude (1M context window; truncating
+    # mid-argument loses the contested claims that are the research priority).
+    # Guard against truly pathological inputs (>40k is far beyond any real report).
+    _BULL_BEAR_HARD_CAP = 40_000
+    bull_display = bull_case[:_BULL_BEAR_HARD_CAP]
+    bear_display = bear_case[:_BULL_BEAR_HARD_CAP]
 
     # Inject symbol and disagreement_section into the task-steps template
     task_steps = _INDIVIDUAL_TASK_STEPS.format(
