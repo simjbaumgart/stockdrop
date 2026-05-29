@@ -24,6 +24,8 @@ from app.services.analytics.dr_compare_metrics import (
     verdict_agreement,
     action_agreement,
 )
+from app.services.analytics.dr_level_compare import compare_levels
+from app.services.analytics.dr_compare_report import write_shadow_report
 
 OUT_DIR = "data/claude_shadow"
 
@@ -188,6 +190,7 @@ def main():
     print(f"Shadowing {len(decisions)} decisions through Claude...\n")
 
     summary = []
+    level_comparisons: list = []  # parallel to summary; one entry per decision
     spent_usd = 0.0
     COST_CEILING_USD = float(os.getenv("SHADOW_COST_CEILING_USD", "20"))
     for i, row in enumerate(decisions, 1):
@@ -221,6 +224,16 @@ def main():
         cl_verdict = (claude or {}).get("review_verdict") or ""
         cl_action = (claude or {}).get("action") or ""
 
+        # ── Gemini DR levels (expanded: all deep_research_* level columns) ─────
+        # Note: entry_price_low/high and stop_loss come from the PM-written
+        # columns (updated by DR when it fires), not from deep_research_entry_*.
+        # We read both sets and prefer the deep_research_* columns when present,
+        # which is what the live pipeline writes. If deep_research_* are absent
+        # (older rows) the PM columns serve as fallback.
+        gem_entry_low = row.get("deep_research_entry_low") or row.get("entry_price_low")
+        gem_entry_high = row.get("deep_research_entry_high") or row.get("entry_price_high")
+        gem_stop = row.get("deep_research_stop_loss") or row.get("stop_loss")
+
         record = {
             "decision_id": row["id"],
             "symbol": symbol,
@@ -229,9 +242,19 @@ def main():
                 "action": gem_action,
                 "score": row.get("deep_research_score"),
                 "reason": row.get("deep_research_reason"),
-                "entry_low": row.get("entry_price_low"),
-                "entry_high": row.get("entry_price_high"),
-                "stop_loss": row.get("stop_loss"),
+                # ── entry / stop (original fields kept for backward compat) ──
+                "entry_low": gem_entry_low,
+                "entry_high": gem_entry_high,
+                "stop_loss": gem_stop,
+                # ── expanded level fields (Step 3b) ───────────────────────────
+                "take_profit_1": row.get("deep_research_tp1"),
+                "take_profit_2": row.get("deep_research_tp2"),
+                "sell_price_low": row.get("deep_research_sell_price_low"),
+                "sell_price_high": row.get("deep_research_sell_price_high"),
+                "ceiling_exit": row.get("deep_research_ceiling_exit"),
+                "risk_reward_ratio": row.get("deep_research_rr_ratio"),
+                "entry_trigger": row.get("deep_research_entry_trigger"),
+                "exit_trigger": row.get("deep_research_exit_trigger"),
             },
             "claude": {k: v for k, v in (claude or {}).items() if k != "_claude_research_meta"},
             "claude_research": {
@@ -251,6 +274,38 @@ def main():
             "gemini_action": gem_action,
             "claude_action": cl_action,
         }
+        # ── Step 3b: buy/sell level comparison (always anchored on shadow) ────
+        gem_levels = {
+            "entry_price_low": record["gemini"]["entry_low"],
+            "entry_price_high": record["gemini"]["entry_high"],
+            "stop_loss": record["gemini"]["stop_loss"],
+            "take_profit_1": record["gemini"].get("take_profit_1"),
+            "take_profit_2": record["gemini"].get("take_profit_2"),
+            "sell_price_low": record["gemini"].get("sell_price_low"),
+            "sell_price_high": record["gemini"].get("sell_price_high"),
+            "ceiling_exit": record["gemini"].get("ceiling_exit"),
+            "risk_reward_ratio": record["gemini"].get("risk_reward_ratio"),
+            "entry_trigger": record["gemini"].get("entry_trigger"),
+            "exit_trigger": record["gemini"].get("exit_trigger"),
+        }
+        cl_data = record["claude"]
+        claude_levels = {
+            "entry_price_low": cl_data.get("entry_price_low"),
+            "entry_price_high": cl_data.get("entry_price_high"),
+            "stop_loss": cl_data.get("stop_loss"),
+            "take_profit_1": cl_data.get("take_profit_1"),
+            "take_profit_2": cl_data.get("take_profit_2"),
+            "sell_price_low": cl_data.get("sell_price_low"),
+            "sell_price_high": cl_data.get("sell_price_high"),
+            "ceiling_exit": cl_data.get("ceiling_exit"),
+            "risk_reward_ratio": cl_data.get("risk_reward_ratio"),
+            "entry_trigger": cl_data.get("entry_trigger"),
+            "exit_trigger": cl_data.get("exit_trigger"),
+        }
+        record["level_comparison"] = compare_levels(
+            gem_levels, claude_levels, anchored=True
+        )
+
         fname = os.path.join(OUT_DIR, f"shadow_{symbol}_{row['id']}.json")
         with open(fname, "w") as f:
             json.dump(record, f, indent=2)
@@ -260,6 +315,7 @@ def main():
                          "gemini_verdict", "claude_verdict",
                          "gemini_action", "claude_action",
                          "cost_usd_est", "latency_s")})
+        level_comparisons.append(record.get("level_comparison"))
         print(f"  verdict gemini={record['gemini']['review_verdict']} "
               f"claude={record['claude'].get('review_verdict')} "
               f"agree={record['agree_verdict']} "
@@ -277,6 +333,17 @@ def main():
     }
     with open(os.path.join(OUT_DIR, f"_summary_{stamp}.json"), "w") as f:
         json.dump(summary_payload, f, indent=2)
+
+    # ── Step 3b: write markdown report ───────────────────────────────────────
+    report_path = write_shadow_report(
+        out_dir=OUT_DIR,
+        stamp=stamp,
+        summary_rows=summary,
+        level_comparisons=level_comparisons,
+        verdict_metrics=v_metrics,
+        action_metrics=a_metrics,
+    )
+    print(f"\nMarkdown report: {report_path}")
 
     n = len(summary)
     total_cost = round(sum(s["cost_usd_est"] for s in summary), 2)
