@@ -20,6 +20,10 @@ from app.services.claude_deep_research_service import claude_deep_research_servi
 from app.services.token_pricing import (
     compute_cost, CLAUDE_WEB_SEARCH_USD_PER_1K,
 )
+from app.services.analytics.dr_compare_metrics import (
+    verdict_agreement,
+    action_agreement,
+)
 
 OUT_DIR = "data/claude_shadow"
 
@@ -39,6 +43,35 @@ def _recent_decisions(limit: int):
     ).fetchall()
     conn.close()
     return [dict(r) for r in rows]
+
+
+def _build_council_news(council: dict, date_str: str) -> list:
+    """Reconstruct raw_news from the council2 news-agent summary string.
+
+    The original article list is paywalled and not persisted, so we synthesise a
+    single pseudo-article whose ``summary`` field contains the news agent's full
+    report text. This narrows (but does not close) the context gap vs. the live
+    pipeline — Claude still performs its own web search for current news.
+
+    Keys used match what build_individual_prompt() reads:
+        headline, summary, source, source_type, datetime_str
+    (content is left absent; the prompt falls back to summary when content is empty.)
+    """
+    news_text = council.get("news", "") or ""
+    if not isinstance(news_text, str):
+        news_text = str(news_text)
+    news_text = news_text.strip()
+    if not news_text:
+        return []
+    return [
+        {
+            "headline": "Council news summary (reconstructed from shadow)",
+            "summary": news_text,
+            "source": "council",
+            "source_type": "WIRE",
+            "datetime_str": date_str or "Unknown",
+        }
+    ]
 
 
 def _rebuild_context(row: dict) -> dict:
@@ -124,11 +157,16 @@ def _rebuild_context(row: dict) -> dict:
         "bear_case": bear or "Not available from shadow.",
         "technical_data": council.get("technical", {}),
         "drop_percent": row.get("drop_percent", 0) or 0,
-        "raw_news": [],   # paywalled list not persisted; Claude searches for news itself
+        "raw_news": _build_council_news(council, date_str),
         "transcript_summary": "No transcript summary available from shadow.",
         "transcript_date": None,
         "data_depth": {},
         "_council_files_found": bool(council),  # surfaced in the shadow record
+        "_news_caveat": (
+            "raw_news reconstructed from council2 news-agent summary string — "
+            "not the original article list (paywalled, not persisted). "
+            "Claude web-searches for current news itself."
+        ),
     }
     if sensor_summaries:
         context["sensor_summaries"] = sensor_summaries
@@ -178,12 +216,17 @@ def main():
         est_cost = round(token_cost + search_cost, 4)
         spent_usd += est_cost  # cumulative; checked against COST_CEILING_USD at loop top
 
+        gem_verdict = row.get("deep_research_review_verdict") or ""
+        gem_action = row.get("deep_research_action") or ""
+        cl_verdict = (claude or {}).get("review_verdict") or ""
+        cl_action = (claude or {}).get("action") or ""
+
         record = {
             "decision_id": row["id"],
             "symbol": symbol,
             "gemini": {
-                "review_verdict": row.get("deep_research_review_verdict"),
-                "action": row.get("deep_research_action"),
+                "review_verdict": gem_verdict,
+                "action": gem_action,
                 "score": row.get("deep_research_score"),
                 "reason": row.get("deep_research_reason"),
                 "entry_low": row.get("entry_price_low"),
@@ -199,34 +242,75 @@ def main():
             },
             "cost_usd_est": est_cost,
             "latency_s": latency,
-            "agree_verdict": (row.get("deep_research_review_verdict")
-                              == (claude or {}).get("review_verdict")),
-            "agree_action": (row.get("deep_research_action")
-                             == (claude or {}).get("action")),
+            # Raw string-equality flags kept for per-decision readability
+            "agree_verdict": (gem_verdict == cl_verdict),
+            "agree_action": (gem_action == cl_action),
+            # Flat keys used by metrics aggregation across the summary list
+            "gemini_verdict": gem_verdict,
+            "claude_verdict": cl_verdict,
+            "gemini_action": gem_action,
+            "claude_action": cl_action,
         }
         fname = os.path.join(OUT_DIR, f"shadow_{symbol}_{row['id']}.json")
         with open(fname, "w") as f:
             json.dump(record, f, indent=2)
         summary.append({k: record[k] for k in
-                        ("decision_id", "symbol", "agree_verdict", "agree_action",
+                        ("decision_id", "symbol",
+                         "agree_verdict", "agree_action",
+                         "gemini_verdict", "claude_verdict",
+                         "gemini_action", "claude_action",
                          "cost_usd_est", "latency_s")})
         print(f"  verdict gemini={record['gemini']['review_verdict']} "
               f"claude={record['claude'].get('review_verdict')} "
               f"agree={record['agree_verdict']} "
               f"cost=${est_cost} {latency}s sources={len(meta.get('source_urls', []))}")
 
+    # ── Aggregate metrics ─────────────────────────────────────────────────────
+    v_metrics = verdict_agreement(summary)
+    a_metrics = action_agreement(summary)
+
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    summary_payload = {
+        "decisions": summary,
+        "verdict_metrics": v_metrics,
+        "action_metrics": a_metrics,
+    }
     with open(os.path.join(OUT_DIR, f"_summary_{stamp}.json"), "w") as f:
-        json.dump(summary, f, indent=2)
+        json.dump(summary_payload, f, indent=2)
 
     n = len(summary)
-    v_agree = sum(1 for s in summary if s["agree_verdict"])
-    a_agree = sum(1 for s in summary if s["agree_action"])
     total_cost = round(sum(s["cost_usd_est"] for s in summary), 2)
+    avg_latency = round(sum(s["latency_s"] for s in summary) / max(n, 1), 1)
+
+    def _fmt_matrix(cm: dict) -> str:
+        labels = cm.get("labels", [])
+        matrix = cm.get("matrix", {})
+        if not labels:
+            return "  (no data)"
+        col_w = max(len(lbl) for lbl in labels) + 2
+        header = " " * (col_w + 2) + "  ".join(f"{lbl:>{col_w}}" for lbl in labels)
+        lines = [header]
+        for g in labels:
+            row_cells = "  ".join(f"{matrix[g].get(c, 0):>{col_w}}" for c in labels)
+            lines.append(f"  gem={g:<{col_w}} {row_cells}")
+        return "\n".join(lines)
+
     print(f"\n=== SHADOW SUMMARY ({n} decisions) ===")
-    print(f"Verdict agreement: {v_agree}/{n}   Action agreement: {a_agree}/{n}")
-    print(f"Total est cost: ${total_cost}   Avg latency: "
-          f"{round(sum(s['latency_s'] for s in summary)/max(n,1),1)}s")
+    print(f"\n-- VERDICT AGREEMENT (sentinel-excluded) --")
+    print(f"  n={v_metrics['n']}  n_excluded(sentinels)={v_metrics['n_excluded']}")
+    print(f"  raw_agreement={v_metrics['raw_agreement']:.3f}  "
+          f"Cohen's κ={v_metrics['kappa']:.3f}")
+    print("  Confusion matrix (rows=gemini, cols=claude):")
+    print(_fmt_matrix(v_metrics["confusion"]))
+
+    print(f"\n-- ACTION AGREEMENT --")
+    print(f"  n={a_metrics['n']}  n_excluded={a_metrics['n_excluded']}")
+    print(f"  raw_agreement={a_metrics['raw_agreement']:.3f}  "
+          f"Cohen's κ={a_metrics['kappa']:.3f}")
+    print("  Confusion matrix (rows=gemini, cols=claude):")
+    print(_fmt_matrix(a_metrics["confusion"]))
+
+    print(f"\nTotal est cost: ${total_cost}   Avg latency: {avg_latency}s")
     print(f"Per-decision JSON + summary in {OUT_DIR}/")
 
 
