@@ -1292,6 +1292,7 @@ def finalize_dr_comparison(comparison_id: int) -> None:
         if any(v is None for v in (pm_entry_low, pm_entry_high, pm_stop_loss)):
             anchored = 1
         # anchored=1 if all three PM levels are byte-identical to the gem levels
+        # (includes CONFIRMED genuine no-change; conservative bias: discard maybe-clean rather than trust potentially contaminated)
         elif (
             pm_entry_low == gem_entry_low
             and pm_entry_high == gem_entry_high

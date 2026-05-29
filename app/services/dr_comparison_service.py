@@ -14,6 +14,7 @@ work happens in a daemon thread so the asyncio event loop is never blocked.
 Any exception inside trigger() or the challenger thread is logged and swallowed.
 """
 import logging
+import os
 import sqlite3
 import threading
 import time
@@ -21,6 +22,9 @@ from datetime import datetime
 from typing import Optional
 
 logger = logging.getLogger(__name__)
+
+_MAX_CONCURRENT = int(os.getenv("DR_DUAL_RUN_MAX_CONCURRENCY", "2"))
+_challenger_semaphore = threading.Semaphore(_MAX_CONCURRENT)
 
 
 class DRComparisonService:
@@ -76,6 +80,7 @@ class DRComparisonService:
         """Run the Claude challenger, update cl_*, wait for Gemini, finalize.
 
         Runs in a daemon thread — never propagates exceptions.
+        Acquires _challenger_semaphore to bound concurrent Claude research.
         """
         from app.database import (
             set_dr_comparison_status,
@@ -85,51 +90,52 @@ class DRComparisonService:
         from app.services.token_pricing import compute_cost, CLAUDE_WEB_SEARCH_USD_PER_1K
 
         try:
-            # Lazy import to avoid circular-import at module load time.
-            from app.services.claude_deep_research_service import claude_deep_research_service
+            with _challenger_semaphore:
+                # Lazy import to avoid circular-import at module load time.
+                from app.services.claude_deep_research_service import claude_deep_research_service
 
-            result = claude_deep_research_service.execute_deep_research(
-                symbol, context, decision_id
-            )
-
-            if result is None:
-                logger.warning(
-                    "[Dual-Run] Claude returned None for decision_id=%s symbol=%s — marking FAILED",
-                    decision_id, symbol,
+                result = claude_deep_research_service.execute_deep_research(
+                    symbol, context, decision_id
                 )
-                set_dr_comparison_status(comparison_id, "FAILED")
-                return
 
-            meta = result.get("_claude_research_meta", {})
-            usage = meta.get("usage", {})
+                if result is None:
+                    logger.warning(
+                        "[Dual-Run] Claude returned None for decision_id=%s symbol=%s — marking FAILED",
+                        decision_id, symbol,
+                    )
+                    set_dr_comparison_status(comparison_id, "FAILED")
+                    return
 
-            raw_cost = compute_cost(
-                "claude-opus-4-8",
-                usage.get("in", 0),
-                usage.get("out", 0),
-            )
-            search_cost = (meta.get("search_count", 0) / 1000.0) * CLAUDE_WEB_SEARCH_USD_PER_1K
-            total_cost = (raw_cost or 0.0) + search_cost
+                meta = result.get("_claude_research_meta", {})
+                usage = meta.get("usage", {})
 
-            cl_meta = {
-                "search_count": meta.get("search_count"),
-                "source_count": len(meta.get("source_urls", [])),
-                "cost_usd": round(total_cost, 4),
-                "latency_s": meta.get("latency_s"),
-            }
+                raw_cost = compute_cost(
+                    "claude-opus-4-8",
+                    usage.get("in", 0),
+                    usage.get("out", 0),
+                )
+                search_cost = (meta.get("search_count", 0) / 1000.0) * CLAUDE_WEB_SEARCH_USD_PER_1K
+                total_cost = (raw_cost or 0.0) + search_cost
 
-            update_dr_comparison_claude(comparison_id, result, cl_meta)
-            logger.info(
-                "[Dual-Run] Claude result stored for comparison_id=%s; waiting for Gemini DR",
-                comparison_id,
-            )
+                cl_meta = {
+                    "search_count": meta.get("search_count"),
+                    "source_count": len(meta.get("source_urls", [])),
+                    "cost_usd": round(total_cost, 4),
+                    "latency_s": meta.get("latency_s"),
+                }
 
-            self._wait_for_gemini(decision_id)
-            finalize_dr_comparison(comparison_id)
-            logger.info(
-                "[Dual-Run] comparison_id=%s FINALIZED",
-                comparison_id,
-            )
+                update_dr_comparison_claude(comparison_id, result, cl_meta)
+                logger.info(
+                    "[Dual-Run] Claude result stored for comparison_id=%s; waiting for Gemini DR",
+                    comparison_id,
+                )
+
+                self._wait_for_gemini(decision_id)
+                finalize_dr_comparison(comparison_id)
+                logger.info(
+                    "[Dual-Run] comparison_id=%s FINALIZED",
+                    comparison_id,
+                )
 
         except Exception as e:
             logger.error(

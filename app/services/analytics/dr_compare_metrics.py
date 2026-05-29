@@ -166,7 +166,7 @@ def action_agreement(rows: List[Dict]) -> Dict:
     """Compute action-level agreement metrics.
 
     No sentinel exclusion is applied to actions — the action enums are shared
-    between Gemini and Claude (BUY, BUY_LIMIT, WAIT_FOR_STAB, AVOID/PASS).
+    between Gemini and Claude (BUY, BUY_LIMIT, WATCH, AVOID).
     n_excluded is always 0; it is present only for API symmetry with
     verdict_agreement.
 
