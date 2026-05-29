@@ -64,3 +64,33 @@ def test_collect_source_urls_dedupes_and_skips_nonhttp():
                    content=[_FakeBlock(type="web_search_result", url="ftp://nope")]),
     ]
     assert _collect_source_urls(blocks) == ["https://x.com/1"]
+
+
+import os
+import pytest
+from app.services.claude_deep_research_service import claude_deep_research_service
+
+requires_live = pytest.mark.skipif(
+    not (os.getenv("CLAUDE_API_KEY") and os.getenv("RUN_CLAUDE_LIVE_TESTS")),
+    reason="set CLAUDE_API_KEY and RUN_CLAUDE_LIVE_TESTS=1 to run live Claude test",
+)
+
+
+@requires_live
+def test_live_individual_research_returns_grounded_result():
+    context = {
+        "pm_decision": {"verdict": "BUY_LIMIT", "reason": "test"},
+        "bull_case": "Test bull case.",
+        "bear_case": "Test bear case.",
+        "technical_data": {"rsi": 28, "price": 100.0},
+        "drop_percent": -7.5,
+        "raw_news": [],
+    }
+    result = claude_deep_research_service.execute_deep_research("AAPL", context)
+    assert result is not None
+    assert result["review_verdict"] in ("CONFIRMED", "UPGRADED", "ADJUSTED", "OVERRIDDEN")
+    meta = result["_claude_research_meta"]
+    assert meta["search_count"] >= 1, "expected at least one web search hop"
+    for v in result["verification_results"]:
+        if v.get("verdict") in ("VERIFIED", "DISPUTED"):
+            assert v["source_url"].startswith("http")
