@@ -1077,10 +1077,18 @@ class DeepResearchService:
             logger.error("[deep-research] Individual PDF generation failed: %s", e, exc_info=True)
             return None
 
+    @staticmethod
+    def _provider() -> str:
+        return os.getenv("DEEP_RESEARCH_PROVIDER", "gemini").strip().lower()
+
     def execute_deep_research(self, symbol: str, context: dict, decision_id: int = None) -> Optional[Dict]:
         """
         The synchronous execution logic. Takes a pre-built context dict.
         """
+        if self._provider() == "claude":
+            from app.services.claude_deep_research_service import claude_deep_research_service
+            logger.info("[Deep Research] Routing %s to Claude provider.", symbol)
+            return claude_deep_research_service.execute_deep_research(symbol, context, decision_id)
         # 1. Construct the Prompt
         prompt = self._construct_prompt(symbol, context)
         
@@ -1502,6 +1510,10 @@ Do NOT include inline source markers like [Source 1], [Source 2], etc. in any st
         Synchronous execution. Returns parsed JSON result.
         Updates monitor state so Deep Research Monitor shows the active task.
         """
+        if self._provider() == "claude":
+            from app.services.claude_deep_research_service import claude_deep_research_service
+            logger.info("[Deep Research Sell] Routing %s to Claude provider.", symbol)
+            return claude_deep_research_service.execute_sell_reassessment(symbol, context, decision_id)
         prompt = self._construct_sell_reassessment_prompt(symbol, context)
         headers = {
             "Content-Type": "application/json",
