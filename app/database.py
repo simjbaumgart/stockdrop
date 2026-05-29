@@ -1,7 +1,11 @@
+import json
+import logging
 import sqlite3
 from typing import List, Optional
 
 import os
+
+logger = logging.getLogger(__name__)
 
 DB_NAME = os.getenv("DB_PATH", "subscribers.db")
 
@@ -225,6 +229,78 @@ def init_db():
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_atu_decision_id ON agent_token_usage(decision_id)')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_atu_run_date    ON agent_token_usage(run_date)')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_atu_agent_date  ON agent_token_usage(agent_name, run_date)')
+
+    # DR dual-run comparison table (Step 1a)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS dr_comparison (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            decision_id INTEGER,
+            symbol TEXT,
+            run_date TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            status TEXT DEFAULT 'PENDING',
+            anchored INTEGER DEFAULT 0,
+            -- PM pre-DR baseline (snapshotted before DR runs)
+            pm_recommendation TEXT,
+            pm_conviction TEXT,
+            pm_entry_low REAL,
+            pm_entry_high REAL,
+            pm_stop_loss REAL,
+            pm_tp1 REAL,
+            pm_tp2 REAL,
+            pm_sell_low REAL,
+            pm_sell_high REAL,
+            pm_ceiling_exit REAL,
+            pm_rr_ratio REAL,
+            -- Gemini DR result (copied from decision_points after DR completes)
+            gem_review_verdict TEXT,
+            gem_action TEXT,
+            gem_conviction TEXT,
+            gem_score INTEGER,
+            gem_entry_low REAL,
+            gem_entry_high REAL,
+            gem_stop_loss REAL,
+            gem_tp1 REAL,
+            gem_tp2 REAL,
+            gem_sell_low REAL,
+            gem_sell_high REAL,
+            gem_ceiling_exit REAL,
+            gem_rr_ratio REAL,
+            gem_entry_trigger TEXT,
+            gem_exit_trigger TEXT,
+            gem_reason TEXT,
+            -- Claude DR challenger result
+            cl_review_verdict TEXT,
+            cl_action TEXT,
+            cl_conviction TEXT,
+            cl_entry_low REAL,
+            cl_entry_high REAL,
+            cl_stop_loss REAL,
+            cl_tp1 REAL,
+            cl_tp2 REAL,
+            cl_sell_low REAL,
+            cl_sell_high REAL,
+            cl_ceiling_exit REAL,
+            cl_rr_ratio REAL,
+            cl_entry_trigger TEXT,
+            cl_exit_trigger TEXT,
+            cl_reason TEXT,
+            cl_knife_catch TEXT,
+            cl_could_not_verify TEXT,
+            cl_search_count INTEGER,
+            cl_source_count INTEGER,
+            cl_cost_usd REAL,
+            cl_latency_s REAL,
+            cl_result_json TEXT,
+            FOREIGN KEY (decision_id) REFERENCES decision_points (id)
+        )
+    ''')
+    cursor.execute(
+        'CREATE INDEX IF NOT EXISTS idx_drc_decision_id ON dr_comparison(decision_id)'
+    )
+    cursor.execute(
+        'CREATE INDEX IF NOT EXISTS idx_drc_run_date ON dr_comparison(run_date)'
+    )
 
     # Migration for batch_comparisons
     try:
@@ -936,4 +1012,344 @@ def get_news_shadow_runs() -> List[dict]:
         return [dict(r) for r in cursor.fetchall()]
     finally:
         conn.close()
+
+
+# ---------------------------------------------------------------------------
+# DR dual-run comparison helpers (Step 1a)
+# ---------------------------------------------------------------------------
+
+def snapshot_pm_baseline(decision_id: int) -> dict:
+    """Read the current PM trading levels from decision_points for ``decision_id``
+    and return them as a dict keyed with ``pm_*`` prefixes.
+
+    Must be called BEFORE deep research runs — _apply_trading_level_overrides
+    in deep_research_service overwrites these columns in-place and there is no
+    way to recover the original values afterwards.
+
+    Returns {} if the row does not exist.
+    """
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT recommendation, conviction,
+                   entry_price_low, entry_price_high, stop_loss,
+                   take_profit_1, take_profit_2,
+                   sell_price_low, sell_price_high, ceiling_exit,
+                   risk_reward_ratio
+            FROM decision_points
+            WHERE id = ?
+            """,
+            (decision_id,),
+        )
+        row = cursor.fetchone()
+        conn.close()
+        if row is None:
+            return {}
+        return {
+            "pm_recommendation": row["recommendation"],
+            "pm_conviction": row["conviction"],
+            "pm_entry_low": row["entry_price_low"],
+            "pm_entry_high": row["entry_price_high"],
+            "pm_stop_loss": row["stop_loss"],
+            "pm_tp1": row["take_profit_1"],
+            "pm_tp2": row["take_profit_2"],
+            "pm_sell_low": row["sell_price_low"],
+            "pm_sell_high": row["sell_price_high"],
+            "pm_ceiling_exit": row["ceiling_exit"],
+            "pm_rr_ratio": row["risk_reward_ratio"],
+        }
+    except Exception as e:
+        logger.error("[snapshot_pm_baseline] decision_id=%s error: %s", decision_id, e)
+        return {}
+
+
+def create_dr_comparison(
+    decision_id: int,
+    symbol: str,
+    run_date: str,
+    pm_baseline: dict,
+) -> int:
+    """Insert a new dr_comparison row with status PENDING and the PM baseline levels.
+
+    Returns the new row id, or -1 on failure.
+    """
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            INSERT INTO dr_comparison (
+                decision_id, symbol, run_date, status,
+                pm_recommendation, pm_conviction,
+                pm_entry_low, pm_entry_high, pm_stop_loss,
+                pm_tp1, pm_tp2,
+                pm_sell_low, pm_sell_high, pm_ceiling_exit,
+                pm_rr_ratio
+            ) VALUES (?, ?, ?, 'PENDING', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                decision_id,
+                symbol,
+                run_date,
+                pm_baseline.get("pm_recommendation"),
+                pm_baseline.get("pm_conviction"),
+                pm_baseline.get("pm_entry_low"),
+                pm_baseline.get("pm_entry_high"),
+                pm_baseline.get("pm_stop_loss"),
+                pm_baseline.get("pm_tp1"),
+                pm_baseline.get("pm_tp2"),
+                pm_baseline.get("pm_sell_low"),
+                pm_baseline.get("pm_sell_high"),
+                pm_baseline.get("pm_ceiling_exit"),
+                pm_baseline.get("pm_rr_ratio"),
+            ),
+        )
+        conn.commit()
+        new_id = cursor.lastrowid
+        conn.close()
+        return new_id
+    except Exception as e:
+        logger.error(
+            "[create_dr_comparison] decision_id=%s symbol=%s error: %s",
+            decision_id, symbol, e,
+        )
+        return -1
+
+
+def update_dr_comparison_claude(
+    comparison_id: int,
+    claude: dict,
+    meta: dict,
+) -> None:
+    """Fill the cl_* columns from a Claude DR result and set status=CLAUDE_DONE.
+
+    ``claude`` keys: review_verdict, action, conviction, entry_price_low,
+    entry_price_high, stop_loss, take_profit_1, take_profit_2, sell_price_low,
+    sell_price_high, ceiling_exit, risk_reward_ratio, entry_trigger,
+    exit_trigger, reason, knife_catch_warning, could_not_verify.
+
+    ``meta`` keys: search_count, source_count, cost_usd, latency_s.
+
+    ``could_not_verify`` may be a list — it is stored as JSON.
+    The full ``claude`` dict is stored as JSON in cl_result_json.
+    """
+    try:
+        could_not_verify = claude.get("could_not_verify")
+        if isinstance(could_not_verify, list):
+            could_not_verify = json.dumps(could_not_verify)
+
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            UPDATE dr_comparison SET
+                status = 'CLAUDE_DONE',
+                cl_review_verdict = ?,
+                cl_action = ?,
+                cl_conviction = ?,
+                cl_entry_low = ?,
+                cl_entry_high = ?,
+                cl_stop_loss = ?,
+                cl_tp1 = ?,
+                cl_tp2 = ?,
+                cl_sell_low = ?,
+                cl_sell_high = ?,
+                cl_ceiling_exit = ?,
+                cl_rr_ratio = ?,
+                cl_entry_trigger = ?,
+                cl_exit_trigger = ?,
+                cl_reason = ?,
+                cl_knife_catch = ?,
+                cl_could_not_verify = ?,
+                cl_search_count = ?,
+                cl_source_count = ?,
+                cl_cost_usd = ?,
+                cl_latency_s = ?,
+                cl_result_json = ?
+            WHERE id = ?
+            """,
+            (
+                claude.get("review_verdict"),
+                claude.get("action"),
+                claude.get("conviction"),
+                claude.get("entry_price_low"),
+                claude.get("entry_price_high"),
+                claude.get("stop_loss"),
+                claude.get("take_profit_1"),
+                claude.get("take_profit_2"),
+                claude.get("sell_price_low"),
+                claude.get("sell_price_high"),
+                claude.get("ceiling_exit"),
+                claude.get("risk_reward_ratio"),
+                claude.get("entry_trigger"),
+                claude.get("exit_trigger"),
+                claude.get("reason"),
+                claude.get("knife_catch_warning"),
+                could_not_verify,
+                meta.get("search_count"),
+                meta.get("source_count"),
+                meta.get("cost_usd"),
+                meta.get("latency_s"),
+                json.dumps(claude),
+                comparison_id,
+            ),
+        )
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logger.error(
+            "[update_dr_comparison_claude] comparison_id=%s error: %s",
+            comparison_id, e,
+        )
+
+
+def finalize_dr_comparison(comparison_id: int) -> None:
+    """Copy the Gemini DR result from decision_points into the gem_* columns
+    and set status=FINALIZED.  Also computes the ``anchored`` flag:
+      - 1  if any of pm_entry_low / pm_entry_high / pm_stop_loss is NULL
+             (baseline was not captured before DR ran), OR
+      - 1  if (pm_entry_low, pm_entry_high, pm_stop_loss) are all identical to
+             the corresponding gem_* values (snapshot happened too late / is
+             contaminated by the override).
+      - 0  otherwise (the comparison is clean).
+
+    Column mapping from decision_points → dr_comparison:
+        deep_research_review_verdict → gem_review_verdict
+        deep_research_action         → gem_action
+        deep_research_conviction     → gem_conviction
+        deep_research_score          → gem_score
+        deep_research_entry_low      → gem_entry_low
+        deep_research_entry_high     → gem_entry_high
+        deep_research_stop_loss      → gem_stop_loss
+        deep_research_tp1            → gem_tp1
+        deep_research_tp2            → gem_tp2
+        deep_research_rr_ratio       → gem_rr_ratio
+        deep_research_entry_trigger  → gem_entry_trigger
+        deep_research_exit_trigger   → gem_exit_trigger
+        deep_research_reason         → gem_reason
+        deep_research_sell_price_low → gem_sell_low
+        deep_research_sell_price_high→ gem_sell_high
+        deep_research_ceiling_exit   → gem_ceiling_exit
+    """
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        # Fetch the comparison row to get decision_id and pm levels
+        cursor.execute(
+            "SELECT * FROM dr_comparison WHERE id = ?",
+            (comparison_id,),
+        )
+        comp = cursor.fetchone()
+        if comp is None:
+            logger.error(
+                "[finalize_dr_comparison] comparison_id=%s not found", comparison_id
+            )
+            conn.close()
+            return
+        comp = dict(comp)
+
+        # Fetch the linked decision_points row for Gemini DR fields
+        cursor.execute(
+            """
+            SELECT deep_research_review_verdict,
+                   deep_research_action,
+                   deep_research_conviction,
+                   deep_research_score,
+                   deep_research_entry_low,
+                   deep_research_entry_high,
+                   deep_research_stop_loss,
+                   deep_research_tp1,
+                   deep_research_tp2,
+                   deep_research_rr_ratio,
+                   deep_research_entry_trigger,
+                   deep_research_exit_trigger,
+                   deep_research_reason,
+                   deep_research_sell_price_low,
+                   deep_research_sell_price_high,
+                   deep_research_ceiling_exit
+            FROM decision_points
+            WHERE id = ?
+            """,
+            (comp["decision_id"],),
+        )
+        dp = cursor.fetchone()
+        dp = dict(dp) if dp is not None else {}
+
+        gem_entry_low = dp.get("deep_research_entry_low")
+        gem_entry_high = dp.get("deep_research_entry_high")
+        gem_stop_loss = dp.get("deep_research_stop_loss")
+
+        pm_entry_low = comp.get("pm_entry_low")
+        pm_entry_high = comp.get("pm_entry_high")
+        pm_stop_loss = comp.get("pm_stop_loss")
+
+        # anchored=1 if any PM key level is NULL
+        if any(v is None for v in (pm_entry_low, pm_entry_high, pm_stop_loss)):
+            anchored = 1
+        # anchored=1 if all three PM levels are byte-identical to the gem levels
+        elif (
+            pm_entry_low == gem_entry_low
+            and pm_entry_high == gem_entry_high
+            and pm_stop_loss == gem_stop_loss
+        ):
+            anchored = 1
+        else:
+            anchored = 0
+
+        cursor.execute(
+            """
+            UPDATE dr_comparison SET
+                status = 'FINALIZED',
+                anchored = ?,
+                gem_review_verdict = ?,
+                gem_action = ?,
+                gem_conviction = ?,
+                gem_score = ?,
+                gem_entry_low = ?,
+                gem_entry_high = ?,
+                gem_stop_loss = ?,
+                gem_tp1 = ?,
+                gem_tp2 = ?,
+                gem_rr_ratio = ?,
+                gem_entry_trigger = ?,
+                gem_exit_trigger = ?,
+                gem_reason = ?,
+                gem_sell_low = ?,
+                gem_sell_high = ?,
+                gem_ceiling_exit = ?
+            WHERE id = ?
+            """,
+            (
+                anchored,
+                dp.get("deep_research_review_verdict"),
+                dp.get("deep_research_action"),
+                dp.get("deep_research_conviction"),
+                dp.get("deep_research_score"),
+                gem_entry_low,
+                gem_entry_high,
+                gem_stop_loss,
+                dp.get("deep_research_tp1"),
+                dp.get("deep_research_tp2"),
+                dp.get("deep_research_rr_ratio"),
+                dp.get("deep_research_entry_trigger"),
+                dp.get("deep_research_exit_trigger"),
+                dp.get("deep_research_reason"),
+                dp.get("deep_research_sell_price_low"),
+                dp.get("deep_research_sell_price_high"),
+                dp.get("deep_research_ceiling_exit"),
+                comparison_id,
+            ),
+        )
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logger.error(
+            "[finalize_dr_comparison] comparison_id=%s error: %s",
+            comparison_id, e,
+        )
 
