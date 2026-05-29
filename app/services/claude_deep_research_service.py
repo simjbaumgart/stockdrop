@@ -142,7 +142,18 @@ class ClaudeDeepResearchService:
         }
 
     # ---- Phase 2: structured synthesis (no tools) --------------------------
-    def _synthesize(self, transcript: str, source_urls: List[str], schema: dict) -> Optional[Dict]:
+    def _synthesize(
+        self, transcript: str, source_urls: List[str], schema: dict
+    ) -> tuple:
+        """Run the structured synthesis call (no tools).
+
+        Returns a tuple ``(result_or_None, synth_usage_dict)`` so callers can
+        always count the tokens burned — even when parsing fails.
+
+        ``synth_usage_dict`` keys: ``in``, ``out``, ``cache_read``,
+        ``cache_write``.  Returns ``(None, {})`` only if the API call itself
+        fails before a response is available.
+        """
         url_block = "\n".join(f"- {u}" for u in source_urls) or "(no sources fetched)"
         synth_prompt = (
             "Below is your own research transcript on this stock. Convert your "
@@ -160,14 +171,23 @@ class ClaudeDeepResearchService:
             messages=[{"role": "user", "content": synth_prompt}],
         ) as stream:
             resp = stream.get_final_message()
+
+        u = resp.usage
+        synth_usage = {
+            "in": getattr(u, "input_tokens", 0) or 0,
+            "out": getattr(u, "output_tokens", 0) or 0,
+            "cache_read": getattr(u, "cache_read_input_tokens", 0) or 0,
+            "cache_write": getattr(u, "cache_creation_input_tokens", 0) or 0,
+        }
+
         text = next((b.text for b in resp.content if getattr(b, "type", None) == "text"), None)
         if not text:
-            return None
+            return None, synth_usage
         try:
-            return json.loads(text)
+            return json.loads(text), synth_usage
         except json.JSONDecodeError:
             logger.error("[Claude DR] synthesis JSON parse failed: %.300s", text)
-            return None
+            return None, synth_usage
 
     def _record_cost(self, decision_id, symbol, stage, research, synth_usage):
         if decision_id is None:
@@ -195,17 +215,27 @@ class ClaudeDeepResearchService:
             if not research["transcript_text"].strip():
                 logger.warning("[Claude DR] empty research transcript for %s — skipping synthesis.", symbol)
                 return None
-            result = self._synthesize(research["transcript_text"],
-                                      research["source_urls"], INDIVIDUAL_SCHEMA)
+            result, synth_usage = self._synthesize(research["transcript_text"],
+                                                   research["source_urls"], INDIVIDUAL_SCHEMA)
             if result is None:
                 return None
-            self._record_cost(decision_id, symbol, "deep_research", research, {})
+            self._record_cost(decision_id, symbol, "deep_research", research, synth_usage)
+            # Combined usage (research loop + synthesis) is the true cost.
+            # Both sub-totals are also exposed for transparency.
+            combined_usage = {
+                "in": research["usage"]["in"] + synth_usage.get("in", 0),
+                "out": research["usage"]["out"] + synth_usage.get("out", 0),
+                "cache_read": research["usage"]["cache_read"] + synth_usage.get("cache_read", 0),
+                "cache_write": research["usage"]["cache_write"] + synth_usage.get("cache_write", 0),
+            }
             result["_claude_research_meta"] = {
                 "source_urls": research["source_urls"],
                 "search_count": research["search_count"],
                 "latency_s": research["latency_s"],
                 "thinking": research["thinking"],
-                "usage": research["usage"],
+                "usage": combined_usage,
+                "research_usage": research["usage"],
+                "synthesis_usage": synth_usage,
             }
             return result
         except Exception as e:
@@ -221,11 +251,11 @@ class ClaudeDeepResearchService:
             if not research["transcript_text"].strip():
                 logger.warning("[Claude DR] empty sell-research transcript for %s — skipping synthesis.", symbol)
                 return None
-            result = self._synthesize(research["transcript_text"],
-                                      research["source_urls"], SELL_SCHEMA)
+            result, synth_usage = self._synthesize(research["transcript_text"],
+                                                   research["source_urls"], SELL_SCHEMA)
             if result is None:
                 return None
-            self._record_cost(decision_id, symbol, "sell_reassessment", research, {})
+            self._record_cost(decision_id, symbol, "sell_reassessment", research, synth_usage)
             return result
         except Exception as e:
             logger.error("[Claude DR] execute_sell_reassessment failed for %s: %s", symbol, e)
