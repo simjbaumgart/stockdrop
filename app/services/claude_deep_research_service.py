@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 MODEL = "claude-opus-4-8"
 WEB_SEARCH_TOOL = {"type": "web_search_20260209", "name": "web_search"}
 WEB_FETCH_TOOL = {"type": "web_fetch_20260209", "name": "web_fetch"}
+CODE_EXEC_TOOL = {"type": "code_execution_20260120", "name": "code_execution"}
 MAX_CONTINUATIONS = 12   # outer pause_turn resumes; hard backstop on the multi-hop loop
 RESEARCH_MAX_TOKENS = 32000
 SYNTHESIS_MAX_TOKENS = 16000
@@ -89,7 +90,8 @@ class ClaudeDeepResearchService:
                 "cache_control": {"type": "ephemeral"},
             }],
         }]
-        tools = [WEB_SEARCH_TOOL, WEB_FETCH_TOOL]
+        # code_execution MUST be present for web_search_20260209 dynamic filtering.
+        tools = [WEB_SEARCH_TOOL, WEB_FETCH_TOOL, CODE_EXEC_TOOL]
 
         all_blocks: List[Any] = []
         thinking_chunks: List[str] = []
