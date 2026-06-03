@@ -618,28 +618,31 @@ class StockService:
 
     def _should_trigger_deep_research(self, report_data: dict) -> bool:
         """
-        Trigger deep research for buy decisions:
-        - BUY: always trigger (any conviction, any R/R)
-        - BUY_LIMIT: trigger when R/R > 1.0 (any conviction). Mirrors the
-          Pending DR Review status gate so rows are never stranded.
+        Trigger deep research for every buy-side verdict.
+
+        - BUY: always trigger.
+        - BUY_LIMIT: always trigger. R/R no longer gates this — every
+          buy-side verdict is routed through DR so limit orders can't slip
+          past review (the recurring AFRM/OSCR gap).
+
+        WATCH/AVOID never trigger (no position is taken).
         """
         action = report_data.get("recommendation", "AVOID").upper()
-        risk_reward = report_data.get("risk_reward_ratio", 0)
+        return action in ("BUY", "BUY_LIMIT")
 
-        # BUY: always trigger
-        if action == "BUY":
-            return True
+    def _initial_position_status(self, report_data: dict) -> str:
+        """Position-lifecycle status assigned at analysis time.
 
-        # BUY_LIMIT: trigger when R/R > 1.0. The Pending DR Review status
-        # gate uses the same threshold; raising it would strand rows.
-        if action == "BUY_LIMIT":
-            try:
-                if float(risk_reward) > 1.0:
-                    return True
-            except (TypeError, ValueError):
-                return False
-
-        return False
+        Mirrors _should_trigger_deep_research exactly: any verdict routed to
+        Deep Research is parked in 'Pending DR Review' so DR completion can
+        promote it to 'Owned' or demote it to 'Not Owned'. Everything else is
+        'Not Owned'. R/R does not gate the status — that would strand a
+        DR-routed row (finalize_position_status_after_dr cannot promote a
+        'Not Owned' row).
+        """
+        if self._should_trigger_deep_research(report_data):
+            return "Pending DR Review"
+        return "Not Owned"
 
     def _build_deep_research_context(self, report_data: dict, raw_data: dict) -> dict:
         """
@@ -1702,24 +1705,11 @@ class StockService:
         
         self.research_reports[symbol] = reasoning
         
-        # 3-state position lifecycle: BUY/BUY_LIMIT with R/R > 1.0 advances
-        # to 'Pending DR Review' until deep research finalizes the verdict.
-        # _should_trigger_deep_research mirrors this threshold so rows are
-        # never stranded in the pending state.
-        rec_upper = recommendation.upper()
-        try:
-            rr_value = float(report_data.get("risk_reward_ratio") or 0.0)
-        except (TypeError, ValueError):
-            rr_value = 0.0
-        will_trigger_dr = self._should_trigger_deep_research(report_data)
-        if rec_upper in ("BUY", "BUY_LIMIT", "STRONG BUY", "STRONG_BUY", "SPECULATIVE BUY", "SPECULATIVE_BUY") and will_trigger_dr and rr_value > 1.0:
-            status = "Pending DR Review"
-        elif "BUY" in rec_upper and rr_value > 1.0:
-            # BUY-flavored verdict that won't trigger DR (edge case): leave
-            # as Pending too so it surfaces in the UI as awaiting review.
-            status = "Pending DR Review"
-        else:
-            status = "Not Owned"
+        # 3-state position lifecycle: every buy-side verdict (BUY/BUY_LIMIT)
+        # advances to 'Pending DR Review' until deep research finalizes the
+        # verdict. The status is driven directly by the DR trigger gate so a
+        # DR-routed row is never stranded as 'Not Owned'.
+        status = self._initial_position_status(report_data)
 
         if decision_id:
             import json
