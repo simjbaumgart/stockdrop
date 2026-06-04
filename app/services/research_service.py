@@ -65,6 +65,42 @@ def _strip_citations(raw: str) -> str:
     return cleaned.strip(" ")
 
 
+def _strip_trailing_commas(s: str) -> str:
+    """Remove structural trailing commas (',' immediately before '}' or ']').
+
+    String-aware: a ',]' or ',}' that lives INSIDE a string value is left
+    untouched, so financial reason text is never corrupted. This handles the
+    single most common LLM JSON defect losslessly, avoiding a Flash repair pass
+    that silently drops key_factors list items.
+    """
+    out = []
+    in_str = False
+    esc = False
+    n = len(s)
+    for i, ch in enumerate(s):
+        if in_str:
+            out.append(ch)
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == '"':
+                in_str = False
+            continue
+        if ch == '"':
+            in_str = True
+            out.append(ch)
+            continue
+        if ch == ",":
+            j = i + 1
+            while j < n and s[j] in " \t\r\n":
+                j += 1
+            if j < n and s[j] in "}]":
+                continue  # drop the trailing comma
+        out.append(ch)
+    return "".join(out)
+
+
 # Grounding retry policy: 1 initial attempt + up to MAX_GROUNDING_RETRIES retries
 MAX_GROUNDING_RETRIES = 2
 
@@ -2191,14 +2227,37 @@ Process continuing but this agent's output is compromised.
             start = text.find('{')
             end = text.rfind('}')
 
-            if start != -1 and end != -1:
-                json_str = text[start:end+1]
+            if start == -1 or end == -1:
+                return None
+            json_str = text[start:end + 1]
+            try:
                 return json.loads(json_str)
-            return None
+            except json.JSONDecodeError:
+                # Tolerant retry: strip structural trailing commas (string-aware,
+                # value-preserving). Fixes the most common LLM defect without the
+                # lossy Flash repair pass. If it still fails, fall through to the
+                # full-payload dump + None so the caller can attempt Flash repair.
+                return json.loads(_strip_trailing_commas(json_str))
         except Exception as e:
             logger.error(f"Failed to extract JSON: {e}")
             logger.error(f"Raw text (first 500 chars): {text[:500]}")
+            # Persist the FULL unparseable payload so the recurring sell-price/
+            # ceiling-block malformation can be root-caused (the 500-char log
+            # tail rarely reaches the failing field).
+            self._dump_unparseable_payload(text)
             return None
+
+    def _dump_unparseable_payload(self, text: str) -> None:
+        """Best-effort: write an unparseable agent payload to logs/ for diagnosis."""
+        try:
+            os.makedirs("logs", exist_ok=True)
+            ts = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+            path = os.path.join("logs", f"unparseable_json_{ts}.txt")
+            with open(path, "w") as f:
+                f.write(text)
+            logger.error("Full unparseable payload written to %s", path)
+        except Exception as dump_err:
+            logger.warning("Could not dump unparseable payload: %s", dump_err)
 
     def _format_full_report(self, state: MarketState, deep_report: str = "", evidence_barometer: Dict = None) -> str:
         debate_section = ''.join([f"\n{entry}\n" for entry in state.debate_transcript])

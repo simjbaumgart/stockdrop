@@ -59,6 +59,10 @@ You are a data extraction assistant. I have a stock analysis report that is not 
 Please extract the relevant information and format it EXACTLY as this JSON object.
 Do not include markdown formatting or code blocks around the JSON. Just return the raw JSON string.
 
+IMPORTANT: Preserve every list item from the report verbatim — do NOT summarize,
+merge, shorten, or drop any entries in arrays (e.g. key_factors must keep ALL of
+its items, not just the first). Copy the values as written.
+
 SCHEMA:
 {schema_def}
 

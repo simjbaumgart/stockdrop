@@ -139,7 +139,7 @@ def test_run_challenger_happy_path(temp_db, monkeypatch):
         orig_wait = svc._wait_for_gemini
 
         def fast_wait(decision_id, timeout_s=600, poll_s=15):
-            orig_wait(decision_id, timeout_s=5, poll_s=1)
+            return orig_wait(decision_id, timeout_s=5, poll_s=1)
 
         svc._wait_for_gemini = fast_wait
         svc._run_challenger(comp_id, decision_id, "AAPL", CANNED_CONTEXT)

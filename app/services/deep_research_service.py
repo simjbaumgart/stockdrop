@@ -45,6 +45,26 @@ def _strip_citations(raw: str) -> str:
 
 _VALID_URL_SCHEMES = ("http://", "https://")
 
+# (connect, read) timeout for every DR HTTP call. Without these a hung
+# connection blocks the single DR worker thread indefinitely (2026-05 AVGO
+# hung ~87 min on a poll that never returned).
+_DR_HTTP_TIMEOUT = (10, 30)
+
+# Per-task wall-clock budget. Default 12 min: ~2.5x the healthy 3-5 min upper
+# bound, far below the old 90 min ceiling. Override with DR_TASK_TIMEOUT_SECONDS.
+_DR_TASK_TIMEOUT_DEFAULT = 720
+
+
+def _dr_task_timeout_seconds() -> int:
+    """Per-task DR poll budget in seconds (read at call time so tests/ops can
+    override via DR_TASK_TIMEOUT_SECONDS). Falls back to the default on any
+    non-positive / unparseable value."""
+    try:
+        val = int(os.getenv("DR_TASK_TIMEOUT_SECONDS", str(_DR_TASK_TIMEOUT_DEFAULT)))
+        return val if val > 0 else _DR_TASK_TIMEOUT_DEFAULT
+    except (TypeError, ValueError):
+        return _DR_TASK_TIMEOUT_DEFAULT
+
 
 def normalize_verification_results(raw):
     """Coerce a raw verification_results list (mix of legacy strings + new
@@ -154,8 +174,16 @@ class DeepResearchService:
                     minutes, seconds = divmod(duration, 60)
                     current_job_info = f" | Job: {self.current_task_name} (Running: {minutes}m {seconds}s)"
                     
-                    if duration > 5400: # 90 minutes
-                        logger.critical(f"[Deep Research] CRITICAL: Task '{self.current_task_name}' has been running for over 90 minutes ({minutes}m). The background thread may be completely stuck.")
+                    # A task running well past its per-task budget means the
+                    # wall-clock cap failed to fire (e.g. a hung request beyond
+                    # the read timeout) — the worker is genuinely stuck.
+                    stuck_threshold = _dr_task_timeout_seconds() * 2
+                    if duration > stuck_threshold:
+                        logger.critical(
+                            "[Deep Research] CRITICAL: Task '%s' has run for %dm — "
+                            "past 2x the per-task budget. The background thread may be stuck.",
+                            self.current_task_name, minutes,
+                        )
                 
                 print(f"\n[Deep Research Monitor] Active Agent: {active} | Queue: {queued_ind} (Ind), {queued_batch} (Batch){current_job_info} | {datetime.now().strftime('%H:%M:%S')}")
 
@@ -1116,7 +1144,10 @@ class DeepResearchService:
         
         try:
             agent_call_counter.record("dr.individual")
-            response = requests.post(self.base_url, headers=headers, json=payload)
+            response = requests.post(
+                self.base_url, headers=headers, json=payload,
+                timeout=_DR_HTTP_TIMEOUT,
+            )
             if response.status_code != 200:
                 logger.error(f"[Deep Research] API Error: {response.text}")
                 return None
@@ -1127,17 +1158,39 @@ class DeepResearchService:
                 return None
 
             logger.info(f"[Deep Research] Task Started for {symbol} (ID: {interaction_id})")
-            
+
             # 3. Poll
-            max_retries = 360 # Increased to allow 90 mins for background safety
+            # Per-task wall-clock cap. Healthy DR finishes in ~3-5 min; the old
+            # 360-iteration ceiling let a task stuck in a non-terminal status
+            # monopolise the single worker for 90 min (2026-05 AVGO starved
+            # FIVE/FN/PUK). Bound BOTH the iteration count (so a fast-polling
+            # loop can't run away) and the wall clock (so slow individual HTTP
+            # calls can't blow the budget). Configurable via DR_TASK_TIMEOUT_SECONDS.
             poll_interval = 15
+            task_timeout = _dr_task_timeout_seconds()
+            max_polls = max(1, task_timeout // poll_interval)
+            deadline = time.monotonic() + task_timeout
             poll_url = f"{self.base_url}/{interaction_id}"
-            
-            for i in range(max_retries):
+
+            for i in range(max_polls):
                 time.sleep(poll_interval)
-                resp = requests.get(poll_url, headers=headers)
+                if time.monotonic() > deadline:
+                    break
+                # A single hung/slow poll must not kill the task. The request
+                # timeout guarantees this GET returns within bounded time; a
+                # transient failure just rolls to the next poll within budget.
+                try:
+                    resp = requests.get(
+                        poll_url, headers=headers, timeout=_DR_HTTP_TIMEOUT,
+                    )
+                except requests.exceptions.RequestException as poll_err:
+                    logger.warning(
+                        "[Deep Research] Poll request failed for %s (continuing): %s",
+                        symbol, poll_err,
+                    )
+                    continue
                 if resp.status_code != 200: continue
-                
+
                 poll_data = resp.json()
                 status = poll_data.get('status', poll_data.get('state', 'UNKNOWN'))
                 
@@ -1186,7 +1239,11 @@ class DeepResearchService:
                     logger.error(f"[Deep Research] Task Failed for {symbol}: {poll_data}")
                     return None
                     
-            logger.error(f"[Deep Research] Task Timeout for {symbol}")
+            logger.error(
+                "[Deep Research] Task Timeout for %s — abandoned after %ss budget "
+                "(non-terminal status); freeing worker so the queue can drain.",
+                symbol, task_timeout,
+            )
             return None
             
         except Exception as e:

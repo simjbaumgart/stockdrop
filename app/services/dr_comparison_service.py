@@ -26,9 +26,23 @@ logger = logging.getLogger(__name__)
 _MAX_CONCURRENT = int(os.getenv("DR_DUAL_RUN_MAX_CONCURRENCY", "2"))
 _challenger_semaphore = threading.Semaphore(_MAX_CONCURRENT)
 
+# How long _wait_for_gemini blocks inline before deferring to reconciliation.
+# Gemini DR is serialised behind a single worker (+60s cooldown), so a queue of
+# N tasks can take many minutes; the inline wait only needs to cover the common
+# shallow-queue case — anything deeper is finalised later by the reconciler.
+_GEMINI_WAIT_S = int(os.getenv("DR_DUAL_RUN_GEMINI_WAIT_S", "900"))
+# Background reconciler cadence and the age past which a still-Gemini-less row is
+# declared dead (terminal GEMINI_TIMEOUT, excluded from valid head-to-heads).
+_RECONCILE_INTERVAL_S = int(os.getenv("DR_DUAL_RUN_RECONCILE_INTERVAL_S", "120"))
+_RECONCILE_MAX_AGE_S = int(os.getenv("DR_DUAL_RUN_RECONCILE_MAX_AGE_S", str(6 * 3600)))
+
 
 class DRComparisonService:
     """Runs the Claude challenger and persists a paired Gemini/Claude record."""
+
+    # Guards lazy start of the single background reconciler thread.
+    _reconciler_lock = threading.Lock()
+    _reconciler_started = False
 
     def trigger(
         self,
@@ -43,6 +57,14 @@ class DRComparisonService:
         """
         try:
             from app.database import snapshot_pm_baseline, create_dr_comparison
+
+            # Opportunistically drain any prior PENDING_GEMINI backlog and make
+            # sure the periodic reconciler is running. Cheap, best-effort.
+            self._ensure_reconciler_started()
+            try:
+                self.reconcile_pending_gemini()
+            except Exception as recon_err:
+                logger.warning("[Dual-Run] opportunistic reconcile failed: %s", recon_err)
 
             pm_baseline = snapshot_pm_baseline(decision_id)
             run_date = datetime.utcnow().strftime("%Y-%m-%d")
@@ -130,12 +152,21 @@ class DRComparisonService:
                     comparison_id,
                 )
 
-                self._wait_for_gemini(decision_id)
-                finalize_dr_comparison(comparison_id)
-                logger.info(
-                    "[Dual-Run] comparison_id=%s FINALIZED",
-                    comparison_id,
-                )
+                # Only finalise as a complete head-to-head if Gemini actually
+                # landed. Otherwise leave the row PENDING_GEMINI for the
+                # reconciler — finalising here would stamp a Claude-only row
+                # with NULL gem_* columns indistinguishable from a real
+                # comparison (2026-05 benchmark corruption).
+                if self._wait_for_gemini(decision_id, timeout_s=_GEMINI_WAIT_S):
+                    finalize_dr_comparison(comparison_id)
+                    logger.info("[Dual-Run] comparison_id=%s FINALIZED", comparison_id)
+                else:
+                    set_dr_comparison_status(comparison_id, "PENDING_GEMINI")
+                    logger.warning(
+                        "[Dual-Run] comparison_id=%s Gemini DR not ready after %ss — "
+                        "marked PENDING_GEMINI for later reconciliation.",
+                        comparison_id, _GEMINI_WAIT_S,
+                    )
 
         except Exception as e:
             logger.error(
@@ -154,38 +185,136 @@ class DRComparisonService:
     def _wait_for_gemini(
         self,
         decision_id: int,
-        timeout_s: int = 600,
+        timeout_s: int = _GEMINI_WAIT_S,
         poll_s: int = 15,
-    ) -> None:
+    ) -> bool:
         """Poll decision_points.deep_research_review_verdict until non-null/non-empty
         or timeout_s is reached. Uses time.sleep — this is a background thread only.
+
+        Returns True if Gemini's verdict landed, False on timeout.
         """
-        from app.database import DB_NAME
+        if self._gemini_verdict_present(decision_id):
+            return True
 
         deadline = time.monotonic() + timeout_s
         while time.monotonic() < deadline:
-            try:
-                conn = sqlite3.connect(DB_NAME)
-                conn.row_factory = sqlite3.Row
-                cur = conn.cursor()
-                cur.execute(
-                    "SELECT deep_research_review_verdict FROM decision_points WHERE id = ?",
-                    (decision_id,),
-                )
-                row = cur.fetchone()
-                conn.close()
-                if row is not None and row["deep_research_review_verdict"]:
-                    return
-            except Exception as e:
-                logger.warning(
-                    "[Dual-Run] _wait_for_gemini poll error decision_id=%s: %s",
-                    decision_id, e,
-                )
             time.sleep(poll_s)
+            if self._gemini_verdict_present(decision_id):
+                return True
 
         logger.warning(
-            "[Dual-Run] _wait_for_gemini timed out after %ss for decision_id=%s — finalizing anyway",
+            "[Dual-Run] _wait_for_gemini timed out after %ss for decision_id=%s",
             timeout_s, decision_id,
+        )
+        return False
+
+    @staticmethod
+    def _gemini_verdict_present(decision_id: int) -> bool:
+        """True iff decision_points has a non-empty deep_research_review_verdict."""
+        from app.database import DB_NAME
+        try:
+            conn = sqlite3.connect(DB_NAME)
+            conn.row_factory = sqlite3.Row
+            cur = conn.cursor()
+            cur.execute(
+                "SELECT deep_research_review_verdict FROM decision_points WHERE id = ?",
+                (decision_id,),
+            )
+            row = cur.fetchone()
+            conn.close()
+            return bool(row is not None and row["deep_research_review_verdict"])
+        except Exception as e:
+            logger.warning(
+                "[Dual-Run] gemini-verdict poll error decision_id=%s: %s",
+                decision_id, e,
+            )
+            return False
+
+    def reconcile_pending_gemini(self, max_age_s: int = _RECONCILE_MAX_AGE_S) -> dict:
+        """Resolve dr_comparison rows stuck in PENDING_GEMINI.
+
+        For each PENDING_GEMINI row:
+          - if its Gemini verdict has since landed -> finalize (FINALIZED);
+          - else if the row is older than ``max_age_s`` -> GEMINI_TIMEOUT
+            (terminal; Gemini DR never produced a verdict, so this can never be
+            a valid head-to-head);
+          - else leave it PENDING_GEMINI for a future pass.
+
+        Returns {"finalized", "timed_out", "pending"} counts. Safe to call
+        repeatedly; never raises (errors are logged and counted as pending).
+        """
+        from app.database import DB_NAME, finalize_dr_comparison, set_dr_comparison_status
+
+        stats = {"finalized": 0, "timed_out": 0, "pending": 0}
+        try:
+            conn = sqlite3.connect(DB_NAME)
+            conn.row_factory = sqlite3.Row
+            cur = conn.cursor()
+            cur.execute(
+                """
+                SELECT c.id AS comparison_id,
+                       d.deep_research_review_verdict AS verdict,
+                       (c.created_at < datetime('now', ?)) AS too_old
+                FROM dr_comparison c
+                LEFT JOIN decision_points d ON d.id = c.decision_id
+                WHERE c.status = 'PENDING_GEMINI'
+                """,
+                (f"-{int(max_age_s)} seconds",),
+            )
+            rows = [dict(r) for r in cur.fetchall()]
+            conn.close()
+        except Exception as e:
+            logger.error("[Dual-Run] reconcile query failed: %s", e)
+            return stats
+
+        for row in rows:
+            cid = row["comparison_id"]
+            try:
+                if row["verdict"]:
+                    finalize_dr_comparison(cid)
+                    stats["finalized"] += 1
+                elif row["too_old"]:
+                    set_dr_comparison_status(cid, "GEMINI_TIMEOUT")
+                    stats["timed_out"] += 1
+                    logger.warning(
+                        "[Dual-Run] comparison_id=%s aged out to GEMINI_TIMEOUT "
+                        "(no Gemini verdict after %ss).", cid, max_age_s,
+                    )
+                else:
+                    stats["pending"] += 1
+            except Exception as e:
+                logger.error("[Dual-Run] reconcile of comparison_id=%s failed: %s", cid, e)
+                stats["pending"] += 1
+
+        if stats["finalized"] or stats["timed_out"]:
+            logger.info(
+                "[Dual-Run] reconcile: finalized=%s timed_out=%s pending=%s",
+                stats["finalized"], stats["timed_out"], stats["pending"],
+            )
+        return stats
+
+    def _ensure_reconciler_started(self) -> None:
+        """Lazily start the single background reconciler thread (idempotent).
+
+        Started from trigger() so it only runs when dual-run is actually active.
+        """
+        with self._reconciler_lock:
+            if DRComparisonService._reconciler_started:
+                return
+            DRComparisonService._reconciler_started = True
+
+        def _loop():
+            while True:
+                time.sleep(_RECONCILE_INTERVAL_S)
+                try:
+                    self.reconcile_pending_gemini()
+                except Exception as e:
+                    logger.error("[Dual-Run] reconciler loop error: %s", e)
+
+        threading.Thread(target=_loop, daemon=True, name="dr-dual-run-reconciler").start()
+        logger.info(
+            "[Dual-Run] reconciler thread started (interval=%ss, max_age=%ss).",
+            _RECONCILE_INTERVAL_S, _RECONCILE_MAX_AGE_S,
         )
 
 
