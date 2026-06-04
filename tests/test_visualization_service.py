@@ -96,3 +96,30 @@ def test_basket_curve_skips_nan_entry_price():
     # Only AAA counts: day1 0%, day2 +20%. BBB excluded entirely.
     assert curve["vals"] == pytest.approx([0.0, 20.0])
     assert curve["final_n"] == 1
+
+
+def test_render_basket_chart_runs_on_payload(capsys):
+    from app.services.visualization_service import render_basket_chart
+
+    payload = {
+        "curves": {
+            "ENTER_NOW": {
+                "dates": pd.to_datetime(["2026-04-10", "2026-04-11"]).tolist(),
+                "vals": [0.0, 5.0],
+                "final_n": 2,
+            }
+        },
+        "spy_dates": pd.to_datetime(["2026-04-10", "2026-04-11"]).tolist(),
+        "spy_vals": [0.0, 1.0],
+    }
+    render_basket_chart("Test chart", payload)
+    out = capsys.readouterr().out
+    assert "Test chart" in out  # plotext renders the title into the terminal output
+
+
+def test_render_basket_chart_handles_empty(capsys):
+    from app.services.visualization_service import render_basket_chart
+
+    render_basket_chart("Empty chart", {"curves": {}, "spy_dates": [], "spy_vals": []})
+    out = capsys.readouterr().out
+    assert "no data" in out.lower()

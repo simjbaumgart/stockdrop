@@ -100,3 +100,37 @@ def build_basket_curves(
         spy_vals = list(((spy_axis / spy_start - 1.0) * 100.0).values)
 
     return {"curves": curves, "spy_dates": spy_dates, "spy_vals": spy_vals}
+
+
+def render_basket_chart(title: str, payload: dict) -> None:
+    """Draw cumulative-return lines for each bucket + an SPY reference, in-terminal.
+
+    plotext has no true dashed style, so the SPY reference is distinguished by a
+    distinct marker and an explicit '(buy & hold ref)' label.
+    """
+    import plotext as plt
+
+    curves = payload.get("curves", {})
+    if not curves:
+        print(f"\n{title}: no data to chart.")
+        return
+
+    plt.clear_figure()
+    plt.date_form("Y-m-d")
+    plt.theme("pro")
+
+    for intent in INTENT_ORDER:
+        c = curves.get(intent)
+        if not c:
+            continue
+        xs = [d.strftime("%Y-%m-%d") for d in c["dates"]]
+        plt.plot(xs, c["vals"], label=f"{INTENT_LABEL[intent]} (n={c['final_n']})")
+
+    if payload.get("spy_dates"):
+        sxs = [d.strftime("%Y-%m-%d") for d in payload["spy_dates"]]
+        plt.plot(sxs, payload["spy_vals"], label="SPY (buy & hold ref)", marker="dot")
+
+    plt.title(title)
+    plt.xlabel("Date")
+    plt.ylabel("Cumulative return %")
+    plt.show()
