@@ -209,26 +209,37 @@ def test_T7_deep_research_trigger():
 
 
 def test_T8_backfill_query():
-    """T8: Backfill SQL returns BUY/BUY_LIMIT rows, skips WATCH/AVOID. No ai_score filter."""
+    """T8: Backfill SQL returns every BUY/BUY_LIMIT row missing a DR verdict,
+    skips WATCH/AVOID. No conviction or R/R gate — a low-R/R (or NULL-R/R)
+    BUY_LIMIT must still be selected. A conviction/R/R gate here is exactly
+    what stranded AVGO/FIVE/FN (Pending DR Review, no verdict) on 2026-06-04.
+    """
     fresh_db()
     today = __import__("datetime").datetime.now().strftime("%Y-%m-%d")
 
-    # Insert rows with different recommendations, all with NULL deep_research_verdict
+    # Insert rows with different recommendations, all with NULL deep_research_verdict.
+    # The BUY_LIMIT here has NULL conviction and NULL R/R — the regression case.
     for rec in ["BUY", "BUY_LIMIT", "WATCH", "AVOID"]:
         add_decision_point(
             symbol=f"T8_{rec}", price=100.0, drop_percent=-5.0,
             recommendation=rec, reasoning="test", status="Pending",
         )
 
-    # Run the exact backfill query from stock_service.py
+    # Mirror the real selection policy (stock_service.MISSING_DR_WHERE). Kept as
+    # an inline copy so this test stays free of the service's heavy SDK imports.
     conn = sqlite3.connect(TEST_DB)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     query = """
-        SELECT * FROM decision_points 
-        WHERE date(timestamp) = ? 
-        AND (recommendation LIKE '%BUY%' OR recommendation LIKE '%STRONG BUY%')
-        AND (deep_research_verdict IS NULL OR deep_research_verdict = '' OR deep_research_verdict = '-' OR deep_research_verdict LIKE 'UNKNOWN%')
+        SELECT * FROM decision_points
+        WHERE date(timestamp) = ?
+        AND recommendation IN ('BUY', 'BUY_LIMIT')
+        AND (deep_research_verdict IS NULL
+             OR deep_research_verdict = ''
+             OR deep_research_verdict = '-'
+             OR deep_research_verdict LIKE 'UNKNOWN%'
+             OR deep_research_verdict = 'ERROR_PARSING'
+             OR deep_research_verdict = 'PENDING_REVIEW')
     """
     cursor.execute(query, (today,))
     rows = [dict(r) for r in cursor.fetchall()]
@@ -236,7 +247,7 @@ def test_T8_backfill_query():
 
     symbols = [r["symbol"] for r in rows]
     _assert("T8_BUY" in symbols, f"BUY row missing from backfill results: {symbols}")
-    _assert("T8_BUY_LIMIT" in symbols, f"BUY_LIMIT row missing from backfill results: {symbols}")
+    _assert("T8_BUY_LIMIT" in symbols, f"BUY_LIMIT (NULL R/R) row missing from backfill results: {symbols}")
     _assert("T8_WATCH" not in symbols, f"WATCH row should NOT be in backfill results: {symbols}")
     _assert("T8_AVOID" not in symbols, f"AVOID row should NOT be in backfill results: {symbols}")
 

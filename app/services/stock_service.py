@@ -65,6 +65,91 @@ STALE_TRANSCRIPT_DAYS = 75
 MIN_AVG_VOLUME = 100_000
 
 
+# Single source of truth for "which same-day decisions still need Deep Research".
+# This MUST mirror StockService._should_trigger_deep_research: every buy-side
+# verdict (BUY / BUY_LIMIT) is routed through DR — no conviction or R/R gate.
+# Gating here is what previously stranded sub-1.5 R/R limit orders (the
+# AVGO/FIVE/FN gap): the live pipeline parked them as "Pending DR Review" but
+# the backfill net skipped them, so they never got a verdict.
+# `?` binds the date string (YYYY-MM-DD).
+MISSING_DR_WHERE = """
+    date(timestamp) = ?
+    AND recommendation IN ('BUY', 'BUY_LIMIT')
+    AND (deep_research_verdict IS NULL
+         OR deep_research_verdict = ''
+         OR deep_research_verdict = '-'
+         OR deep_research_verdict LIKE 'UNKNOWN%'
+         OR deep_research_verdict = 'ERROR_PARSING'
+         OR deep_research_verdict = 'PENDING_REVIEW')
+"""
+
+
+def build_backfill_dr_context(c: dict, date_str: str) -> dict:
+    """Build a Deep Research context package for a same-day decision row that
+    missed its live DR pass.
+
+    Loads the saved council reports from disk (council2 preferred — it carries
+    bull/bear/risk — falling back to council1) and combines them with the PM
+    fields persisted on the decision row. Shared by the inline per-cycle
+    backfill and the standalone scripts/trigger_missing_dr.py CLI so both build
+    identical context.
+    """
+    symbol = c["symbol"]
+    drop_percent = c.get("drop_percent", 0.0)
+
+    council_dir = "data/council_reports"
+    from app.utils.ticker_paths import safe_ticker_path
+    _safe = safe_ticker_path(symbol)
+    council1_path = f"{council_dir}/{_safe}_{date_str}_council1.json"
+    council2_path = f"{council_dir}/{_safe}_{date_str}_council2.json"
+    council_reports: dict = {}
+
+    if os.path.exists(council1_path):
+        try:
+            with open(council1_path, "r") as f:
+                council_reports = json.loads(f.read())
+                print(f"  > Loaded council1 report from file: {council1_path}")
+        except Exception as e:
+            print(f"  > Error reading council1 report file: {e}")
+
+    if os.path.exists(council2_path):
+        try:
+            with open(council2_path, "r") as f:
+                council2_data = json.loads(f.read())
+                council_reports.update(council2_data)
+                print(f"  > Loaded council2 report (bull/bear/risk) from file: {council2_path}")
+        except Exception as e:
+            print(f"  > Error reading council2 report file: {e}")
+
+    return {
+        "pm_decision": {
+            "action": c.get("recommendation"),
+            "conviction": c.get("conviction"),
+            "drop_type": c.get("drop_type"),
+            "entry_price_low": c.get("entry_price_low"),
+            "entry_price_high": c.get("entry_price_high"),
+            "stop_loss": c.get("stop_loss"),
+            "take_profit_1": c.get("take_profit_1"),
+            "take_profit_2": c.get("take_profit_2"),
+            "upside_percent": c.get("upside_percent"),
+            "downside_risk_percent": c.get("downside_risk_percent"),
+            "risk_reward_ratio": c.get("risk_reward_ratio"),
+            "pre_drop_price": c.get("pre_drop_price"),
+            "entry_trigger": c.get("entry_trigger"),
+            "reason": (c.get("reasoning") or "")[:500],
+            "key_factors": [],
+        },
+        "bull_case": council_reports.get("bull", "Not available from backfill."),
+        "bear_case": council_reports.get("bear", "Not available from backfill."),
+        "technical_data": council_reports.get("technical", {}),
+        "drop_percent": drop_percent,
+        "raw_news": [],  # Not available in inline backfill
+        "transcript_summary": "No transcript summary available from backfill.",
+        "transcript_date": None,
+        "data_depth": {},
+    }
+
+
 class StockService:
     def __init__(self):
         # Indices tickers: CSI 300 (000300.SS), S&P 500 (^GSPC), STOXX 600 (^STOXX)
@@ -759,88 +844,31 @@ class StockService:
             conn = sqlite3.connect(os.getenv("DB_PATH", "subscribers.db"))
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-            
-            # Query candidates: Same Date, BUY/BUY_LIMIT with MODERATE+ conviction and R/R >= 1.5
-            query = """
-                SELECT * FROM decision_points 
-                WHERE date(timestamp) = ? 
-                AND recommendation IN ('BUY', 'BUY_LIMIT')
-                AND conviction IN ('MODERATE', 'HIGH')
-                AND risk_reward_ratio >= 1.5
-                AND (deep_research_verdict IS NULL OR deep_research_verdict = '' OR deep_research_verdict = '-' OR deep_research_verdict LIKE 'UNKNOWN%' OR deep_research_verdict = 'ERROR_PARSING' OR deep_research_verdict = 'PENDING_REVIEW')
-            """
-            cursor.execute(query, (date_str,))
+
+            # Candidates: same date, any buy-side verdict still missing a DR
+            # verdict. The WHERE clause mirrors _should_trigger_deep_research
+            # (no conviction / R/R gate) — see MISSING_DR_WHERE.
+            cursor.execute(
+                f"SELECT * FROM decision_points WHERE {MISSING_DR_WHERE}",
+                (date_str,),
+            )
             rows = cursor.fetchall()
             conn.close()
-            
+
             candidates = [dict(row) for row in rows]
-            
+
             if not candidates:
                 print("[Backfill] No outstanding candidates found.")
                 return
 
             print(f"[Backfill] Found {len(candidates)} candidates needing Deep Research: {[c['symbol'] for c in candidates]}")
-            
+
             for c in candidates:
                 symbol = c['symbol']
                 decision_id = c['id']
-                drop_percent = c.get('drop_percent', 0.0)
-                
-                # Try to load council reports from file
-                # council2 (Phase 1+2: includes bull/bear/risk) preferred, fallback to council1
-                council_dir = "data/council_reports"
-                from app.utils.ticker_paths import safe_ticker_path
-                _safe = safe_ticker_path(symbol)
-                council1_path = f"{council_dir}/{_safe}_{date_str}_council1.json"
-                council2_path = f"{council_dir}/{_safe}_{date_str}_council2.json"
-                council_reports = {}
-                
-                if os.path.exists(council1_path):
-                    try:
-                        with open(council1_path, 'r') as f:
-                            council_reports = json.loads(f.read())
-                            print(f"  > Loaded council1 report from file: {council1_path}")
-                    except Exception as e:
-                        print(f"  > Error reading council1 report file: {e}")
-                
-                if os.path.exists(council2_path):
-                    try:
-                        with open(council2_path, 'r') as f:
-                            council2_data = json.loads(f.read())
-                            council_reports.update(council2_data)
-                            print(f"  > Loaded council2 report (bull/bear/risk) from file: {council2_path}")
-                    except Exception as e:
-                        print(f"  > Error reading council2 report file: {e}")
-                
-                # Build context from DB row + file data
-                context = {
-                    "pm_decision": {
-                        "action": c.get("recommendation"),
-                        "conviction": c.get("conviction"),
-                        "drop_type": c.get("drop_type"),
-                        "entry_price_low": c.get("entry_price_low"),
-                        "entry_price_high": c.get("entry_price_high"),
-                        "stop_loss": c.get("stop_loss"),
-                        "take_profit_1": c.get("take_profit_1"),
-                        "take_profit_2": c.get("take_profit_2"),
-                        "upside_percent": c.get("upside_percent"),
-                        "downside_risk_percent": c.get("downside_risk_percent"),
-                        "risk_reward_ratio": c.get("risk_reward_ratio"),
-                        "pre_drop_price": c.get("pre_drop_price"),
-                        "entry_trigger": c.get("entry_trigger"),
-                        "reason": c.get("reasoning", "")[:500],
-                        "key_factors": [],
-                    },
-                    "bull_case": council_reports.get("bull", "Not available from backfill."),
-                    "bear_case": council_reports.get("bear", "Not available from backfill."),
-                    "technical_data": council_reports.get("technical", {}),
-                    "drop_percent": drop_percent,
-                    "raw_news": [],  # Not available in inline backfill
-                    "transcript_summary": "No transcript summary available from backfill.",
-                    "transcript_date": None,
-                    "data_depth": {},
-                }
-                
+
+                context = build_backfill_dr_context(c, date_str)
+
                 print(f"  > Triggering Backfill for {symbol} (Conviction: {c.get('conviction')}, R/R: {c.get('risk_reward_ratio')})...")
                 queued = deep_research_service.queue_research_task(
                     symbol=symbol,
