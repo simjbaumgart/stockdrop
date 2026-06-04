@@ -134,3 +134,51 @@ def render_basket_chart(title: str, payload: dict) -> None:
     plt.xlabel("Date")
     plt.ylabel("Cumulative return %")
     plt.show()
+
+
+def run_visualization() -> None:
+    """One-shot console report: alpha tables + cumulative-return charts. Writes no files."""
+    df = load_decisions()
+    print(
+        f"Loaded {len(df)} decisions "
+        f"({df['date'].min().date()} -> {df['date'].max().date()})"
+    )
+
+    start = df["date"].min() - timedelta(days=5)
+    end = datetime.now()
+    prices = fetch_prices(df["symbol"].tolist(), start, end)
+    spy = prices.get(BENCHMARK)
+    if spy is None:
+        print("Could not fetch SPY benchmark — aborting.")
+        return
+    print(f"Got prices for {len(prices) - 1} / {df['symbol'].nunique()} symbols.\n")
+
+    # ---- OUTPUT 1: alpha-vs-SPY tables (reuse verdict_performance) ----
+    council_tbl = build_table(df, prices, spy, WINDOWS, "council_intent")
+    dr_tbl = build_table(df, prices, spy, WINDOWS, "dr_intent")
+    render_console(
+        "COUNCIL / PM verdict — alpha vs SPY (market-on-decision entry)",
+        council_tbl, WINDOWS, MIN_N,
+    )
+    print()
+    render_console(
+        "DEEP RESEARCH verdict — alpha vs SPY (market-on-decision entry)",
+        dr_tbl, WINDOWS, MIN_N,
+    )
+    print()
+
+    # ---- OUTPUT 2: cumulative-return line charts ----
+    pm_payload = build_basket_curves(df, prices, spy, "council_intent")
+    render_basket_chart("Council / PM verdict — cumulative return vs SPY", pm_payload)
+
+    dr_df = df[df["dr_intent"] != ""].copy()
+    dr_payload = build_basket_curves(dr_df, prices, spy, "dr_intent")
+    render_basket_chart("Deep Research verdict — cumulative return vs SPY", dr_payload)
+
+    print("\nFootnotes:")
+    print("  * Cumulative basket = equal-weight, market-on-decision entry at price_at_decision,")
+    print("    buy-and-hold to today; each position's return clipped at +/-300%.")
+    print("  * SPY line = buy & hold from each chart's start date.")
+    print("  * The pre-Apr 9 2026 stretch comes from the legacy DB (data/subscribers.db),")
+    print("    an earlier regime of the tool.")
+    print("  * Console-only: no files were written.")
