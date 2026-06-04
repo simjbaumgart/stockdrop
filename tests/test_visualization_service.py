@@ -73,3 +73,26 @@ def test_basket_curve_clips_extreme_position_return():
 
     out = build_basket_curves(df, prices, spy, "council_intent")
     assert out["curves"]["ENTER_NOW"]["vals"][-1] == pytest.approx(300.0)
+
+
+def test_basket_curve_skips_nan_entry_price():
+    # A NaN price_at_decision must be silently excluded, not poison the basket.
+    axis = ["2026-04-10", "2026-04-11"]
+    spy = _series(axis, [100.0, 100.0])
+    prices = {
+        "SPY": spy,
+        "AAA": _series(axis, [50.0, 60.0]),   # valid, +20%
+        "BBB": _series(axis, [10.0, 20.0]),   # would be +100% but its entry price is NaN
+    }
+    df = pd.DataFrame({
+        "symbol": ["AAA", "BBB"],
+        "price_at_decision": [50.0, float("nan")],
+        "date": pd.to_datetime(["2026-04-10", "2026-04-10"]),
+        "council_intent": ["ENTER_NOW", "ENTER_NOW"],
+    })
+
+    out = build_basket_curves(df, prices, spy, "council_intent")
+    curve = out["curves"]["ENTER_NOW"]
+    # Only AAA counts: day1 0%, day2 +20%. BBB excluded entirely.
+    assert curve["vals"] == pytest.approx([0.0, 20.0])
+    assert curve["final_n"] == 1

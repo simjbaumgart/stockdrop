@@ -49,11 +49,14 @@ def build_basket_curves(
         positions = []
         for _, r in sub.iterrows():
             s = prices.get(r["symbol"])
-            entry_price = r["price_at_decision"]
-            if s is None or not entry_price or entry_price <= 0:
+            try:
+                entry_price = float(r["price_at_decision"])
+            except (TypeError, ValueError):
+                entry_price = float("nan")
+            if s is None or not (entry_price > 0):
                 continue
             entry_ts = pd.Timestamp(r["date"]).normalize()
-            positions.append((entry_ts, float(entry_price), s))
+            positions.append((entry_ts, entry_price, s))
             if earliest is None or entry_ts < earliest:
                 earliest = entry_ts
         if positions:
@@ -91,6 +94,9 @@ def build_basket_curves(
     spy_axis = spy.reindex(axis).ffill()
     spy_start = float(spy_axis.iloc[0])
     spy_dates = list(axis)
-    spy_vals = list(((spy_axis / spy_start - 1.0) * 100.0).values)
+    if not (spy_start > 0):
+        spy_vals = [float("nan")] * len(spy_axis)
+    else:
+        spy_vals = list(((spy_axis / spy_start - 1.0) * 100.0).values)
 
     return {"curves": curves, "spy_dates": spy_dates, "spy_vals": spy_vals}
