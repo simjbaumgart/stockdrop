@@ -251,6 +251,8 @@ if __name__ == "__main__":
     parser.add_argument("--enable-email", action="store_true", help="Enable email notifications")
     parser.add_argument("--run-for", type=int, default=None, metavar="MINUTES",
                         help="Run for N minutes then gracefully shut down (default: run forever)")
+    parser.add_argument("--visualization", action="store_true",
+                        help="Print performance tables + console charts, then exit")
     args = parser.parse_args()
 
     if args.enable_email:
@@ -262,5 +264,11 @@ if __name__ == "__main__":
     if args.run_for:
         # Propagate via env var so uvicorn's re-import of this module picks it up.
         os.environ["STOCKDROP_RUN_FOR"] = str(args.run_for)
+
+    if args.visualization:
+        import sys
+        from app.services.visualization_service import run_visualization
+        run_visualization()
+        sys.exit(0)
 
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=not args.run_for)
