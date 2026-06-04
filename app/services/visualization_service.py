@@ -10,10 +10,16 @@ buy-and-hold reference, entering each position at its DB price_at_decision.
 
 from __future__ import annotations
 
+import re
+import warnings
 from datetime import datetime, timedelta
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import pandas as pd
+
+# yfinance on pandas 2.3+ emits a Timestamp.utcnow deprecation warning once per
+# downloaded ticker — hundreds of lines of noise in this console report. Silence it.
+warnings.filterwarnings("ignore", message=r".*Timestamp\.utcnow is deprecated.*")
 
 from scripts.analysis.verdict_performance import (
     BENCHMARK,
@@ -28,6 +34,34 @@ from scripts.analysis.verdict_performance import (
 
 WINDOWS: List[int] = [2, 4, 12]
 MIN_N: int = 3  # match verdict_performance.py default
+
+
+def parse_since(spec: str) -> datetime:
+    """Parse a --since value into a cutoff datetime.
+
+    Accepts a relative window — ``<n>w`` / ``<n>d`` / ``<n>m`` / ``<n>y`` (weeks,
+    days, months, years ago; a space before the unit is allowed) — or an absolute
+    date string such as ``2026-04-09``. Raises ValueError on anything unparseable.
+    """
+    s = spec.strip().lower()
+    m = re.fullmatch(r"(\d+)\s*([wdmy])", s)
+    if m:
+        n, unit = int(m.group(1)), m.group(2)
+        now = datetime.now()
+        if unit == "w":
+            return now - timedelta(weeks=n)
+        if unit == "d":
+            return now - timedelta(days=n)
+        if unit == "m":
+            return (pd.Timestamp(now) - pd.DateOffset(months=n)).to_pydatetime()
+        return (pd.Timestamp(now) - pd.DateOffset(years=n)).to_pydatetime()  # "y"
+    try:
+        return pd.to_datetime(spec).to_pydatetime()
+    except Exception as exc:  # noqa: BLE001 — re-raise as a clear user-facing error
+        raise ValueError(
+            f"Could not parse --since value {spec!r}. "
+            "Use a window like '4w', '30d', '3m', '1y', or a date like '2026-04-09'."
+        ) from exc
 
 
 def build_basket_curves(
@@ -136,9 +170,23 @@ def render_basket_chart(title: str, payload: dict) -> None:
     plt.show()
 
 
-def run_visualization() -> None:
-    """One-shot console report: alpha tables + cumulative-return charts. Writes no files."""
+def run_visualization(since: Optional[str] = None) -> None:
+    """One-shot console report: alpha tables + cumulative-return charts. Writes no files.
+
+    If ``since`` is given (a window like '4w'/'30d'/'3m'/'1y' or a date like
+    '2026-04-09'), only decisions made on/after that cutoff are included.
+    """
     df = load_decisions()
+
+    if since:
+        cutoff = parse_since(since)
+        before = len(df)
+        df = df[df["date"] >= pd.Timestamp(cutoff)].copy()
+        print(f"Filtering to decisions since {cutoff.date()} — {len(df)} of {before}.")
+        if df.empty:
+            print("No decisions in that window — nothing to show.")
+            return
+
     print(
         f"Loaded {len(df)} decisions "
         f"({df['date'].min().date()} -> {df['date'].max().date()})"

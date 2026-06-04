@@ -253,6 +253,9 @@ if __name__ == "__main__":
                         help="Run for N minutes then gracefully shut down (default: run forever)")
     parser.add_argument("--visualization", action="store_true",
                         help="Print performance tables + console charts, then exit")
+    parser.add_argument("--since", default=None, metavar="WINDOW",
+                        help="With --visualization: only include decisions made since this "
+                             "cutoff — a window like 4w/30d/3m/1y or a date like 2026-04-09")
     args = parser.parse_args()
 
     if args.enable_email:
@@ -268,7 +271,7 @@ if __name__ == "__main__":
     if args.visualization:
         import sys
         from app.services.visualization_service import run_visualization
-        run_visualization()
+        run_visualization(since=args.since)
         sys.exit(0)
 
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=not args.run_for)

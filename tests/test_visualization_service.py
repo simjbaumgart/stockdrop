@@ -123,3 +123,33 @@ def test_render_basket_chart_handles_empty(capsys):
     render_basket_chart("Empty chart", {"curves": {}, "spy_dates": [], "spy_vals": []})
     out = capsys.readouterr().out
     assert "no data" in out.lower()
+
+
+def test_parse_since_absolute_date():
+    from app.services.visualization_service import parse_since
+
+    dt = parse_since("2026-04-09")
+    assert (dt.year, dt.month, dt.day) == (2026, 4, 9)
+
+
+def test_parse_since_relative_weeks_and_days():
+    from datetime import datetime
+
+    from app.services.visualization_service import parse_since
+
+    now = datetime.now()
+    four_weeks = parse_since("4w")
+    assert 27 <= (now - four_weeks).days <= 29  # ~28, allow clock drift
+
+    thirty_days = parse_since("30d")
+    assert 29 <= (now - thirty_days).days <= 31
+
+    # A space before the unit is allowed.
+    assert 6 <= (now - parse_since("1 w")).days <= 8
+
+
+def test_parse_since_rejects_garbage():
+    from app.services.visualization_service import parse_since
+
+    with pytest.raises(ValueError):
+        parse_since("banana")
