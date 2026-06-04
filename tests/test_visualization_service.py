@@ -153,3 +153,88 @@ def test_parse_since_rejects_garbage():
 
     with pytest.raises(ValueError):
         parse_since("banana")
+
+
+# --- price cache -----------------------------------------------------------
+
+def _fake_downloader(records):
+    """Return a fetch_prices stand-in that records calls and returns SPY + non-BAD symbols."""
+    axis = pd.to_datetime(["2025-12-05", "2025-12-06"])
+
+    def _fetch(symbols, start, end):
+        # Mimic the real fetch_prices contract: start/end must be datetime-like
+        # (the real one calls start.date()/start.strftime()). This guards against
+        # passing the cached ISO start string straight through.
+        start.strftime("%Y-%m-%d")
+        end.strftime("%Y-%m-%d")
+        records.append(sorted(symbols))
+        out = {}
+        for s in symbols:
+            if s.startswith("BAD"):
+                continue  # simulate a delisted/foreign ticker yfinance can't resolve
+            out[s] = pd.Series([100.0, 101.0], index=axis)
+        out["SPY"] = pd.Series([400.0, 402.0], index=axis)  # benchmark always present
+        return out
+
+    return _fetch
+
+
+def test_cache_serves_second_call_without_download(tmp_path, monkeypatch):
+    import app.services.visualization_service as viz
+
+    records = []
+    monkeypatch.setattr(viz, "fetch_prices", _fake_downloader(records))
+    monkeypatch.setattr(viz, "CACHE_PATH", str(tmp_path / "price_cache.pkl"))
+
+    start = pd.Timestamp("2025-12-05")
+    first = viz.fetch_prices_cached(["AAA", "BBB"], start, pd.Timestamp("2026-06-04"))
+    second = viz.fetch_prices_cached(["AAA", "BBB"], start, pd.Timestamp("2026-06-04"))
+
+    assert set(first) == {"AAA", "BBB", "SPY"}
+    assert set(second) == {"AAA", "BBB", "SPY"}
+    assert len(records) == 1  # only the FIRST call hit the network
+
+
+def test_cache_downloads_only_new_symbols(tmp_path, monkeypatch):
+    import app.services.visualization_service as viz
+
+    records = []
+    monkeypatch.setattr(viz, "fetch_prices", _fake_downloader(records))
+    monkeypatch.setattr(viz, "CACHE_PATH", str(tmp_path / "price_cache.pkl"))
+
+    start = pd.Timestamp("2025-12-05")
+    viz.fetch_prices_cached(["AAA"], start, pd.Timestamp("2026-06-04"))
+    viz.fetch_prices_cached(["AAA", "CCC"], start, pd.Timestamp("2026-06-04"))
+
+    # First call downloaded AAA (+SPY); second downloaded ONLY the new CCC.
+    assert records[0] == ["AAA", "SPY"]
+    assert records[1] == ["CCC"]
+
+
+def test_cache_negative_caches_failed_symbols(tmp_path, monkeypatch):
+    import app.services.visualization_service as viz
+
+    records = []
+    monkeypatch.setattr(viz, "fetch_prices", _fake_downloader(records))
+    monkeypatch.setattr(viz, "CACHE_PATH", str(tmp_path / "price_cache.pkl"))
+
+    start = pd.Timestamp("2025-12-05")
+    viz.fetch_prices_cached(["AAA", "BAD1"], start, pd.Timestamp("2026-06-04"))
+    viz.fetch_prices_cached(["AAA", "BAD1"], start, pd.Timestamp("2026-06-04"))
+
+    # BAD1 never resolves; it must NOT be retried on the second same-day call.
+    assert len(records) == 1
+
+
+def test_cache_refresh_forces_redownload(tmp_path, monkeypatch):
+    import app.services.visualization_service as viz
+
+    records = []
+    monkeypatch.setattr(viz, "fetch_prices", _fake_downloader(records))
+    monkeypatch.setattr(viz, "CACHE_PATH", str(tmp_path / "price_cache.pkl"))
+
+    start = pd.Timestamp("2025-12-05")
+    viz.fetch_prices_cached(["AAA"], start, pd.Timestamp("2026-06-04"))
+    viz.fetch_prices_cached(["AAA"], start, pd.Timestamp("2026-06-04"), refresh=True)
+
+    assert len(records) == 2  # refresh ignores the cache
