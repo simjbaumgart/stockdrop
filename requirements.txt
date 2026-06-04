@@ -3,6 +3,8 @@ uvicorn==0.38.0
 jinja2==3.1.6
 python-multipart==0.0.20
 yfinance==0.2.66
+plotext==5.3.2
+rich==15.0.0
 google-generativeai==0.8.5
 anthropic==0.105.2
 python-dotenv==1.2.1
