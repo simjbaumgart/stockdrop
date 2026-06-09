@@ -1488,6 +1488,40 @@ REALISTIC EXIT CEILING (Bear's Upside Limit):
                 "decline'). Do not invent or repeat exact financial figures."
             )
 
+        df = getattr(state, "dividend_facts", None) or {}
+        if df and df.get("ex_dividend_date"):
+            ex_date = df["ex_dividend_date"]
+            today = state.date
+            pay_str = df.get("pay_date") or "unknown"
+            amount_str = (
+                f"${df['amount']:.2f}" if df.get("amount") is not None else "unknown"
+            )
+            # ISO 'YYYY-MM-DD' strings compare lexically in chronological order.
+            # A buyer is only entitled to the dividend if they buy BEFORE the
+            # ex-date, so today >= ex_date means any capture thesis is invalid.
+            if today >= ex_date:
+                capture_rule = (
+                    f"TODAY ({today}) IS PAST THE EX-DIVIDEND DATE ({ex_date}). "
+                    "Any 'buy now to capture the dividend' argument is INVALID — a "
+                    "buyer today is NOT entitled to this dividend. Reject any "
+                    "dividend-capture thesis in the bull case."
+                )
+            else:
+                capture_rule = (
+                    f"Today ({today}) is before the ex-dividend date ({ex_date}); a "
+                    "buyer before the ex-date would be entitled to this dividend."
+                )
+            dividend_block = (
+                "\nDIVIDEND_FACTS (canonical, from Yahoo Finance — ground truth for "
+                "any dividend reasoning):\n"
+                f"- Ex-dividend date: {ex_date}\n"
+                f"- Pay date: {pay_str}\n"
+                f"- Amount per share: {amount_str}\n"
+                f"- {capture_rule}\n"
+            )
+        else:
+            dividend_block = ""
+
         return f"""
 You are the **Portfolio Manager**. You have the final vote.
 You must weigh the arguments from the Bull Agent and the Bear Agent, cross-reference with the original Agent Reports, and produce a concrete, actionable trading plan.
@@ -1505,6 +1539,7 @@ RISK FACTORS (For Consideration):
 - **RISK AGENT ASSESSMENT**:
 {risk_report}
 {earnings_block}
+{dividend_block}
 
 BULL CASE:
 {bull_report}
