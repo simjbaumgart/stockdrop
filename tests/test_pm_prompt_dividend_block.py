@@ -34,6 +34,21 @@ def test_past_ex_date_marks_capture_invalid():
     assert "PAST THE EX-DIVIDEND DATE" in out
 
 
+def test_today_equals_ex_date_marks_capture_invalid():
+    # Boundary: a buyer ON the ex-date is NOT entitled — must be INVALID.
+    state = _make_state(
+        {
+            "ex_dividend_date": "2026-06-09", "pay_date": "2026-06-20",
+            "amount": 1.23, "source": "yfinance", "fetched_at": "2026-06-09T12:00Z",
+        },
+        date="2026-06-09",
+    )
+    out = _build_prompt(state)
+    assert "INVALID" in out
+    assert "PAST THE EX-DIVIDEND DATE" in out
+    assert "would be entitled" not in out
+
+
 def test_future_ex_date_marks_capture_valid():
     state = _make_state({
         "ex_dividend_date": "2026-06-20", "pay_date": "2026-07-01",
