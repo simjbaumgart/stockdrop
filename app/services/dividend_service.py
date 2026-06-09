@@ -12,7 +12,7 @@ from typing import Optional
 import yfinance as yf
 
 
-def _to_iso(val) -> Optional[str]:
+def _to_iso(val: object) -> Optional[str]:
     """Normalize a date-like value to an ISO 'YYYY-MM-DD' string, or None."""
     if val is None:
         return None
