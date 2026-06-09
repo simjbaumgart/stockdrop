@@ -1478,7 +1478,7 @@ REALISTIC EXIT CEILING (Bear's Upside Limit):
         else:
             earnings_block = (
                 "\nEARNINGS_FACTS: (no canonical earnings data available from Finnhub — "
-                "common for ADRs and foreign listings).\n"
+                "common for ADRs/foreign listings, or the drop is not earnings-driven).\n"
                 "RULE: Because no verified EPS figure exists, you MUST NOT cite any specific "
                 "EPS number, revenue figure, or surprise percentage in your reasoning or "
                 "key_factors. News articles may report figures in a foreign currency (e.g. PEN, "
