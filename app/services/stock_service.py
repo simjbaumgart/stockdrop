@@ -1616,6 +1616,16 @@ class StockService:
             print(f"[Earnings Facts] Failed to fetch for {symbol}: {e}")
             earnings_facts = None
 
+        # Pre-fetch dividend facts so the PM has the ex-dividend date as ground
+        # truth and cannot build a "buy to capture the dividend" thesis around a
+        # payout whose ex-date has already passed.
+        try:
+            from app.services.dividend_service import dividend_service
+            dividend_facts = dividend_service.get_dividend_facts(symbol)
+        except Exception as e:
+            print(f"[Dividend Facts] Failed to fetch for {symbol}: {e}")
+            dividend_facts = None
+
         # Fetch SA article counts for source-depth gate in research_service.
         # get_counts() reads from the JSON cache that was populated during
         # get_aggregated_news(), so this does NOT trigger an extra API call.
@@ -1651,6 +1661,7 @@ class StockService:
             "change_percent": stock.get("change_percent", 0.0),
             "gatekeeper_tier": reasons.get("tier"),
             "earnings_facts": earnings_facts,
+            "dividend_facts": dividend_facts,
             "company_name": company_name,
             "seeking_alpha_local_counts": _sa_local_counts,
         }

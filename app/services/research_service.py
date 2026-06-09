@@ -293,6 +293,7 @@ class ResearchService:
             date=datetime.now().strftime("%Y-%m-%d"),
             gatekeeper_tier=raw_data.get("gatekeeper_tier"),
             earnings_facts=raw_data.get("earnings_facts"),
+            dividend_facts=raw_data.get("dividend_facts"),
             volatility_regime=gatekeeper_service.check_market_regime(),
             decision_id=decision_id,
         )
