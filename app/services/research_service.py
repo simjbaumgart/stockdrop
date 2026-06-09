@@ -1476,7 +1476,16 @@ REALISTIC EXIT CEILING (Bear's Upside Limit):
                 "the values above are the ground truth."
             )
         else:
-            earnings_block = "\nEARNINGS_FACTS: (no recent reported quarter available — drop is not earnings-driven, or facts unavailable)"
+            earnings_block = (
+                "\nEARNINGS_FACTS: (no canonical earnings data available from Finnhub — "
+                "common for ADRs and foreign listings).\n"
+                "RULE: Because no verified EPS figure exists, you MUST NOT cite any specific "
+                "EPS number, revenue figure, or surprise percentage in your reasoning or "
+                "key_factors. News articles may report figures in a foreign currency (e.g. PEN, "
+                "KRW) or quote stale/unverified consensus numbers. You may describe earnings only "
+                "QUALITATIVELY (e.g. 'beat expectations per press reports', 'reported a revenue "
+                "decline'). Do not invent or repeat exact financial figures."
+            )
 
         return f"""
 You are the **Portfolio Manager**. You have the final vote.
