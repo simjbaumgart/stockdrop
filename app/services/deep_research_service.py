@@ -234,7 +234,6 @@ class DeepResearchService:
         """
         try:
             import glob
-            import json
             from app.database import update_batch_status, mark_batch_winner
             
             output_dir = "data/comparisons"
@@ -796,7 +795,7 @@ class DeepResearchService:
         """
         try:
             action = result.get('action', 'AVOID')
-            
+
             set_clauses = []
             values = []
 
@@ -1203,14 +1202,15 @@ class DeepResearchService:
                     # The original code returns the result and _process_individual_task calls _handle_completion.
                     # So we should just return result.
 
-                    # Best-effort token tracking. The REST response shape may not
-                    # include usageMetadata; if it doesn't, log and skip — DR cost
-                    # is already documented as a lower bound (spec out-of-scope).
+                    # Token tracking. The Interactions poll carries usage under
+                    # "usage" (total_input_tokens/total_output_tokens). Older/other
+                    # shapes used "usageMetadata" (promptTokenCount/...); try usage
+                    # first and fall back so we record real DR cost either way.
                     if decision_id is not None:
                         try:
-                            um = poll_data.get("usageMetadata") or {}
-                            tokens_in  = int(um.get("promptTokenCount", 0) or 0)
-                            tokens_out = int(um.get("candidatesTokenCount", 0) or 0)
+                            um = poll_data.get("usage") or poll_data.get("usageMetadata") or {}
+                            tokens_in  = int(um.get("total_input_tokens", um.get("promptTokenCount", 0)) or 0)
+                            tokens_out = int(um.get("total_output_tokens", um.get("candidatesTokenCount", 0)) or 0)
                             if tokens_in or tokens_out:
                                 from app.services.token_tracker import record_llm_call
                                 from datetime import datetime
@@ -1226,15 +1226,25 @@ class DeepResearchService:
                                 )
                             else:
                                 logger.info(
-                                    "[Deep Research] No usageMetadata in poll response for %s — "
-                                    "skipping token record (expected; see spec out-of-scope).",
+                                    "[Deep Research] No usage/usageMetadata in poll response for %s — "
+                                    "skipping token record.",
                                     symbol,
                                 )
                         except Exception as e:
                             logger.warning("[Deep Research] token tracking failed for %s: %s",
                                            symbol, e)
 
-                    return self._parse_output(poll_data, schema_type='individual')
+                    result = self._parse_output(poll_data, schema_type='individual')
+                    # dr.individual (recorded at dispatch above) counts ATTEMPTS and
+                    # thus cost. Record success separately so the quota line can no
+                    # longer make a completed-but-empty run (which returns None here)
+                    # look identical to one that produced a result. Note: a result
+                    # may still be a PENDING_REVIEW fallback (reviewer ran, output
+                    # unparseable) — that is counted as success because the stage
+                    # ran and captured output, unlike the empty-outputs case.
+                    if result is not None:
+                        agent_call_counter.record("dr.individual.success")
+                    return result
                 elif status in ['failed', 'FAILED']:
                     logger.error(f"[Deep Research] Task Failed for {symbol}: {poll_data}")
                     return None
@@ -1840,26 +1850,151 @@ REPORT CONTENT:
             logger.error(f"[Deep Research] Repair failed: {e}")
             return None
 
+    @staticmethod
+    def _collect_candidate_texts(node, add) -> None:
+        """Harvest text from a generateContent-style node:
+        candidates[].content.parts[].text."""
+        if not isinstance(node, dict):
+            return
+        cands = node.get('candidates')
+        if not isinstance(cands, list):
+            return
+        for c in cands:
+            content = c.get('content') if isinstance(c, dict) else None
+            parts = content.get('parts') if isinstance(content, dict) else None
+            if isinstance(parts, list):
+                for p in parts:
+                    if isinstance(p, dict):
+                        add(p.get('text'))
+
+    @staticmethod
+    def _deep_collect_text(node, add, depth: int = 0) -> None:
+        """Generic fallback: recursively harvest any 'text' string anywhere in
+        the body, for response shapes we don't explicitly model."""
+        if depth > 6:
+            return
+        if isinstance(node, dict):
+            for k, v in node.items():
+                if k == 'text' and isinstance(v, str):
+                    add(v)
+                else:
+                    DeepResearchService._deep_collect_text(v, add, depth + 1)
+        elif isinstance(node, list):
+            for item in node:
+                DeepResearchService._deep_collect_text(item, add, depth + 1)
+
+    def _extract_output_texts(self, poll_data) -> List[str]:
+        """Collect candidate text payloads from a completed interaction poll,
+        tolerant of differing response shapes.
+
+        The Interactions API result is NOT guaranteed to live under 'outputs'
+        (see the CBOE/SSRM/BLTE empty-outputs incidents). We try the known and
+        likely containers in priority order — 'outputs', then 'response' /
+        'output' / 'result' (string or generateContent-style), then top-level
+        'candidates' — and only if all of those are empty do we deep-walk the
+        whole body for any 'text' field. Returns de-duplicated texts, ordered
+        most-recent-first where order is known.
+        """
+        texts: List[str] = []
+
+        def _add(val):
+            if isinstance(val, str) and val.strip():
+                texts.append(val)
+
+        # 1. steps: [ {type/role, content:[{text}]}, ... ]  — the REAL Interactions
+        # agent shape. The final answer is the LAST step carrying model text; walk
+        # in reverse and take the first text-bearing step, explicitly skipping
+        # user_input / tool steps. This matters: the user_input step contains the
+        # prompt, which itself embeds the JSON output schema (with braces), so a
+        # blind text harvest would let the regex fallback mis-parse the prompt
+        # instead of the reviewer's actual answer.
+        steps = poll_data.get('steps')
+        if isinstance(steps, list):
+            for step in reversed(steps):
+                if not isinstance(step, dict):
+                    continue
+                stype = str(step.get('type') or step.get('role') or '').lower()
+                if any(tok in stype for tok in ('user', 'input', 'tool')):
+                    continue
+                before = len(texts)
+                content = step.get('content')
+                if isinstance(content, list):
+                    for part in content:
+                        if isinstance(part, dict):
+                            _add(part.get('text'))
+                        elif isinstance(part, str):
+                            _add(part)
+                elif isinstance(content, str):
+                    _add(content)
+                _add(step.get('text'))
+                self._collect_candidate_texts(step, _add)
+                if len(texts) > before:
+                    break  # found the final model step — stop
+
+        # 2. outputs: [ {text: ...} | str, ... ]  (SDK-normalized / legacy shape)
+        outputs = poll_data.get('outputs')
+        if isinstance(outputs, list):
+            for o in reversed(outputs):
+                if isinstance(o, dict):
+                    _add(o.get('text'))
+                elif isinstance(o, str):
+                    _add(o)
+
+        # 3. response / output / result: str, or generateContent-style dict
+        for key in ('response', 'output', 'result'):
+            node = poll_data.get(key)
+            if node is None:
+                continue
+            if isinstance(node, str):
+                _add(node)
+            elif isinstance(node, dict):
+                self._collect_candidate_texts(node, _add)
+                # a dict 'output' may itself carry a 'text'
+                _add(node.get('text'))
+
+        # 4. top-level candidates (generateContent shape)
+        self._collect_candidate_texts(poll_data, _add)
+
+        # 5. last resort: deep-walk for any 'text' anywhere
+        if not texts:
+            self._deep_collect_text(poll_data, _add)
+
+        # De-duplicate, preserving order.
+        seen = set()
+        uniq = []
+        for t in texts:
+            if t not in seen:
+                seen.add(t)
+                uniq.append(t)
+        return uniq
+
     def _parse_output(self, poll_data, schema_type: str = 'individual') -> Optional[Dict]:
         try:
-            outputs = poll_data.get('outputs', [])
-            if not outputs: 
-                logger.warning("[Deep Research] No outputs found in poll data.")
+            texts = self._extract_output_texts(poll_data)
+            if not texts:
+                # A terminal-'completed' poll with no extractable text is NOT
+                # success — the senior-reviewer override stage produced nothing
+                # this parser can read. Surface the real response shape (top-level
+                # keys + a truncated dump) so we can model whatever container the
+                # Interactions API actually used. Returning None leaves the PM
+                # verdict untouched (the correct conservative default), but the
+                # ERROR makes the empty/unknown completion visible instead of silent.
+                logger.error(
+                    "[Deep Research] Completed poll yielded no extractable text "
+                    "(override skipped). poll_data keys=%s; status=%s; sample=%.1000s",
+                    list(poll_data.keys()) if isinstance(poll_data, dict) else type(poll_data).__name__,
+                    poll_data.get('status', poll_data.get('state')) if isinstance(poll_data, dict) else None,
+                    json.dumps(poll_data, default=str),
+                )
                 return None
-            
-            logger.info(f"[Deep Research] Parsing outputs. Count: {len(outputs)}")
-            
-            # Iterate through all outputs to find the best candidate
-            best_text_candidate = ""
-            for output in reversed(outputs):
-                text = output.get('text', str(output)) if isinstance(output, dict) else str(output)
-                
-                # Update candidate (take the last one seen, which is the first in reversed list)
-                if not best_text_candidate:
-                    best_text_candidate = text
 
+            logger.info(f"[Deep Research] Parsing {len(texts)} candidate text(s) from poll.")
+
+            # First text is most-recent / highest-priority candidate.
+            best_text_candidate = texts[0]
+            for raw in texts:
                 # Cleaning
-                text = text.strip()
+                text = raw.strip()
                 if text.startswith("```json"):
                     text = text[7:]
                 if text.startswith("```"):
@@ -1870,7 +2005,6 @@ REPORT CONTENT:
                 text = _strip_citations(text)
 
                 # Try explicit JSON parsing first
-                import json
                 try:
                     return json.loads(text)
                 except:
@@ -1884,10 +2018,10 @@ REPORT CONTENT:
                         return json.loads(_strip_citations(json_match.group(0)))
                     except:
                         pass
-                        
-            # If we reach here, no valid JSON found in any output.
-            final_text = str(outputs[-1]) if outputs else "No Output"
-            
+
+            # If we reach here, no valid JSON found in any candidate text.
+            final_text = texts[-1]
+
             # Use the cleaner text candidate if available, else raw
             text_to_repair = best_text_candidate if best_text_candidate else final_text
             
@@ -2261,8 +2395,7 @@ A JSON object:
             story = []
             story.append(Paragraph(f"Batch Comparison: {', '.join(symbols)}", styles['Title']))
             story.append(Spacer(1, 12))
-            
-            import json
+
             try:
                 data = json.loads(result_text)
                 
