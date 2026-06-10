@@ -35,6 +35,24 @@ def _finite_or_none(val):
         return None
     return None if math.isnan(f) else f
 
+def _resolve_horizon_price(decision_dt, target_dt, now, exact_lookup, latest_price):
+    """Resolve the price for a horizon column (+7d/+14d/+28d).
+
+    Same-day decisions return None: with zero elapsed days the "latest"
+    fallback is just the intraday move, and it only fired when the symbol
+    happened to be in the price cache — producing inconsistent rows (TLN/SMMT
+    showed -1% while SMCI showed "-" on 2026-06-10). Pending windows track
+    progress via the latest close; completed windows use the close at the
+    target date, falling back to the latest close (holiday/missing bar).
+    """
+    if decision_dt.date() == now.date():
+        return None
+    if target_dt > now:
+        return latest_price()
+    price = exact_lookup(target_dt)
+    return price if price is not None else latest_price()
+
+
 def get_decision_points():
     try:
         conn = sqlite3.connect(DB_PATH)
@@ -201,22 +219,21 @@ def main():
         target_dt = decision_dt + timedelta(days=window_days)
         now = datetime.now()
         is_future = target_dt > now
+        same_day = decision_dt.date() == now.date()
 
         # Get Prices from Batch Data
         if not price_at_decision:
              price_at_decision = get_price_from_history(symbol, decision_dt)
 
-        target_price = None
-        current_status_price = get_latest_price(symbol)
+        def _horizon_price(t_dt):
+            return _resolve_horizon_price(
+                decision_dt, t_dt, now,
+                exact_lookup=lambda dt: get_price_from_history(symbol, dt),
+                latest_price=lambda: get_latest_price(symbol),
+            )
 
-        if is_future:
-            target_price = current_status_price
-            status = f"Pending (<{window_days}d)"
-        else:
-            target_price = get_price_from_history(symbol, target_dt)
-            if target_price is None:
-                target_price = current_status_price
-            status = "Completed"
+        target_price = _horizon_price(target_dt)
+        status = f"Pending (<{window_days}d)" if is_future else "Completed"
 
         # Calculate Drop/Gain
         perf_pct = 0.0
@@ -225,34 +242,27 @@ def main():
 
         # --- 2W (14-day) horizon ---
         target_dt_2w = decision_dt + timedelta(days=14)
-        if target_dt_2w > now:
-            price_2w = current_status_price
-            perf_2w_pct = ((price_2w - price_at_decision) / price_at_decision * 100) if price_at_decision and price_2w else 0.0
-            status_2w = "Pending"
-        else:
-            price_2w = get_price_from_history(symbol, target_dt_2w)
-            if price_2w is None:
-                price_2w = current_status_price
-            perf_2w_pct = ((price_2w - price_at_decision) / price_at_decision * 100) if price_at_decision and price_2w else 0.0
-            status_2w = "Done"
+        price_2w = _horizon_price(target_dt_2w)
+        perf_2w_pct = ((price_2w - price_at_decision) / price_at_decision * 100) if price_at_decision and price_2w else 0.0
+        status_2w = "Pending" if target_dt_2w > now else "Done"
 
         # --- 4W (28-day) horizon ---
         target_dt_4w = decision_dt + timedelta(days=28)
-        if target_dt_4w > now:
-            price_4w = current_status_price
-            perf_4w_pct = ((price_4w - price_at_decision) / price_at_decision * 100) if price_at_decision and price_4w else 0.0
-            status_4w = "Pending"
-        else:
-            price_4w = get_price_from_history(symbol, target_dt_4w)
-            if price_4w is None:
-                price_4w = current_status_price
-            perf_4w_pct = ((price_4w - price_at_decision) / price_at_decision * 100) if price_at_decision and price_4w else 0.0
-            status_4w = "Done"
+        price_4w = _horizon_price(target_dt_4w)
+        perf_4w_pct = ((price_4w - price_at_decision) / price_at_decision * 100) if price_at_decision and price_4w else 0.0
+        status_4w = "Pending" if target_dt_4w > now else "Done"
 
         # Benchmark Calculations
         bench_data = {}
         sp500_perf_num = None
         for bench_ticker, bench_name in [('^GSPC', 'SP500'), ('^DJI', 'Dow'), ('^GDAXI', 'DAX')]:
+            bench_label = f"{bench_name} {window_days}d"
+            # Same-day rows show "-" across the board (matching the horizon
+            # columns) instead of a meaningless +0.00%.
+            if same_day:
+                bench_data[bench_label] = "-"
+                continue
+
             bench_start = get_price_from_history(bench_ticker, decision_dt)
 
             # Determine end date for benchmark
@@ -264,7 +274,6 @@ def main():
                  if bench_end is None:
                       bench_end = get_latest_price(bench_ticker)
 
-            bench_label = f"{bench_name} {window_days}d"
             if bench_start and bench_end:
                 bench_perf = ((bench_end - bench_start) / bench_start) * 100
                 bench_data[bench_label] = f"{bench_perf:+.2f}%"
