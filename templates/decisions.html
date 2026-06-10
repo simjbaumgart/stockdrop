@@ -113,6 +113,10 @@
                         {% else %}
                         <span class="badge badge-warning" style="background-color: #451a03; color: #fbbf24;">{{ dp.recommendation }}</span>
                         {% endif %}
+                        {% if dp.gates_fired and dp.pre_gate_action and dp.pre_gate_action != dp.recommendation %}
+                        <div style="font-size: 0.72em; color: #fbbf24; margin-top: 2px;" title="{{ dp.gate_reasons }}">
+                            gated from {{ dp.pre_gate_action }}: {{ dp.gates_fired }}</div>
+                        {% endif %}
                         {% endif %}
                         {% endif %}
                     </td>

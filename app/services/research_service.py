@@ -295,6 +295,7 @@ def _is_real_report(report: Optional[str]) -> bool:
 
 from app.services.seeking_alpha_service import seeking_alpha_service
 from app.services.sa_grades_service import sa_grades_service
+from app.services.decision_gate_service import apply_decision_gates
 from app.services.pm_verdict_formatters import format_rr_block, format_ratings_block
 
 # Configure logging
@@ -798,18 +799,32 @@ class ResearchService:
             earnings_facts=raw_data.get("earnings_facts"),
         )
 
-        # Construct Final Output compatible with existing app expectations
-        recommendation = final_decision.get("action", "AVOID").upper()
-
         # External ratings — looked up AFTER final_decision is finalized.
         # Never passed into any agent prompt; lives in dedicated dict keys + DB columns.
         external_ratings = sa_grades_service.lookup(state.ticker)
+
+        # Deterministic decision gates (post-PM, pre-persistence). The PM's
+        # original action survives in pre_gate_action for the gated-vs-kept A/B.
+        gate_result = apply_decision_gates(
+            action=final_decision.get("action"),
+            drop_type=final_decision.get("drop_type"),
+            conviction=final_decision.get("conviction"),
+            sa_quant_rating=external_ratings.get("sa_quant_rating"),
+            risk_report=state.reports.get("risk"),
+        )
+        if gate_result.gates_fired:
+            final_decision["action"] = gate_result.final_action
+
+        # Construct Final Output compatible with existing app expectations
+        recommendation = final_decision.get("action", "AVOID").upper()
 
         # --- Print Final Decision to Console (post-guard, post-recompute) ---
         _company_name = raw_data.get("company_name") or state.ticker
         print("\n" + "="*50)
         print(f"  Stock: {_company_name} ({state.ticker})")
         print(f"  [PORTFOLIO MANAGER DECISION]: {final_decision.get('action')} (Conviction: {final_decision.get('conviction', 'N/A')})")
+        if gate_result.gates_fired:
+            print(f"  [GATED from {gate_result.pre_gate_action}] {'; '.join(gate_result.gate_reasons)}")
         print(f"  Drop Type: {final_decision.get('drop_type', 'N/A')}")
         print(f"  Entry Zone: ${final_decision.get('entry_price_low', 'N/A')} - ${final_decision.get('entry_price_high', 'N/A')}")
         print(f"  Stop Loss: ${final_decision.get('stop_loss', 'N/A')} | TP1: ${final_decision.get('take_profit_1', 'N/A')} | TP2: ${final_decision.get('take_profit_2', 'N/A')}")
@@ -872,6 +887,12 @@ class ResearchService:
             "exit_trigger": final_decision.get("exit_trigger"),
             "key_factors": final_decision.get("key_factors", []),
             "earnings_narrative_flag": final_decision.get("earnings_narrative_flag"),
+            # Decision gates (post-PM, deterministic). gates_fired is "" when
+            # the layer ran and nothing fired — NULL means the layer predates
+            # this decision.
+            "pre_gate_action": gate_result.pre_gate_action,
+            "gates_fired": ",".join(gate_result.gates_fired),
+            "gate_reasons": "; ".join(gate_result.gate_reasons),
             # Legacy compatibility fields
             "technician_report": state.reports.get('technical', ''),
             "bull_report": state.reports.get('bull', ''),

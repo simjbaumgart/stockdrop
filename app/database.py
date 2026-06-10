@@ -151,6 +151,16 @@ def init_db():
             "total_tokens_out": "INTEGER",
             "total_cost_usd":   "REAL",
             "total_llm_calls":  "INTEGER",
+            # --- deterministic decision gates (2026-06-10) ---
+            # pre_gate_action: PM's original action before gating (A/B baseline).
+            # gates_fired: comma-separated gate names, "" = layer ran, none fired.
+            "pre_gate_action": "TEXT",
+            "gates_fired": "TEXT",
+            "gate_reasons": "TEXT",
+            # DR override basis: NAMED_EVENT (verifiable dated event, honored)
+            # vs JUDGMENT (advisory only, council action stands).
+            "deep_research_override_basis": "TEXT",
+            "deep_research_named_event": "TEXT",
         }
         
         
@@ -434,6 +444,8 @@ def update_decision_point(decision_id: int, recommendation: str, reasoning: str,
             "earnings_narrative_flag",
             # External ratings — informational only, NEVER fed into any LLM prompt.
             "sa_quant_rating", "sa_authors_rating", "wall_street_rating", "sa_rank",
+            # Deterministic decision gates
+            "pre_gate_action", "gates_fired", "gate_reasons",
         ]
         for field in trading_fields:
             if field in kwargs and kwargs[field] is not None:

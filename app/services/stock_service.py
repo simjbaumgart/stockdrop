@@ -715,11 +715,17 @@ class StockService:
         - BUY_LIMIT: always trigger. R/R no longer gates this — every
           buy-side verdict is routed through DR so limit orders can't slip
           past review (the recurring AFRM/OSCR gap).
+        - Gated-away buys (PM said BUY/BUY_LIMIT, decision gates downgraded):
+          still trigger, because DR with a NAMED_EVENT positive catalyst is
+          the one path that can lift Gate 1's WATCH back to BUY_LIMIT.
 
-        WATCH/AVOID never trigger (no position is taken).
+        Organic WATCH/AVOID never trigger (no position is taken).
         """
         action = report_data.get("recommendation", "AVOID").upper()
-        return action in ("BUY", "BUY_LIMIT")
+        if action in ("BUY", "BUY_LIMIT"):
+            return True
+        pre_gate = (report_data.get("pre_gate_action") or "").upper()
+        return bool(report_data.get("gates_fired")) and pre_gate in ("BUY", "BUY_LIMIT")
 
     def _initial_position_status(self, report_data: dict) -> str:
         """Position-lifecycle status assigned at analysis time.
@@ -1803,6 +1809,10 @@ class StockService:
                 sa_authors_rating=report_data.get("sa_authors_rating"),
                 wall_street_rating=report_data.get("wall_street_rating"),
                 sa_rank=report_data.get("sa_rank"),
+                # Deterministic decision gates (decision_gate_service).
+                pre_gate_action=report_data.get("pre_gate_action"),
+                gates_fired=report_data.get("gates_fired"),
+                gate_reasons=report_data.get("gate_reasons"),
             )
             print(f"Updated decision point for {symbol}: {recommendation} -> {status} (Conviction: {report_data.get('conviction', 'N/A')})")
             print(f"  > Saved trading levels and Data Depth metrics to DB.")
