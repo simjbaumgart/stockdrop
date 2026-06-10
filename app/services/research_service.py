@@ -1687,6 +1687,13 @@ At the very end of your response, append exactly this block (raw JSON on one lin
         bear_report = state.reports.get('bear', 'No Bear Report')
         risk_report = state.reports.get('risk', 'No Risk Report')
 
+        # Compact machine-parsed verdicts go ABOVE the prose so the PM reads
+        # signal first, narrative second.
+        _sv = {k: v for k, v in (getattr(state, "structured_verdicts", None) or {}).items() if v}
+        structured_block = (
+            json.dumps(_sv, indent=2) if _sv else "(no structured verdicts parsed this run)"
+        )
+
         # Extract available technical levels for the PM to reference
         indicators = state.reports.get('technical', '')
 
@@ -1754,6 +1761,9 @@ DECISION CONTEXT:
 - The investor holds positions until recovery (weeks to months), not day-trading.
 - Gatekeeper Tier: {tier_line}
 {vol_block}
+STRUCTURED SENSOR VERDICTS (machine-parsed from the reports below — read these first, then the narrative):
+{structured_block}
+
 RISK FACTORS (For Consideration):
 - Technical Flags: {safe_concerns}
 - News Flags: {risky_support}
@@ -1778,6 +1788,7 @@ CRITICAL TASK:
 3. **SOURCE QUALITY**: Agent reports reference source types — OFFICIAL (SEC/PR), WIRE (factual), ANALYST (opinion), MARKET_CONTEXT (broad). When claims conflict, OFFICIAL and WIRE sources carry more weight than ANALYST opinions.
 4. **CLASSIFY THE DROP**: Determine WHY the stock dropped. This is critical for predicting recovery.
 5. **CALCULATE TRADING LEVELS**: Using the technical data (ATR, Support, Resistance, Bollinger Bands) from the reports, determine concrete price levels.
+6. **BEAR REBUTTAL**: If the bear's structured verdict is NO_TRADE or SHORT, quote the bear's top_risk VERBATIM in your reason or key_factors and rebut it specifically before any BUY. If you cannot rebut it with evidence, do not BUY.
 
 AVAILABLE TECHNICAL DATA (use these exact fields from the reports):
 - Current price: `close` field in indicators
@@ -1805,7 +1816,7 @@ INSTRUCTIONS FOR TRADING LEVELS:
 - **pre_drop_price**: Calculate from close and drop_percent. Formula: close / (1 + drop_percent/100). Example: close=$93, drop=-7% → pre_drop = 93 / 0.93 = $100. Include this for reference.
 
 INSTRUCTIONS FOR SELL RANGE:
-These define where you recommend SELLING (taking profits) once the position is entered. Use the Bull's TARGET_SELL_RANGE and the Bear's BEAR_EXIT_CEILING as inputs alongside technicals.
+These define where you recommend SELLING (taking profits) once the position is entered. Use the Bull's target_sell_low/target_sell_high and the Bear's exit_ceiling (structured verdicts above) as inputs alongside technicals.
 - **sell_price_low**: Conservative exit target — where a cautious trader starts scaling out. Use the LESSER of: pre_drop_price, or bb_middle (midpoint of bb_lower and bb_upper). This is the "safe profits" level.
 - **sell_price_high**: Optimistic exit target — where even bulls should exit. Use bb_upper, SMA50, or SMA200 — whichever represents realistic resistance above sell_price_low. Consider the Bear's exit ceiling as an upper bound.
 - **ceiling_exit**: Absolute maximum target beyond which further gains are unlikely without a new catalyst. Calculate as: min(high52, bb_upper + 1×ATR). This is the "euphoria" level.
@@ -1822,8 +1833,8 @@ Classify the `drop_type` as one of:
 - "UNKNOWN" — No clear catalyst identified
 
 INSTRUCTIONS FOR CONVICTION:
-- "HIGH": Bull case is verified, risk/reward ratio > 2:1, multiple catalysts align, and the drop type is recoverable (EARNINGS_MISS with beat, SECTOR_ROTATION, MACRO_SELLOFF).
-- "MODERATE": Mixed signals but favorable lean. Some unresolved risks. Risk/reward roughly 1.5:1.
+- "HIGH": requires at least three of the following from the STRUCTURED SENSOR VERDICTS: competitive attribution = SECTOR, news sentiment != BEARISH, bear_verdict = TOLERABLE, falling_knife = NO — plus a bull case you verified via search. Self-calculated risk/reward is NOT evidence of conviction (empirically, projected R/R 2-3 buys won 31% vs 50% for R/R 1.5-2).
+- "MODERATE": Mixed signals but favorable lean. Some unresolved risks.
 - "LOW": Too many unknowns, bear case has strong points, or drop type is structural (fraud, permanent competitive loss). Skip this trade.
 
 INSTRUCTIONS FOR ACTION:
