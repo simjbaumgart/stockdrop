@@ -59,6 +59,12 @@ except ImportError:
 # and triggers an Alpha Vantage fallback fetch.
 STALE_TRANSCRIPT_DAYS = 75
 
+# Hard age cap: transcripts older than this are rejected outright, even as a
+# last-resort fallback. IESC 2026-06-10: DefeatBeta served a Feb-2009 call,
+# the company-name guard passed (same company), and the News Agent summarized
+# a 17-year-old transcript as current. Better "No Transcript" than ancient.
+MAX_TRANSCRIPT_AGE_DAYS = 120
+
 # Minimum average daily volume (shares) for a ticker to be considered tradeable.
 # Paired with the gatekeeper's $5 price floor to catch above-$5 tickers that
 # still have no realistic liquidity.
@@ -1512,6 +1518,18 @@ class StockService:
                             db_age_days = None
             except Exception as e:
                 print(f"[StockService] DefeatBeta transcript fetch failed for {symbol}: {e}")
+
+        # Hard age cap: an ancient transcript must not survive even as the
+        # step-6 last-resort fallback — discard it entirely so the caller
+        # reports "No Transcript" instead of summarizing a years-old call.
+        if db_age_days is not None and db_age_days > MAX_TRANSCRIPT_AGE_DAYS:
+            print(
+                f"[StockService] DefeatBeta transcript for {symbol} is {db_age_days} days old "
+                f"(> {MAX_TRANSCRIPT_AGE_DAYS}d cap, dated {db_date_str}). Discarding."
+            )
+            db_text = ""
+            db_date_str = None
+            db_age_days = None
 
         # Step 2: If DefeatBeta gave us fresh data, we're done — no Finnhub, no cache, no AV.
         needs_fallback = (not db_text) or (db_age_days is not None and db_age_days > STALE_TRANSCRIPT_DAYS)
