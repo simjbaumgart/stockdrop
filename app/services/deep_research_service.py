@@ -787,46 +787,89 @@ class DeepResearchService:
         except Exception as e:
             logger.error(f"[Deep Research] Error updating DB: {e}")
 
+    # Numeric override fields where 0 or a negative value is a JSON-repair
+    # artifact, never a real level (GNRC/MOD 2026-06-10: Flash repair returned
+    # 0.0 for every level and overwrote the PM's valid entry/stop/TP).
+    _NUMERIC_LEVEL_KEYS = (
+        "entry_price_low", "entry_price_high", "stop_loss",
+        "take_profit_1", "take_profit_2",
+        "upside_percent", "downside_risk_percent", "risk_reward_ratio",
+        # Sell range overrides (Plan B)
+        "sell_price_low", "sell_price_high", "ceiling_exit",
+    )
+
+    @classmethod
+    def _clean_level_overrides(cls, result: dict) -> tuple:
+        """
+        Validate DR trading levels before they overwrite the PM's columns.
+
+        Returns (levels, dropped): `levels` maps DB column -> value for fields
+        safe to write; `dropped` lists "key=value" strings for fields rejected
+        as repair artifacts (non-numeric or <= 0), for the caller's warning log.
+
+        Rules:
+          - A numeric level <= 0 is treated as missing (skipped + reported).
+          - If no usable entry_price_low/entry_price_high/stop_loss survives,
+            ALL level fields are dropped — partial overrides would mix DR's
+            TP/sell range with the PM's entry, so the PM levels stay
+            authoritative wholesale.
+        """
+        levels = {}
+        dropped = []
+        for key in cls._NUMERIC_LEVEL_KEYS:
+            val = result.get(key)
+            if val is None:
+                continue
+            try:
+                f = float(val)
+            except (TypeError, ValueError):
+                dropped.append(f"{key}={val!r}")
+                continue
+            if f <= 0:
+                dropped.append(f"{key}={f}")
+                continue
+            levels[key] = f
+
+        exit_trigger = result.get("exit_trigger")
+        if exit_trigger:
+            levels["exit_trigger"] = exit_trigger
+
+        has_entry_or_stop = any(
+            k in levels for k in ("entry_price_low", "entry_price_high", "stop_loss")
+        )
+        if not has_entry_or_stop and levels:
+            dropped.extend(f"{k}={v!r}" for k, v in levels.items())
+            levels = {}
+        return levels, dropped
+
     def _apply_trading_level_overrides(self, decision_id: int, symbol: str, result: dict):
         """
         Deep Research gets the final call on the limit and trading levels.
         Overwrites the main PM-level columns (entry zone, stop-loss, etc.)
         but PRESERVES the initial recommendation.
+
+        Levels are sanitized first (_clean_level_overrides): zeroed/invalid
+        levels never overwrite the PM's valid ones.
         """
         try:
             action = result.get('action', 'AVOID')
 
+            levels, dropped = self._clean_level_overrides(result)
+            if dropped:
+                logger.warning(
+                    f"[Deep Research] {symbol} (ID: {decision_id}): rejected invalid "
+                    f"trading-level overrides ({', '.join(dropped)})"
+                    + ("" if levels else " — keeping PM levels.")
+                )
+
             set_clauses = []
             values = []
+            for field, val in levels.items():
+                set_clauses.append(f"{field} = ?")
+                values.append(val)
 
-            # Entry zone (the "Limit" column in the dashboard)
-            entry_low = result.get('entry_price_low')
-            entry_high = result.get('entry_price_high')
-            if entry_low is not None:
-                set_clauses.append("entry_price_low = ?")
-                values.append(float(entry_low))
-            if entry_high is not None:
-                set_clauses.append("entry_price_high = ?")
-                values.append(float(entry_high))
-
-            # Trading levels
-            for field, key in [
-                ("stop_loss", "stop_loss"),
-                ("take_profit_1", "take_profit_1"),
-                ("take_profit_2", "take_profit_2"),
-                ("upside_percent", "upside_percent"),
-                ("downside_risk_percent", "downside_risk_percent"),
-                ("risk_reward_ratio", "risk_reward_ratio"),
-                # Sell range overrides (Plan B)
-                ("sell_price_low", "sell_price_low"),
-                ("sell_price_high", "sell_price_high"),
-                ("ceiling_exit", "ceiling_exit"),
-                ("exit_trigger", "exit_trigger"),
-            ]:
-                val = result.get(key)
-                if val is not None:
-                    set_clauses.append(f"{field} = ?")
-                    values.append(float(val) if field != "exit_trigger" else val)
+            entry_low = levels.get('entry_price_low')
+            entry_high = levels.get('entry_price_high')
 
             # Conviction & metadata
             for field, key in [
