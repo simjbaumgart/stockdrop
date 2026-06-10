@@ -161,6 +161,14 @@ def init_db():
             # vs JUDGMENT (advisory only, council action stands).
             "deep_research_override_basis": "TEXT",
             "deep_research_named_event": "TEXT",
+            # --- structured agent verdicts (Phase 2, 2026-06-10) ---
+            # NULL = block not parsed (or predates the feature).
+            "tech_signal": "TEXT",
+            "news_sentiment": "TEXT",
+            "comp_attribution": "TEXT",
+            "bull_case_strength": "INTEGER",
+            "bear_verdict": "TEXT",
+            "risk_falling_knife": "TEXT",
         }
         
         
@@ -446,6 +454,9 @@ def update_decision_point(decision_id: int, recommendation: str, reasoning: str,
             "sa_quant_rating", "sa_authors_rating", "wall_street_rating", "sa_rank",
             # Deterministic decision gates
             "pre_gate_action", "gates_fired", "gate_reasons",
+            # Structured agent verdicts (Phase 2)
+            "tech_signal", "news_sentiment", "comp_attribution",
+            "bull_case_strength", "bear_verdict", "risk_falling_knife",
         ]
         for field in trading_fields:
             if field in kwargs and kwargs[field] is not None:

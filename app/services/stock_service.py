@@ -1815,6 +1815,13 @@ class StockService:
                 pre_gate_action=report_data.get("pre_gate_action"),
                 gates_fired=report_data.get("gates_fired"),
                 gate_reasons=report_data.get("gate_reasons"),
+                # Structured agent verdicts (Phase 2).
+                tech_signal=report_data.get("tech_signal"),
+                news_sentiment=report_data.get("news_sentiment"),
+                comp_attribution=report_data.get("comp_attribution"),
+                bull_case_strength=report_data.get("bull_case_strength"),
+                bear_verdict=report_data.get("bear_verdict"),
+                risk_falling_knife=report_data.get("risk_falling_knife"),
             )
             print(f"Updated decision point for {symbol}: {recommendation} -> {status} (Conviction: {report_data.get('conviction', 'N/A')})")
             print(f"  > Saved trading levels and Data Depth metrics to DB.")

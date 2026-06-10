@@ -293,6 +293,62 @@ def _is_real_report(report: Optional[str]) -> bool:
     return not any(stripped.startswith(marker) for marker in _FAILED_REPORT_MARKERS)
 
 
+# --- Structured agent verdicts (Phase 2 of the council-gates plan) ---------
+# Each agent appends a small JSON block after this marker. The parser is the
+# single transport for machine-readable signals out of the prose reports —
+# it must never crash the pipeline on bad output.
+
+STRUCTURED_VERDICT_MARKER = "=== STRUCTURED_VERDICT ==="
+_PARSER_FAILURE_DIR = os.path.join("data", "parser_failures")
+
+
+def _log_parser_failure(agent_name: str, report: str) -> None:
+    try:
+        os.makedirs(_PARSER_FAILURE_DIR, exist_ok=True)
+        from datetime import datetime
+        fname = os.path.join(
+            _PARSER_FAILURE_DIR,
+            f"structured_{agent_name}_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.txt",
+        )
+        with open(fname, "w") as f:
+            f.write(report or "")
+        logging.getLogger(__name__).warning(
+            "[StructuredVerdict] %s: parse failure logged to %s", agent_name, fname
+        )
+    except Exception as e:
+        logging.getLogger(__name__).warning(
+            "[StructuredVerdict] %s: parse failure (could not write log: %s)",
+            agent_name, e,
+        )
+
+
+def _extract_structured_verdict(report: Optional[str], agent_name: str = "agent") -> Optional[Dict]:
+    """Parse the JSON block an agent appended after STRUCTURED_VERDICT_MARKER.
+
+    Uses the last marker occurrence, tolerates markdown fences and trailing
+    commas. Returns None on any failure (payload saved to
+    data/parser_failures/) — a parse failure must never crash the pipeline.
+    """
+    if not report or not isinstance(report, str) or STRUCTURED_VERDICT_MARKER not in report:
+        return None
+    tail = report.rsplit(STRUCTURED_VERDICT_MARKER, 1)[1]
+    tail = tail.replace("```json", "").replace("```", "")
+    start, end = tail.find("{"), tail.rfind("}")
+    if start == -1 or end <= start:
+        _log_parser_failure(agent_name, report)
+        return None
+    payload = tail[start:end + 1]
+    try:
+        parsed = json.loads(payload)
+    except json.JSONDecodeError:
+        try:
+            parsed = json.loads(_strip_trailing_commas(payload))
+        except json.JSONDecodeError:
+            _log_parser_failure(agent_name, report)
+            return None
+    return parsed if isinstance(parsed, dict) else None
+
+
 from app.services.seeking_alpha_service import seeking_alpha_service
 from app.services.sa_grades_service import sa_grades_service
 from app.services.decision_gate_service import apply_decision_gates
@@ -659,6 +715,10 @@ class ResearchService:
         # Validate Bull & Bear Reports
         state.reports = QualityControlService.validate_reports(state.reports, state.ticker, ["bull", "bear"])
 
+        # Machine-readable verdicts out of the prose reports (Phase 2 of the
+        # council-gates plan). None per agent on parse failure — never fatal.
+        state.structured_verdicts = self._collect_structured_verdicts(state)
+
         # --- Save Council 2 Output to JSON (Phase 1 + Phase 2: bull/bear/risk) ---
         try:
             council_dir = "data/council_reports"
@@ -805,12 +865,16 @@ class ResearchService:
 
         # Deterministic decision gates (post-PM, pre-persistence). The PM's
         # original action survives in pre_gate_action for the gated-vs-kept A/B.
+        structured = getattr(state, "structured_verdicts", None) or {}
+        risk_verdict = structured.get("risk") or {}
         gate_result = apply_decision_gates(
             action=final_decision.get("action"),
             drop_type=final_decision.get("drop_type"),
             conviction=final_decision.get("conviction"),
             sa_quant_rating=external_ratings.get("sa_quant_rating"),
             risk_report=state.reports.get("risk"),
+            # Structured verdict wins over the interim regex when it parsed.
+            risk_falling_knife=risk_verdict.get("falling_knife"),
         )
         if gate_result.gates_fired:
             final_decision["action"] = gate_result.final_action
@@ -893,6 +957,8 @@ class ResearchService:
             "pre_gate_action": gate_result.pre_gate_action,
             "gates_fired": ",".join(gate_result.gates_fired),
             "gate_reasons": "; ".join(gate_result.gate_reasons),
+            # Structured agent verdicts (Phase 2) — None when not parsed.
+            "risk_falling_knife": risk_verdict.get("falling_knife"),
             # Legacy compatibility fields
             "technician_report": state.reports.get('technical', ''),
             "bull_report": state.reports.get('bull', ''),
@@ -917,6 +983,16 @@ class ResearchService:
             "wall_street_rating": external_ratings.get("wall_street_rating"),
             "sa_rank": external_ratings.get("sa_rank"),
         }
+
+    def _collect_structured_verdicts(self, state: MarketState) -> Dict[str, Optional[Dict]]:
+        """Parse each agent's STRUCTURED_VERDICT block from state.reports."""
+        verdicts: Dict[str, Optional[Dict]] = {}
+        for agent in ("technical", "news", "competitive", "bull", "bear", "risk"):
+            verdicts[agent] = _extract_structured_verdict(state.reports.get(agent), agent)
+        parsed = [a for a, v in verdicts.items() if v is not None]
+        if parsed:
+            print(f"  > [System] Structured verdicts parsed: {', '.join(parsed)}")
+        return verdicts
 
     def _run_bull_bear_perspectives(self, state: MarketState, drop_str: str):
         """
@@ -2446,6 +2522,10 @@ OUTPUT:
 A dedicated Risk Assessment.
 We argue that contexts should function not as concise summaries, but as comprehensive, evolving playbooks—detailed, inclusive, and rich with domain insights.
 Use Headers: "Risk Assessment", "Trap Check", "Counter-Thesis", "Key Risks".
+
+At the very end of your response, append exactly this block (raw JSON on one line, no markdown fences):
+=== STRUCTURED_VERDICT ===
+{{"falling_knife": "YES" or "NO", "top_risk": "one short sentence naming the single biggest risk"}}
 {self._news_block_for(state, "risk")}"""
 
 
