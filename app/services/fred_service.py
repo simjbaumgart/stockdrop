@@ -16,6 +16,18 @@ logger = logging.getLogger(__name__)
 _SNAPSHOT_PATH = "logs/fred_snapshot.json"
 
 
+def _scrub_err(e: Exception, series_id: str) -> str:
+    """Summarize a request exception WITHOUT leaking the URL.
+
+    requests' HTTPError stringifies as '... for url: <full request URL>', and
+    the FRED request URL carries api_key=<secret> as a query param. Logging the
+    raw exception therefore exfiltrates the key. Log only the type, HTTP status,
+    and series instead.
+    """
+    status = getattr(getattr(e, "response", None), "status_code", None)
+    return f"{type(e).__name__} status={status} series={series_id}"
+
+
 class FredService:
     BASE_URL = "https://api.stlouisfed.org/fred/series/observations"
     AV_URL = "https://www.alphavantage.co/query"
@@ -106,7 +118,7 @@ class FredService:
                     entry["stale"] = True
                 data[name] = entry
             except Exception as e:
-                logger.error(f"Error fetching {name} ({series_id}): {e}")
+                logger.error(f"Error fetching {name} ({series_id}): {_scrub_err(e, series_id)}")
                 data[name] = {"value": "N/A", "date": "N/A"}
 
         try:
@@ -163,11 +175,11 @@ class FredService:
                 last_error = e
                 if attempt < max_retries - 1:
                     wait = 2 ** attempt  # 1s, 2s
-                    logger.info(f"FRED retry {attempt + 1}/{max_retries} for {series_id} after {wait}s: {e}")
+                    logger.info(f"FRED retry {attempt + 1}/{max_retries} for {series_id} after {wait}s: {_scrub_err(e, series_id)}")
                     time.sleep(wait)
 
         if last_error:
-            logger.warning(f"FRED fetch failed for {series_id} after {max_retries} attempts: {last_error}")
+            logger.warning(f"FRED fetch failed for {series_id} after {max_retries} attempts: {_scrub_err(last_error, series_id)}")
             if cached:
                 cached["stale"] = True
                 self._cache[series_id] = cached
@@ -223,7 +235,7 @@ class FredService:
             if data:
                 return data[0]["value"], data[0]["date"]
         except Exception as e:
-            logger.warning(f"Alpha Vantage treasury fallback failed for {maturity}: {e}")
+            logger.warning(f"Alpha Vantage treasury fallback failed for {maturity}: {_scrub_err(e, maturity)}")
         return None
 
 
