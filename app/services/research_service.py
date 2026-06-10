@@ -229,6 +229,60 @@ _FM_OUTPUT_SCHEMA = """
 """
 
 
+# Price fields covered by the post-repair semantic gate. Nullable fields
+# (e.g. take_profit_2) may be None; a PRESENT value must be a positive number.
+_FM_PRICE_KEYS = (
+    "entry_price_low", "entry_price_high", "stop_loss",
+    "take_profit_1", "take_profit_2", "pre_drop_price",
+    "sell_price_low", "sell_price_high", "ceiling_exit",
+)
+
+# A key_factor must contain at least one real word to count as content.
+_FM_FACTOR_WORD_RE = re.compile(r"[A-Za-z]{3}")
+
+
+def _fm_semantic_check(decision: Dict) -> tuple:
+    """Minimal content validation for a Fund Manager decision dict.
+
+    The Flash JSON-repair pass validates structure, not content (NXT
+    2026-06-10: repair "succeeded" but saved key_factors ["."], and GNRC/MOD
+    got zeroed prices). Returns (ok, reason); callers re-prompt the PM once
+    on failure rather than persisting junk.
+    """
+    for field in ("action", "conviction"):
+        val = decision.get(field)
+        if not isinstance(val, str) or not val.strip():
+            return False, f"missing/empty {field}"
+
+    # Missing/empty key_factors is tolerated: a payload truncated BEFORE the
+    # key_factors field (NIO 2026-05-22) repairs to an empty list, and that is
+    # honest — the factors never existed in the raw text. What must never pass
+    # is degraded content: trivial items like "." (NXT 2026-06-10).
+    factors = decision.get("key_factors")
+    if factors is not None and not isinstance(factors, list):
+        return False, "key_factors is not a list"
+    for item in factors or []:
+        if (
+            not isinstance(item, str)
+            or len(item.strip()) < 4
+            or not _FM_FACTOR_WORD_RE.search(item)
+        ):
+            return False, f"key_factors contains trivial item {item!r}"
+
+    for key in _FM_PRICE_KEYS:
+        val = decision.get(key)
+        if val is None:
+            continue
+        try:
+            f = float(val)
+        except (TypeError, ValueError):
+            return False, f"non-numeric price {key}={val!r}"
+        if f <= 0:
+            return False, f"non-positive price {key}={f}"
+
+    return True, "ok"
+
+
 def _is_real_report(report: Optional[str]) -> bool:
     """Return True if the report looks like real agent output, not an error stub."""
     if not report or not isinstance(report, str):
@@ -1029,11 +1083,44 @@ class ResearchService:
                 label="fund_manager",
             )
             if repaired and repaired.get("action") and repaired.get("conviction"):
-                logger.info(
-                    "[Fund Manager] %s: successfully repaired JSON output.",
-                    state.ticker,
-                )
-                decision = repaired
+                sem_ok, sem_reason = _fm_semantic_check(repaired)
+                if sem_ok:
+                    logger.info(
+                        "[Fund Manager] %s: successfully repaired JSON output.",
+                        state.ticker,
+                    )
+                    decision = repaired
+                else:
+                    # Repair validated structure but degraded content (NXT
+                    # 2026-06-10: key_factors ["."]). Re-prompt the PM once
+                    # rather than persisting junk.
+                    logger.warning(
+                        "[Fund Manager] %s: repaired JSON failed semantic check "
+                        "(%s) — re-prompting PM once.",
+                        state.ticker, sem_reason,
+                    )
+                    agent_call_counter.record("pm")
+                    retry_str = self._call_agent(manager_prompt, "Fund Manager", state)
+                    retry_failed = (
+                        not retry_str
+                        or any(
+                            retry_str.lstrip().startswith(m)
+                            for m in _FAILED_REPORT_MARKERS
+                        )
+                    )
+                    retry_decision = None if retry_failed else self._extract_json(retry_str)
+                    if retry_decision and _fm_semantic_check(retry_decision)[0]:
+                        logger.info(
+                            "[Fund Manager] %s: re-prompt produced a clean decision.",
+                            state.ticker,
+                        )
+                        decision = retry_decision
+                    else:
+                        logger.warning(
+                            "[Fund Manager] %s: re-prompt did not yield a usable "
+                            "decision either.",
+                            state.ticker,
+                        )
             else:
                 logger.warning(
                     "[Fund Manager] %s: repair did not yield a usable decision.",
