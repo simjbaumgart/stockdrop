@@ -868,6 +868,14 @@ class ResearchService:
         structured = getattr(state, "structured_verdicts", None) or {}
         risk_verdict = structured.get("risk") or {}
         news_verdict = structured.get("news") or {}
+        tech_verdict = structured.get("technical") or {}
+        comp_verdict = structured.get("competitive") or {}
+        bull_verdict = structured.get("bull") or {}
+        bear_verdict_sv = structured.get("bear") or {}
+        try:
+            bull_case_strength = int(bull_verdict.get("case_strength"))
+        except (TypeError, ValueError):
+            bull_case_strength = None
         gate_result = apply_decision_gates(
             action=final_decision.get("action"),
             drop_type=final_decision.get("drop_type"),
@@ -963,6 +971,10 @@ class ResearchService:
             # Structured agent verdicts (Phase 2) — None when not parsed.
             "risk_falling_knife": risk_verdict.get("falling_knife"),
             "news_sentiment": news_verdict.get("sentiment"),
+            "tech_signal": tech_verdict.get("signal"),
+            "comp_attribution": comp_verdict.get("attribution"),
+            "bull_case_strength": bull_case_strength,
+            "bear_verdict": bear_verdict_sv.get("bear_verdict"),
             # Legacy compatibility fields
             "technician_report": state.reports.get('technical', ''),
             "bull_report": state.reports.get('bull', ''),
@@ -1333,6 +1345,12 @@ OUTPUT:
 A detailed technical playbook.
 We argue that contexts should function not as concise summaries, but as comprehensive, evolving playbooks—detailed, inclusive, and rich with domain insights.
 Use headers: "Technical Signal", "Oversold Status", "Context from Report", "Verdict".
+
+At the very end of your response, append exactly this block (raw JSON on one line, no markdown fences):
+=== STRUCTURED_VERDICT ===
+{{"signal": "BREAKDOWN" or "PULLBACK" or "OVERSOLD_BOUNCE", "support_held": true or false}}
+- signal: BREAKDOWN = trend broken, lower levels likely; PULLBACK = orderly dip within an intact trend; OVERSOLD_BOUNCE = stretched to the downside, bounce setup.
+- support_held: did the nearest key support (BB lower / SMA / prior swing low) hold on this drop?
 """
 
     def _create_news_agent_prompt(self, state: MarketState, raw_data: Dict, drop_str: str) -> str:
@@ -1568,6 +1586,12 @@ Structure it as follows:
 - Point 1
 - Point 2
 - Point 3
+
+At the very end of your response, append exactly this block (raw JSON on one line, no markdown fences):
+=== STRUCTURED_VERDICT ===
+{{"attribution": "SECTOR" or "IDIOSYNCRATIC" or "MIXED", "confidence": <integer 0-10>}}
+- attribution: is this drop sector-wide (peers down too), company-specific, or mixed?
+- confidence: how confident you are in that attribution given the evidence found.
 {self._news_block_for(state, "competitive")}"""
 
     def _create_bull_prompt(self, state: MarketState, drop_str: str) -> str:
@@ -1606,7 +1630,12 @@ SELL TARGET ESTIMATION (The Bull Case Exit):
 - At what price level does the recovery top out? Consider pre-drop price, BB upper, SMA50, SMA200, and 52-week high as anchors.
 - At what price would even a bull say "take profits"? (e.g. "RSI > 70 combined with price at $148-150 suggests overextension")
 - Consider the drop type: earnings misses rarely fully recover in one quarter, while sector rotations can overshoot to the upside.
-- Provide a TARGET_SELL_RANGE: {{"low": $X, "high": $Y}} in your Conclusion.
+- State your target sell range in the Conclusion; it must match target_sell_low / target_sell_high below.
+
+At the very end of your response, append exactly this block (raw JSON on one line, no markdown fences):
+=== STRUCTURED_VERDICT ===
+{{"case_strength": <integer 0-10>, "target_sell_low": <number>, "target_sell_high": <number>}}
+- case_strength: how strong the bull case actually is on the evidence. A weak bull case is valuable information. Do not inflate case_strength.
 """
 
     def _create_bear_prompt(self, state: MarketState, drop_str: str) -> str:
@@ -1643,7 +1672,12 @@ REALISTIC EXIT CEILING (Bear's Upside Limit):
 - Even if the bull case plays out, what is the maximum realistic recovery price? Where does the bear think recovery stalls?
 - Identify the key resistance level that would cap any bounce (e.g. SMA50, BB upper, pre-drop price, volume resistance).
 - Where would the "easy money" run out? (e.g. "Volume dries up above $142, institutional selling resumes at SMA200")
-- Provide a BEAR_EXIT_CEILING: $X in your Conclusion.
+- State your exit ceiling in the Conclusion; it must match exit_ceiling below.
+
+At the very end of your response, append exactly this block (raw JSON on one line, no markdown fences):
+=== STRUCTURED_VERDICT ===
+{{"bear_verdict": "NO_TRADE" or "SHORT" or "TOLERABLE", "top_risk": "one short sentence naming the single biggest risk", "exit_ceiling": <number>}}
+- bear_verdict: NO_TRADE = stay away from this dip; SHORT = actively negative, drop continues; TOLERABLE = the bear case is real but survivable — a disciplined long entry is defensible.
 {self._news_block_for(state, "bear")}"""
 
 
