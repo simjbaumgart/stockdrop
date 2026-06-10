@@ -19,6 +19,22 @@ warnings.filterwarnings('ignore', category=FutureWarning)
 
 DB_PATH = os.getenv("DB_PATH", "subscribers.db")
 
+
+def _finite_or_none(val):
+    """Coerce a price to a finite float, or None for missing/NaN.
+
+    Thin-volume / OTC tickers have non-trading rows whose Close is NaN. A direct
+    .loc hit returns that NaN (no KeyError), and float(NaN) is NaN — which is
+    *truthy* in Python, so `if price:` guards pass and the report renders
+    "+nan%". Funnel every price through here so NaN becomes None and the
+    existing `if ... and price` guards correctly fall back to "-".
+    """
+    try:
+        f = float(val)
+    except (TypeError, ValueError):
+        return None
+    return None if math.isnan(f) else f
+
 def get_decision_points():
     try:
         conn = sqlite3.connect(DB_PATH)
@@ -129,20 +145,25 @@ def main():
                 
             ts_date_str = date_obj.strftime('%Y-%m-%d')
             
-            # Direct lookup string
+            # Direct lookup string. A present-but-empty bar yields NaN (not a
+            # KeyError), so treat NaN as a miss and fall through to the next
+            # valid trading day rather than returning nan.
             try:
-                val = ts_data['Close'].loc[ts_date_str]
-                return float(val)
+                price = _finite_or_none(ts_data['Close'].loc[ts_date_str])
+                if price is not None:
+                    return price
             except KeyError:
-                # Try next 3 days
-                for i in range(1, 4):
-                    next_d = (date_obj + timedelta(days=i)).strftime('%Y-%m-%d')
-                    try:
-                         val = ts_data['Close'].loc[next_d]
-                         return float(val)
-                    except KeyError:
-                        pass
-                return None
+                pass
+            # Try next 3 days (forward-fill to the next valid bar)
+            for i in range(1, 4):
+                next_d = (date_obj + timedelta(days=i)).strftime('%Y-%m-%d')
+                try:
+                    price = _finite_or_none(ts_data['Close'].loc[next_d])
+                    if price is not None:
+                        return price
+                except KeyError:
+                    pass
+            return None
         except Exception:
             return None
 
@@ -153,10 +174,11 @@ def main():
                 return None
             ts_data = all_history[ticker]
             
-            # Get last valid index
+            # Get last valid index (last_valid_index already skips NaN, but
+            # guard defensively in case the Close itself is NaN).
             last_valid = ts_data['Close'].last_valid_index()
-            if last_valid:
-                return float(ts_data['Close'].loc[last_valid])
+            if last_valid is not None:
+                return _finite_or_none(ts_data['Close'].loc[last_valid])
             return None
         except:
             return None
@@ -172,21 +194,21 @@ def main():
         except:
             continue
             
-        price_at_decision = d.get('price_at_decision')
+        price_at_decision = _finite_or_none(d.get('price_at_decision'))
         recommendation = d.get('recommendation')
         region = d.get('region') # Get the region/market
         
         target_dt = decision_dt + timedelta(days=window_days)
         now = datetime.now()
         is_future = target_dt > now
-        
+
         # Get Prices from Batch Data
         if not price_at_decision:
              price_at_decision = get_price_from_history(symbol, decision_dt)
-        
+
         target_price = None
         current_status_price = get_latest_price(symbol)
-        
+
         if is_future:
             target_price = current_status_price
             status = f"Pending (<{window_days}d)"
@@ -200,7 +222,7 @@ def main():
         perf_pct = 0.0
         if price_at_decision and target_price:
             perf_pct = ((target_price - price_at_decision) / price_at_decision) * 100
-            
+
         # --- 2W (14-day) horizon ---
         target_dt_2w = decision_dt + timedelta(days=14)
         if target_dt_2w > now:
