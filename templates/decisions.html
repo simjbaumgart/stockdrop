@@ -51,6 +51,11 @@
                         {% if dp.deep_research_score %}
                         <br><small class="text-muted">Score: {{ dp.deep_research_score }}</small>
                         {% endif %}
+                        {% if dp.deep_research_review_verdict == 'OVERRIDDEN' and dp.deep_research_override_basis and dp.deep_research_override_basis != 'NAMED_EVENT' %}
+                        <br><small style="color: #fbbf24;" title="{{ dp.deep_research_reason }}">advisory override (JUDGMENT) — council action stands</small>
+                        {% elif dp.deep_research_named_event %}
+                        <br><small class="text-muted" title="{{ dp.deep_research_named_event }}">named event</small>
+                        {% endif %}
                         {% else %}
                         <span class="text-muted">-</span>
                         {% endif %}

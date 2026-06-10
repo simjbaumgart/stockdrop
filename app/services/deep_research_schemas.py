@@ -37,6 +37,10 @@ INDIVIDUAL_SCHEMA = {
     "properties": {
         "review_verdict": {"type": "string",
                            "enum": ["CONFIRMED", "UPGRADED", "ADJUSTED", "OVERRIDDEN"]},
+        # Gate 4: OVERRIDDEN is only binding with a NAMED_EVENT basis;
+        # JUDGMENT overrides are recorded as advisory, council action stands.
+        "override_basis": {"type": "string", "enum": ["NAMED_EVENT", "JUDGMENT", "NONE"]},
+        "named_event": {"type": ["string", "null"]},
         "action": {"type": "string", "enum": ["BUY", "BUY_LIMIT", "WATCH", "AVOID"]},
         "conviction": {"type": "string", "enum": ["HIGH", "MODERATE", "LOW"]},
         "drop_type": _STR,
@@ -67,7 +71,8 @@ INDIVIDUAL_SCHEMA = {
         "could_not_verify": {"type": "array", "items": _STR},
     },
     "required": [
-        "review_verdict", "action", "conviction", "drop_type", "risk_level",
+        "review_verdict", "override_basis", "named_event",
+        "action", "conviction", "drop_type", "risk_level",
         "catalyst_type", "entry_price_low", "entry_price_high", "stop_loss",
         "take_profit_1", "upside_percent", "downside_risk_percent",
         "risk_reward_ratio", "entry_trigger", "reassess_in_days",

@@ -130,6 +130,16 @@ STEP 7: FINAL VERDICT
   • ADJUSTED    — Thesis ok but trading levels need correction; provide corrected levels.
   • OVERRIDDEN  — You found critical issues the council missed; do NOT buy.
 
+OVERRIDDEN requires override_basis=NAMED_EVENT: a specific, verifiable, dated event —
+lawsuit/regulatory action, SEC filing, restated guidance, insider transaction, analyst
+downgrade with target. General macro, valuation, or "structurally challenged" concerns
+are JUDGMENT — record them (override_basis=JUDGMENT, explain in reason) but they do NOT
+override: the council action stands and your concern is logged as an advisory flag.
+The same rule works in the positive direction: if your verdict rests on a specific,
+verifiable, dated POSITIVE catalyst the council missed, set override_basis=NAMED_EVENT
+and name it in named_event. If no single named event grounds your verdict, set
+override_basis=NONE and named_event=null.
+
 > **Elm Partners Humility Reminder:**
 > Even traders with tomorrow's news often lose because they misjudge what's
 > priced in.  If the news driving this drop is already widely understood, the
@@ -149,6 +159,10 @@ All percentage fields must be numbers. Do NOT include inline source markers like
 
 Required fields:
   review_verdict       : "CONFIRMED" | "UPGRADED" | "ADJUSTED" | "OVERRIDDEN"
+  override_basis       : "NAMED_EVENT" | "JUDGMENT" | "NONE"
+                         — NAMED_EVENT only for a specific, verifiable, dated event;
+                           required to make an OVERRIDDEN verdict binding.
+  named_event          : "The specific dated event grounding your verdict" | null
   action               : "BUY" | "BUY_LIMIT" | "WATCH" | "AVOID"
   conviction           : "HIGH" | "MODERATE" | "LOW"
   drop_type            : "EARNINGS_MISS" | "ANALYST_DOWNGRADE" | "SECTOR_ROTATION" |

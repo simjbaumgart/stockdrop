@@ -599,6 +599,9 @@ def update_deep_research_data(decision_id: int, verdict: str, risk: str, catalys
             "sell_price_high": "deep_research_sell_price_high",
             "ceiling_exit": "deep_research_ceiling_exit",
             "exit_trigger": "deep_research_exit_trigger",
+            # Gate 4: override basis (NAMED_EVENT binding / JUDGMENT advisory)
+            "override_basis": "deep_research_override_basis",
+            "named_event": "deep_research_named_event",
         }
         
         for kwarg_key, db_col in new_field_map.items():
@@ -673,6 +676,38 @@ def finalize_position_status_after_dr(
         return updated
     except Exception as e:
         print(f"[finalize_position_status_after_dr] error for decision_id={decision_id}: {e}")
+        return False
+
+
+def lift_gated_watch_to_buy_limit(decision_id: int, named_event: str) -> bool:
+    """Gate 1 exception path: Deep Research cited a NAMED_EVENT positive
+    catalyst, so a drop-type-gated WATCH is lifted back to BUY_LIMIT.
+
+    Atomic: only fires on rows that are currently WATCH because the decision
+    gates downgraded a PM buy (pre_gate_action BUY/BUY_LIMIT + DROP_TYPE_GATE
+    fired). Organic WATCH rows are never lifted. Returns True if lifted.
+    """
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        cursor.execute(
+            """UPDATE decision_points
+               SET recommendation = 'BUY_LIMIT',
+                   gates_fired = gates_fired || ',DR_NAMED_EVENT_LIFT',
+                   gate_reasons = COALESCE(gate_reasons, '')
+                       || '; DR lifted WATCH to BUY_LIMIT on named event: ' || ?
+               WHERE id = ?
+                 AND recommendation = 'WATCH'
+                 AND pre_gate_action IN ('BUY', 'BUY_LIMIT')
+                 AND gates_fired LIKE '%DROP_TYPE_GATE%'""",
+            (named_event, decision_id),
+        )
+        conn.commit()
+        lifted = cursor.rowcount > 0
+        conn.close()
+        return lifted
+    except Exception as e:
+        print(f"[lift_gated_watch_to_buy_limit] error for decision_id={decision_id}: {e}")
         return False
 
 

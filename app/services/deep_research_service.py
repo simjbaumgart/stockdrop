@@ -672,6 +672,33 @@ class DeepResearchService:
         action = result.get('action', 'AVOID')
         logger.info(f"[Deep Research] Task Completed for {symbol}. Review Verdict: {review_verdict}, Action: {action}")
 
+        # --- Gate 4: override basis ---
+        # Hard-event DR overrides added +10.9 pts historically; soft-rationale
+        # ones lost -5.9 pts (killed ADSK +11%, FICO +16%, GWRE +11%). An
+        # OVERRIDDEN verdict is binding only with a NAMED_EVENT basis; a
+        # JUDGMENT override is demoted to an advisory flag and the council
+        # action stands.
+        override_basis = str(result.get('override_basis') or 'NONE').strip().upper()
+        named_event = (result.get('named_event') or '').strip() or None
+        has_named_event = override_basis == 'NAMED_EVENT' and named_event is not None
+        advisory_override = review_verdict == 'OVERRIDDEN' and not has_named_event
+
+        council_row = {}
+        if decision_id:
+            try:
+                from app.database import get_decision_point
+                council_row = get_decision_point(decision_id) or {}
+            except Exception as e:
+                logger.warning(f"[Deep Research] Could not load decision row {decision_id}: {e}")
+        council_action = (council_row.get('recommendation') or '').upper() or None
+
+        if advisory_override:
+            logger.warning(
+                f"[Deep Research] {symbol}: OVERRIDDEN without NAMED_EVENT basis "
+                f"(basis={override_basis}) — demoted to advisory; council action "
+                f"{council_action or 'unknown'} stands."
+            )
+
         # Validate trading levels for verdicts that should have them. If invalid,
         # null the level fields in `result` so neither the DB write below nor
         # _apply_trading_level_overrides persists garbage zeros, and mark the
@@ -731,7 +758,11 @@ class DeepResearchService:
             # Map review_verdict to the legacy verdict field for backward compat
             # CONFIRMED/UPGRADED -> action value, ADJUSTED -> action, OVERRIDDEN -> AVOID
             # PENDING_REVIEW: don't overwrite verdict column with None; caller keeps the PM verdict.
+            # Advisory (JUDGMENT) overrides keep the council action in the
+            # legacy verdict column; DR's AVOID survives in deep_research_action.
             verdict_for_db = action if action is not None else "PENDING_REVIEW"
+            if advisory_override and council_action:
+                verdict_for_db = council_action
             
             # Update DB with all new fields
             success = update_deep_research_data(
@@ -766,6 +797,9 @@ class DeepResearchService:
                 sell_price_high=result.get('sell_price_high'),
                 ceiling_exit=result.get('ceiling_exit'),
                 exit_trigger=result.get('exit_trigger'),
+                # Gate 4: override basis audit trail
+                override_basis=override_basis,
+                named_event=named_event,
             )
             
             if success:
@@ -775,8 +809,55 @@ class DeepResearchService:
 
             # --- Deep Research overrides main trading-level columns ---
             # Deep Research gets the final call on recommendation & limit prices.
-            if decision_id and action in ('BUY_LIMIT', 'BUY', 'WATCH', 'AVOID'):
-                self._apply_trading_level_overrides(decision_id, symbol, result)
+            gated_away = bool(
+                council_action == 'WATCH'
+                and (council_row.get('gates_fired') or '')
+                and (council_row.get('pre_gate_action') or '').upper() in ('BUY', 'BUY_LIMIT')
+            )
+            if decision_id and advisory_override:
+                # JUDGMENT override is advisory only: no level overrides, the
+                # council action stands and resolves the position status.
+                from app.database import finalize_position_status_after_dr
+                finalize_position_status_after_dr(
+                    decision_id=decision_id,
+                    dr_action=council_action,
+                    dr_review_verdict='ADVISORY_OVERRIDE',
+                )
+                print(
+                    f"  >> \U0001F7E1 [Deep Research] {symbol}: JUDGMENT override is "
+                    f"advisory only — council action {council_action} stands."
+                )
+            elif decision_id and action in ('BUY_LIMIT', 'BUY', 'WATCH', 'AVOID'):
+                if gated_away and action in ('BUY', 'BUY_LIMIT'):
+                    # Gate 1 exception: only a NAMED_EVENT positive catalyst can
+                    # lift a drop-type-gated WATCH back to BUY_LIMIT.
+                    from app.database import lift_gated_watch_to_buy_limit
+                    lifted = has_named_event and lift_gated_watch_to_buy_limit(
+                        decision_id, named_event
+                    )
+                    if lifted:
+                        result = dict(result)
+                        result['action'] = 'BUY_LIMIT'
+                        print(
+                            f"  >> \U0001F7E2 [Deep Research] {symbol}: NAMED_EVENT "
+                            f"catalyst ('{named_event}') — gated WATCH lifted to BUY_LIMIT."
+                        )
+                        self._apply_trading_level_overrides(decision_id, symbol, result)
+                    else:
+                        # DR wants to buy a gated-away name without a named
+                        # catalyst: the gate stands, no position is taken.
+                        from app.database import finalize_position_status_after_dr
+                        finalize_position_status_after_dr(
+                            decision_id=decision_id,
+                            dr_action='WATCH',
+                            dr_review_verdict=review_verdict,
+                        )
+                        print(
+                            f"  >> \U0001F7E1 [Deep Research] {symbol}: DR action {action} "
+                            f"lacks a NAMED_EVENT catalyst — gated WATCH stands."
+                        )
+                else:
+                    self._apply_trading_level_overrides(decision_id, symbol, result)
 
             # --- Print Formatted Deep Research Result to Console ---
             self._print_deep_research_result(symbol, result, score)
@@ -1489,6 +1570,16 @@ After your review, decide:
 - **ADJUSTED**: The thesis is okay but trading levels need correction. Provide corrected levels.
 - **OVERRIDDEN**: You found critical issues the council missed. Do NOT buy this stock.
 
+OVERRIDDEN requires override_basis=NAMED_EVENT: a specific, verifiable, dated event —
+lawsuit/regulatory action, SEC filing, restated guidance, insider transaction, analyst
+downgrade with target. General macro, valuation, or "structurally challenged" concerns
+are JUDGMENT — record them (override_basis=JUDGMENT, explain in reason) but they do NOT
+override: the council action stands and your concern is logged as an advisory flag.
+The same rule works in the positive direction: if your verdict rests on a specific,
+verifiable, dated POSITIVE catalyst the council missed, set override_basis=NAMED_EVENT
+and name it in named_event. If no single named event grounds your verdict, set
+override_basis=NONE and named_event=null.
+
 > **Philosophical Reminder (Elm Partners Paradox):**
 > Even traders with tomorrow's news often lose because they misjudge what's priced in.
 > If the news driving this drop is obvious to everyone, the recovery may already be priced in.
@@ -1500,6 +1591,8 @@ Your output must be valid JSON. All price fields must be numbers. All percentage
 Do NOT include inline source markers like [Source 1], [Source 2], etc. in any string value. Your search grounding is recorded separately by the API; do not repeat citation markers inside JSON fields.
 {{
   "review_verdict": "CONFIRMED" | "UPGRADED" | "ADJUSTED" | "OVERRIDDEN",
+  "override_basis": "NAMED_EVENT" | "JUDGMENT" | "NONE",
+  "named_event": "The specific, dated, verifiable event grounding your verdict" | null,
   "action": "BUY" | "BUY_LIMIT" | "WATCH" | "AVOID",
   "conviction": "HIGH" | "MODERATE" | "LOW",
   "drop_type": "EARNINGS_MISS" | "ANALYST_DOWNGRADE" | "SECTOR_ROTATION" | "MACRO_SELLOFF" | "COMPANY_SPECIFIC" | "TECHNICAL_BREAKDOWN" | "UNKNOWN",
@@ -1822,6 +1915,8 @@ REPORT:
                 schema_def = """
 {
   "review_verdict": "CONFIRMED | UPGRADED | ADJUSTED | OVERRIDDEN",
+  "override_basis": "NAMED_EVENT | JUDGMENT | NONE",
+  "named_event": "string or null",
   "action": "BUY | BUY_LIMIT | WATCH | AVOID",
   "conviction": "HIGH | MODERATE | LOW",
   "drop_type": "EARNINGS_MISS | ANALYST_DOWNGRADE | SECTOR_ROTATION | MACRO_SELLOFF | COMPANY_SPECIFIC | TECHNICAL_BREAKDOWN | UNKNOWN",

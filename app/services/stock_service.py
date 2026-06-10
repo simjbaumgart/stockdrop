@@ -80,7 +80,9 @@ MIN_AVG_VOLUME = 100_000
 # `?` binds the date string (YYYY-MM-DD).
 MISSING_DR_WHERE = """
     date(timestamp) = ?
-    AND recommendation IN ('BUY', 'BUY_LIMIT')
+    AND (recommendation IN ('BUY', 'BUY_LIMIT')
+         OR (pre_gate_action IN ('BUY', 'BUY_LIMIT')
+             AND gates_fired IS NOT NULL AND gates_fired != ''))
     AND (deep_research_verdict IS NULL
          OR deep_research_verdict = ''
          OR deep_research_verdict = '-'
