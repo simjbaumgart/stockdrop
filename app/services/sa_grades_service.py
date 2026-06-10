@@ -112,15 +112,46 @@ class SAGradesService:
         self._total_ranked = len(rows)
         self._available = True
 
+        # The CSV is a manual screener export (see data/SAgrades/README.md) —
+        # warn when it has gone stale so coverage doesn't silently rot.
+        try:
+            import time
+            age_days = (time.time() - path.stat().st_mtime) / 86400
+            if age_days > 14:
+                logger.warning(
+                    "[SA Grades] %s is %.0f days old — refresh the screener "
+                    "export to keep rating coverage current.", path.name, age_days,
+                )
+        except OSError:
+            pass
+
+    def _candidate_keys(self, ticker: str) -> list:
+        """Lookup keys to try, in order: exact, then dot/dash share-class
+        variants (BRK.B <-> BRK-B style mismatches between data vendors)."""
+        key = (ticker or "").strip().upper()
+        if not key:
+            return []
+        candidates = [key]
+        for variant in (key.replace(".", "-"), key.replace("-", ".")):
+            if variant not in candidates:
+                candidates.append(variant)
+        return candidates
+
     def lookup(self, ticker: str) -> dict:
         self._ensure_loaded()
         if not self._available:
             return dict(_NULL_RESULT_UNAVAILABLE)
-        key = (ticker or "").strip().upper()
-        row = self._rows.get(key)
-        if row is None:
-            return {**_NULL_RESULT_AVAILABLE, "total_ranked": self._total_ranked}
-        return {**row, "total_ranked": self._total_ranked, "available": True}
+        for key in self._candidate_keys(ticker):
+            row = self._rows.get(key)
+            if row is not None:
+                return {**row, "total_ranked": self._total_ranked, "available": True}
+        # Miss logging: distinguishes "ratings file absent" from "this ticker
+        # is not in the export" (typically foreign OTC listings / small caps).
+        logger.info(
+            "[SA Grades] No rating for %s (not in %s-row screener export).",
+            (ticker or "").strip().upper(), self._total_ranked,
+        )
+        return {**_NULL_RESULT_AVAILABLE, "total_ranked": self._total_ranked}
 
 
 # Singleton — mirrors other service modules in app/services/.

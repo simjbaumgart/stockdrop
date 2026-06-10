@@ -11,6 +11,48 @@ from datetime import datetime
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+import re as _re
+
+_TABLE_NUM_RE = _re.compile(r"\(?\$?\d{1,3}(?:,\d{3})+(?:\.\d+)?\)?|\(?\$?\d{3,}(?:\.\d+)?\)?")
+
+
+def _is_financial_table_line(line: str) -> bool:
+    """A balance-sheet/income-statement row: >=2 large number tokens and at
+    most a short label of words ('Operating lease right-of-use assets 1,033
+    1,019'). Prose sentences with a couple of figures don't match."""
+    s = line.strip()
+    if not s:
+        return False
+    if len(_TABLE_NUM_RE.findall(s)) < 2:
+        return False
+    words = [w for w in _TABLE_NUM_RE.sub(" ", s).split() if any(c.isalpha() for c in w)]
+    return len(words) <= 8
+
+
+def strip_financial_tables(text: str, min_run: int = 5) -> str:
+    """Collapse runs of raw financial-statement rows (the balance-sheet dumps
+    in SA press releases) into a single placeholder. Article prose passes
+    through untouched."""
+    if not text:
+        return text
+    lines = text.split("\n")
+    out, i, n = [], 0, len(lines)
+    while i < n:
+        if _is_financial_table_line(lines[i]):
+            j, count, last_table = i, 0, i
+            while j < n and (_is_financial_table_line(lines[j]) or not lines[j].strip()):
+                if _is_financial_table_line(lines[j]):
+                    count, last_table = count + 1, j
+                j += 1
+            if count >= min_run:
+                out.append("[financial statement table omitted]")
+                i = last_table + 1
+                continue
+        out.append(lines[i])
+        i += 1
+    return "\n".join(out)
+
+
 class SeekingAlphaService:
     def __init__(self):
         self.api_key = os.getenv("GEMINI_API_KEY")
@@ -609,7 +651,11 @@ class SeekingAlphaService:
             
             # 3. Collapse multiple newlines (created by block injection) into max 2
             text = re.sub(r'\n\s*\n', '\n\n', text)
-            
+
+            # 4. Drop raw financial-statement dumps (balance sheets, cash-flow
+            # tables in press releases) — pure token noise for the agents.
+            text = strip_financial_tables(text)
+
             return text.strip()
             
         except Exception as e:

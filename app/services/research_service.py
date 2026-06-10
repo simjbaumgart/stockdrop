@@ -301,6 +301,15 @@ def _is_real_report(report: Optional[str]) -> bool:
 STRUCTURED_VERDICT_MARKER = "=== STRUCTURED_VERDICT ==="
 _PARSER_FAILURE_DIR = os.path.join("data", "parser_failures")
 
+# Daily macro snapshot cache (Phase 3 of the council-gates plan): Market
+# Sentiment + Economics are market-wide, so they are computed ONCE per
+# trading day (first stock pays the grounded calls) and reused for every
+# subsequent candidate — ~25% pipeline cost cut. Per-stock relevance is a
+# cheap flash call against the cached snapshot.
+import threading
+_MACRO_SNAPSHOT_DIR = os.path.join("data", "macro_snapshot")
+_macro_snapshot_lock = threading.Lock()
+
 
 def _log_parser_failure(agent_name: str, report: str) -> None:
     try:
@@ -511,7 +520,7 @@ class ResearchService:
             futures = {
                 executor.submit(run_agent, "Technical Agent", self._call_agent, tech_prompt, "Technical Agent", state): "technical",
                 executor.submit(run_agent, "News Agent", self._call_agent, news_prompt, "News Agent", state, news_metrics): "news",
-                executor.submit(run_agent, "Market Sentiment Agent", self._call_agent, sentiment_prompt, "Market Sentiment Agent", state): "sentiment",
+                executor.submit(run_agent, "Market Sentiment Agent", self._run_market_sentiment_cached, state, raw_data, drop_str): "sentiment",
                 executor.submit(run_agent, "Competitive Landscape Agent", self._call_agent, comp_prompt, "Competitive Landscape Agent", state): "competitive",
                 executor.submit(run_agent, "Seeking Alpha Agent", seeking_alpha_service.get_evidence, state.ticker): "seeking_alpha"
             }
@@ -614,13 +623,30 @@ class ResearchService:
         economics_report = ""
         if "NEEDS_ECONOMICS: TRUE" in news_report:
             print("  > [Economics Agent] Triggered by News Agent (US Exposure detected).")
-            print("  > Fetching US Macro Data from FRED...")
-            macro_data = fred_service.get_macro_data()
-            if macro_data:
-                econ_prompt = self._create_economics_agent_prompt(state, macro_data)
-                economics_report = self._call_agent(econ_prompt, "Economics Agent", state)
+            # Daily snapshot first: the economics analysis is market-wide and
+            # was already computed (and cached) by the sentiment path. The
+            # per-stock relevance lives in the flash assessment.
+            _snap = None
+            try:
+                _snap = self._get_or_build_macro_snapshot(state, raw_data)
+            except Exception as e:
+                logger.warning("[Macro Snapshot] economics read failed: %s", e)
+            if _snap and _snap.get("economics"):
+                _assessment = getattr(state, "macro_assessment", "") or ""
+                economics_report = (
+                    "## Daily Economics Snapshot (cached, shared across today's candidates)\n"
+                    f"{_snap['economics']}"
+                    + (f"\n\n## Stock-Specific Macro Assessment ({state.ticker})\n{_assessment}"
+                       if _assessment else "")
+                )
             else:
-                economics_report = "Economics Agent triggered but failed to fetch FRED data."
+                print("  > Fetching US Macro Data from FRED...")
+                macro_data = fred_service.get_macro_data()
+                if macro_data:
+                    econ_prompt = self._create_economics_agent_prompt(state, macro_data)
+                    economics_report = self._call_agent(econ_prompt, "Economics Agent", state)
+                else:
+                    economics_report = "Economics Agent triggered but failed to fetch FRED data."
         
         state.reports = {
             "technical": tech_report,
@@ -1343,7 +1369,7 @@ TASK:
 
 OUTPUT:
 A detailed technical playbook.
-We argue that contexts should function not as concise summaries, but as comprehensive, evolving playbooks—detailed, inclusive, and rich with domain insights.
+Be thorough but information-dense. Maximum ~600 words before the structured verdict.
 Use headers: "Technical Signal", "Oversold Status", "Context from Report", "Verdict".
 
 At the very end of your response, append exactly this block (raw JSON on one line, no markdown fences):
@@ -1483,7 +1509,7 @@ but consider the ANALYST perspective for sentiment and thesis construction.
 
 OUTPUT:
 A comprehensive sentiment playbook.
-We argue that contexts should function not as concise summaries, but as comprehensive, evolving playbooks—detailed, inclusive, and rich with domain insights.
+Be thorough but information-dense. Maximum ~600 words before the structured verdict.
 Use headers: "Sentiment Overview", "Reason for Drop", "Extended Transcript Summary", "Key Drivers", "Narrative Check", "Top 5 Sources".
 
 SECTION: "Extended Transcript Summary":
@@ -1545,7 +1571,7 @@ TASK:
 
 OUTPUT:
 A detailed macro playbook.
-We argue that contexts should function not as concise summaries, but as comprehensive, evolving playbooks—detailed, inclusive, and rich with domain insights.
+Be thorough but information-dense. Maximum ~600 words before the structured verdict.
 Headers: "Macro Environment", "Impact on {state.ticker}", "Risk Level".
 """
 
@@ -2305,6 +2331,188 @@ Process continuing but this agent's output is compromised.
             print(f"\n!!! GROUNDING EXCEPTION ({agent_context}, {err_type}): {e} !!!\n")
             return f"[Error in {agent_context}: {err_type}: {e}]"
 
+    def _get_or_build_macro_snapshot(self, state: MarketState, raw_data: Dict) -> Optional[Dict]:
+        """Load (or build, once per trading day) the shared macro snapshot.
+
+        The lock makes the first stock of the day the single builder; every
+        other thread blocks briefly, then reads the cache. Failed builds are
+        not cached, so the next stock retries.
+        """
+        path = os.path.join(_MACRO_SNAPSHOT_DIR, f"{state.date}.json")
+        with _macro_snapshot_lock:
+            if os.path.exists(path):
+                try:
+                    with open(path) as f:
+                        return json.load(f)
+                except Exception as e:
+                    logger.warning("[Macro Snapshot] Unreadable cache %s (%s); rebuilding.", path, e)
+            print(f"  > [Macro Snapshot] Building today's shared macro snapshot (triggered by {state.ticker})...")
+            sentiment = self._call_agent(
+                self._create_market_wide_sentiment_prompt(state, raw_data),
+                "Market Sentiment Agent", state,
+            )
+            if not _is_real_report(sentiment):
+                logger.warning("[Macro Snapshot] Market-wide sentiment call failed; not caching.")
+                return None
+            economics = ""
+            macro_data = fred_service.get_macro_data()
+            if macro_data:
+                economics = self._call_agent(
+                    self._create_economics_snapshot_prompt(macro_data),
+                    "Economics Agent", state,
+                )
+                if not _is_real_report(economics):
+                    economics = ""
+            snapshot = {
+                "date": state.date,
+                "built_from_ticker": state.ticker,
+                "market_sentiment": sentiment,
+                "economics": economics,
+            }
+            try:
+                os.makedirs(_MACRO_SNAPSHOT_DIR, exist_ok=True)
+                with open(path, "w") as f:
+                    json.dump(snapshot, f, indent=2)
+            except Exception as e:
+                logger.warning("[Macro Snapshot] Could not persist snapshot: %s", e)
+            return snapshot
+
+    def _call_flash_for_macro(self, prompt: str) -> str:
+        """Cheap non-grounded flash call for the per-stock macro assessment."""
+        try:
+            model = genai.GenerativeModel("gemini-3-flash-preview")
+            response = model.generate_content(prompt, request_options=RequestOptions(timeout=120))
+            return (getattr(response, "text", None) or "").strip()
+        except Exception as e:
+            logger.warning("[Macro Snapshot] Per-stock flash assessment failed: %s", e)
+            return ""
+
+    def _build_stock_macro_assessment(self, state: MarketState, snapshot: Dict, drop_str: str) -> str:
+        """Per-stock relevance read of the cached snapshot (flash model)."""
+        prompt = f"""You are assessing how today's macro environment affects ONE specific stock.
+
+TODAY'S MARKET SNAPSHOT (shared, market-wide):
+{snapshot.get('market_sentiment', '')}
+
+ECONOMICS SNAPSHOT:
+{snapshot.get('economics') or '(not available today)'}
+
+STOCK UNDER REVIEW: {state.ticker}, dropped {drop_str} today.
+
+TASK (max ~200 words): Based ONLY on the snapshot above, assess
+1. how exposed {state.ticker} is to the current macro forces (sector, rates, FX, risk appetite), and
+2. whether the macro backdrop is a tailwind, neutral, or headwind for a short-term recovery of this dip.
+
+At the very end of your response, append exactly this block (raw JSON on one line, no markdown fences):
+{STRUCTURED_VERDICT_MARKER}
+{{"macro_sensitivity": "HIGH" or "MED" or "LOW", "direction": "TAILWIND" or "NEUTRAL" or "HEADWIND"}}"""
+        return self._call_flash_for_macro(prompt)
+
+    def _run_market_sentiment_cached(self, state: MarketState, raw_data: Dict, drop_str: str) -> str:
+        """Market Sentiment via the daily snapshot + per-stock flash assessment.
+
+        Falls back to the legacy full per-stock grounded call when the
+        snapshot cannot be built.
+        """
+        snapshot = None
+        try:
+            snapshot = self._get_or_build_macro_snapshot(state, raw_data)
+        except Exception as e:
+            logger.warning("[Macro Snapshot] get_or_build failed: %s", e)
+        if not snapshot:
+            return self._call_agent(
+                self._create_market_sentiment_prompt(state, raw_data),
+                "Market Sentiment Agent", state,
+            )
+        assessment = self._build_stock_macro_assessment(state, snapshot, drop_str)
+        state.macro_assessment = assessment  # reused by the economics block
+        report = (
+            "## Daily Macro Snapshot (cached, shared across today's candidates)\n"
+            f"{snapshot.get('market_sentiment', '')}\n\n"
+            f"## Stock-Specific Macro Assessment ({state.ticker})\n"
+            f"{assessment or 'Assessment unavailable.'}"
+        )
+        return report
+
+    def _create_market_wide_sentiment_prompt(self, state: MarketState, raw_data: Dict) -> str:
+        """Market-wide (ticker-free) variant of the sentiment prompt — its
+        output is cached for the whole trading day."""
+        market_news_str = ""
+        news_items = raw_data.get('news_items', []) if raw_data else []
+        for n in news_items:
+            if n.get('provider') == 'Market News (Benzinga)':
+                market_news_str += (
+                    f"- {n.get('datetime_str', 'N/A')}: {n.get('headline', 'No Headline')}\n"
+                    f"  Summary: {n.get('summary', '')}\n"
+                )
+        if market_news_str:
+            market_news_str = f"\nPROVIDED BROAD MARKET CONTEXT (Important):\n{market_news_str}\n"
+
+        vol = getattr(state, "volatility_regime", None) or {}
+        vol_block = ""
+        if vol.get("regime_score") is not None:
+            vol_block = (
+                "\nVOLATILITY REGIME (numeric ground truth — do NOT contradict "
+                "this with news prose; cite these exact numbers):\n"
+                f"- VIX: {vol.get('vix')} ({vol.get('vix_class')}), "
+                f"20-day percentile {vol.get('vix_pctile_20d')}%\n"
+                f"- VIX term structure: {vol.get('term_structure')} "
+                f"(VIX - VIX3M spread {vol.get('term_spread')})\n"
+                f"- CNN Fear & Greed: {vol.get('fear_greed')} ({vol.get('fear_greed_rating')})\n"
+                f"- Regime: {vol.get('regime_label')} (score {vol.get('regime_score')} of 1.0)\n"
+                f"{vol.get('summary')}\n"
+            )
+
+        return f"""
+You are the **Market Sentiment Agent**.
+Your goal is to analyze the general market sentiment across the major markets TODAY. This snapshot will be shared across every stock reviewed today, so do NOT discuss any individual stock.
+
+CONTEXT:
+- Date: {state.date}
+- Focus: TODAY and YESTERDAY only.
+{vol_block}{market_news_str}
+TASK (use Google Search for live market summaries):
+1. **US Market**: S&P 500, Nasdaq, Dow Jones direction today/yesterday and the dominant driver (rates, earnings season, geopolitics).
+2. **Europe & Asia**: DAX, FTSE, Nikkei, Hang Seng — direction and drivers.
+3. **Rates & FX**: 10Y yield direction, dollar strength.
+4. **Synthesize**: Is the environment Risk-On or Risk-Off? Broad sell-off, rotation, or rally? Which sectors are being sold/bought?
+
+OUTPUT FORMAT:
+## Global/US Market Context (Today/Yesterday)
+- **US Indices (SPX/NDX/DJI)**: [Direction + driver]
+- **Europe (DAX/FTSE)**: [Direction + driver]
+- **Asia (Nikkei/HSI)**: [Direction + driver]
+- **Rates/FX**: [10Y, USD]
+
+## Risk Appetite
+- **Regime**: [Risk-On / Risk-Off / Mixed] with evidence
+
+## Sector Flows
+- [Which sectors are leading/lagging today]
+
+Be thorough but information-dense. Maximum ~500 words.
+"""
+
+    def _create_economics_snapshot_prompt(self, macro_data: Dict) -> str:
+        """Market-wide (ticker-free) economics prompt — cached for the day."""
+        return f"""
+You are the **Macro Economics Agent**.
+Analyze the US and world economic environment TODAY. This snapshot will be shared across every stock reviewed today, so do NOT discuss any individual company.
+
+INPUT DATA (FRED API):
+{json.dumps(macro_data, indent=2)}
+
+TASK:
+- Analyze the provided macro indicators (Unemployment, CPI, Rates, GDP, Yields).
+- Characterize the environment: expansion, late-cycle, contraction?
+- Look specifically for "Recession Signals" (Yield Curve Inversion, rising Unemployment).
+- State which kinds of companies face a HEADWIND vs a TAILWIND in this environment (rate-sensitive, consumer-discretionary, exporters, etc.).
+
+OUTPUT:
+Headers: "Macro Environment", "Recession Signals", "Sector Implications".
+Be thorough but information-dense. Maximum ~400 words.
+"""
+
     def _create_market_sentiment_prompt(self, state: MarketState, raw_data: Dict) -> str:
         """Builds the prompt for the Market Sentiment Agent."""
         ticker = state.ticker
@@ -2576,7 +2784,7 @@ TASK:
 
 OUTPUT:
 A dedicated Risk Assessment.
-We argue that contexts should function not as concise summaries, but as comprehensive, evolving playbooks—detailed, inclusive, and rich with domain insights.
+Be thorough but information-dense. Maximum ~600 words before the structured verdict.
 Use Headers: "Risk Assessment", "Trap Check", "Counter-Thesis", "Key Risks".
 
 At the very end of your response, append exactly this block (raw JSON on one line, no markdown fences):
