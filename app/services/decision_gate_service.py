@@ -16,6 +16,9 @@ instead of prompt instructions:
     to BUY_LIMIT, or to WATCH when PM conviction is LOW. Until the structured
     risk verdict (Phase 2) lands, an interim regex catches the explicit
     verdict subset (~11% of reports) that was predictive.
+  * Gate 5 (NEWS_SENTIMENT_GATE): bearish-news buys won 39% vs 54% for
+    bullish-news buys. A buy on BEARISH news sentiment needs a named,
+    verifiable catalyst from the News agent; otherwise downgrade to WATCH.
 
 The PM's original action is preserved (`pre_gate_action`) so gated-vs-kept
 performance is a free ongoing A/B — see scripts/analysis/gate_baseline_check.py.
@@ -71,6 +74,8 @@ def apply_decision_gates(
     sa_quant_rating: Optional[float],
     risk_report: Optional[str] = None,
     risk_falling_knife: Optional[str] = None,
+    news_sentiment: Optional[str] = None,
+    news_named_catalyst: Optional[str] = None,
 ) -> GateResult:
     """Run all deterministic gates against a finalized PM decision.
 
@@ -117,6 +122,13 @@ def apply_decision_gates(
             "Risk agent flags a falling knife"
             + (" and PM conviction is LOW" if low_conviction else "")
             + " (knife-flagged buys averaged -2.48%)"
+        )
+
+    if (news_sentiment or "").strip().upper() == "BEARISH" and not (news_named_catalyst or "").strip():
+        targets.append("WATCH")
+        result.gates_fired.append("NEWS_SENTIMENT_GATE")
+        result.gate_reasons.append(
+            "Bearish news flow with no named catalyst (bearish-news buys won 39% vs 54%)"
         )
 
     if targets:

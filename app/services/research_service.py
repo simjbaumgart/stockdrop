@@ -867,6 +867,7 @@ class ResearchService:
         # original action survives in pre_gate_action for the gated-vs-kept A/B.
         structured = getattr(state, "structured_verdicts", None) or {}
         risk_verdict = structured.get("risk") or {}
+        news_verdict = structured.get("news") or {}
         gate_result = apply_decision_gates(
             action=final_decision.get("action"),
             drop_type=final_decision.get("drop_type"),
@@ -875,6 +876,8 @@ class ResearchService:
             risk_report=state.reports.get("risk"),
             # Structured verdict wins over the interim regex when it parsed.
             risk_falling_knife=risk_verdict.get("falling_knife"),
+            news_sentiment=news_verdict.get("sentiment"),
+            news_named_catalyst=news_verdict.get("named_catalyst"),
         )
         if gate_result.gates_fired:
             final_decision["action"] = gate_result.final_action
@@ -959,6 +962,7 @@ class ResearchService:
             "gate_reasons": "; ".join(gate_result.gate_reasons),
             # Structured agent verdicts (Phase 2) — None when not parsed.
             "risk_falling_knife": risk_verdict.get("falling_knife"),
+            "news_sentiment": news_verdict.get("sentiment"),
             # Legacy compatibility fields
             "technician_report": state.reports.get('technical', ''),
             "bull_report": state.reports.get('bull', ''),
@@ -1495,6 +1499,13 @@ Otherwise, state "NEEDS_ECONOMICS: FALSE".
 DROP REASON CHECK:
 Also, explicitly state on a new line: "REASON_FOR_DROP_IDENTIFIED: YES" if you have found a specific news event or report detail explaining the drop (e.g. "missed earnings", "CEO resignation", "lawsuit").
 If the drop is a mystery or just general market noise with no specific catalyst found, state "REASON_FOR_DROP_IDENTIFIED: NO".
+
+After those two marker lines, append exactly this block (raw JSON on one line, no markdown fences) as the FINAL lines of your response:
+=== STRUCTURED_VERDICT ===
+{{"sentiment": "BULLISH" or "NEUTRAL" or "BEARISH", "drop_reason_confirmed": true or false, "named_catalyst": "the specific event explaining the drop" or null}}
+- sentiment: the net sentiment of the news flow on this stock right now.
+- drop_reason_confirmed: mirrors REASON_FOR_DROP_IDENTIFIED.
+- named_catalyst: a specific, dated, verifiable event (e.g. "Q1 earnings miss reported 2026-06-09"); null if no specific catalyst was found.
 {self._news_block_for(state, "news")}"""
 
     def _create_economics_agent_prompt(self, state: MarketState, macro_data: Dict) -> str:

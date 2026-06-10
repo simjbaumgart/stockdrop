@@ -116,6 +116,33 @@ def test_knife_regex_matches_explicit_verdicts_only():
 
 
 # ---------------------------------------------------------------------------
+# Gate 5: news sentiment
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize("action", ["BUY", "BUY_LIMIT"])
+def test_gate5_bearish_news_without_catalyst_downgrades(action):
+    r = apply_decision_gates(action, "SECTOR_ROTATION", "HIGH", None,
+                             news_sentiment="BEARISH", news_named_catalyst=None)
+    assert r.final_action == "WATCH"
+    assert r.gates_fired == ["NEWS_SENTIMENT_GATE"]
+
+
+def test_gate5_bearish_news_with_named_catalyst_passes():
+    r = apply_decision_gates("BUY", "SECTOR_ROTATION", "HIGH", None,
+                             news_sentiment="BEARISH",
+                             news_named_catalyst="CFO resigned 2026-06-08")
+    assert r.gates_fired == []
+    assert r.final_action == "BUY"
+
+
+@pytest.mark.parametrize("sentiment", ["BULLISH", "NEUTRAL", None, ""])
+def test_gate5_non_bearish_sentiment_passes(sentiment):
+    r = apply_decision_gates("BUY", "SECTOR_ROTATION", "HIGH", None,
+                             news_sentiment=sentiment)
+    assert r.gates_fired == []
+
+
+# ---------------------------------------------------------------------------
 # Combinations + non-buy passthrough
 # ---------------------------------------------------------------------------
 
