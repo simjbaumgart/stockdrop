@@ -240,6 +240,11 @@ _FM_PRICE_KEYS = (
 # A key_factor must contain at least one real word to count as content.
 _FM_FACTOR_WORD_RE = re.compile(r"[A-Za-z]{3}")
 
+# The PM prompt mandates exactly 3 key_factors. A present-but-shorter list is
+# the repair-after-truncation signature (AAOI 2026-06-11: 2 of 3 factors
+# survived, heads mangled). None/[] remains tolerated (honest truncation).
+_FM_MIN_KEY_FACTORS = 3
+
 
 def _fm_semantic_check(decision: Dict) -> tuple:
     """Minimal content validation for a Fund Manager decision dict.
@@ -268,6 +273,12 @@ def _fm_semantic_check(decision: Dict) -> tuple:
             or not _FM_FACTOR_WORD_RE.search(item)
         ):
             return False, f"key_factors contains trivial item {item!r}"
+
+    # The PM prompt mandates exactly 3 key_factors. A present-but-shorter
+    # list is the repair-after-truncation signature (AAOI 2026-06-11: 2 of 3
+    # factors survived, heads mangled). None/[] stays tolerated above.
+    if factors and len(factors) < _FM_MIN_KEY_FACTORS:
+        return False, f"key_factors has {len(factors)} items (expected >= {_FM_MIN_KEY_FACTORS})"
 
     for key in _FM_PRICE_KEYS:
         val = decision.get(key)
@@ -2215,6 +2226,10 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
             config = new_types.GenerateContentConfig(
                 tools=[{"google_search": {}}],
                 temperature=0.7,
+                # Thinking tokens count against the output cap on Gemini 3;
+                # the default repeatedly truncated PM JSON mid-string
+                # (NXT, NIO, AAOI). 16384 leaves headroom for thinking + JSON.
+                max_output_tokens=16384,
                 # Use GenAI's typed config for HTTP options (timeout is in millis if integer on some SDK versions, but 600 ensures a long enough wait in any unit)
                 http_options=new_types.HttpOptions(timeout=600000)
             )
@@ -2239,6 +2254,13 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
             # Check for FunctionCall (finish_reason 10) which indicates failure to auto-ground
             candidate = response.candidates[0] if response.candidates else None
             finish_reason = candidate.finish_reason if candidate else None
+
+            if finish_reason is not None and "MAX_TOKENS" in str(finish_reason):
+                logger.warning(
+                    "[%s] Output truncated at max_output_tokens (finish_reason=%s) — "
+                    "downstream JSON is likely cut mid-string.",
+                    agent_context, finish_reason,
+                )
 
             # 10 is STOP_REASON_FUNCTION_CALL
             if finish_reason == 10 or finish_reason == "STOP_REASON_FUNCTION_CALL":

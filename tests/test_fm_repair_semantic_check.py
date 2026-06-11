@@ -23,7 +23,13 @@ GOOD_DECISION = {
     "take_profit_1": 120.0,
     "take_profit_2": None,
     "reason": "Oversold on sector rotation, fundamentals intact.",
-    "key_factors": ["Earnings beat last quarter", "RSI at 22, deeply oversold"],
+    # PM prompt mandates exactly 3 key_factors; the semantic check now enforces
+    # a minimum of 3 for any present list (AAOI 2026-06-11 fix).
+    "key_factors": [
+        "Earnings beat last quarter",
+        "RSI at 22, deeply oversold",
+        "Falling-knife flag NO from risk agent",
+    ],
 }
 
 
