@@ -2255,7 +2255,9 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
             candidate = response.candidates[0] if response.candidates else None
             finish_reason = candidate.finish_reason if candidate else None
 
-            if finish_reason is not None and "MAX_TOKENS" in str(finish_reason):
+            # 2 is the proto enum value for MAX_TOKENS (mirrors the == 10
+            # FunctionCall check below, which handles int and string forms).
+            if finish_reason == 2 or (finish_reason is not None and "MAX_TOKENS" in str(finish_reason)):
                 logger.warning(
                     "[%s] Output truncated at max_output_tokens (finish_reason=%s) — "
                     "downstream JSON is likely cut mid-string.",
