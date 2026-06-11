@@ -5,6 +5,16 @@ import tempfile
 
 import pytest
 
+# Import-time guard: pytest imports this conftest BEFORE any test module, so
+# this default catches singletons that write to the DB at import time
+# (deep_research_service's batch-winner sync starts in a daemon thread the
+# moment the module is imported — no fixture can intercept that). Modules
+# that need their own path still override it at their import
+# (e.g. test_dr_override_basis). The autouse fixture below handles run time.
+os.environ.setdefault(
+    "DB_PATH", os.path.join(tempfile.gettempdir(), "stockdrop_test_import_guard.db")
+)
+
 
 @pytest.fixture
 def temp_db(monkeypatch):
