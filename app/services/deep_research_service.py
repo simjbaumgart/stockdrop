@@ -117,7 +117,7 @@ def resolve_redirect_urls(entries, timeout: int = 8, max_lookups: int = 12):
     destination (review v0.8.2-288 #5: redirects expire and are unauditable).
 
     Bounded: at most `max_lookups` HTTP round-trips, `timeout`s each, so a
-    redirect-heavy result can't stall the DR worker thread. Failures keep the
+    redirect-heavy result can't stall the DR worker thread beyond ~max_lookups*timeout seconds. Failures keep the
     original URL. The redirect is preserved in `grounding_redirect` for audit.
     """
     out = []
@@ -688,11 +688,9 @@ class DeepResearchService:
         # Dispute penalty (grounded only): -5 per DISPUTED claim with a valid
         # source URL. Hallucinated disputes (missing/invalid URL) are demoted
         # to UNVERIFIED upstream and earn no score adjustment.
-        normalized = resolve_redirect_urls(
-            normalize_verification_results(result.get("verification_results", []))
-        )
-        result["verification_results"] = normalized  # persist normalized form for DB & logs
-        score += score_verification_penalty(normalized)
+        # verification_results was normalized + redirect-resolved by
+        # _handle_completion before this call; score the final form.
+        score += score_verification_penalty(result.get("verification_results", []))
 
         return max(0, min(100, score))
 
@@ -778,7 +776,13 @@ class DeepResearchService:
 
         try:
             from app.database import update_deep_research_data
-            
+
+            # Normalize + resolve verification URLs FIRST: this exact list is
+            # what gets scored, persisted to the DB, and saved to JSON.
+            result["verification_results"] = resolve_redirect_urls(
+                normalize_verification_results(result.get("verification_results", []))
+            )
+
             # Calculate composite score
             score = self._calculate_deep_research_score(result)
             
