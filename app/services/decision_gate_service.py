@@ -19,6 +19,8 @@ instead of prompt instructions:
   * Gate 5 (NEWS_SENTIMENT_GATE): bearish-news buys won 39% vs 54% for
     bullish-news buys. A buy on BEARISH news sentiment needs a named,
     verifiable catalyst from the News agent; otherwise downgrade to WATCH.
+  * Gate 6 (UNCONFIRMED_DROP_GATE): BUY on a drop whose reason the News
+    agent explicitly could not confirm is demoted to BUY_LIMIT.
 
 The PM's original action is preserved (`pre_gate_action`) so gated-vs-kept
 performance is a free ongoing A/B — see scripts/analysis/gate_baseline_check.py.
@@ -76,6 +78,7 @@ def apply_decision_gates(
     risk_falling_knife: Optional[str] = None,
     news_sentiment: Optional[str] = None,
     news_named_catalyst: Optional[str] = None,
+    news_drop_reason_confirmed: Optional[bool] = None,
 ) -> GateResult:
     """Run all deterministic gates against a finalized PM decision.
 
@@ -129,6 +132,17 @@ def apply_decision_gates(
         result.gates_fired.append("NEWS_SENTIMENT_GATE")
         result.gate_reasons.append(
             "Bearish news flow with no named catalyst (bearish-news buys won 39% vs 54%)"
+        )
+
+    # Gate 6: the News agent explicitly could NOT confirm why the stock
+    # dropped (drop_reason_confirmed=False, PTC 2026-06-11 went BUY anyway).
+    # An immediate BUY on an unexplained drop becomes a limit order; None
+    # (unparsed verdict) never fires.
+    if news_drop_reason_confirmed is False and pre_gate == "BUY":
+        targets.append("BUY_LIMIT")
+        result.gates_fired.append("UNCONFIRMED_DROP_GATE")
+        result.gate_reasons.append(
+            "News agent could not confirm the drop reason — no immediate entry"
         )
 
     if targets:

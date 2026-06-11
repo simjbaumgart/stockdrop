@@ -935,6 +935,7 @@ class ResearchService:
             risk_falling_knife=risk_verdict.get("falling_knife"),
             news_sentiment=news_verdict.get("sentiment"),
             news_named_catalyst=news_verdict.get("named_catalyst"),
+            news_drop_reason_confirmed=news_verdict.get("drop_reason_confirmed"),
         )
         if gate_result.gates_fired:
             final_decision["action"] = gate_result.final_action

@@ -2202,6 +2202,23 @@ REPORT CONTENT:
             text_to_repair = best_text_candidate if best_text_candidate else final_text
             
             # --- ATTEMPT REPAIR ---
+            # Repair rate was 2/3 results in run v0.8.2-288 — persist the raw
+            # output so the failure mode (truncation vs markdown vs prose) is
+            # diagnosable instead of guessing from the repaired JSON.
+            try:
+                os.makedirs(os.path.join("data", "parser_failures"), exist_ok=True)
+                _dump = os.path.join(
+                    "data", "parser_failures",
+                    f"dr_raw_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.txt",
+                )
+                with open(_dump, "w") as _f:
+                    _f.write(text_to_repair or "")
+                logger.warning(
+                    "[Deep Research] Raw output needed Flash repair (len=%d, tail=%r) — saved to %s",
+                    len(text_to_repair or ""), (text_to_repair or "")[-120:], _dump,
+                )
+            except Exception as _e:
+                logger.warning("[Deep Research] Could not dump raw output: %s", _e)
             repaired_json = self._repair_json_using_flash(text_to_repair, schema_type=schema_type)
             if repaired_json:
                 logger.info("[Deep Research] Successfully repaired JSON output.")

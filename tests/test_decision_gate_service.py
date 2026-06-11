@@ -174,3 +174,27 @@ def test_result_preserves_pre_gate_action_for_ab():
     assert isinstance(r, GateResult)
     assert r.pre_gate_action == "BUY_LIMIT"
     assert r.final_action == "WATCH"
+
+
+# ---------------------------------------------------------------------------
+# Gate 6: unconfirmed drop reason
+# ---------------------------------------------------------------------------
+
+def test_gate6_unconfirmed_drop_demotes_buy_to_limit():
+    r = apply_decision_gates("BUY", "SECTOR_ROTATION", "HIGH", None,
+                             news_drop_reason_confirmed=False)
+    assert r.final_action == "BUY_LIMIT"
+    assert r.gates_fired == ["UNCONFIRMED_DROP_GATE"]
+
+
+def test_gate6_confirmed_or_unknown_passes():
+    for val in (True, None):
+        r = apply_decision_gates("BUY", "SECTOR_ROTATION", "HIGH", None,
+                                 news_drop_reason_confirmed=val)
+        assert r.gates_fired == []
+
+
+def test_gate6_does_not_touch_buy_limit():
+    r = apply_decision_gates("BUY_LIMIT", "SECTOR_ROTATION", "HIGH", None,
+                             news_drop_reason_confirmed=False)
+    assert r.gates_fired == []
