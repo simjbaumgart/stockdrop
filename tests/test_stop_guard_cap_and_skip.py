@@ -19,7 +19,8 @@ def test_sma_widening_capped_at_3x_atr():
 
 
 def test_sma_within_cap_still_used():
-    # SMA200 at 126 sits between 2x (127) and 3x (122) ATR floors -> keep SMA.
+    # SMA200 at 126 is below the 2x ATR floor (127) so it becomes the farther
+    # (lower) stop — correctly chosen — and is still within the 3x cap (122).
     adj = widen_stop_if_too_tight(
         stop_loss=136.0, entry_low=137.0, atr=5.0,
         sma_50=None, sma_200=126.0, bb_lower=None,
