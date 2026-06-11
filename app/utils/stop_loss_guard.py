@@ -29,6 +29,18 @@ class StopLossAdjustment:
     sma_floor: Optional[float] = None
 
 
+# Verdicts the stop-guard applies to. For AVOID/WATCH no position is
+# recommended, so widening the stop only distorts the displayed R/R
+# (AAOI 2026-06-11: 137.38 -> 73.15, -52% downside on an AVOID).
+def should_run_stop_guard(action: Optional[str]) -> bool:
+    return (action or "").strip().upper() in ("BUY", "BUY_LIMIT")
+
+
+# Never let the SMA floor drag the stop further than 3x ATR below entry —
+# beyond that the "stop" is a portfolio-risk statement, not a trade level.
+MAX_WIDEN_ATR_MULT = 3.0
+
+
 def widen_stop_if_too_tight(
     *,
     stop_loss: Optional[float],
@@ -83,6 +95,12 @@ def widen_stop_if_too_tight(
     else:
         new_stop = atr_floor
         reason = "widened_to_2x_atr"
+
+    # Cap: an SMA far below entry must not blow out the published downside.
+    cap_floor = entry_low - MAX_WIDEN_ATR_MULT * atr
+    if new_stop < cap_floor:
+        new_stop = cap_floor
+        reason = "capped_at_3x_atr"
 
     return StopLossAdjustment(
         stop_loss=round(new_stop, 2),

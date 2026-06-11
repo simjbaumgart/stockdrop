@@ -822,12 +822,14 @@ class ResearchService:
             widen_stop_if_too_tight,
             recompute_risk_metrics,
             evaluate_stop_acceptability,
+            should_run_stop_guard,
         )
         _tv_inds = raw_data.get("indicators", {})
         _entry_low = final_decision.get("entry_price_low")
         if _entry_low is None or (isinstance(_entry_low, (int, float)) and _entry_low < 0):
             _entry_low = _tv_inds.get("close")
-        if _entry_low is not None:
+        _pm_action = (final_decision.get("action") or "").strip().upper()
+        if _entry_low is not None and should_run_stop_guard(_pm_action):
             _guard = widen_stop_if_too_tight(
                 stop_loss=final_decision.get("stop_loss"),
                 entry_low=float(_entry_low),
