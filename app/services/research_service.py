@@ -484,6 +484,15 @@ class ResearchService:
             )
             response["aborted_reason"] = "insufficient_source_depth"
             response["executive_summary"] = depth_reason
+            # The builder's default text blames an API incident — here no
+            # agents ran at all; the cause is thin source coverage.
+            response["detailed_report"] = (
+                f"Analysis for {state.ticker} aborted before Phase 1: {depth_reason}. "
+                "No sensor agents were dispatched — the ticker lacks enough "
+                "company-specific coverage (Seeking Alpha items / news articles) "
+                "for a reliable council decision."
+            )
+            response["reasoning"] = response["detailed_report"]
             return response
 
         # --- Phase 1: The Agents (Sensors) ---
