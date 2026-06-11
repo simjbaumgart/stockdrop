@@ -2239,8 +2239,9 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
                 temperature=0.7,
                 # Thinking tokens count against the output cap on Gemini 3;
                 # the default repeatedly truncated PM JSON mid-string
-                # (NXT, NIO, AAOI). 16384 leaves headroom for thinking + JSON.
-                max_output_tokens=16384,
+                # (NXT, NIO, AAOI). 30k leaves ample headroom for thinking +
+                # JSON — watch the MAX_TOKENS warning below after deploys.
+                max_output_tokens=30000,
                 # Use GenAI's typed config for HTTP options (timeout is in millis if integer on some SDK versions, but 600 ensures a long enough wait in any unit)
                 http_options=new_types.HttpOptions(timeout=600000)
             )
