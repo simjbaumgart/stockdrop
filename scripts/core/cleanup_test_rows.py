@@ -33,6 +33,7 @@ def main() -> int:
     rows = cur.execute(SELECT_SQL).fetchall()
     if not rows:
         print("No test rows found — nothing to do.")
+        conn.close()
         return 0
     print(f"{'DELETING' if args.execute else 'WOULD DELETE'} {len(rows)} rows:")
     for r in rows:
@@ -41,7 +42,7 @@ def main() -> int:
     if args.execute:
         ph = ",".join("?" * len(ids))
         # children first (FK decision_id), then parents
-        for table in ("decision_tracking", "agent_token_usage"):
+        for table in ("decision_tracking", "agent_token_usage", "dr_comparison"):
             try:
                 cur.execute(f"DELETE FROM {table} WHERE decision_id IN ({ph})", ids)
                 print(f"  deleted {cur.rowcount} child rows from {table}")
