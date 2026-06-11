@@ -469,6 +469,23 @@ class ResearchService:
         # Ensure it's formatted as a string with sign if needed, or absolute
         drop_str = f"{drop_percent:.2f}%"
 
+        # --- Source-Depth Gate (pre-Phase 1) ---
+        # SA/news counts are known before any agent dispatch
+        # (stock_service populates seeking_alpha_local_counts) — abort thin
+        # tickers HERE instead of burning a 5-agent council first
+        # (ORCL/PD 2026-06-11 burned full Phase 1 before the old gate fired).
+        depth_aborted, depth_reason = self._source_depth_insufficient(raw_data)
+        if depth_aborted:
+            msg = f"[ABORT] Source-depth gate failed for {state.ticker}: {depth_reason}"
+            print(f"\n{'=' * 50}\n  {msg}\n{'=' * 50}\n")
+            logger.error(msg)
+            response = self._build_insufficient_data_response(
+                state, failed_agents=["source_depth"], real_count=0
+            )
+            response["aborted_reason"] = "insufficient_source_depth"
+            response["executive_summary"] = depth_reason
+            return response
+
         # --- Phase 1: The Agents (Sensors) ---
         print("  > Phase 1: Running Agent Council (Technical, News, Sentiment, Competitive) in Parallel...")
         
@@ -729,22 +746,6 @@ class ResearchService:
             print(f"\n{'=' * 50}\n  {msg}\n{'=' * 50}\n")
             logger.error(msg)
             return self._build_insufficient_data_response(state, failed_agents, real_count)
-
-        # --- Phase 1 Source-Depth Gate ---
-        # Catches thin-coverage tickers where all 5 agents passed the liveness
-        # check by summarizing a Wall Street Breakfast headline (FJIKY 2026-05-14:
-        # SA 0/0/0, total news = 7, yet 5/5 agents returned text).
-        depth_aborted, depth_reason = self._source_depth_insufficient(raw_data)
-        if depth_aborted:
-            msg = f"[ABORT] Phase 1 source-depth gate failed for {state.ticker}: {depth_reason}"
-            print(f"\n{'=' * 50}\n  {msg}\n{'=' * 50}\n")
-            logger.error(msg)
-            response = self._build_insufficient_data_response(
-                state, failed_agents=["source_depth"], real_count=real_count
-            )
-            response["aborted_reason"] = "insufficient_source_depth"
-            response["executive_summary"] = depth_reason
-            return response
 
         # --- Phase 2: Bull & Bear Perspectives (Brain) ---
         self._run_bull_bear_perspectives(state, drop_str)

@@ -8,6 +8,18 @@ from app.services.tv_exchange_resolver import (
     TA_UNAVAILABLE_SENTINEL,
 )
 
+
+def exclude_non_common_tickers(movers: List[Dict]) -> List[Dict]:
+    """Drop preferred shares / warrants (TradingView notation contains '/',
+    e.g. ORCL/PD). They share the common stock's news flow but have their own
+    price series — analyzing them burns a full council for an untradable row."""
+    kept = [m for m in movers if "/" not in (m.get("symbol") or "")]
+    skipped = len(movers) - len(kept)
+    if skipped:
+        print(f"  > Screener: skipped {skipped} preferred/warrant ticker(s) (symbol contains '/').")
+    return kept
+
+
 class TradingViewService:
     def __init__(self):
         pass
@@ -161,6 +173,8 @@ class TradingViewService:
                     all_movers.extend(movers)
                 except Exception as e:
                     print(f"Error processing market config for {config['region']}: {e}")
+
+        all_movers = exclude_non_common_tickers(all_movers)
 
         # Deduplicate by symbol (just in case) and sort
         # Use a dict to deduplicate
