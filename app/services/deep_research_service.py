@@ -109,6 +109,38 @@ def normalize_verification_results(raw):
     return out
 
 
+_GROUNDING_REDIRECT_PREFIX = "https://vertexaisearch.cloud.google.com/grounding-api-redirect/"
+
+
+def resolve_redirect_urls(entries, timeout: int = 8, max_lookups: int = 12):
+    """Replace Vertex grounding-redirect source URLs with their resolved
+    destination (review v0.8.2-288 #5: redirects expire and are unauditable).
+
+    Bounded: at most `max_lookups` HTTP round-trips, `timeout`s each, so a
+    redirect-heavy result can't stall the DR worker thread. Failures keep the
+    original URL. The redirect is preserved in `grounding_redirect` for audit.
+    """
+    out = []
+    budget = max_lookups
+    for entry in entries or []:
+        if not isinstance(entry, dict):
+            out.append(entry)
+            continue
+        url = (entry.get("source_url") or "").strip()
+        if url.startswith(_GROUNDING_REDIRECT_PREFIX) and budget > 0:
+            budget -= 1
+            try:
+                resp = requests.get(url, allow_redirects=True, timeout=timeout, stream=True)
+                final_url = resp.url
+                resp.close()
+                if final_url and final_url != url:
+                    entry = {**entry, "source_url": final_url, "grounding_redirect": url}
+            except requests.RequestException as e:
+                logger.warning("[Deep Research] Could not resolve grounding redirect: %s", e)
+        out.append(entry)
+    return out
+
+
 def score_verification_penalty(normalized_entries) -> int:
     """-5 per grounded DISPUTED claim. UNVERIFIED entries earn nothing."""
     return -5 * sum(
@@ -656,7 +688,9 @@ class DeepResearchService:
         # Dispute penalty (grounded only): -5 per DISPUTED claim with a valid
         # source URL. Hallucinated disputes (missing/invalid URL) are demoted
         # to UNVERIFIED upstream and earn no score adjustment.
-        normalized = normalize_verification_results(result.get("verification_results", []))
+        normalized = resolve_redirect_urls(
+            normalize_verification_results(result.get("verification_results", []))
+        )
         result["verification_results"] = normalized  # persist normalized form for DB & logs
         score += score_verification_penalty(normalized)
 
