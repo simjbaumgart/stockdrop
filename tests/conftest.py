@@ -34,3 +34,25 @@ def temp_db(monkeypatch):
     conn.close()
     yield path, decision_id
     os.unlink(path)
+
+
+@pytest.fixture(autouse=True)
+def _no_production_db(monkeypatch, tmp_path):
+    """Safety net (v0.8.2-288 review #1): no test may touch subscribers.db.
+
+    If the running test's module didn't already redirect app.database to its
+    own test DB, point both the module attr and the DB_PATH env var (read at
+    call time by deep_research_service) at a throwaway per-test file.
+    monkeypatch auto-restores after each test, so cross-module leakage from
+    import-time DB_NAME assignments can no longer land on production.
+    """
+    import app.database as db
+
+    current = os.path.basename(str(db.DB_NAME))
+    if current == "subscribers.db":
+        guard_db = str(tmp_path / "guard.db")
+        monkeypatch.setattr(db, "DB_NAME", guard_db)
+        monkeypatch.setenv("DB_PATH", guard_db)
+    elif os.getenv("DB_PATH", "subscribers.db") == "subscribers.db":
+        # Module redirected DB_NAME but not the env var — align them.
+        monkeypatch.setenv("DB_PATH", str(db.DB_NAME))

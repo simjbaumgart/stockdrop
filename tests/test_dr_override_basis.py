@@ -11,6 +11,9 @@ overrides added +10.9 pts. These tests pin the new behavior:
 import os
 import sys
 
+# KEEP this import-time redirect: importing deep_research_service below runs
+# the singleton's batch-winner sync, which WRITES to the DB at import time —
+# before the conftest autouse guard can intervene.
 TEST_DB = "test_dr_override_basis.db"
 os.environ["DB_PATH"] = TEST_DB
 

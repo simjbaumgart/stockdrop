@@ -8,13 +8,7 @@ Research (the NAMED_EVENT re-upgrade path).
 import os
 import sys
 
-TEST_DB = "test_gate_persistence.db"
-os.environ["DB_PATH"] = TEST_DB
-
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-
-import app.database
-app.database.DB_NAME = TEST_DB
 
 import pytest
 
@@ -22,13 +16,10 @@ from app.database import init_db, add_decision_point, update_decision_point, get
 
 
 @pytest.fixture()
-def fresh_db():
-    if os.path.exists(TEST_DB):
-        os.remove(TEST_DB)
-    init_db()
+def fresh_db(_no_production_db):
+    from app.database import init_db
+    init_db()  # runs against the guard's per-test tmp DB
     yield
-    if os.path.exists(TEST_DB):
-        os.remove(TEST_DB)
 
 
 def test_gate_fields_round_trip(fresh_db):
