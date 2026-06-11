@@ -111,6 +111,10 @@ def normalize_verification_results(raw):
 
 _GROUNDING_REDIRECT_PREFIX = "https://vertexaisearch.cloud.google.com/grounding-api-redirect/"
 
+# Mirrors research_service._PARSER_FAILURE_DIR (importing it would be circular:
+# research_service already imports this module).
+_PARSER_FAILURE_DIR = os.path.join("data", "parser_failures")
+
 
 def resolve_redirect_urls(entries, timeout: int = 8, max_lookups: int = 12):
     """Replace Vertex grounding-redirect source URLs with their resolved
@@ -2206,9 +2210,9 @@ REPORT CONTENT:
             # output so the failure mode (truncation vs markdown vs prose) is
             # diagnosable instead of guessing from the repaired JSON.
             try:
-                os.makedirs(os.path.join("data", "parser_failures"), exist_ok=True)
+                os.makedirs(_PARSER_FAILURE_DIR, exist_ok=True)
                 _dump = os.path.join(
-                    "data", "parser_failures",
+                    _PARSER_FAILURE_DIR,
                     f"dr_raw_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.txt",
                 )
                 with open(_dump, "w") as _f:

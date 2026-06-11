@@ -198,3 +198,13 @@ def test_gate6_does_not_touch_buy_limit():
     r = apply_decision_gates("BUY_LIMIT", "SECTOR_ROTATION", "HIGH", None,
                              news_drop_reason_confirmed=False)
     assert r.gates_fired == []
+
+
+def test_gate5_and_gate6_cofire_yields_watch():
+    # Bearish news, no catalyst, unconfirmed drop: Gate 5 targets WATCH and
+    # Gate 6 targets BUY_LIMIT — most restrictive wins, both recorded.
+    r = apply_decision_gates("BUY", "SECTOR_ROTATION", "HIGH", None,
+                             news_sentiment="BEARISH", news_named_catalyst=None,
+                             news_drop_reason_confirmed=False)
+    assert r.final_action == "WATCH"
+    assert r.gates_fired == ["NEWS_SENTIMENT_GATE", "UNCONFIRMED_DROP_GATE"]
