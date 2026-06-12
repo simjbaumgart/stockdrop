@@ -449,6 +449,7 @@ class ResearchService:
             date=datetime.now().strftime("%Y-%m-%d"),
             gatekeeper_tier=raw_data.get("gatekeeper_tier"),
             earnings_facts=raw_data.get("earnings_facts"),
+            dividend_facts=raw_data.get("dividend_facts"),
             volatility_regime=gatekeeper_service.check_market_regime(),
             decision_id=decision_id,
         )
@@ -1774,7 +1775,50 @@ At the very end of your response, append exactly this block (raw JSON on one lin
                 "the values above are the ground truth."
             )
         else:
-            earnings_block = "\nEARNINGS_FACTS: (no recent reported quarter available — drop is not earnings-driven, or facts unavailable)"
+            earnings_block = (
+                "\nEARNINGS_FACTS: (no canonical earnings data available from Finnhub — "
+                "common for ADRs/foreign listings, or the drop is not earnings-driven).\n"
+                "RULE: Because no verified EPS figure exists, you MUST NOT cite any specific "
+                "EPS number, revenue figure, or surprise percentage in your reasoning or "
+                "key_factors. News articles may report figures in a foreign currency (e.g. PEN, "
+                "KRW) or quote stale/unverified consensus numbers. You may describe earnings only "
+                "QUALITATIVELY (e.g. 'beat expectations per press reports', 'reported a revenue "
+                "decline'). Do not invent or repeat exact financial figures."
+            )
+
+        df = getattr(state, "dividend_facts", None) or {}
+        if df and df.get("ex_dividend_date"):
+            ex_date = df["ex_dividend_date"]
+            today = state.date
+            pay_str = df.get("pay_date") or "unknown"
+            amount_str = (
+                f"${df['amount']:.2f}" if df.get("amount") is not None else "unknown"
+            )
+            # ISO 'YYYY-MM-DD' strings compare lexically in chronological order.
+            # A buyer is only entitled to the dividend if they buy BEFORE the
+            # ex-date, so today >= ex_date means any capture thesis is invalid.
+            if today >= ex_date:
+                capture_rule = (
+                    f"TODAY ({today}) IS PAST THE EX-DIVIDEND DATE ({ex_date}). "
+                    "Any 'buy now to capture the dividend' argument is INVALID — a "
+                    "buyer today is NOT entitled to this dividend. Reject any "
+                    "dividend-capture thesis in the bull case."
+                )
+            else:
+                capture_rule = (
+                    f"Today ({today}) is before the ex-dividend date ({ex_date}); a "
+                    "buyer before the ex-date would be entitled to this dividend."
+                )
+            dividend_block = (
+                "\nDIVIDEND_FACTS (canonical, from Yahoo Finance — ground truth for "
+                "any dividend reasoning):\n"
+                f"- Ex-dividend date: {ex_date}\n"
+                f"- Pay date: {pay_str}\n"
+                f"- Amount per share: {amount_str}\n"
+                f"- {capture_rule}\n"
+            )
+        else:
+            dividend_block = ""
 
         return f"""
 You are the **Portfolio Manager**. You have the final vote.
@@ -1796,6 +1840,7 @@ RISK FACTORS (For Consideration):
 - **RISK AGENT ASSESSMENT**:
 {risk_report}
 {earnings_block}
+{dividend_block}
 
 BULL CASE:
 {bull_report}
