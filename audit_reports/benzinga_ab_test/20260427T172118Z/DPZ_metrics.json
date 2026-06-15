@@ -1,0 +1,54 @@
+{
+  "ticker": "DPZ",
+  "counts": {
+    "with_total": 30,
+    "without_total": 30,
+    "benzinga_items": 15,
+    "with_chars": 35537,
+    "without_chars": 7738,
+    "char_delta": 27799
+  },
+  "providers_with": {
+    "Finnhub": 11,
+    "Yahoo Finance": 4,
+    "Benzinga/Massive": 10,
+    "Market News (Benzinga)": 5
+  },
+  "providers_without": {
+    "Finnhub": 25,
+    "Yahoo Finance": 5
+  },
+  "headlines_only_in_with": [
+    "$4 Gas Is Draining American Wallets: Here's Why Pizza Stocks Could Actually Gain",
+    "3 Absurdly Cheap Stocks to Buy With $1,000 While the Market Is This Nervous",
+    "AI-Driven Fear Slashed Toast Stock by 43%, Even as Free Cash Flow Hit Records",
+    "Domino's Hit By Budget-Conscious Diners, Shares Tumble",
+    "Is DPC Dash Pullback A Buying Opportunity?",
+    "McDonald's or Domino's: One of These Is a Screaming Buy Right Now",
+    "S&P 500 Holds Near Highs Despite Oil Shock and Weak Breadth Data",
+    "S&P 500 Near Highs as Earnings and Fed Outlook Limit Further Gains",
+    "Stock Market Today: Dow Futures Fall, S&P 500 Gains As Trump Halts Iran Talks\u2014 Organon, SAP, Cheetah Net Supply Chain Service In Focus (UPDATED)",
+    "The Mistakes I Keep Seeing ETF Investors Make With \"Set It and Forget It\" Funds",
+    "The S&P 500's Next Shock May Come From Another Country \u2014 And It's Not Iran",
+    "This \u2019Safe\u2019 Retirement Strategy Is Costly and This 10% Dividend Crushes It",
+    "Wall Street Says 'Sell In May And Go Away': History Says Otherwise",
+    "Warren Buffett Spent $3.5 Billion on 5 Stocks in His Last Quarter as Berkshire Hathaway CEO. Here's the Best of the Bunch."
+  ],
+  "headlines_only_in_without": [
+    "Domino's (NASDAQ:DPZ) Misses Q1 CY2026 Sales Expectations",
+    "Domino's Pizza (DPZ) Lags Q1 Earnings and Revenue Estimates",
+    "Domino's Pizza Q1 2026 earnings miss sales estimates",
+    "Domino's Pizza, Inc. (DPZ) Q1 2026 Earnings Call Transcript",
+    "Domino's Pizza\u00ae Announces First Quarter 2026 Financial Results",
+    "Domino's stock falls after Q1 earnings, sales growth miss expectations",
+    "Domino\u2019s Pizza Inc (NASDAQ:DPZ) Slides After Q1 Miss on Revenue and EPS",
+    "Domino\u2019s Pizza stock falls premarket as quarterly results miss estimates",
+    "Domino\u2019s same-store sales hit a speed bump \u2014 but execs aren\u2019t worried",
+    "Stocks Mostly Down Pre-Bell as Iran Reportedly Offers New Proposal to Open Strait of Hormuz",
+    "These Stocks Are Today\u2019s Movers: Qualcomm, Apple, Intel, Adidas, and More",
+    "Transcript : Domino's Pizza, Inc., Q1 2026 Earnings Call, Apr 27, 2026",
+    "US Equity Futures Fall Pre-Bell as Middle East Peace Talks Remain Stalled, Iran Reportedly Floats New Peace Offer",
+    "Wall Street Lunch: OpenAI Loosens Exclusivity In Revised Microsoft Pact"
+  ],
+  "benzinga_items_with_full_content": 15
+}

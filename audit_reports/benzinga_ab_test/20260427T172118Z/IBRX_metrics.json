@@ -1,0 +1,48 @@
+{
+  "ticker": "IBRX",
+  "counts": {
+    "with_total": 30,
+    "without_total": 25,
+    "benzinga_items": 15,
+    "with_chars": 28302,
+    "without_chars": 9176,
+    "char_delta": 19126
+  },
+  "providers_with": {
+    "Yahoo Finance": 4,
+    "Market News (Benzinga)": 5,
+    "Finnhub": 11,
+    "Benzinga/Massive": 10
+  },
+  "providers_without": {
+    "Yahoo Finance": 10,
+    "Finnhub": 15
+  },
+  "headlines_only_in_with": [
+    "Bronstein, Gewirtz & Grossman LLC Urges ImmunityBio, Inc. Investors to Act: Class Action Filed Alleging Investor Harm",
+    "IBRX INVESTOR ALERT: Robbins Geller Rudman & Dowd LLP Announces that ImmunityBio, Inc. Investors with Substantial Losses Have Opportunity to Lead Securities Class Action Lawsuit",
+    "IBRX Investor Alert: ImmunityBio Securities Fraud Lawsuit - Investors With Losses May Seek to Lead the Class Action After Chairman Allegedly Misled on Drug Efficacy: Levi & Korsinsky",
+    "IBRX SHAREHOLDER UPDATE: ImmunityBio (IBRX) Sued After FDA Flags Misleading Cancer Claims, Shares Plunge 21%, $2B Market Cap Lost -- Hagens Berman",
+    "ImmunityBio, Inc. (IBRX) Securities Fraud Class Action Lawsuit Filed; May 26, 2026, Lead Plaintiff Deadline",
+    "ImmunityBio, Inc. Securities Fraud Class Action Result of FDA Warning and 21% Stock Decline - Investors may Contact Lewis Kahn, Esq, at Kahn Swick & Foti, LLC",
+    "ROSEN, THE FIRST FILING FIRM, Encourages ImmunityBio, Inc. Investors with Losses in Excess of $100K to Secure Counsel Before Important Deadline in Securities Class Action First Filed by the Firm - IBRX",
+    "Soleno Therapeutics, Inc. Notice of May 5, 2026 Application Deadline for Class Action Lawsuit - Contact Lewis Kahn, Esq. at Kahn Swick & Foti, LLC, Before Application Deadline",
+    "Stock Market Today: Dow Futures Fall, S&P 500 Gains As Trump Halts Iran Talks\u2014 Organon, SAP, Cheetah Net Supply Chain Service In Focus (UPDATED)",
+    "The Mistakes I Keep Seeing ETF Investors Make With \"Set It and Forget It\" Funds",
+    "The S&P 500's Next Shock May Come From Another Country \u2014 And It's Not Iran",
+    "This \u2019Safe\u2019 Retirement Strategy Is Costly and This 10% Dividend Crushes It",
+    "Wall Street Says 'Sell In May And Go Away': History Says Otherwise"
+  ],
+  "headlines_only_in_without": [
+    "Assessing ImmunityBio (IBRX) Valuation After ANKTIVA Driven Q1 2026 Revenue Update",
+    "IBRX Responds to FDA Warning Over Misleading Cancer Drug Claims",
+    "IBRX Stock Rises 7% on Strong Q1 2026 Preliminary Results",
+    "IBRX UPCOMING DEADLINE: Faruqi & Faruqi, LLP Reminds ImmunityBio (IBRX) Investors of Securities Class Action Deadline on May 26, 2026",
+    "INVESTOR DEADLINE: ImmunityBio, Inc. (IBRX) Investors with Substantial Losses Have Opportunity to Lead Investor Class Action Lawsuit",
+    "ImmunityBio (IBRX) Global Expansion Bolsters 266% Jump This Year",
+    "ImmunityBio Announces ANKTIVA\u00ae Is Now Available in Saudi Arabia for Bladder and Lung Cancer Patients; Market Entry Achieved Within Two Months of MENA Partnership",
+    "ImmunityBio, Inc. (IBRX) Posts Strong Preliminary Q1 Sales on ANKTIVA Momentum",
+    "Is ImmunityBio\u2019s (IBRX) FDA Promotion Setback Reframing the Stock\u2019s Risk and Credibility Narrative?"
+  ],
+  "benzinga_items_with_full_content": 15
+}

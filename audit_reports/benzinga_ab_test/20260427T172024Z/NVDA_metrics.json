@@ -1,0 +1,53 @@
+{
+  "ticker": "NVDA",
+  "counts": {
+    "with_total": 30,
+    "without_total": 30,
+    "benzinga_items": 15,
+    "with_chars": 40240,
+    "without_chars": 9665,
+    "char_delta": 30575
+  },
+  "providers_with": {
+    "Yahoo Finance": 5,
+    "Benzinga/Massive": 10,
+    "Finnhub": 10,
+    "Market News (Benzinga)": 5
+  },
+  "providers_without": {
+    "Yahoo Finance": 6,
+    "Finnhub": 24
+  },
+  "headlines_only_in_with": [
+    "1 Major Reason Why Broadcom Still Has More Room to Run",
+    "2 Unstoppable Growth Stocks That Could Soar 20% and 26% in 2026, According to Wall Street Analysts",
+    "Here\u2019s an easy way to expand your AI investment exposure",
+    "Is Marvell Stock a Buy After Alphabet and Nvidia Deals?",
+    "Prediction: Alphabet's New TPUs Are Another Reason to Buy the Stock",
+    "S&P 500 Holds Near Highs Despite Oil Shock and Weak Breadth Data",
+    "S&P 500 Near Highs as Earnings and Fed Outlook Limit Further Gains",
+    "SpaceX's European Rival Eutelsat's CEO Says Company Sees Demand In US Despite Elon Musk's Pushback",
+    "Stock Market Today: Dow Futures Fall, S&P 500 Gains As Trump Halts Iran Talks\u2014 Organon, SAP, Cheetah Net Supply Chain Service In Focus (UPDATED)",
+    "The Mistakes I Keep Seeing ETF Investors Make With \"Set It and Forget It\" Funds",
+    "The S&P 500's Next Shock May Come From Another Country \u2014 And It's Not Iran",
+    "This \u2019Safe\u2019 Retirement Strategy Is Costly and This 10% Dividend Crushes It",
+    "Wall Street Says 'Sell In May And Go Away': History Says Otherwise"
+  ],
+  "headlines_only_in_without": [
+    "1 Reason I'd Buy Home Depot Stock Today and Never Sell",
+    "After 11 years, Northland Capital downgrades AMD",
+    "Arm Stock Just Went Parabolic. Is This a Glimmer of NVIDIA-Like Greatness?",
+    "At $265: How Amazon Stock Is Getting Rerated",
+    "COPLUS Accelerates AIoT Transition: Capturing High-Margin Mobility Markets via NVIDIA Ecosystem",
+    "Have software stocks reached an extreme washout yet?",
+    "Intel Stock Rally Rages On. What UBS Says It Underestimated.",
+    "Jim Cramer Discusses NVIDIA (NVDA) Shares",
+    "Nasdaq Composite Eyes AI Deals, Tech Earnings and Fed but Oil Shock Looms",
+    "Nvidia could be undervalued by at least 30%: BofA analyst on Mag 7",
+    "SoftBank draws Big Tech into massive AI data center project",
+    "Where Will Rocket Lab Stock Be in 10 Years?",
+    "Why Sandisk Stock Popped Again Today",
+    "Will Nvidia's explosive rally end soon?"
+  ],
+  "benzinga_items_with_full_content": 15
+}

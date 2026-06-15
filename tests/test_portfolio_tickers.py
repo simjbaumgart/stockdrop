@@ -48,7 +48,10 @@ def test_reads_real_file():
 
     from pathlib import Path
 
-    root = Path(os.getenv("NEWS_ARCHIVE_ROOT", "/Users/simonbaumgart/Documents/Claude/Projects/Investment Ideas and Portfolio"))
+    root_env = os.getenv("NEWS_ARCHIVE_ROOT")
+    if not root_env:
+        return  # skip silently
+    root = Path(root_env)
     if not (root / "Portfolio_Total_Weights.xlsx").exists():
         return  # skip silently
     result = load_portfolio_tickers()

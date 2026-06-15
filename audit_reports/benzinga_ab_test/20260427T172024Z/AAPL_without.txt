@@ -1,0 +1,91 @@
+--- SOURCE: Finnhub [WIRE] ---
+- 2026-04-27: [WIRE] OpenAI + Qualcomm Tie-Up Signals AI Smartphone Revolution: Should Apple Be Worried? (Yahoo)
+  SUMMARY: Smartphone sales have hovered in a rut for years, with global shipments often flat or down amid longer replacement cycles. Investors wondered whether AI could spark the next big upgrade wave — or if the iPhone’s ecosystem lock would keep Apple (NASDAQ:AAPL) dominant no matter what. Now a fresh report changes the script. According to ... OpenAI + Qualcomm Tie-Up Signals AI Smartphone Revolution: Should Apple Be Worried?
+
+- 2026-04-27: [WIRE] Why Fox Business Network's Charles Payne has owned Apple stock for more than 30 years (Yahoo)
+  SUMMARY: Apple has been a long-term winner for many investors.
+
+- 2026-04-27: [WIRE] Stock Market Today: Dow Firm As Pharma Shines; Google Stock Clears Entry, But Note This (Live Coverage) (Yahoo)
+  SUMMARY: Stock Market Today: The Dow Jones index rose Monday on the latest U.S.-Iran news. Nvidia stock rallied near record highs.
+
+- 2026-04-27: [WIRE] Apple Shares Edge Lower on Report of OpenAI Chip Ambitions (Yahoo)
+  SUMMARY: Apple Inc. (NASDAQ:AAPL) declined 1.
+
+- 2026-04-27: [WIRE] Google, Meta, Microsoft, Amazon, Apple earnings: What to expect (Yahoo)
+  SUMMARY: Alphabet (GOOG, GOOGL), Meta (META), Microsoft (MSFT), Amazon (AMZN), and Apple (AAPL) are all reporting quarterly earnings results this week. D.A. Davidson head of technology research Gil Luria joins Yahoo Finance to discuss his outlook for the results and the questions to which he'll be looking for answers.
+
+- 2026-04-27: [WIRE] Nvidia could be undervalued by at least 30%: BofA analyst on Mag 7 (Yahoo)
+  SUMMARY: While five of the Magnificent Seven companies are releasing earnings results this week — Alphabet (GOOG, GOOGL), Amazon (AMZN), Apple (AAPL), Meta Platforms (META), and Microsoft (MSFT) — the last one to report this earnings season is chipmaker Nvidia (NVDA) on May 20. BofA Securities senior semiconductor analyst Vivek Arya comes on Market Catalysts to share how much he believes Nvidia to be undervalued. Nvidia's market cap crossed back above $5 trillion last week.
+
+- 2026-04-27: [WIRE] Week ahead: Big Tech earnings, Fed decision, and an oil crisis set up Wall Street's biggest test of the year (Yahoo)
+  SUMMARY: Wall Street heads into one of the most consequential weeks of the year with a full plate: a historic wave of corporate earnings, a pivotal Federal Reserve meeting, and an unresolved geopolitical standoff in the Middle East all arriving at once. Some 180 S&P 500 companies are scheduled to...
+
+- 2026-04-27: [WIRE] Apple, Google crushed California bill that helped smaller rivals (Yahoo)
+  SUMMARY: (Bloomberg) -- Some of the world’s largest technology companies swiftly quashed a California legislative measure that pitted giants like Apple Inc. and Google against smaller rivals, a display of their immense political influence in their home state. Most Read from BloombergThe Billion-Barrel Hormuz Oil Shock Is About to Crash DemandSergey Brin Confronted Gavin Newsom at a Treehouse Party — Then Launched a Political WarIran Offers Deal to US to Reopen Strait and Delay Nuclear Talks, Axios SaysGu
+
+- 2026-04-27: [WIRE] Amazon's 2026 CapEx spend: What Polymarket is predicting (Yahoo)
+  SUMMARY: With "Magnificent Seven" (MAGS) earnings on deck this week, Yahoo Finance Senior Reporter Brooke DiPalma takes a look at what prediction markets are forecasting for Amazon's (AMZN) 2026 capital expenditures (CapEx) spending.  For more predictions market insight, check out the new Yahoo Finance Polymarket Hub.
+
+- 2026-04-27: [WIRE] VIX Fear Rising Toward 20 on Tech Earnings, Capex Risk, War Uncertainty (Yahoo)
+  SUMMARY: The CBOE Volatility Index (^VIX) is back on the move. The VIX climbed about 2% in early Monday trading, pushing back above 19 with the 20 threshold in view as traders position for the busiest stretch of first-quarter earnings season. The catalyst is concentrated risk: nearly half the Russell 1000 reports this week, including five ... VIX Fear Rising Toward 20 on Tech Earnings, Capex Risk, War Uncertainty
+
+- 2026-04-27: [WIRE] Embree Financial Purchased Shares Worth $13.1 Million in iShares' CORO. Is This ETF a Buy? (Yahoo)
+  SUMMARY: Specializing in active country rotation, this ETF targets international equity exposure for investors seeking dynamic portfolio strategies.
+
+- 2026-04-27: [WIRE] Jim Cramer’s Still a Believer in Apple (AAPL) (Yahoo)
+  SUMMARY: We have recently published Jim Cramer Discussed AI Circular Deals, Top Quantum Plays & These 22 Stocks. Apple Inc. (NASDAQ:AAPL) is one of the stocks discussed by Jim Cramer. Consumer electronics giant Apple Inc. (NASDAQ:AAPL)’s shares are up by 29.5% over the past year and flat year-to-date. Cramer is one of the strongest proponents of […]
+
+- 2026-04-27: [WIRE] Nasdaq Composite Eyes AI Deals, Tech Earnings and Fed but Oil Shock Looms (Yahoo)
+  SUMMARY: The Nasdaq Composite (^IXIC) heads into Monday’s open at record territory but is kicking off the week on a cautious note, down 0.18% at the open. Mideast peace talks have slowed, and the oil price is back in $100/barrel territory. As a result, investors are returning to the sidelines amid a bevy of events including ... Nasdaq Composite Eyes AI Deals, Tech Earnings and Fed but Oil Shock Looms
+
+- 2026-04-27: [WIRE] Stocks Are Wavering to Kick Off a Busy Week (Yahoo)
+  SUMMARY: Stocks wavered on Monday to kick off the most packed week in months on Wall Street’s calendar.  “Despite bouts of volatility, for most of this month the showdown between geopolitical uncertainty and enthusiasm over AI-driven earnings growth has been a one-sided battle,” writes Chris Larkin, managing director, trading and investing at E*TRADE from Morgan Stanley.  “This week could show whether the bulls’ enthusiasm has been misplaced,” writes Larkin.
+
+- 2026-04-27: [WIRE] Apple Is a Loser From a New OpenAI Phone. This Stock Is a Winner. (Yahoo)
+  SUMMARY: Qualcomm stock was surging while Apple was slipping on a report about OpenAI's smartphone plans.
+
+- 2026-04-27: [WIRE] Intel Stock Rally Rages On. What UBS Says It Underestimated. (Yahoo)
+  SUMMARY: STOCKSTOWATCHTODAY BLOG   Intel was rising Monday as it built upon its huge rally from the previous week. Everything looks to be going great for the chip company but UBS analysts are skeptical of further gains.
+
+- 2026-04-27: [WIRE] S&P 500 Holding Pattern: Mag 7 Earnings Collide With Oil Surge and Fed Fears (Yahoo)
+  SUMMARY: Stocks opened in a holding pattern, with the S&P 500 (^GSPC) heading into the trading session fractionally lower after rising to all-time highs last week. Three forces pull in opposite directions: the heaviest tech earnings week of the quarter, a fresh jump in oil after Iran peace talks stalled, and a Federal Reserve meeting within ... S&P 500 Holding Pattern: Mag 7 Earnings Collide With Oil Surge and Fed Fears
+
+- 2026-04-27: [WIRE] Wall Street's Insights Into Key Metrics Ahead of Apple (AAPL) Q2 Earnings (Yahoo)
+  SUMMARY: Looking beyond Wall Street's top-and-bottom-line estimate forecasts for Apple (AAPL), delve into some of its key metrics to gain a deeper insight into the company's potential performance for the quarter ended March 2026.
+
+- 2026-04-27: [WIRE] Is Tim Cook’s departure a canary in the coal mine for tech stocks? (Yahoo)
+  SUMMARY: Hello Swampians. Today, I’m pleased to have our veteran technology columnist in San Francisco, Richard Waters, here with me to parse the decision...
+
+- 2026-04-27: [WIRE] Stock Market Today: Dow Sinks On Iran News; Nvidia Rallies Near Record Highs (Live Coverage) (Yahoo)
+  SUMMARY: Stock Market Today: The Dow Jones index fell Monday on the latest U.S.-Iran news. Nvidia stock rallied near record highs.
+
+- 2026-04-27: [WIRE] US Equity Futures Fall Pre-Bell as Middle East Peace Talks Remain Stalled, Iran Reportedly Floats New Peace Offer (Yahoo)
+  SUMMARY: US equity futures were marginally lower pre-bell Monday amid reports of Iran's new proposal to reope
+
+- 2026-04-27: [WIRE] Zacks Investment Ideas feature highlights: Spotify, Apple, Amazon and Alphabet (Yahoo)
+  SUMMARY: Spotify stock drops 33% from highs but strong user growth, rising profits, and pricing power position it as a compelling buy ahead of earnings.
+
+- 2026-04-27: [WIRE] Fed Rate Decision, Verizon, Coca-Cola, Apple, Meta, Exxon, and Much More to Watch This Week (Yahoo)
+  SUMMARY: This week brings what could be Jerome Powell’s final presser as Fed chair, and we’ll also see PCE inflation data. Plus, it’s a huge week for earnings, with about a third of S&P 500 companies reporting.
+
+- 2026-04-27: [WIRE] Amazon, Alphabet, Microsoft, Meta and Apple  are part of Zacks Earnings Preview (Yahoo)
+  SUMMARY: Alphabet leads Mag 7 into key earnings week as investors watch cloud, search growth and AI spending signals amid strong stock momentum.
+
+--- SOURCE: Yahoo Finance [ANALYST] ---
+- 2026-04-27: [ANALYST] Stock Market Today, April 27: Rally Stalls at Midday as Iran Talks Falter (Motley Fool)
+  SUMMARY: The lack of hoped-for U.S.-Iran peace talks and surging oil kept U.S. stocks choppy, today, April 27, 2026.
+
+- 2026-04-27: [WIRE] Stock Market Today: Dow Dips While Intel Gains; Google Stock Clears Entry, But Note This (Live Coverage) (Investor's Business Daily)
+  SUMMARY: The Dow Jones index falls Monday. Intel rises but chip stocks lag. Google parent Alphabet clears an entry on the stock market today.
+
+- 2026-04-27: [ANALYST] Tim Cook Is Stepping Down. Is Apple's Stock in Trouble? (Motley Fool)
+  SUMMARY: John Ternus will become Apple's new CEO as of Sept. 1.
+
+- 2026-04-27: [WIRE] Nvidia Adding To $5 Trillion Market Cap With Big Tech Spending In Focus; Is Nvidia A Buy Now? (Investor's Business Daily)
+  SUMMARY: Nvidia stock is approaching its all-time high above 212 and is a buy zone. Investors await earnings results from key customers.
+
+- 2026-04-27: [WIRE] Apple, Google Crushed California Bill Helping Smaller Rivals (Bloomberg)
+  SUMMARY: (Bloomberg) -- Some of the world’s largest technology companies swiftly quashed a California legislative measure that pitted giants like Apple Inc. and Google against smaller rivals, a display of their immense political influence in their home state. Most Read from BloombergThe Billion-Barrel Hormuz Oil Shock Is About to Crash DemandSergey Brin Confronted Gavin Newsom — Then Launched a Political WarIran Offers Deal to US to Reopen Strait and Delay Nuclear Talks, Axios SaysChina Blocks Meta’s $2
+
+- 2026-04-27: [WIRE] These Stocks Are Today’s Movers: Tesla, Qualcomm, Sandisk, Domino’s Pizza, Micron, Meta, Organon, Avis, and More (Barrons.com)
+  SUMMARY: Qualcomm is trading lower despite a tech supply chain analyst saying OpenAI is working with the chip maker to develop smartphone processors.
