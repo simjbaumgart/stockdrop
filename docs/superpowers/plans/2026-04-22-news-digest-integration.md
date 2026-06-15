@@ -71,7 +71,7 @@ from typing import Dict, List, Optional
 # Default: the user's local folder. Overridable via env so CI/remote deploys
 # can point at their own mirror or a test fixture directory.
 _DEFAULT_ROOT = (
-    "/Users/simonbaumgart/Documents/Claude/Projects/Investment Ideas and Portfolio"
+    "<NEWS_ARCHIVE_ROOT>"
 )
 
 
@@ -217,7 +217,7 @@ Append to `.env.example`:
 ```
 # --- News Digest (FT + Finimize) ---
 # Absolute path to the shared archive root. Default is the user's local folder.
-NEWS_ARCHIVE_ROOT=/Users/simonbaumgart/Documents/Claude/Projects/Investment Ideas and Portfolio
+NEWS_ARCHIVE_ROOT=<NEWS_ARCHIVE_ROOT>
 # Gemini thinking model used by the summarizer. Thinking model gets a cleaner JSON.
 NEWS_DIGEST_MODEL=gemini-3.1-pro-thinking
 # Feature flag. Set to false in environments without archive access.
@@ -246,8 +246,8 @@ Raw files use a strict markdown shape: `## Section` header, `### Title` per arti
 - [ ] **Step 1: Copy fixtures**
 
 ```bash
-cp "/Users/simonbaumgart/Documents/Claude/Projects/Investment Ideas and Portfolio/FT Archive/daily/2026-04-22.md" tests/fixtures/news/ft_2026-04-22.md
-cp "/Users/simonbaumgart/Documents/Claude/Projects/Investment Ideas and Portfolio/Finimize Archive/daily/2026-04-22.md" tests/fixtures/news/finimize_2026-04-22.md
+cp "<NEWS_ARCHIVE_ROOT>/FT Archive/daily/2026-04-22.md" tests/fixtures/news/ft_2026-04-22.md
+cp "<NEWS_ARCHIVE_ROOT>/Finimize Archive/daily/2026-04-22.md" tests/fixtures/news/finimize_2026-04-22.md
 ```
 
 - [ ] **Step 2: Write the failing tests**
@@ -514,7 +514,7 @@ We need `{ticker: sector}` for the summarizer to tag `relevance_to_portfolio`. R
 
 - [ ] **Step 1: Inspect the xlsx shape**
 
-Run: `python -c "import pandas as pd; df = pd.read_excel('/Users/simonbaumgart/Documents/Claude/Projects/Investment Ideas and Portfolio/Portfolio_Total_Weights.xlsx'); print(df.columns.tolist()); print(df.head())"`
+Run: `python -c "import pandas as pd; df = pd.read_excel('<NEWS_ARCHIVE_ROOT>/Portfolio_Total_Weights.xlsx'); print(df.columns.tolist()); print(df.head())"`
 Expected: column names printed. Use the real column names in Step 3 — if the ticker column is called e.g. `Symbol` and sector is `Sector`, use those names below.
 
 - [ ] **Step 2: Write the failing test**

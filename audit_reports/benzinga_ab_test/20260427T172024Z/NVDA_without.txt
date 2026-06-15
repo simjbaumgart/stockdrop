@@ -1,0 +1,91 @@
+--- SOURCE: Finnhub [WIRE] ---
+- 2026-04-27: [WIRE] Cantor Fitzgerald Raises Western Digital Price Target to $500: Is the HDD Squeeze Just Getting Started? (Yahoo)
+  SUMMARY: Western Digital (NASDAQ:WDC) received price target raises from Cantor Fitzgerald to $500 from $420, maintaining an Overweight rating, and Bank of America to $495 from $415, keeping a Buy rating. Both calls rest on a structural HDD supply squeeze that could drive durable pricing power for Western Digital stock. Wall Street is consolidating around one ... Cantor Fitzgerald Raises Western Digital Price Target to $500: Is the HDD Squeeze Just Getting Started?
+
+- 2026-04-27: [WIRE] DeepMind researcher raises $1.1B for Ineffable Intelligence (Yahoo)
+  SUMMARY: The round, led by Sequoia and Lightspeed, values the months-old startup at $5.1 billion — the largest seed round ever in Europe
+
+- 2026-04-27: [WIRE] Northland Downgrades AMD to Market Perform: Is the Chip Rally Running on Fumes? (Yahoo)
+  SUMMARY: Northland Capital Markets analyst Gus Richard downgraded Advanced Micro Devices (NASDAQ:AMD) stock to Market Perform from Outperform on Monday with a $260 price target. The contrarian call lands just days after AMD shares hit a record high on the back of Intel‘s (NASDAQ:INTC) blowout Q1 2026 earnings and the broader semiconductor rally. The analyst downgrade ... Northland Downgrades AMD to Market Perform: Is the Chip Rally Running on Fumes?
+
+- 2026-04-27: [WIRE] Elon Musk Just Delivered Great News for Tesla, but Don't Rush to Buy the Stock (Yahoo)
+  SUMMARY: Despite a series of positive developments, Tesla stock might still be too expensive to buy right now.
+
+- 2026-04-27: [WIRE] Stock Market Today: Dow Firm As Pharma Shines; Google Stock Clears Entry, But Note This (Live Coverage) (Yahoo)
+  SUMMARY: Stock Market Today: The Dow Jones index rose Monday on the latest U.S.-Iran news. Nvidia stock rallied near record highs.
+
+- 2026-04-27: [WIRE] Sequoia and Nvidia Back Ex-DeepMind Researcher’s New AI Startup at $5.1 Billion Value (Yahoo)
+  SUMMARY: (Bloomberg) -- Former Google DeepMind researcher David Silver has raised $1.1 billion for his new company, Ineffable Intelligence, in the latest example of an artificial intelligence startup securing enormous funds out of the gate.Most Read from BloombergThe Billion-Barrel Hormuz Oil Shock Is About to Crash DemandSergey Brin Confronted Gavin Newsom at a Treehouse Party — Then Launched a Political WarIran Offers Deal to US to Reopen Strait and Delay Nuclear Talks, Axios SaysGunman Detained, Trump
+
+- 2026-04-27: [WIRE] Google To Increase Anthropic Investment; OpenAI, Microsoft Shake Up Partnership (Yahoo)
+  SUMMARY: Alphabet plans to invest $10 billion more in Anthropic and possibly up to $40 billion more. Google stock edged up amid the news.
+
+- 2026-04-27: [WIRE] Google, Meta, Microsoft, Amazon, Apple earnings: What to expect (Yahoo)
+  SUMMARY: Alphabet (GOOG, GOOGL), Meta (META), Microsoft (MSFT), Amazon (AMZN), and Apple (AAPL) are all reporting quarterly earnings results this week. D.A. Davidson head of technology research Gil Luria joins Yahoo Finance to discuss his outlook for the results and the questions to which he'll be looking for answers.
+
+- 2026-04-27: [WIRE] Chip Stocks Take A Breather After Historic Run. What's Next For Semiconductor Group? (Yahoo)
+  SUMMARY: The Philadelphia semiconductor index, known as SOX, fell on Monday as chip stocks took a breather after a historic run.
+
+- 2026-04-27: [WIRE] Amazon's Core Businesses Just Keep Getting Stronger -- This Is the Growth Powerhouse I'd Hold Through Any Market Crash (Yahoo)
+  SUMMARY: It's built to weather any storm that comes its way.
+
+- 2026-04-27: [WIRE] Nvidia could be undervalued by at least 30%: BofA analyst on Mag 7 (Yahoo)
+  SUMMARY: While five of the Magnificent Seven companies are releasing earnings results this week — Alphabet (GOOG, GOOGL), Amazon (AMZN), Apple (AAPL), Meta Platforms (META), and Microsoft (MSFT) — the last one to report this earnings season is chipmaker Nvidia (NVDA) on May 20. BofA Securities senior semiconductor analyst Vivek Arya comes on Market Catalysts to share how much he believes Nvidia to be undervalued. Nvidia's market cap crossed back above $5 trillion last week.
+
+- 2026-04-27: [WIRE] Why Sandisk Stock Popped Again Today (Yahoo)
+  SUMMARY: Even if this time isn't different, Sandisk stock could be a bargain.
+
+- 2026-04-27: [WIRE] At $265: How Amazon Stock Is Getting Rerated (Yahoo)
+  SUMMARY: Amazon (AMZN) stock recently crossed its 52-week high to trade near $265, posting a 16% year-to-date gain. At that level, the 34x forward multiple leads many retail investors to conclude the stock has become expensive, typically by comparing it to its four-year historical forward average of roughly 29x. That comparison is the wrong benchmark for where Amazon stands today. The premium to its historical average is not a warning sign but a re-rating, as the market correctly prices in Amazon Web Ser
+
+- 2026-04-27: [WIRE] Jim Cramer Discusses NVIDIA (NVDA) Shares (Yahoo)
+  SUMMARY: We have recently published Jim Cramer Discussed AI Circular Deals, Top Quantum Plays & These 22 Stocks. NVIDIA Corporation (NASDAQ:NVDA) is one of the stocks discussed by Jim Cramer. AI chip giant NVIDIA Corporation (NASDAQ:NVDA)’s shares have performed well over the past month, as they are up by 16.5%. During this period, Cramer has wondered […]
+
+- 2026-04-27: [WIRE] Have software stocks reached an extreme washout yet? (Yahoo)
+  SUMMARY: Continue to proceed with caution on battered software stocks.
+
+- 2026-04-27: [WIRE] 1 Reason I'd Buy Home Depot Stock Today and Never Sell (Yahoo)
+  SUMMARY: A great dividend makes it a great forever stock.
+
+- 2026-04-27: [WIRE] Where Will Rocket Lab Stock Be in 10 Years? (Yahoo)
+  SUMMARY: With great risk comes great potential rewards.
+
+- 2026-04-27: [WIRE] Nasdaq Composite Eyes AI Deals, Tech Earnings and Fed but Oil Shock Looms (Yahoo)
+  SUMMARY: The Nasdaq Composite (^IXIC) heads into Monday’s open at record territory but is kicking off the week on a cautious note, down 0.18% at the open. Mideast peace talks have slowed, and the oil price is back in $100/barrel territory. As a result, investors are returning to the sidelines amid a bevy of events including ... Nasdaq Composite Eyes AI Deals, Tech Earnings and Fed but Oil Shock Looms
+
+- 2026-04-27: [WIRE] Will Nvidia's explosive rally end soon? (Yahoo)
+  SUMMARY: JPMorgan has a warning for Nvidia fans.
+
+- 2026-04-27: [WIRE] COPLUS Accelerates AIoT Transition: Capturing High-Margin Mobility Markets via NVIDIA Ecosystem (Yahoo)
+  SUMMARY: COPLUS (2254.TW), a global leader in custom performance lighting holding over 1,000 patents, recently announced its strategic integration into the NVIDIA Developer Program. This milestone marks COPLUS's evolution from a hardware manufacturer into a high-growth AIoT Mobility Tech pioneer, strategically positioned to capture the rapidly expanding smart-vehicle infrastructure market.
+
+- 2026-04-27: [WIRE] Intel Stock Rally Rages On. What UBS Says It Underestimated. (Yahoo)
+  SUMMARY: STOCKSTOWATCHTODAY BLOG   Intel was rising Monday as it built upon its huge rally from the previous week. Everything looks to be going great for the chip company but UBS analysts are skeptical of further gains.
+
+- 2026-04-27: [WIRE] After 11 years, Northland Capital downgrades AMD (Yahoo)
+  SUMMARY: Investing.com -- Northland Capital Markets has downgraded Advanced Micro Devices to Market Perform after more than a decade of bullish coverage, setting a price target of $260 and warning that consensus estimates for 2027 are too optimistic.
+
+- 2026-04-27: [WIRE] Arm Stock Just Went Parabolic. Is This a Glimmer of NVIDIA-Like Greatness? (Yahoo)
+  SUMMARY: Arm Holdings (NASDAQ:ARM) just went parabolic, and momentum investors seem way too willing to chase down what could be one of the next big stories in the semi scene. Just when you thought the enthusiasm was priced into shares of Arm, the name went on to gain another 15% last Friday. And while it’s really ... Arm Stock Just Went Parabolic. Is This a Glimmer of NVIDIA-Like Greatness?
+
+- 2026-04-27: [WIRE] SoftBank draws Big Tech into massive AI data center project (Yahoo)
+  SUMMARY: Big Tech eyes huge data center deal
+
+--- SOURCE: Yahoo Finance [ANALYST] ---
+- 2026-04-27: [ANALYST] Goldman Sachs Predicts $100 Oil Through the End of 2026 if Flows Don't Normalize Soon. Here's What That Means for Oil Stocks. (Motley Fool)
+  SUMMARY: Oil prices are increasingly likely to stay higher for longer.
+
+- 2026-04-27: [ANALYST] The First 5 Quantum Computing Stocks I'd Buy If I Were Starting From Scratch (Motley Fool)
+  SUMMARY: Quantum computing is coming faster than most realize.
+
+- 2026-04-27: [ANALYST] Is Palantir Technologies Stock More Likely to Hit $100 or $200? (Motley Fool)
+  SUMMARY: The stock has been volatile over the past year, and that trend could continue.
+
+- 2026-04-27: [WIRE] Stock Market Today: Dow Dips While Intel Gains; Google Stock Clears Entry, But Note This (Live Coverage) (Investor's Business Daily)
+  SUMMARY: The Dow Jones index falls Monday. Intel rises but chip stocks lag. Google parent Alphabet clears an entry on the stock market today.
+
+- 2026-04-27: [ANALYST] OpenAI and Microsoft Just Revamped Their Longstanding Partnership. Will This Impact Microsoft's Artificial Intelligence (AI) Moat? (Motley Fool)
+  SUMMARY: OpenAI and Microsoft have long had a partnership regarding how the two entities do business with one another.
+
+- 2026-04-27: [ANALYST] Why Domino's Pizza Stock Dove Today (Motley Fool)
+  SUMMARY: Domino's wants to double down on taking market share.

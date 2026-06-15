@@ -1,0 +1,55 @@
+{
+  "ticker": "AAPL",
+  "counts": {
+    "with_total": 30,
+    "without_total": 30,
+    "benzinga_items": 15,
+    "with_chars": 43080,
+    "without_chars": 10820,
+    "char_delta": 32260
+  },
+  "providers_with": {
+    "Yahoo Finance": 6,
+    "Benzinga/Massive": 10,
+    "Finnhub": 9,
+    "Market News (Benzinga)": 5
+  },
+  "providers_without": {
+    "Yahoo Finance": 6,
+    "Finnhub": 24
+  },
+  "headlines_only_in_with": [
+    "1 Stock to Buy, 1 Stock to Sell This Week: Apple, ExxonMobil",
+    "2 Unstoppable Growth Stocks That Could Soar 20% and 26% in 2026, According to Wall Street Analysts",
+    "Broadcom Joins the $2 Trillion Club, and 4 of the 5 Vanguard ETFs That Just Underwent Stock Splits Hold It. Here's an Even Better Low-Cost ETF for Long-Term Broadcom Investors.",
+    "Earnings Volatility Watch: What To Expect From Sandisk and 5 Mag Seven Stocks This Week",
+    "Is the Vanguard Total Stock Market ETF the Best Buy for Long-Term Investors Right Now?",
+    "John Ternus Will Become Apple's New CEO in September. Is Now a Good Time to Buy the Stock?",
+    "Mag 7 Earnings Bonanza, Fed Await Stocks at Record Highs: What to Expect",
+    "S&P 500 Holds Near Highs Despite Oil Shock and Weak Breadth Data",
+    "S&P 500 Near Highs as Earnings and Fed Outlook Limit Further Gains",
+    "Stock Market Today: Dow Futures Fall, S&P 500 Gains As Trump Halts Iran Talks\u2014 Organon, SAP, Cheetah Net Supply Chain Service In Focus (UPDATED)",
+    "The Mistakes I Keep Seeing ETF Investors Make With \"Set It and Forget It\" Funds",
+    "The S&P 500's Next Shock May Come From Another Country \u2014 And It's Not Iran",
+    "This \u2019Safe\u2019 Retirement Strategy Is Costly and This 10% Dividend Crushes It",
+    "Wall Street Says 'Sell In May And Go Away': History Says Otherwise"
+  ],
+  "headlines_only_in_without": [
+    "Amazon, Alphabet, Microsoft, Meta and Apple  are part of Zacks Earnings Preview",
+    "Apple Is a Loser From a New OpenAI Phone. This Stock Is a Winner.",
+    "Embree Financial Purchased Shares Worth $13.1 Million in iShares' CORO. Is This ETF a Buy?",
+    "Fed Rate Decision, Verizon, Coca-Cola, Apple, Meta, Exxon, and Much More to Watch This Week",
+    "Intel Stock Rally Rages On. What UBS Says It Underestimated.",
+    "Is Tim Cook\u2019s departure a canary in the coal mine for tech stocks?",
+    "Jim Cramer\u2019s Still a Believer in Apple (AAPL)",
+    "Nasdaq Composite Eyes AI Deals, Tech Earnings and Fed but Oil Shock Looms",
+    "S&P 500 Holding Pattern: Mag 7 Earnings Collide With Oil Surge and Fed Fears",
+    "Stock Market Today: Dow Sinks On Iran News; Nvidia Rallies Near Record Highs (Live Coverage)",
+    "Stocks Are Wavering to Kick Off a Busy Week",
+    "US Equity Futures Fall Pre-Bell as Middle East Peace Talks Remain Stalled, Iran Reportedly Floats New Peace Offer",
+    "VIX Fear Rising Toward 20 on Tech Earnings, Capex Risk, War Uncertainty",
+    "Wall Street's Insights Into Key Metrics Ahead of Apple (AAPL) Q2 Earnings",
+    "Zacks Investment Ideas feature highlights: Spotify, Apple, Amazon and Alphabet"
+  ],
+  "benzinga_items_with_full_content": 15
+}

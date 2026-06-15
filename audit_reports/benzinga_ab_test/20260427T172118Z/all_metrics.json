@@ -1,0 +1,342 @@
+[
+  {
+    "ticker": "CYATY",
+    "counts": {
+      "with_total": 12,
+      "without_total": 7,
+      "benzinga_items": 5,
+      "with_chars": 12736,
+      "without_chars": 2598,
+      "char_delta": 10138
+    },
+    "providers_with": {
+      "Market News (Benzinga)": 5,
+      "Yahoo Finance": 7
+    },
+    "providers_without": {
+      "Yahoo Finance": 7
+    },
+    "headlines_only_in_with": [
+      "Stock Market Today: Dow Futures Fall, S&P 500 Gains As Trump Halts Iran Talks\u2014 Organon, SAP, Cheetah Net Supply Chain Service In Focus (UPDATED)",
+      "The Mistakes I Keep Seeing ETF Investors Make With \"Set It and Forget It\" Funds",
+      "The S&P 500's Next Shock May Come From Another Country \u2014 And It's Not Iran",
+      "This \u2019Safe\u2019 Retirement Strategy Is Costly and This 10% Dividend Crushes It",
+      "Wall Street Says 'Sell In May And Go Away': History Says Otherwise"
+    ],
+    "headlines_only_in_without": [],
+    "benzinga_items_with_full_content": 5
+  },
+  {
+    "ticker": "DLTR",
+    "counts": {
+      "with_total": 30,
+      "without_total": 30,
+      "benzinga_items": 12,
+      "with_chars": 29771,
+      "without_chars": 14524,
+      "char_delta": 15247
+    },
+    "providers_with": {
+      "Finnhub": 6,
+      "Market News (Benzinga)": 5,
+      "Alpha Vantage": 12,
+      "Benzinga/Massive": 7
+    },
+    "providers_without": {
+      "Finnhub": 9,
+      "Alpha Vantage": 21
+    },
+    "headlines_only_in_with": [
+      "Dollar Tree Annual Forecast Points To Steady Growth",
+      "Dollar Tree Planted the Seeds for Triple-Digit Gains in Q4",
+      "EXCLUSIVE: Can Walmart And Dollar Tree Ride The 'Trade Down' Wave As War-Driven Price Shock Hits Americans?",
+      "How the Risk/Reward Calculation Is Changing for Discount Retail",
+      "Luxury to Budget Retail: What Upcoming Earnings Say About the State of Consumers",
+      "Stock Market Today: Dow Futures Fall, S&P 500 Gains As Trump Halts Iran Talks\u2014 Organon, SAP, Cheetah Net Supply Chain Service In Focus (UPDATED)",
+      "The Mistakes I Keep Seeing ETF Investors Make With \"Set It and Forget It\" Funds",
+      "The Oil Spike Is Hitting the Markets. Here's What Investors Are Watching Next.",
+      "The S&P 500's Next Shock May Come From Another Country \u2014 And It's Not Iran",
+      "This \u2019Safe\u2019 Retirement Strategy Is Costly and This 10% Dividend Crushes It",
+      "Wall Street Says 'Sell In May And Go Away': History Says Otherwise",
+      "Walmart, Dollar Stores Beat Traditional Grocers' Reach As Affordability Crunch Intensifies, Report Finds"
+    ],
+    "headlines_only_in_without": [
+      "11 Best New Dollar Tree Spring Finds Hitting Shelves This Week",
+      "Are consumers finally cracking under the weight of $4 gas?",
+      "Brightstar Capital Partners Invests in Bendon, a Provider of Screen-Free Children\u2019s Activity Products",
+      "Corvex Management exits CCL, DLTR, raises stakes in VSTS, DIS, ORCL among Q4 moves",
+      "Dollar Tree Inc. stock outperforms competitors on strong trading day",
+      "Dollar Tree Inc. stock underperforms Wednesday when compared to competitors",
+      "Dollar Tree price gives in to negative pressure - Forecast today - 22-04-2026",
+      "Dollar Tree rounding out Brierwood Village Plaza Winn-Dixie",
+      "Don\u2019t Sleep on These Luxe Dollar Tree Mother\u2019s Day Gifts!",
+      "FIVE vs. DLTR: Which Discount Retail Stock Has Better Upside Now?",
+      "Is It Time To Reconsider Dollar Tree (DLTR) After This Year\u2019s 20% Share Price Slide",
+      "Linde price leans on SMA support - Forecast today - 22-04-2026"
+    ],
+    "benzinga_items_with_full_content": 12
+  },
+  {
+    "ticker": "CHGCY",
+    "counts": {
+      "with_total": 16,
+      "without_total": 11,
+      "benzinga_items": 5,
+      "with_chars": 14979,
+      "without_chars": 4841,
+      "char_delta": 10138
+    },
+    "providers_with": {
+      "Market News (Benzinga)": 5,
+      "Finnhub": 2,
+      "Yahoo Finance": 9
+    },
+    "providers_without": {
+      "Finnhub": 2,
+      "Yahoo Finance": 9
+    },
+    "headlines_only_in_with": [
+      "Stock Market Today: Dow Futures Fall, S&P 500 Gains As Trump Halts Iran Talks\u2014 Organon, SAP, Cheetah Net Supply Chain Service In Focus (UPDATED)",
+      "The Mistakes I Keep Seeing ETF Investors Make With \"Set It and Forget It\" Funds",
+      "The S&P 500's Next Shock May Come From Another Country \u2014 And It's Not Iran",
+      "This \u2019Safe\u2019 Retirement Strategy Is Costly and This 10% Dividend Crushes It",
+      "Wall Street Says 'Sell In May And Go Away': History Says Otherwise"
+    ],
+    "headlines_only_in_without": [],
+    "benzinga_items_with_full_content": 5
+  },
+  {
+    "ticker": "TAL",
+    "counts": {
+      "with_total": 30,
+      "without_total": 19,
+      "benzinga_items": 6,
+      "with_chars": 21937,
+      "without_chars": 6291,
+      "char_delta": 15646
+    },
+    "providers_with": {
+      "Market News (Benzinga)": 5,
+      "Alpha Vantage": 17,
+      "Yahoo Finance": 1,
+      "Finnhub": 6,
+      "Benzinga/Massive": 1
+    },
+    "providers_without": {
+      "Yahoo Finance": 8,
+      "Finnhub": 11
+    },
+    "headlines_only_in_with": [
+      "Assessing TAL Education Group (NYSE:TAL) Valuation After Recent Share Price Volatility",
+      "Earnings Call Summary | TAL Education(TAL.US) Q4 2026 Earnings Conference",
+      "Earnings Flash (TAL) TAL Education Group Reports Q4 Revenue $802.4M, vs. FactSet Est of $784.9M",
+      "Research Alert: CFRA Keeps Hold Opinion On Adss Of Tal Education Group",
+      "Stock Market Today: Dow Futures Fall, S&P 500 Gains As Trump Halts Iran Talks\u2014 Organon, SAP, Cheetah Net Supply Chain Service In Focus (UPDATED)",
+      "Surging profit at TAL Education (NYSE: TAL) as FY 2026 revenue climbs",
+      "TAL Education Group (NYSE:TAL) Posts Earnings Results, Beats Estimates By $0.30 EPS",
+      "TAL Education Group (NYSE:TAL) Q4 2026 Earnings Call Transcript",
+      "TAL Education Group (TAL) Earnings Surge Reinforces Bullish Profitability Narrative",
+      "TAL Education Group Just Beat Analyst Forecasts, And Analysts Have Been Updating Their Predictions",
+      "TAL Education Group Releases Q4 2026 Financial Results",
+      "TAL Education Group Swings to Strong Profit on 34% Revenue Surge in Fiscal 2026",
+      "TAL Education Group: Strong revenue and profit growth in FY2026, with improved margins and robust cash flow",
+      "TAL Education Moves to Balance Growth and Profitability",
+      "TAL Education jumps nearly 10% after earnings smash expectations",
+      "The Mistakes I Keep Seeing ETF Investors Make With \"Set It and Forget It\" Funds",
+      "The S&P 500's Next Shock May Come From Another Country \u2014 And It's Not Iran",
+      "This \u2019Safe\u2019 Retirement Strategy Is Costly and This 10% Dividend Crushes It",
+      "Tianli's Turnaround Fails To Sway Crackdown-Burned Investors",
+      "Wall Street Says 'Sell In May And Go Away': History Says Otherwise"
+    ],
+    "headlines_only_in_without": [
+      "Assessing TAL Education Group\u2019s Valuation After Recent Share Price Weakness",
+      "CoreView Capital Trims KE Holdings as Beike Platform Connects China\u2019s Housing Brokerage Network",
+      "Does PetroTal (TSX:TAL) Buyback Strategy Offset the Signal from Softer 2025 Earnings?",
+      "Investment Manager Takes New Stake in Full Truck Alliance Stock, According to Latest SEC Filing",
+      "PetroTal's (TSE:TAL) Conservative Accounting Might Explain Soft Earnings",
+      "Serenity Capital Management Opens $43 Million Mattel Position",
+      "TAL Education Group Announces Unaudited Financial Results for the Fourth Fiscal Quarter and the Fiscal Year 2026",
+      "TAL Education Group Reports Earnings Results for the Fourth Quarter and Full Year Ended February 28, 2026",
+      "TAL Education Q4 Adj. EPS $0.45 Beats $0.16 Estimate, Sales $802.389M Beat $776.552M Estimate",
+      "Wall Street Analysts Think TAL Education (TAL) Could Surge 44.62%: Read This Before Placing a Bet"
+    ],
+    "benzinga_items_with_full_content": 6
+  },
+  {
+    "ticker": "DPZ",
+    "counts": {
+      "with_total": 30,
+      "without_total": 30,
+      "benzinga_items": 15,
+      "with_chars": 35537,
+      "without_chars": 7738,
+      "char_delta": 27799
+    },
+    "providers_with": {
+      "Finnhub": 11,
+      "Yahoo Finance": 4,
+      "Benzinga/Massive": 10,
+      "Market News (Benzinga)": 5
+    },
+    "providers_without": {
+      "Finnhub": 25,
+      "Yahoo Finance": 5
+    },
+    "headlines_only_in_with": [
+      "$4 Gas Is Draining American Wallets: Here's Why Pizza Stocks Could Actually Gain",
+      "3 Absurdly Cheap Stocks to Buy With $1,000 While the Market Is This Nervous",
+      "AI-Driven Fear Slashed Toast Stock by 43%, Even as Free Cash Flow Hit Records",
+      "Domino's Hit By Budget-Conscious Diners, Shares Tumble",
+      "Is DPC Dash Pullback A Buying Opportunity?",
+      "McDonald's or Domino's: One of These Is a Screaming Buy Right Now",
+      "S&P 500 Holds Near Highs Despite Oil Shock and Weak Breadth Data",
+      "S&P 500 Near Highs as Earnings and Fed Outlook Limit Further Gains",
+      "Stock Market Today: Dow Futures Fall, S&P 500 Gains As Trump Halts Iran Talks\u2014 Organon, SAP, Cheetah Net Supply Chain Service In Focus (UPDATED)",
+      "The Mistakes I Keep Seeing ETF Investors Make With \"Set It and Forget It\" Funds",
+      "The S&P 500's Next Shock May Come From Another Country \u2014 And It's Not Iran",
+      "This \u2019Safe\u2019 Retirement Strategy Is Costly and This 10% Dividend Crushes It",
+      "Wall Street Says 'Sell In May And Go Away': History Says Otherwise",
+      "Warren Buffett Spent $3.5 Billion on 5 Stocks in His Last Quarter as Berkshire Hathaway CEO. Here's the Best of the Bunch."
+    ],
+    "headlines_only_in_without": [
+      "Domino's (NASDAQ:DPZ) Misses Q1 CY2026 Sales Expectations",
+      "Domino's Pizza (DPZ) Lags Q1 Earnings and Revenue Estimates",
+      "Domino's Pizza Q1 2026 earnings miss sales estimates",
+      "Domino's Pizza, Inc. (DPZ) Q1 2026 Earnings Call Transcript",
+      "Domino's Pizza\u00ae Announces First Quarter 2026 Financial Results",
+      "Domino's stock falls after Q1 earnings, sales growth miss expectations",
+      "Domino\u2019s Pizza Inc (NASDAQ:DPZ) Slides After Q1 Miss on Revenue and EPS",
+      "Domino\u2019s Pizza stock falls premarket as quarterly results miss estimates",
+      "Domino\u2019s same-store sales hit a speed bump \u2014 but execs aren\u2019t worried",
+      "Stocks Mostly Down Pre-Bell as Iran Reportedly Offers New Proposal to Open Strait of Hormuz",
+      "These Stocks Are Today\u2019s Movers: Qualcomm, Apple, Intel, Adidas, and More",
+      "Transcript : Domino's Pizza, Inc., Q1 2026 Earnings Call, Apr 27, 2026",
+      "US Equity Futures Fall Pre-Bell as Middle East Peace Talks Remain Stalled, Iran Reportedly Floats New Peace Offer",
+      "Wall Street Lunch: OpenAI Loosens Exclusivity In Revised Microsoft Pact"
+    ],
+    "benzinga_items_with_full_content": 15
+  },
+  {
+    "ticker": "MZHOF",
+    "counts": {
+      "with_total": 14,
+      "without_total": 9,
+      "benzinga_items": 5,
+      "with_chars": 13608,
+      "without_chars": 3470,
+      "char_delta": 10138
+    },
+    "providers_with": {
+      "Market News (Benzinga)": 5,
+      "Yahoo Finance": 9
+    },
+    "providers_without": {
+      "Yahoo Finance": 9
+    },
+    "headlines_only_in_with": [
+      "Stock Market Today: Dow Futures Fall, S&P 500 Gains As Trump Halts Iran Talks\u2014 Organon, SAP, Cheetah Net Supply Chain Service In Focus (UPDATED)",
+      "The Mistakes I Keep Seeing ETF Investors Make With \"Set It and Forget It\" Funds",
+      "The S&P 500's Next Shock May Come From Another Country \u2014 And It's Not Iran",
+      "This \u2019Safe\u2019 Retirement Strategy Is Costly and This 10% Dividend Crushes It",
+      "Wall Street Says 'Sell In May And Go Away': History Says Otherwise"
+    ],
+    "headlines_only_in_without": [],
+    "benzinga_items_with_full_content": 5
+  },
+  {
+    "ticker": "IBRX",
+    "counts": {
+      "with_total": 30,
+      "without_total": 25,
+      "benzinga_items": 15,
+      "with_chars": 28302,
+      "without_chars": 9176,
+      "char_delta": 19126
+    },
+    "providers_with": {
+      "Yahoo Finance": 4,
+      "Market News (Benzinga)": 5,
+      "Finnhub": 11,
+      "Benzinga/Massive": 10
+    },
+    "providers_without": {
+      "Yahoo Finance": 10,
+      "Finnhub": 15
+    },
+    "headlines_only_in_with": [
+      "Bronstein, Gewirtz & Grossman LLC Urges ImmunityBio, Inc. Investors to Act: Class Action Filed Alleging Investor Harm",
+      "IBRX INVESTOR ALERT: Robbins Geller Rudman & Dowd LLP Announces that ImmunityBio, Inc. Investors with Substantial Losses Have Opportunity to Lead Securities Class Action Lawsuit",
+      "IBRX Investor Alert: ImmunityBio Securities Fraud Lawsuit - Investors With Losses May Seek to Lead the Class Action After Chairman Allegedly Misled on Drug Efficacy: Levi & Korsinsky",
+      "IBRX SHAREHOLDER UPDATE: ImmunityBio (IBRX) Sued After FDA Flags Misleading Cancer Claims, Shares Plunge 21%, $2B Market Cap Lost -- Hagens Berman",
+      "ImmunityBio, Inc. (IBRX) Securities Fraud Class Action Lawsuit Filed; May 26, 2026, Lead Plaintiff Deadline",
+      "ImmunityBio, Inc. Securities Fraud Class Action Result of FDA Warning and 21% Stock Decline - Investors may Contact Lewis Kahn, Esq, at Kahn Swick & Foti, LLC",
+      "ROSEN, THE FIRST FILING FIRM, Encourages ImmunityBio, Inc. Investors with Losses in Excess of $100K to Secure Counsel Before Important Deadline in Securities Class Action First Filed by the Firm - IBRX",
+      "Soleno Therapeutics, Inc. Notice of May 5, 2026 Application Deadline for Class Action Lawsuit - Contact Lewis Kahn, Esq. at Kahn Swick & Foti, LLC, Before Application Deadline",
+      "Stock Market Today: Dow Futures Fall, S&P 500 Gains As Trump Halts Iran Talks\u2014 Organon, SAP, Cheetah Net Supply Chain Service In Focus (UPDATED)",
+      "The Mistakes I Keep Seeing ETF Investors Make With \"Set It and Forget It\" Funds",
+      "The S&P 500's Next Shock May Come From Another Country \u2014 And It's Not Iran",
+      "This \u2019Safe\u2019 Retirement Strategy Is Costly and This 10% Dividend Crushes It",
+      "Wall Street Says 'Sell In May And Go Away': History Says Otherwise"
+    ],
+    "headlines_only_in_without": [
+      "Assessing ImmunityBio (IBRX) Valuation After ANKTIVA Driven Q1 2026 Revenue Update",
+      "IBRX Responds to FDA Warning Over Misleading Cancer Drug Claims",
+      "IBRX Stock Rises 7% on Strong Q1 2026 Preliminary Results",
+      "IBRX UPCOMING DEADLINE: Faruqi & Faruqi, LLP Reminds ImmunityBio (IBRX) Investors of Securities Class Action Deadline on May 26, 2026",
+      "INVESTOR DEADLINE: ImmunityBio, Inc. (IBRX) Investors with Substantial Losses Have Opportunity to Lead Investor Class Action Lawsuit",
+      "ImmunityBio (IBRX) Global Expansion Bolsters 266% Jump This Year",
+      "ImmunityBio Announces ANKTIVA\u00ae Is Now Available in Saudi Arabia for Bladder and Lung Cancer Patients; Market Entry Achieved Within Two Months of MENA Partnership",
+      "ImmunityBio, Inc. (IBRX) Posts Strong Preliminary Q1 Sales on ANKTIVA Momentum",
+      "Is ImmunityBio\u2019s (IBRX) FDA Promotion Setback Reframing the Stock\u2019s Risk and Credibility Narrative?"
+    ],
+    "benzinga_items_with_full_content": 15
+  },
+  {
+    "ticker": "CAR",
+    "counts": {
+      "with_total": 30,
+      "without_total": 30,
+      "benzinga_items": 15,
+      "with_chars": 34463,
+      "without_chars": 9790,
+      "char_delta": 24673
+    },
+    "providers_with": {
+      "Market News (Benzinga)": 5,
+      "Finnhub": 15,
+      "Benzinga/Massive": 10
+    },
+    "providers_without": {
+      "Finnhub": 30
+    },
+    "headlines_only_in_with": [
+      "Avis Brings Back The Short Squeeze \u2014 Navitas, Beyond Meat Join In",
+      "Avis Budget Stock Soars 160% In Violent Short Squeeze Melt-Up",
+      "Avis Budget Stock: One of History\u2019s Wildest Short Squeezes Explained",
+      "Bears Pounce On Avis Budget, Lucid, MARA \u2014 Short Interest In These 10 Stocks Soars Above 40%",
+      "Intel, Nebius, And Applied Optoelectronics Are Among the Top 10 Large-Cap Gainers Last Week (April 6-April 10): Are the Others in Your Portfolio?",
+      "IonQ, Oklo, And Robinhood Are Among the Top 10 Large-Cap Gainers Last Week (April 13-April 17): Are the Others in Your Portfolio?",
+      "Stock Market Today: Dow Futures Fall, S&P 500 Gains As Trump Halts Iran Talks\u2014 Organon, SAP, Cheetah Net Supply Chain Service In Focus (UPDATED)",
+      "Stock Market Today: S&P 500 Pulls Back From Records As Oil Jumps 6% On Hormuz Tensions",
+      "The Mistakes I Keep Seeing ETF Investors Make With \"Set It and Forget It\" Funds",
+      "The S&P 500's Next Shock May Come From Another Country \u2014 And It's Not Iran",
+      "This \u2019Safe\u2019 Retirement Strategy Is Costly and This 10% Dividend Crushes It",
+      "Wall Street Says 'Sell In May And Go Away': History Says Otherwise"
+    ],
+    "headlines_only_in_without": [
+      "Avis Budget slides as short squeeze unwinds and JPMorgan cuts rating",
+      "Avis Budget stock plunges 62% as short squeeze reverses",
+      "Avis Sinks 35%: Short Squeeze Fades as Dilution Risk Takes Center Stage",
+      "Avis Stock Craters 40% Thursday After Historic Squeeze Unwinds",
+      "Avis Stock Drops 70% in Two Days. The Short Squeeze Is Colliding With a New Reality.",
+      "Avis Stock Plunges 57% In Two Days After 600% Surge",
+      "Avis stock extends crash after epic short squeeze",
+      "Avis stock extends crash, falling 48% after epic short squeeze",
+      "These stocks are gapping in today's session",
+      "Top Midday Stories: Tesla Shares Fall Despite Q1 Beats; ServiceNow Says Iran War Weighed on Q1 Subscription Revenue",
+      "Top movers in Thursday's session",
+      "Why Avis Budget Stock Is Crashing Today"
+    ],
+    "benzinga_items_with_full_content": 15
+  }
+]

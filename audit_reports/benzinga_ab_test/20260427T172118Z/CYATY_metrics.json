@@ -1,0 +1,27 @@
+{
+  "ticker": "CYATY",
+  "counts": {
+    "with_total": 12,
+    "without_total": 7,
+    "benzinga_items": 5,
+    "with_chars": 12736,
+    "without_chars": 2598,
+    "char_delta": 10138
+  },
+  "providers_with": {
+    "Market News (Benzinga)": 5,
+    "Yahoo Finance": 7
+  },
+  "providers_without": {
+    "Yahoo Finance": 7
+  },
+  "headlines_only_in_with": [
+    "Stock Market Today: Dow Futures Fall, S&P 500 Gains As Trump Halts Iran Talks\u2014 Organon, SAP, Cheetah Net Supply Chain Service In Focus (UPDATED)",
+    "The Mistakes I Keep Seeing ETF Investors Make With \"Set It and Forget It\" Funds",
+    "The S&P 500's Next Shock May Come From Another Country \u2014 And It's Not Iran",
+    "This \u2019Safe\u2019 Retirement Strategy Is Costly and This 10% Dividend Crushes It",
+    "Wall Street Says 'Sell In May And Go Away': History Says Otherwise"
+  ],
+  "headlines_only_in_without": [],
+  "benzinga_items_with_full_content": 5
+}

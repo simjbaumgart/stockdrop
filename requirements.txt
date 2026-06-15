@@ -19,10 +19,10 @@ tradingview-ta==3.3.0
 tradingview-screener==3.0.0
 scipy==1.16.3
 beautifulsoup4==4.14.3
-defeatbeta-api==0.0.29
+defeatbeta-api==0.0.52
 requests==2.32.5
 finnhub-python==2.4.26
-pandas==2.3.3
+pandas==3.0.2
 numpy==2.3.5
 pytz==2025.2
 google-genai==1.55.0  # Optional/New SDK

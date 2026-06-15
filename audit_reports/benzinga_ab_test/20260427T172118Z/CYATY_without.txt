@@ -1,0 +1,21 @@
+--- SOURCE: Yahoo Finance [WIRE] ---
+- 2026-04-22: [WIRE] CATL Unveils Fast-Charging Battery Innovation (The Wall Street Journal)
+  SUMMARY: The EV battery giant says its new Shenxing 3 battery can charge from 10% to 98% in about 6.5 minutes.
+
+- 2026-04-21: [WIRE] CATL launches battery innovations to strengthen global market leadership (Reuters)
+  SUMMARY: China's CATL on Tuesday showcased a slew of technological advancements in electric vehicle batteries, aiming to set new industry ‌benchmarks and bolster its dominant global position.  In a 90-minute event in ‌Beijing, CATL launched its latest-generation Qilin battery, enabling a lighter battery pack to deliver a 1,000-km (621-mile) driving ​range per charge.  The product aims to meet increasing demand from automakers grappling with stricter energy efficiency regulations in China and internationally.
+
+- 2026-04-21: [WIRE] Toyota Indonesia signs CATL battery deal as EVs gather pace (Just Auto)
+  SUMMARY: TMMIN is committing Rp1.3tn ($75.8m) to support Indonesia’s EV ecosystem, including development of the battery supply chain.
+
+- 2026-04-17: [WIRE] Basic Materials Roundup: Market Talk (The Wall Street Journal)
+  SUMMARY: Find insight on Albemarle, Ganfeng Lithium and more in the latest Market Talks covering basic materials.
+
+- 2026-04-17: [WIRE] Albemarle Had Its Best Day Since 2023. The Lithium Stock Gets Downgraded Anyway. (Barrons.com)
+  SUMMARY: Albemarle  stock received a downgrade Friday, one day after shares of the lithium miner jumped 16% to notch their highest close in well more than two years.  Baird analysts cut their rating on  Albemarle  to Neutral from Outperform while keeping their price target unchanged at $120.  Albemarle stock fell 8.3% to $197.74 on Friday.
+
+- 2026-04-17: [WIRE] Hungary’s New Leader Has a China Dilemma. Investing Will Be a Delicate Balance. (Barrons.com)
+  SUMMARY: China invested heavily in Hungary because of cheaper labor, less corporate taxes and political support.
+
+- 2026-04-17: [WIRE] China’s Surging Tech Stock Index Faces Rising Concentration Risk (Bloomberg)
+  SUMMARY: (Bloomberg) -- China’s tech-heavy ChiNext Index is becoming increasingly concentrated as it powers to an 11-year high, buoyed by earnings beats from a small group of heavyweight stocks.Contemporary Amperex Technology Co., Zhongji Innolight Co. and five others make up nearly half of the ChiNext’s weighting, according to data compiled by Bloomberg. CATL, which accounts for roughly a fifth of the gauge, reported stronger-than-expected results this month, while Zhongji Innolight announced a 262% ear

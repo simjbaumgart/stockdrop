@@ -1,0 +1,57 @@
+{
+  "ticker": "TAL",
+  "counts": {
+    "with_total": 30,
+    "without_total": 19,
+    "benzinga_items": 6,
+    "with_chars": 21937,
+    "without_chars": 6291,
+    "char_delta": 15646
+  },
+  "providers_with": {
+    "Market News (Benzinga)": 5,
+    "Alpha Vantage": 17,
+    "Yahoo Finance": 1,
+    "Finnhub": 6,
+    "Benzinga/Massive": 1
+  },
+  "providers_without": {
+    "Yahoo Finance": 8,
+    "Finnhub": 11
+  },
+  "headlines_only_in_with": [
+    "Assessing TAL Education Group (NYSE:TAL) Valuation After Recent Share Price Volatility",
+    "Earnings Call Summary | TAL Education(TAL.US) Q4 2026 Earnings Conference",
+    "Earnings Flash (TAL) TAL Education Group Reports Q4 Revenue $802.4M, vs. FactSet Est of $784.9M",
+    "Research Alert: CFRA Keeps Hold Opinion On Adss Of Tal Education Group",
+    "Stock Market Today: Dow Futures Fall, S&P 500 Gains As Trump Halts Iran Talks\u2014 Organon, SAP, Cheetah Net Supply Chain Service In Focus (UPDATED)",
+    "Surging profit at TAL Education (NYSE: TAL) as FY 2026 revenue climbs",
+    "TAL Education Group (NYSE:TAL) Posts Earnings Results, Beats Estimates By $0.30 EPS",
+    "TAL Education Group (NYSE:TAL) Q4 2026 Earnings Call Transcript",
+    "TAL Education Group (TAL) Earnings Surge Reinforces Bullish Profitability Narrative",
+    "TAL Education Group Just Beat Analyst Forecasts, And Analysts Have Been Updating Their Predictions",
+    "TAL Education Group Releases Q4 2026 Financial Results",
+    "TAL Education Group Swings to Strong Profit on 34% Revenue Surge in Fiscal 2026",
+    "TAL Education Group: Strong revenue and profit growth in FY2026, with improved margins and robust cash flow",
+    "TAL Education Moves to Balance Growth and Profitability",
+    "TAL Education jumps nearly 10% after earnings smash expectations",
+    "The Mistakes I Keep Seeing ETF Investors Make With \"Set It and Forget It\" Funds",
+    "The S&P 500's Next Shock May Come From Another Country \u2014 And It's Not Iran",
+    "This \u2019Safe\u2019 Retirement Strategy Is Costly and This 10% Dividend Crushes It",
+    "Tianli's Turnaround Fails To Sway Crackdown-Burned Investors",
+    "Wall Street Says 'Sell In May And Go Away': History Says Otherwise"
+  ],
+  "headlines_only_in_without": [
+    "Assessing TAL Education Group\u2019s Valuation After Recent Share Price Weakness",
+    "CoreView Capital Trims KE Holdings as Beike Platform Connects China\u2019s Housing Brokerage Network",
+    "Does PetroTal (TSX:TAL) Buyback Strategy Offset the Signal from Softer 2025 Earnings?",
+    "Investment Manager Takes New Stake in Full Truck Alliance Stock, According to Latest SEC Filing",
+    "PetroTal's (TSE:TAL) Conservative Accounting Might Explain Soft Earnings",
+    "Serenity Capital Management Opens $43 Million Mattel Position",
+    "TAL Education Group Announces Unaudited Financial Results for the Fourth Fiscal Quarter and the Fiscal Year 2026",
+    "TAL Education Group Reports Earnings Results for the Fourth Quarter and Full Year Ended February 28, 2026",
+    "TAL Education Q4 Adj. EPS $0.45 Beats $0.16 Estimate, Sales $802.389M Beat $776.552M Estimate",
+    "Wall Street Analysts Think TAL Education (TAL) Could Surge 44.62%: Read This Before Placing a Bet"
+  ],
+  "benzinga_items_with_full_content": 6
+}

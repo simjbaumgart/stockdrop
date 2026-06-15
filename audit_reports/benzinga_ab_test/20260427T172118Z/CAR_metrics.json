@@ -1,0 +1,48 @@
+{
+  "ticker": "CAR",
+  "counts": {
+    "with_total": 30,
+    "without_total": 30,
+    "benzinga_items": 15,
+    "with_chars": 34463,
+    "without_chars": 9790,
+    "char_delta": 24673
+  },
+  "providers_with": {
+    "Market News (Benzinga)": 5,
+    "Finnhub": 15,
+    "Benzinga/Massive": 10
+  },
+  "providers_without": {
+    "Finnhub": 30
+  },
+  "headlines_only_in_with": [
+    "Avis Brings Back The Short Squeeze \u2014 Navitas, Beyond Meat Join In",
+    "Avis Budget Stock Soars 160% In Violent Short Squeeze Melt-Up",
+    "Avis Budget Stock: One of History\u2019s Wildest Short Squeezes Explained",
+    "Bears Pounce On Avis Budget, Lucid, MARA \u2014 Short Interest In These 10 Stocks Soars Above 40%",
+    "Intel, Nebius, And Applied Optoelectronics Are Among the Top 10 Large-Cap Gainers Last Week (April 6-April 10): Are the Others in Your Portfolio?",
+    "IonQ, Oklo, And Robinhood Are Among the Top 10 Large-Cap Gainers Last Week (April 13-April 17): Are the Others in Your Portfolio?",
+    "Stock Market Today: Dow Futures Fall, S&P 500 Gains As Trump Halts Iran Talks\u2014 Organon, SAP, Cheetah Net Supply Chain Service In Focus (UPDATED)",
+    "Stock Market Today: S&P 500 Pulls Back From Records As Oil Jumps 6% On Hormuz Tensions",
+    "The Mistakes I Keep Seeing ETF Investors Make With \"Set It and Forget It\" Funds",
+    "The S&P 500's Next Shock May Come From Another Country \u2014 And It's Not Iran",
+    "This \u2019Safe\u2019 Retirement Strategy Is Costly and This 10% Dividend Crushes It",
+    "Wall Street Says 'Sell In May And Go Away': History Says Otherwise"
+  ],
+  "headlines_only_in_without": [
+    "Avis Budget slides as short squeeze unwinds and JPMorgan cuts rating",
+    "Avis Budget stock plunges 62% as short squeeze reverses",
+    "Avis Sinks 35%: Short Squeeze Fades as Dilution Risk Takes Center Stage",
+    "Avis Stock Craters 40% Thursday After Historic Squeeze Unwinds",
+    "Avis Stock Drops 70% in Two Days. The Short Squeeze Is Colliding With a New Reality.",
+    "Avis Stock Plunges 57% In Two Days After 600% Surge",
+    "Avis stock extends crash after epic short squeeze",
+    "Avis stock extends crash, falling 48% after epic short squeeze",
+    "These stocks are gapping in today's session",
+    "Top Midday Stories: Tesla Shares Fall Despite Q1 Beats; ServiceNow Says Iran War Weighed on Q1 Subscription Revenue",
+    "Top movers in Thursday's session",
+    "Why Avis Budget Stock Is Crashing Today"
+  ],
+  "benzinga_items_with_full_content": 15
+}

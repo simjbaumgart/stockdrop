@@ -1,0 +1,50 @@
+{
+  "ticker": "DLTR",
+  "counts": {
+    "with_total": 30,
+    "without_total": 30,
+    "benzinga_items": 12,
+    "with_chars": 29771,
+    "without_chars": 14524,
+    "char_delta": 15247
+  },
+  "providers_with": {
+    "Finnhub": 6,
+    "Market News (Benzinga)": 5,
+    "Alpha Vantage": 12,
+    "Benzinga/Massive": 7
+  },
+  "providers_without": {
+    "Finnhub": 9,
+    "Alpha Vantage": 21
+  },
+  "headlines_only_in_with": [
+    "Dollar Tree Annual Forecast Points To Steady Growth",
+    "Dollar Tree Planted the Seeds for Triple-Digit Gains in Q4",
+    "EXCLUSIVE: Can Walmart And Dollar Tree Ride The 'Trade Down' Wave As War-Driven Price Shock Hits Americans?",
+    "How the Risk/Reward Calculation Is Changing for Discount Retail",
+    "Luxury to Budget Retail: What Upcoming Earnings Say About the State of Consumers",
+    "Stock Market Today: Dow Futures Fall, S&P 500 Gains As Trump Halts Iran Talks\u2014 Organon, SAP, Cheetah Net Supply Chain Service In Focus (UPDATED)",
+    "The Mistakes I Keep Seeing ETF Investors Make With \"Set It and Forget It\" Funds",
+    "The Oil Spike Is Hitting the Markets. Here's What Investors Are Watching Next.",
+    "The S&P 500's Next Shock May Come From Another Country \u2014 And It's Not Iran",
+    "This \u2019Safe\u2019 Retirement Strategy Is Costly and This 10% Dividend Crushes It",
+    "Wall Street Says 'Sell In May And Go Away': History Says Otherwise",
+    "Walmart, Dollar Stores Beat Traditional Grocers' Reach As Affordability Crunch Intensifies, Report Finds"
+  ],
+  "headlines_only_in_without": [
+    "11 Best New Dollar Tree Spring Finds Hitting Shelves This Week",
+    "Are consumers finally cracking under the weight of $4 gas?",
+    "Brightstar Capital Partners Invests in Bendon, a Provider of Screen-Free Children\u2019s Activity Products",
+    "Corvex Management exits CCL, DLTR, raises stakes in VSTS, DIS, ORCL among Q4 moves",
+    "Dollar Tree Inc. stock outperforms competitors on strong trading day",
+    "Dollar Tree Inc. stock underperforms Wednesday when compared to competitors",
+    "Dollar Tree price gives in to negative pressure - Forecast today - 22-04-2026",
+    "Dollar Tree rounding out Brierwood Village Plaza Winn-Dixie",
+    "Don\u2019t Sleep on These Luxe Dollar Tree Mother\u2019s Day Gifts!",
+    "FIVE vs. DLTR: Which Discount Retail Stock Has Better Upside Now?",
+    "Is It Time To Reconsider Dollar Tree (DLTR) After This Year\u2019s 20% Share Price Slide",
+    "Linde price leans on SMA support - Forecast today - 22-04-2026"
+  ],
+  "benzinga_items_with_full_content": 12
+}
