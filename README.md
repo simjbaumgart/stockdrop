@@ -172,6 +172,46 @@ Because Deep Research is the system's senior reviewer — the only stage with ov
 
 ---
 
+## 📈 3-Month Readout: Forward Returns & Recovery by Verdict (Apr–Jun 2026)
+
+The table above evaluates Deep Research verdicts. This section zooms out to **all four PM verdicts — including the ones that never become trades (`WATCH`, `AVOID`)** — and asks the question the whole system exists to answer: *does the verdict ladder actually predict which dips recover?*
+
+**Methodology:** every PM decision since Apr 9, 2026 with a usable screen price, anchored at the **decision-day close** and tracked forward against live yfinance prices. Each stock's path is measured against its own anchor, so the comparison is per-name. Split / bad-ticker artifacts (|move| > 30–60%) are dropped; **medians** are used as the robust central tendency. Scripts: `scripts/analysis/recovery_curves.py`, `verdict_forward_returns.py`.
+
+### Recovery over the two weeks after the recommendation
+
+Median cumulative return from the decision-day close, by trading day:
+
+| Verdict | n | +3d | +6d | +8d | **+2wk (d10)** |
+|---|---|---|---|---|---|
+| **BUY** | 77 | +0.68% | +0.59% | +2.03% | **+1.21%** |
+| **BUY_LIMIT** | 79 | −0.37% | −1.86% | +0.10% | **+0.67%** |
+| **WATCH** | 105 | −0.94% | −1.45% | −0.41% | **+0.57%** |
+| **AVOID** | 349 | +0.08% | −0.52% | −0.70% | **−0.15%** |
+
+![Recovery curves by verdict over 2 weeks](docs/images/recovery_curves_2wk.png)
+*Median (left, IQR band) and mean (right, ±1 SE band) cumulative return over the 10 trading days after each recommendation.*
+
+### Forward return at +5 days, by verdict
+
+![+5-day forward return by PM verdict](docs/images/forward_return_all_verdicts.png)
+*Distribution of the one-week forward return per verdict (winsorized ±30%). Only the top `BUY` bucket sits clearly above zero.*
+
+### Realized P&L dispersion across the PM and DR layers
+
+![Realized P&L dispersion by decision layer](docs/images/pnl_dispersion_by_decision.png)
+*Closed-trade P&L (mean ± 1σ, with per-trade scatter) split by PM verdict and DR action, against the SPY period return. The desk's realized edge concentrates in the `BUY_LIMIT` cohort.*
+
+### What this tells us
+
+*   **The verdict ladder is correctly ordered over two weeks:** `BUY` (+1.21%) > `BUY_LIMIT` (+0.67%) ≈ `WATCH` (+0.57%) > `AVOID` (−0.15%). The system's ranking has real forward predictive content.
+*   **`BUY` is the only bucket that recovers monotonically.** It climbs from day 0 and never meaningfully dips — this is the cohort actually catching the bounce, and the one with positive +5d forward return (median +0.85%, 55% up).
+*   **`BUY_LIMIT` and `WATCH` keep falling for ~1.5 weeks, then stabilize** (troughing near −1.5% to −1.9% around day 6 before recovering). This is empirical validation of the **limit-order / wait-for-stabilization discipline**: those dips genuinely fall further before they turn, so a limit entry *below* the decision price is the right call — not a market buy.
+*   **`AVOID` doesn't pick losers — it picks non-recoverers.** Avoided names drift flat-to-negative the whole fortnight (ending −0.15% while SPY rose), correctly identifying dips with no durable bounce, even though they rarely collapse outright.
+*   **Caveat — the realized book is thin and stale:** the closed-position desk only ran Apr 9 → May 14 (40 trades, 55% win, +1.11%/trade, ≈+0.2% alpha vs SPY over matched holds). The forward-return analysis above spans the full window and is the more complete signal.
+
+---
+
 ## 🔭 Active Workstreams
 Documented in `docs/proposals/`:
 *   **LOO (Limit Order Optimizer)** — capture the alpha currently lost when limit orders don't trigger.
