@@ -154,10 +154,10 @@ Median cumulative return from the decision-day close, by trading day:
 ![+5-day forward return by PM verdict](docs/images/forward_return_all_verdicts.png)
 *Distribution of the one-week forward return per verdict (winsorized ±30%). Only the top `BUY` bucket sits clearly above zero.*
 
-### Realized P&L dispersion across the PM and DR layers
+### Realized P&L vs SPY — matched holding windows
 
-![Realized P&L dispersion by decision layer](docs/images/pnl_dispersion_by_decision.png)
-*Closed-trade P&L (mean ± 1σ, with per-trade scatter) split by PM verdict and DR action, against the SPY period return. The desk's realized edge concentrates in the `BUY_LIMIT` cohort.*
+![Strategy vs SPY on matched holding windows](docs/images/strategy_vs_spy_matched.png)
+*Each closed trade is benchmarked against SPY's return over its **own entry→exit window** (avg hold ≈3 days) — not full-period buy-and-hold. The desk posts positive alpha in aggregate (+0.20 pts) and in both PM buckets (`BUY_LIMIT` +0.27); only the small DR-`BUY` group (n=8) lags SPY.*
 
 ### What this tells us
 
