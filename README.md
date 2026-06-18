@@ -154,16 +154,22 @@ Median cumulative return from the decision-day close, by trading day:
 ![+5-day forward return by PM verdict](docs/images/forward_return_all_verdicts.png)
 *Distribution of the one-week forward return per verdict (winsorized ±30%). Only the top `BUY` bucket sits clearly above zero.*
 
+### Desk equity vs SPY
+
+![Desk equity vs SPY buy-and-hold](docs/images/equity_curve_vs_spy.png)
+*Daily mark-to-market equity (equal-weight across concurrent open positions) vs SPY buy-and-hold over the trading window. Because trades overlap heavily, the desk held ≥1 position on **96% of days** — so this is a like-for-like, fully-invested comparison. The desk ends **+15.0% vs SPY +7.7% (+7.3 pts ahead)**.*
+
 ### Realized P&L vs SPY — matched holding windows
 
 ![Strategy vs SPY on matched holding windows](docs/images/strategy_vs_spy_matched.png)
-*Each closed trade is benchmarked against SPY's return over its **own entry→exit window** (avg hold ≈3 days) — not full-period buy-and-hold. The desk posts positive alpha in aggregate (+0.20 pts) and in both PM buckets (`BUY_LIMIT` +0.27); only the small DR-`BUY` group (n=8) lags SPY.*
+*Per-trade view: each closed trade is benchmarked against SPY's return over its **own entry→exit window** (avg hold ≈3 days) — not full-period buy-and-hold. The desk posts positive alpha in aggregate (+0.20 pts) and in both PM buckets (`BUY_LIMIT` +0.27); only the small DR-`BUY` group (n=8) lags SPY.*
 
 ### What this tells us
 
 *   **The ladder is correctly ordered over two weeks:** `BUY` (+1.21%) > `BUY_LIMIT` (+0.67%) ≈ `WATCH` (+0.57%) > `AVOID` (−0.15%). `BUY` is the only bucket that recovers monotonically — the cohort actually catching the bounce.
 *   **`BUY_LIMIT`/`WATCH` keep falling ~1.5 weeks, then stabilize** (troughing near −1.9% around day 6). Empirical validation of the limit-order discipline: those dips fall further before turning, so a limit entry *below* the decision price beats a market buy.
-*   **`AVOID` picks non-recoverers, not losers** — flat-to-negative all fortnight (−0.15% while SPY rose), without collapsing outright. *(The realized desk is thinner: 40 closed trades Apr 9 → May 14, 55% win, ≈+0.2% alpha vs SPY.)*
+*   **`AVOID` picks non-recoverers, not losers** — flat-to-negative all fortnight (−0.15% while SPY rose), without collapsing outright.
+*   **The desk beats the market over the traded window.** As a fully-invested equal-weight portfolio it returned +15.0% vs SPY's +7.7% (Apr 9 – May 14); on a stricter per-trade matched-window basis the edge is a thinner but still-positive +0.2 pts (40 closed trades, 55% win).
 
 ---
 
