@@ -131,52 +131,9 @@ Dashboard: `http://localhost:8000`. Background workers (scanner, Deep Research, 
 
 ---
 
-## 📊 Performance: Deep Research Verdicts vs Reality
-
-Because Deep Research is the system's senior reviewer — the only stage with override authority over the PM — its verdicts are the most useful unit to evaluate. The table below covers **every decision since Jan 15, 2026 that received a DR verdict**, scored against live prices through today.
-
-**Methodology:** combined dataset from `data/subscribers.db` and `subscribers.db`, joined to live yfinance history. Outliers with |peak ROI| > 300% (corporate-action artifacts) are excluded from cohort aggregates. SPY peak ROI is computed over the *exact same window* per ticker, so the comparison is apples-to-apples.
-
-### Headline numbers
-*   **Trades analyzed: 155** (decisions with a Deep Research verdict)
-*   **Overall win rate (>10% peak): 57.4%**
-*   **Avg peak ROI across all DR-verdicted trades: 15.45%**
-*   **SPY avg peak ROI over the same windows: 3.76%** (~4x baseline)
-
-### Performance by DR Verdict
-
-| DR Verdict | N | Avg Date | Avg Peak ROI | Median Peak ROI | SPY (same window) | Win Rate (>10%) | Loss Rate (current ≤ -10%) |
-|---|---|---|---|---|---|---|---|
-| **STRONG_BUY** | 1 | Feb 03 | **73.46%** | 73.46% | 3.77% | **100.0%** | 0.0% |
-| **SPECULATIVE_BUY** | 20 | Jan 30 | **14.48%** | 13.90% | 3.76% | **70.0%** | 30.0% |
-| **BUY_LIMIT** | 55 | Mar 05 | **13.25%** | 9.86% | 3.95% | 49.1% | 18.2% |
-| **BUY** | 11 | Mar 19 | **10.44%** | 7.04% | 3.21% | 27.3% | 18.2% |
-| **WAIT_FOR_STABILIZATION** | 51 | Jan 29 | **17.97%** | 16.16% | 3.67% | 66.7% | 45.1% |
-| **AVOID** | 14 | Apr 02 | **16.37%** | 10.06% | 3.92% | 50.0% | 0.0% |
-| **HARD_AVOID** | 3 | Jan 28 | **14.22%** | 10.90% | 3.37% | 100.0% | 66.7% |
-
-### What this tells us
-
-*   **The high-conviction signal is real.** `SPECULATIVE_BUY` (N=20) hits a 70% win rate at ~4x SPY's peak ROI over the same windows. This is the cohort the system is designed to surface, and it pays.
-*   **`WAIT_FOR_STABILIZATION` is a useful stop-sign — peak ROI is a misleading metric here.** These names *do* run (17.97% avg peak), but the 45% loss rate at current price shows what the verdict is actually flagging: stocks that bounce, then keep bleeding. The DR agent is correctly identifying falling knives that have a relief rally in them but no durable thesis. **Acting on peak ROI alone here would be a trap** — the verdict is telling you to wait for confirmation, and the data backs that up.
-*   **Even `AVOID` candidates often bounce.** Most >5% drops in large-caps see *some* relief rally, regardless of fundamentals. `AVOID` averages 16% peak ROI but a 0% loss rate at current — meaning these stocks rarely collapse further, they just don't sustain. Disciplined entry/exit is what separates the alpha from the noise; that's the empirical motivation for the LOO and Sell Council workstreams below.
-*   **`HARD_AVOID` (N=3) is too small to draw conclusions** — a 67% loss-rate-at-current is consistent with the verdict's intent (true value traps), but we need more samples.
-
-### Visuals
-
-![Peak ROI Distribution by DR Verdict](docs/images/dr_verdict_distribution.png)
-*Box plot of peak ROI per DR verdict. Outliers > 300% removed.*
-
-![Avg Peak ROI by DR Verdict vs SPY](docs/images/dr_verdict_avg_roi.png)
-*Side-by-side comparison: each cohort's avg peak ROI against SPY's peak ROI over the same windows.*
-
----
-
 ## 📈 3-Month Readout: Forward Returns & Recovery by Verdict (Apr–Jun 2026)
 
-The table above evaluates Deep Research verdicts. This section zooms out to **all four PM verdicts — including the ones that never become trades (`WATCH`, `AVOID`)** — and asks the question the whole system exists to answer: *does the verdict ladder actually predict which dips recover?*
-
-**Methodology:** every PM decision since Apr 9, 2026 with a usable screen price, anchored at the **decision-day close** and tracked forward against live yfinance prices. Each stock's path is measured against its own anchor, so the comparison is per-name. Split / bad-ticker artifacts (|move| > 30–60%) are dropped; **medians** are used as the robust central tendency. Scripts: `scripts/analysis/recovery_curves.py`, `verdict_forward_returns.py`.
+Does the verdict ladder actually predict which dips recover? Every PM decision since Apr 9, 2026 is anchored at its **decision-day close** and tracked against live yfinance prices (artifacts > ±30–60% dropped, **medians** used). Scripts: `scripts/analysis/recovery_curves.py`, `verdict_forward_returns.py`.
 
 ### Recovery over the two weeks after the recommendation
 
@@ -204,11 +161,9 @@ Median cumulative return from the decision-day close, by trading day:
 
 ### What this tells us
 
-*   **The verdict ladder is correctly ordered over two weeks:** `BUY` (+1.21%) > `BUY_LIMIT` (+0.67%) ≈ `WATCH` (+0.57%) > `AVOID` (−0.15%). The system's ranking has real forward predictive content.
-*   **`BUY` is the only bucket that recovers monotonically.** It climbs from day 0 and never meaningfully dips — this is the cohort actually catching the bounce, and the one with positive +5d forward return (median +0.85%, 55% up).
-*   **`BUY_LIMIT` and `WATCH` keep falling for ~1.5 weeks, then stabilize** (troughing near −1.5% to −1.9% around day 6 before recovering). This is empirical validation of the **limit-order / wait-for-stabilization discipline**: those dips genuinely fall further before they turn, so a limit entry *below* the decision price is the right call — not a market buy.
-*   **`AVOID` doesn't pick losers — it picks non-recoverers.** Avoided names drift flat-to-negative the whole fortnight (ending −0.15% while SPY rose), correctly identifying dips with no durable bounce, even though they rarely collapse outright.
-*   **Caveat — the realized book is thin and stale:** the closed-position desk only ran Apr 9 → May 14 (40 trades, 55% win, +1.11%/trade, ≈+0.2% alpha vs SPY over matched holds). The forward-return analysis above spans the full window and is the more complete signal.
+*   **The ladder is correctly ordered over two weeks:** `BUY` (+1.21%) > `BUY_LIMIT` (+0.67%) ≈ `WATCH` (+0.57%) > `AVOID` (−0.15%). `BUY` is the only bucket that recovers monotonically — the cohort actually catching the bounce.
+*   **`BUY_LIMIT`/`WATCH` keep falling ~1.5 weeks, then stabilize** (troughing near −1.9% around day 6). Empirical validation of the limit-order discipline: those dips fall further before turning, so a limit entry *below* the decision price beats a market buy.
+*   **`AVOID` picks non-recoverers, not losers** — flat-to-negative all fortnight (−0.15% while SPY rose), without collapsing outright. *(The realized desk is thinner: 40 closed trades Apr 9 → May 14, 55% win, ≈+0.2% alpha vs SPY.)*
 
 ---
 
