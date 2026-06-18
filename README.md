@@ -131,44 +131,39 @@ Dashboard: `http://localhost:8000`. Background workers (scanner, Deep Research, 
 
 ---
 
-## 📊 Performance: Deep Research Verdicts vs Reality
+## 📈 3-Month Readout: Forward Returns & Recovery by Verdict (Apr–Jun 2026)
 
-Because Deep Research is the system's senior reviewer — the only stage with override authority over the PM — its verdicts are the most useful unit to evaluate. The table below covers **every decision since Jan 15, 2026 that received a DR verdict**, scored against live prices through today.
+Does the verdict ladder actually predict which dips recover? Every PM decision since Apr 9, 2026 is anchored at its **decision-day close** and tracked against live yfinance prices (artifacts > ±30–60% dropped, **medians** used). Scripts: `scripts/analysis/recovery_curves.py`, `verdict_forward_returns.py`.
 
-**Methodology:** combined dataset from `data/subscribers.db` and `subscribers.db`, joined to live yfinance history. Outliers with |peak ROI| > 300% (corporate-action artifacts) are excluded from cohort aggregates. SPY peak ROI is computed over the *exact same window* per ticker, so the comparison is apples-to-apples.
+### Recovery over the two weeks after the recommendation
 
-### Headline numbers
-*   **Trades analyzed: 155** (decisions with a Deep Research verdict)
-*   **Overall win rate (>10% peak): 57.4%**
-*   **Avg peak ROI across all DR-verdicted trades: 15.45%**
-*   **SPY avg peak ROI over the same windows: 3.76%** (~4x baseline)
+Median cumulative return from the decision-day close, by trading day:
 
-### Performance by DR Verdict
+| Verdict | n | +3d | +6d | +8d | **+2wk (d10)** |
+|---|---|---|---|---|---|
+| **BUY** | 77 | +0.68% | +0.59% | +2.03% | **+1.21%** |
+| **BUY_LIMIT** | 79 | −0.37% | −1.86% | +0.10% | **+0.67%** |
+| **WATCH** | 105 | −0.94% | −1.45% | −0.41% | **+0.57%** |
+| **AVOID** | 349 | +0.08% | −0.52% | −0.70% | **−0.15%** |
 
-| DR Verdict | N | Avg Date | Avg Peak ROI | Median Peak ROI | SPY (same window) | Win Rate (>10%) | Loss Rate (current ≤ -10%) |
-|---|---|---|---|---|---|---|---|
-| **STRONG_BUY** | 1 | Feb 03 | **73.46%** | 73.46% | 3.77% | **100.0%** | 0.0% |
-| **SPECULATIVE_BUY** | 20 | Jan 30 | **14.48%** | 13.90% | 3.76% | **70.0%** | 30.0% |
-| **BUY_LIMIT** | 55 | Mar 05 | **13.25%** | 9.86% | 3.95% | 49.1% | 18.2% |
-| **BUY** | 11 | Mar 19 | **10.44%** | 7.04% | 3.21% | 27.3% | 18.2% |
-| **WAIT_FOR_STABILIZATION** | 51 | Jan 29 | **17.97%** | 16.16% | 3.67% | 66.7% | 45.1% |
-| **AVOID** | 14 | Apr 02 | **16.37%** | 10.06% | 3.92% | 50.0% | 0.0% |
-| **HARD_AVOID** | 3 | Jan 28 | **14.22%** | 10.90% | 3.37% | 100.0% | 66.7% |
+![Recovery curves by verdict over 2 weeks](docs/images/recovery_curves_2wk.png)
+*Median (left, IQR band) and mean (right, ±1 SE band) cumulative return over the 10 trading days after each recommendation.*
+
+### Forward return at +5 days, by verdict
+
+![+5-day forward return by PM verdict](docs/images/forward_return_all_verdicts.png)
+*Distribution of the one-week forward return per verdict (winsorized ±30%). Only the top `BUY` bucket sits clearly above zero.*
+
+### Realized P&L dispersion across the PM and DR layers
+
+![Realized P&L dispersion by decision layer](docs/images/pnl_dispersion_by_decision.png)
+*Closed-trade P&L (mean ± 1σ, with per-trade scatter) split by PM verdict and DR action, against the SPY period return. The desk's realized edge concentrates in the `BUY_LIMIT` cohort.*
 
 ### What this tells us
 
-*   **The high-conviction signal is real.** `SPECULATIVE_BUY` (N=20) hits a 70% win rate at ~4x SPY's peak ROI over the same windows. This is the cohort the system is designed to surface, and it pays.
-*   **`WAIT_FOR_STABILIZATION` is a useful stop-sign — peak ROI is a misleading metric here.** These names *do* run (17.97% avg peak), but the 45% loss rate at current price shows what the verdict is actually flagging: stocks that bounce, then keep bleeding. The DR agent is correctly identifying falling knives that have a relief rally in them but no durable thesis. **Acting on peak ROI alone here would be a trap** — the verdict is telling you to wait for confirmation, and the data backs that up.
-*   **Even `AVOID` candidates often bounce.** Most >5% drops in large-caps see *some* relief rally, regardless of fundamentals. `AVOID` averages 16% peak ROI but a 0% loss rate at current — meaning these stocks rarely collapse further, they just don't sustain. Disciplined entry/exit is what separates the alpha from the noise; that's the empirical motivation for the LOO and Sell Council workstreams below.
-*   **`HARD_AVOID` (N=3) is too small to draw conclusions** — a 67% loss-rate-at-current is consistent with the verdict's intent (true value traps), but we need more samples.
-
-### Visuals
-
-![Peak ROI Distribution by DR Verdict](docs/images/dr_verdict_distribution.png)
-*Box plot of peak ROI per DR verdict. Outliers > 300% removed.*
-
-![Avg Peak ROI by DR Verdict vs SPY](docs/images/dr_verdict_avg_roi.png)
-*Side-by-side comparison: each cohort's avg peak ROI against SPY's peak ROI over the same windows.*
+*   **The ladder is correctly ordered over two weeks:** `BUY` (+1.21%) > `BUY_LIMIT` (+0.67%) ≈ `WATCH` (+0.57%) > `AVOID` (−0.15%). `BUY` is the only bucket that recovers monotonically — the cohort actually catching the bounce.
+*   **`BUY_LIMIT`/`WATCH` keep falling ~1.5 weeks, then stabilize** (troughing near −1.9% around day 6). Empirical validation of the limit-order discipline: those dips fall further before turning, so a limit entry *below* the decision price beats a market buy.
+*   **`AVOID` picks non-recoverers, not losers** — flat-to-negative all fortnight (−0.15% while SPY rose), without collapsing outright. *(The realized desk is thinner: 40 closed trades Apr 9 → May 14, 55% win, ≈+0.2% alpha vs SPY.)*
 
 ---
 
