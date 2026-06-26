@@ -1309,7 +1309,73 @@ class ResearchService:
                 "key_factors": [],
             }
 
+        # Stage-1 calibration shadow A/B (opt-in via CALIBRATION_SHADOW=1). Logs a
+        # paired card-ON (treatment) PM verdict next to this card-OFF (control) one.
+        # Best-effort and gated — never affects the returned decision.
+        if os.getenv("CALIBRATION_SHADOW", "0") == "1" and getattr(state, "decision_id", None) is not None:
+            self._run_calibration_shadow(state, safe_concerns, risky_support, drop_str, decision)
+
         return decision
+
+    def _run_calibration_shadow(self, state: MarketState, safe_concerns: List[str],
+                                risky_support: List[str], drop_str: str,
+                                control_decision: Dict) -> None:
+        """Re-run the PM synthesis with the calibration card forced ON and log the
+        treatment verdict alongside the control. Isolates the card's effect on the
+        PM (raw verdict, pre-gate). Never raises into the live pipeline."""
+        try:
+            from app.services.calibration_service import calibration_block
+            from app.database import insert_calibration_shadow_run
+
+            ef = getattr(state, "earnings_facts", None) or {}
+            card_slice = calibration_block(
+                drop_type=None,
+                is_earnings=(ef.get("reported_eps") is not None),
+                force=True,
+            )
+            if not card_slice:
+                return  # no bucket met threshold -> treatment == control, skip the call
+
+            treatment_prompt = self._create_fund_manager_prompt(
+                state, safe_concerns, risky_support, drop_str, force_calibration=True
+            )
+            agent_call_counter.record("pm")
+            t_str = self._call_agent(treatment_prompt, "Fund Manager (cal-shadow)", state)
+            t_failed = (
+                not t_str
+                or any(t_str.lstrip().startswith(m) for m in _FAILED_REPORT_MARKERS)
+            )
+            t_decision = None if t_failed else self._extract_json(t_str)
+            if not t_decision:
+                logger.warning(
+                    "[Cal-Shadow] %s: treatment PM call failed/unparseable; skipping.",
+                    state.ticker,
+                )
+                return
+
+            c_verdict = (control_decision.get("action") or "").upper()
+            t_verdict = (t_decision.get("action") or "").upper()
+            insert_calibration_shadow_run(
+                decision_id=state.decision_id,
+                symbol=state.ticker,
+                decision_date=datetime.now().strftime("%Y-%m-%d"),
+                control_verdict=c_verdict,
+                control_conviction=control_decision.get("conviction"),
+                control_score=control_decision.get("upside_percent"),
+                treatment_verdict=t_verdict,
+                treatment_conviction=t_decision.get("conviction"),
+                treatment_score=t_decision.get("upside_percent"),
+                card_slice=card_slice,
+                verdict_flipped=int(c_verdict != t_verdict),
+            )
+            flip = "FLIP" if c_verdict != t_verdict else "same"
+            print(f"  > [Cal-Shadow] {state.ticker}: control={c_verdict} "
+                  f"treatment={t_verdict} ({flip})")
+        except Exception as e:
+            logger.warning(
+                "[Cal-Shadow] %s: shadow run errored (non-fatal): %s",
+                getattr(state, "ticker", "?"), e,
+            )
 
     def _run_deep_reasoning_check(self, state: MarketState, drop_str: str, raw_data: Dict) -> str:
         """
@@ -1732,7 +1798,7 @@ At the very end of your response, append exactly this block (raw JSON on one lin
 
 
 
-    def _create_fund_manager_prompt(self, state: MarketState, safe_concerns: List[str], risky_support: List[str], drop_str: str) -> str:
+    def _create_fund_manager_prompt(self, state: MarketState, safe_concerns: List[str], risky_support: List[str], drop_str: str, force_calibration: bool = False) -> str:
         bull_report = state.reports.get('bull', 'No Bull Report')
         bear_report = state.reports.get('bear', 'No Bear Report')
         risk_report = state.reports.get('risk', 'No Risk Report')
@@ -1800,6 +1866,18 @@ At the very end of your response, append exactly this block (raw JSON on one lin
         else:
             earnings_block = "\nEARNINGS_FACTS: (no recent reported quarter available — drop is not earnings-driven, or facts unavailable)"
 
+        # Calibration card (Option 1, feature-flagged via CALIBRATION_ENABLED).
+        # drop_type is not yet known at PM time (the PM classifies it), so only
+        # the earnings slice is passed. Empty string when the flag is off keeps
+        # this prompt byte-identical to before.
+        from app.services.calibration_service import calibration_block
+        _cal_block = calibration_block(
+            drop_type=None,
+            is_earnings=(ef.get("reported_eps") is not None),
+            force=force_calibration,
+        )
+        _cal_block_fmt = f"{_cal_block}\n\n" if _cal_block else ""
+
         return f"""
 You are the **Portfolio Manager**. You have the final vote.
 You must weigh the arguments from the Bull Agent and the Bear Agent, cross-reference with the original Agent Reports, and produce a concrete, actionable trading plan.
@@ -1811,7 +1889,7 @@ DECISION CONTEXT:
 - The investor holds positions until recovery (weeks to months), not day-trading.
 - Gatekeeper Tier: {tier_line}
 {vol_block}
-STRUCTURED SENSOR VERDICTS (machine-parsed from the reports below — read these first, then the narrative):
+{_cal_block_fmt}STRUCTURED SENSOR VERDICTS (machine-parsed from the reports below — read these first, then the narrative):
 {structured_block}
 
 RISK FACTORS (For Consideration):

@@ -121,6 +121,7 @@ async def startup_event_handler():
     asyncio.create_task(run_daily_summary())
     asyncio.create_task(run_performance_tracking())
     asyncio.create_task(run_trade_report_update())
+    asyncio.create_task(run_outcome_marking())
     if run_for_minutes:
         asyncio.create_task(run_shutdown_timer(run_for_minutes))
 
@@ -242,6 +243,63 @@ async def run_performance_tracking():
 
         if await _interruptible_sleep(3600):
             break
+
+async def run_outcome_marking():
+    """Forward-mark decision_outcomes as horizons mature (calibration Phase 0).
+
+    Runs once a day after market close. Reuses the yfinance backfill logic on
+    just the decisions with an unfilled-but-matured horizon, then a QC guard
+    alerts loudly if anything matured long ago and still has no marks.
+    """
+    from app.database import get_decisions_missing_outcomes, get_stale_unmarked_outcomes
+    from scripts.maintenance import backfill_outcomes
+    from scripts.analysis import build_calibration_card
+
+    last_run_date = None
+    while not shutdown_event.is_set():
+        try:
+            now = datetime.now()
+            today_str = now.strftime("%Y-%m-%d")
+
+            if now.hour >= 23 and last_run_date != today_str:
+                print("Running Outcome Marking (calibration)...")
+                missing = await asyncio.to_thread(get_decisions_missing_outcomes, today_str)
+                if missing:
+                    summary = await asyncio.to_thread(
+                        backfill_outcomes.run, False, None, missing
+                    )
+                    print(f"Outcome Marking completed. {summary}")
+                else:
+                    print("Outcome Marking: nothing matured to fill.")
+
+                # QC guard — fail loudly if matured decisions are still unmarked.
+                stale = await asyncio.to_thread(get_stale_unmarked_outcomes, today_str, 8)
+                if stale:
+                    syms = ", ".join(f"{s['symbol']}#{s['id']}" for s in stale[:15])
+                    logging.error(
+                        "[QC ALERT] %d decisions >8d old still have no outcome marks "
+                        "(first 15: %s). decision_outcomes may be rotting.",
+                        len(stale), syms,
+                    )
+                    print(f"[QC ALERT] {len(stale)} matured decisions unmarked: {syms}")
+
+                # Rebuild the calibration card so it always reflects fresh marks,
+                # then invalidate the in-process cache so the live prompts pick it up.
+                try:
+                    await asyncio.to_thread(build_calibration_card.run)
+                    from app.services.calibration_service import reload_card
+                    reload_card()
+                except Exception as e:
+                    print(f"Error rebuilding calibration card: {e}")
+
+                last_run_date = today_str
+
+        except Exception as e:
+            print(f"Error in outcome marking task: {e}")
+
+        if await _interruptible_sleep(3600):
+            break
+
 
 if __name__ == "__main__":
     import argparse
