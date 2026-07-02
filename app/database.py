@@ -185,6 +185,10 @@ def init_db():
     except Exception as e:
         print(f"Error during database migration: {e}")
 
+    # DEPRECATED (2026-07-02): decision_tracking was a raw price log with no
+    # scheduled writer. Superseded by decision_outcomes (fixed-horizon forward
+    # returns, nightly marking). Kept for history — do not write new code
+    # against it; use decision_outcomes / get_outcomes_joined instead.
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS decision_tracking (
             id INTEGER PRIMARY KEY AUTOINCREMENT,

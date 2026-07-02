@@ -65,6 +65,21 @@ def _strip_citations(raw: str) -> str:
     return cleaned.strip(" ")
 
 
+# The recovery edge materializes at ~4 weeks, not 1 (locked 4w outcome
+# horizon). When the PM omits reassess_in_days on a buy, default the cadence
+# to 4 calendar weeks = 20 TRADING days. Plumbing only — the PM prompt is
+# deliberately not told this (THREE_TIER_FEEDBACK_PROPOSAL.md, "28d ramp").
+REASSESS_DEFAULT_TRADING_DAYS = 20
+
+
+def _reassess_in_days_with_default(raw: Optional[int], final_action: str) -> Optional[int]:
+    if raw:
+        return raw
+    if (final_action or "").upper() in ("BUY", "BUY_LIMIT"):
+        return REASSESS_DEFAULT_TRADING_DAYS
+    return raw
+
+
 def _strip_trailing_commas(s: str) -> str:
     """Remove structural trailing commas (',' immediately before '}' or ']').
 
@@ -1010,7 +1025,8 @@ class ResearchService:
             "risk_reward_ratio": final_decision.get("risk_reward_ratio"),
             "pre_drop_price": final_decision.get("pre_drop_price"),
             "entry_trigger": final_decision.get("entry_trigger"),
-            "reassess_in_days": final_decision.get("reassess_in_days"),
+            "reassess_in_days": _reassess_in_days_with_default(
+                final_decision.get("reassess_in_days"), gate_result.final_action),
             "stop_loss_guard_reason": final_decision.get("stop_loss_guard_reason"),
             # Sell range fields (v1.0)
             "sell_price_low": final_decision.get("sell_price_low"),
