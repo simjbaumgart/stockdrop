@@ -283,14 +283,29 @@ async def run_outcome_marking():
                     )
                     print(f"[QC ALERT] {len(stale)} matured decisions unmarked: {syms}")
 
-                # Rebuild the calibration card so it always reflects fresh marks,
-                # then invalidate the in-process cache so the live prompts pick it up.
+                # Rebuild the CANDIDATE card (console-only, for the monthly
+                # audit). Prompts read only the hand-pinned card — nothing the
+                # nightly job writes may reach agents (three-tier feedback).
                 try:
                     await asyncio.to_thread(build_calibration_card.run)
-                    from app.services.calibration_service import reload_card
-                    reload_card()
                 except Exception as e:
-                    print(f"Error rebuilding calibration card: {e}")
+                    print(f"Error rebuilding calibration card candidate: {e}")
+
+                # QC: injection enabled but pin missing or past its audit window.
+                try:
+                    from app.services import calibration_service
+                    if calibration_service.is_enabled():
+                        age = calibration_service.pinned_card_age_days()
+                        if age is None or age > calibration_service.STALE_PIN_MAX_DAYS:
+                            desc = "missing/unstamped" if age is None else f"{age}d old"
+                            logging.error(
+                                "[QC ALERT] CALIBRATION_ENABLED=1 but pinned card is %s — "
+                                "run the monthly audit, then "
+                                "python -m scripts.analysis.pin_calibration_card --approve",
+                                desc,
+                            )
+                except Exception as e:
+                    print(f"Error in pinned-card staleness QC: {e}")
 
                 last_run_date = today_str
 
