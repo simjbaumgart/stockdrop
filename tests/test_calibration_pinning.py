@@ -112,3 +112,57 @@ def test_pin_run_requires_approve(tmp_path, monkeypatch):
     assert not pinned.exists()
     assert pin.run(approve=True, audited_at="2026-06-30") == 0
     assert json.loads(pinned.read_text())["audited_at"] == "2026-06-30"
+
+
+def _write_pinned(tmp_path, monkeypatch, audited_at):
+    import app.services.calibration_service as cs
+    pinned = dict(_candidate_card())
+    for sec in ("by_pm_verdict", "by_dr_verdict", "by_gatekeeper_tier"):
+        pinned.pop(sec)
+    pinned["audited_at"] = audited_at
+    path = tmp_path / "calibration_card_pinned.json"
+    path.write_text(json.dumps(pinned))
+    monkeypatch.setattr(cs, "_CARD_PATH", str(path))
+    cs.reload_card()
+    return cs
+
+
+def test_calibration_service_reads_pinned_path():
+    import app.services.calibration_service as cs
+    assert os.path.basename(cs._CARD_PATH) == "calibration_card_pinned.json"
+
+
+def test_block_serves_fresh_pin(tmp_path, monkeypatch):
+    import datetime
+    today = datetime.date(2026, 7, 2)
+    cs = _write_pinned(tmp_path, monkeypatch, audited_at="2026-06-30")
+    monkeypatch.setattr(cs, "_today", lambda: today)
+    block = cs.calibration_block(is_earnings=True, force=True)
+    assert "earnings drops overall" in block
+    assert cs.pinned_card_age_days(today) == 2
+
+
+def test_block_refuses_stale_pin(tmp_path, monkeypatch):
+    import datetime
+    today = datetime.date(2026, 7, 2)
+    cs = _write_pinned(tmp_path, monkeypatch, audited_at="2026-05-01")  # 62d old
+    monkeypatch.setattr(cs, "_today", lambda: today)
+    assert cs.calibration_block(is_earnings=True, force=True) == ""
+    assert cs.pinned_card_age_days(today) == 62
+
+
+def test_pin_edit_is_picked_up_without_reload(tmp_path, monkeypatch):
+    """mtime cache: a manual re-pin must reach a long-lived process."""
+    import datetime, time
+    today = datetime.date(2026, 7, 2)
+    cs = _write_pinned(tmp_path, monkeypatch, audited_at="2026-06-30")
+    monkeypatch.setattr(cs, "_today", lambda: today)
+    assert "n=412" in cs.calibration_block(is_earnings=False, force=True)
+
+    path = tmp_path / "calibration_card_pinned.json"
+    card = json.loads(path.read_text())
+    card["by_earnings"]["non_earnings"]["n"] = 999
+    time.sleep(0.01)
+    path.write_text(json.dumps(card))
+    os.utime(str(path))  # force a distinct mtime on coarse filesystems
+    assert "n=999" in cs.calibration_block(is_earnings=False, force=True)
