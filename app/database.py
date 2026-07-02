@@ -665,6 +665,55 @@ def get_outcomes_joined() -> List[dict]:
         return []
 
 
+def get_recent_signal_rates(
+    limit: int = 50,
+    gated_drop_types: tuple = ("EARNINGS_MISS", "COMPANY_SPECIFIC", "ANALYST_DOWNGRADE"),
+) -> dict:
+    """Trailing-N shares of gate-input signals across ALL decisions.
+
+    The denominator is every decision, not just buys — that is the base the
+    falling-knife collapse was measured on (256/264 YES since 2026-06-11).
+    Used by decision_gate_service.run_nightly_degeneracy_check.
+    """
+    empty = {"n": 0, "drop_type_gated_rate": 0.0, "news_bearish_rate": 0.0,
+             "knife_n": 0, "knife_yes_rate": 0.0}
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT drop_type, risk_falling_knife, news_sentiment
+            FROM decision_points
+            ORDER BY timestamp DESC, id DESC
+            LIMIT ?
+            """,
+            (int(limit),),
+        )
+        rows = [dict(r) for r in cursor.fetchall()]
+        conn.close()
+    except Exception as e:
+        print(f"Error fetching recent signal rates: {e}")
+        return empty
+
+    n = len(rows)
+    if n == 0:
+        return empty
+    gated = set(gated_drop_types)
+    knife_vals = [(r["risk_falling_knife"] or "").strip().upper()
+                  for r in rows if r["risk_falling_knife"] is not None]
+    return {
+        "n": n,
+        "drop_type_gated_rate": sum(
+            1 for r in rows if (r["drop_type"] or "").strip().upper() in gated) / n,
+        "news_bearish_rate": sum(
+            1 for r in rows if (r["news_sentiment"] or "").strip().upper() == "BEARISH") / n,
+        "knife_n": len(knife_vals),
+        "knife_yes_rate": (sum(1 for v in knife_vals if v == "YES") / len(knife_vals))
+        if knife_vals else 0.0,
+    }
+
+
 def insert_calibration_shadow_run(**fields) -> bool:
     """Insert a paired control-vs-treatment PM verdict row (Phase 3 A/B)."""
     if not fields:

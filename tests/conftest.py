@@ -59,7 +59,7 @@ def _no_production_db(monkeypatch, tmp_path):
     import app.database as db
 
     current = os.path.basename(str(db.DB_NAME))
-    if current == "subscribers.db":
+    if current == "subscribers.db" or current == "stockdrop_test_import_guard.db":
         guard_db = str(tmp_path / "guard.db")
         monkeypatch.setattr(db, "DB_NAME", guard_db)
         monkeypatch.setenv("DB_PATH", guard_db)
