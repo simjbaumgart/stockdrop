@@ -131,6 +131,13 @@ def _is_retryable_grounding_error(e: Exception) -> bool:
 # when a transient 503 + exponential backoff combine to loop for hours.
 AGENT_WALL_CLOCK_BUDGET_SEC = 600
 
+# Live fallback when the primary pro model (gemini-3.1-pro-preview) returns 503.
+# gemini-3-pro-preview was RETIRED and now 404s, which silently dropped agents
+# (e.g. Bear Researcher) from the council. This must always point at a
+# currently-available model. Flash supports grounding, so it can stand in for
+# the pro reasoning agents — degraded quality is acceptable; a dropped agent is not.
+GROUNDING_FALLBACK_MODEL = os.getenv("GROUNDING_FALLBACK_MODEL", "gemini-3-flash-preview")
+
 # When the wall clock advances much faster than the monotonic clock between
 # two budget checks, we assume the machine slept. The budget should not be
 # eaten by sleep time (laptop lid closed mid-cycle), so we re-stamp it.
@@ -1794,6 +1801,12 @@ At the very end of your response, append exactly this block (raw JSON on one lin
 === STRUCTURED_VERDICT ===
 {{"bear_verdict": "NO_TRADE" or "SHORT" or "TOLERABLE", "top_risk": "one short sentence naming the single biggest risk", "exit_ceiling": <number>}}
 - bear_verdict: NO_TRADE = stay away from this dip; SHORT = actively negative, drop continues; TOLERABLE = the bear case is real but survivable — a disciplined long entry is defensible.
+
+VERDICT CALIBRATION (read carefully — you are graded on discrimination, not pessimism):
+- TOLERABLE is the correct verdict when the bear case is real but already priced in, or when the maximum realistic downside from the CURRENT (post-drop) price is smaller than the recovery upside. Your prose can and should stay bearish; the verdict is a separate, calibrated judgment.
+- SHORT requires an active, UNPRICED negative catalyst you can name and date in top_risk.
+- NO_TRADE requires unresolvable information gaps, not general skepticism.
+- Empirics (as of 2026-07-02): when the desk's SHORT/NO_TRADE rate was ~19% of reports it was right-signed and predictive; in June 2026 it hit 93% SHORT and the signal became worthless and was ignored. Reserve SHORT for the genuinely broken.
 {self._news_block_for(state, "bear")}"""
 
 
@@ -1961,13 +1974,18 @@ Classify the `drop_type` as one of:
 - "UNKNOWN" — No clear catalyst identified
 
 INSTRUCTIONS FOR CONVICTION:
-- "HIGH": requires at least three of the following from the STRUCTURED SENSOR VERDICTS: competitive attribution = SECTOR, news sentiment != BEARISH, bear_verdict = TOLERABLE, falling_knife = NO — plus a bull case you verified via search. Self-calculated risk/reward is NOT evidence of conviction (empirically, projected R/R 2-3 buys won 31% vs 50% for R/R 1.5-2).
+- "HIGH": requires at least three of the following from the STRUCTURED SENSOR VERDICTS: competitive attribution = SECTOR, news sentiment != BEARISH, bear_verdict = TOLERABLE, falling_knife = NO — plus a bull case you verified via search. Self-calculated risk/reward is NOT evidence of conviction — it has never predicted outcomes on this desk. Do not cite it.
 - "MODERATE": Mixed signals but favorable lean. Some unresolved risks.
 - "LOW": Too many unknowns, bear case has strong points, or drop type is structural (fraud, permanent competitive loss). Skip this trade.
 
+DESK TRACK RECORD (as of 2026-07-02; Apr-Jun 2026, 14-day marks vs SPY — weigh this evidence in your decision):
+- Your drop_type call is your highest-value output; it gates the action. SECTOR_ROTATION buys: 82% win, +3.7 excess. MACRO_SELLOFF limit-buys: 62%, +2.6. EARNINGS_MISS buys: 42%, −3.0. COMPANY_SPECIFIC buys: 46%, −1.9. Classify carefully and honestly — do not shade a company-specific drop toward SECTOR_ROTATION to justify a buy.
+- BUY_LIMIT is the desk's worst action (median excess −1.9; June 2026: 1 win in 9). Limit orders fill precisely when the stock keeps falling — adverse selection. If you believe in the recovery, prefer BUY with a tighter stop_loss; if you need a lower price to like the trade, that is a WATCH with an entry_trigger, not a BUY_LIMIT.
+- Seeking Alpha quant rating ≥ 4.0 among buys: 71% win, +3.9 excess. Treat it as confirmation weight, not a standalone reason.
+
 INSTRUCTIONS FOR ACTION:
 - "BUY": Enter now at current price. Conviction is HIGH. The evidence strongly supports recovery.
-- "BUY_LIMIT": Set a limit order at entry_price_low. Price needs to stabilize or dip slightly more before entry.
+- "BUY_LIMIT": Set a limit order at entry_price_low. ONLY permitted when drop_type is SECTOR_ROTATION or MACRO_SELLOFF (the only cases where it historically wins). For all other drop types choose BUY or WATCH.
 - "WATCH": Add to watchlist with specific entry_trigger condition. Do NOT buy yet.
 - "AVOID": Do not trade. The bear case dominates or risk/reward is unfavorable.
 
@@ -2202,8 +2220,27 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
             # Using standard generate_content (old SDK)
             # Rate limit buffer
             time.sleep(2)
-            
-            response = self.model.generate_content(prompt, request_options=RequestOptions(timeout=600))
+
+            # A 503 is transient overload: retry the SAME pro model with backoff
+            # (2s, 4s) up to MAX_GROUNDING_RETRIES before letting the exception
+            # propagate to the degrade-to-fallback handler below. This mirrors the
+            # grounded path's retry-then-degrade policy.
+            response = None
+            for _attempt in range(MAX_GROUNDING_RETRIES + 1):
+                try:
+                    response = self.model.generate_content(prompt, request_options=RequestOptions(timeout=600))
+                    break
+                except Exception as _e:
+                    _is_503 = getattr(_e, "code", None) == 503 or "503" in str(_e)
+                    if _is_503 and _attempt < MAX_GROUNDING_RETRIES:
+                        _wait = 2 ** (_attempt + 1)  # 2s, 4s
+                        logger.warning(
+                            f"503 UNAVAILABLE for {agent_name} (attempt {_attempt + 1}/{MAX_GROUNDING_RETRIES + 1}); "
+                            f"retrying pro model in {_wait}s..."
+                        )
+                        time.sleep(_wait)
+                        continue
+                    raise
 
             # Record token usage if we have the context to attribute it.
             if tracker_context is not None:
@@ -2231,11 +2268,13 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
 
             return response.text
         except Exception as e:
-            # Check for 503 Unavailable inside generic exception (for GenAI v1 SDK)
+            # Check for 503 Unavailable inside generic exception (for GenAI v1 SDK).
+            # The pro model's retries (see loop above) are already exhausted by the
+            # time we reach here, so this degrades once to the fallback model.
             if "503" in str(e) and getattr(self, "model", None) and self.model.model_name == 'models/gemini-3.1-pro-preview':
-                logger.warning(f"503 UNAVAILABLE for gemini-3.1-pro-preview. Falling back to gemini-3-pro-preview for {agent_name}...")
+                logger.warning(f"503 UNAVAILABLE for gemini-3.1-pro-preview after retries. Falling back to {GROUNDING_FALLBACK_MODEL} for {agent_name}...")
                 try:
-                    fallback_model = genai.GenerativeModel('gemini-3-pro-preview')
+                    fallback_model = genai.GenerativeModel(GROUNDING_FALLBACK_MODEL)
                     fallback_response = fallback_model.generate_content(prompt, request_options=RequestOptions(timeout=600))
 
                     if tracker_context is not None:
@@ -2250,7 +2289,7 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
                                 run_date=tracker_context["run_date"],
                                 stage=tracker_context["stage"],
                                 agent_name=tracker_context["agent_name"],
-                                model="gemini-3-pro-preview",
+                                model=GROUNDING_FALLBACK_MODEL,
                                 tokens_in=tokens_in,
                                 tokens_out=tokens_out,
                             )
@@ -2284,8 +2323,10 @@ A strictly formatted JSON object. All price fields must be numbers (not strings)
         - Retryable exceptions (ConnectionReset, 503/504, UNAVAILABLE, timeouts):
           up to MAX_GROUNDING_RETRIES retries with exponential backoff (2s, 4s).
         - Non-retryable exceptions: fail fast, return error stub.
-        - 3.1-pro 503 specifically falls back to 3-pro on the first attempt
-          (model-availability issue, no point burning retries on a known-bad preview).
+        - 3.1-pro 503 is treated as retryable: the SAME pro model is retried with
+          backoff up to MAX_GROUNDING_RETRIES first. ONLY after those retries are
+          exhausted (still 503) do we degrade once to GROUNDING_FALLBACK_MODEL
+          with a fresh retry_count but the SAME wall-clock budget.
 
         Wall-clock budget:
         - The first call creates a BudgetClock stamped at time.time() +
@@ -2406,25 +2447,12 @@ Process continuing but this agent's output is compromised.
             err_msg = str(e)
             is_503 = getattr(e, "code", None) == 503 or "503" in err_msg
 
-            # 3.1-pro 503 → fall back to 3-pro on the first attempt only.
-            # Both models being unavailable is a real outage; let the fallback run its own retry budget.
-            if is_503 and "pro" in model_name and "3.1" in model_name and retry_count == 0:
-                logger.warning(f"503 UNAVAILABLE for {model_name} in {agent_context} ({err_type}). Falling back to gemini-3-pro-preview...")
-                if time.time() + 2 >= budget_clock.deadline:
-                    return (
-                        f"[Error: {agent_context} exceeded {AGENT_WALL_CLOCK_BUDGET_SEC}s wall-clock "
-                        f"budget before 503 fallback]"
-                    )
-                time.sleep(2)
-                try:
-                    return self._call_grounded_model(prompt, "gemini-3-pro-preview", agent_context, retry_count=0, budget_clock=budget_clock, metrics_sink=metrics_sink, tracker_context=tracker_context)
-                except Exception as fallback_e:
-                    logger.error(f"Fallback model also failed for {agent_context} ({type(fallback_e).__name__}): {fallback_e}")
-                    return f"[Error in {agent_context} (Fallback): {type(fallback_e).__name__}: {fallback_e}]"
-
             retryable = _is_retryable_grounding_error(e)
             logger.error(f"Grounding call failed for {agent_context} (model={model_name}, type={err_type}, retryable={retryable}, {attempt_label}): {err_msg}")
 
+            # Retryable errors (incl. 503) retry the SAME model first with backoff.
+            # A 503 is transient overload, so we exhaust the pro model's retry
+            # budget before ever degrading to the fallback model below.
             if retryable and retry_count < MAX_GROUNDING_RETRIES:
                 wait = 2 ** (retry_count + 1)  # 2s, 4s
                 # If the upcoming sleep would blow the wall-clock budget, bail now
@@ -2440,6 +2468,24 @@ Process continuing but this agent's output is compromised.
                 logger.info(f"Retrying {agent_context} ({model_name}) in {wait}s ({err_type})...")
                 time.sleep(wait)
                 return self._call_grounded_model(prompt, model_name, agent_context, retry_count=retry_count + 1, budget_clock=budget_clock, metrics_sink=metrics_sink, tracker_context=tracker_context)
+
+            # Pro model's retries are exhausted and it's STILL 503 → degrade once
+            # to GROUNDING_FALLBACK_MODEL. Fresh retry_count, but the SAME
+            # budget_clock (no new wall-clock budget) and the same sinks/context.
+            # Fallback is flash (not "3.1 pro"), so it cannot re-trigger this path.
+            if is_503 and "pro" in model_name and "3.1" in model_name:
+                logger.warning(f"503 UNAVAILABLE for {model_name} in {agent_context} ({err_type}) after {retry_count} retries. Degrading to {GROUNDING_FALLBACK_MODEL}...")
+                if time.time() + 2 >= budget_clock.deadline:
+                    return (
+                        f"[Error: {agent_context} exceeded {AGENT_WALL_CLOCK_BUDGET_SEC}s wall-clock "
+                        f"budget before 503 fallback]"
+                    )
+                time.sleep(2)
+                try:
+                    return self._call_grounded_model(prompt, GROUNDING_FALLBACK_MODEL, agent_context, retry_count=0, budget_clock=budget_clock, metrics_sink=metrics_sink, tracker_context=tracker_context)
+                except Exception as fallback_e:
+                    logger.error(f"Fallback model also failed for {agent_context} ({type(fallback_e).__name__}): {fallback_e}")
+                    return f"[Error in {agent_context} (Fallback): {type(fallback_e).__name__}: {fallback_e}]"
 
             if not retryable:
                 logger.warning(f"Non-retryable exception for {agent_context} ({err_type}); failing fast.")
@@ -2902,6 +2948,13 @@ OUTPUT:
 A dedicated Risk Assessment.
 Be thorough but information-dense. Maximum ~600 words before the structured verdict.
 Use Headers: "Risk Assessment", "Trap Check", "Counter-Thesis", "Key Risks".
+
+FALLING_KNIFE CALIBRATION (read carefully — your verdict feeds a hard trading gate):
+Answer falling_knife = "YES" ONLY when at least TWO of these three conditions are simultaneously true, and you name which ones in your Trap Check:
+1. TECHNICAL: price closed below its prior major support or 200-day SMA with no reclaim attempt.
+2. FUNDAMENTAL: the drop's cause implies a permanent earnings or multiple impairment (guidance cut, structural competitive loss, fraud/regulatory action) — NOT a one-quarter miss.
+3. FLOW: no identifiable buyer catalyst within the reassessment window.
+A large one-day drop is NOT by itself evidence of a knife — every stock this desk analyzes has already dropped >5%; that is the entry condition, not a red flag. Historically ~40-50% of screened dips recovered within 14 days: if you answer YES on more than ~60% of stocks you are not discriminating and your verdict carries no information (as of 2026-07-02 the desk's knife verdict ran 97% YES and had to be ignored). When the two-of-three test fails, answer "NO" even though your role is risk-focused — a false knife call costs the desk real upside.
 
 At the very end of your response, append exactly this block (raw JSON on one line, no markdown fences):
 === STRUCTURED_VERDICT ===

@@ -13,14 +13,22 @@ instead of prompt instructions:
     median of -3.47%. Missing rating does NOT block (coverage ~39%).
   * Gate 3 (RISK_KNIFE_GATE): explicit falling-knife verdicts from the Risk
     agent were ignored by the PM; those buys averaged -2.48%. BUY downgrades
-    to BUY_LIMIT, or to WATCH when PM conviction is LOW. Until the structured
-    risk verdict (Phase 2) lands, an interim regex catches the explicit
-    verdict subset (~11% of reports) that was predictive.
+    to WATCH. SUSPENDED as of 2026-07-02: the structured `falling_knife`
+    verdict collapsed to 97% YES (256/264 since Jun 11) — zero information —
+    and this gate downgraded ALL 17 June PM BUYs into BUY_LIMIT, the desk's
+    worst bucket (1/9 win at 14d). Re-enable via RISK_KNIFE_GATE_ENABLED once
+    the recalibrated Risk prompt (two-of-three conjunction test, 2026-07-02)
+    restores variance: trailing-50 YES-rate must fall below
+    KNIFE_YES_RATE_CEILING. Downgrade target changed BUY_LIMIT -> WATCH:
+    BUY_LIMIT is empirically the worst action (medExc -1.9), so downgrading
+    into it was anti-defensive.
   * Gate 5 (NEWS_SENTIMENT_GATE): bearish-news buys won 39% vs 54% for
     bullish-news buys. A buy on BEARISH news sentiment needs a named,
     verifiable catalyst from the News agent; otherwise downgrade to WATCH.
   * Gate 6 (UNCONFIRMED_DROP_GATE): BUY on a drop whose reason the News
-    agent explicitly could not confirm is demoted to BUY_LIMIT.
+    agent explicitly could not confirm is demoted to WATCH (was BUY_LIMIT
+    until 2026-07-02 — see Gate 3 note on why BUY_LIMIT is not a safe
+    downgrade target).
 
 The PM's original action is preserved (`pre_gate_action`) so gated-vs-kept
 performance is a free ongoing A/B — see scripts/analysis/gate_baseline_check.py.
@@ -40,6 +48,13 @@ logger = logging.getLogger(__name__)
 GATED_DROP_TYPES = {"EARNINGS_MISS", "COMPANY_SPECIFIC", "ANALYST_DOWNGRADE"}
 
 SA_QUANT_FLOOR = 2.5
+
+# RISK_KNIFE_GATE kill switch — see module docstring. The structured
+# falling_knife verdict ran 97% YES since 2026-06-11 (no information); the
+# gate converted the entire June buy book into BUY_LIMIT (1/9 win at 14d).
+# Flip back to True only when the trailing-50 YES-rate is below the ceiling.
+RISK_KNIFE_GATE_ENABLED = False
+KNIFE_YES_RATE_CEILING = 0.60
 
 _BUY_ACTIONS = {"BUY", "BUY_LIMIT"}
 
@@ -117,14 +132,11 @@ def apply_decision_gates(
         if risk_falling_knife is not None
         else risk_report_flags_knife(risk_report)
     )
-    if knife and pre_gate == "BUY":
-        low_conviction = (conviction or "").strip().upper() == "LOW"
-        targets.append("WATCH" if low_conviction else "BUY_LIMIT")
+    if RISK_KNIFE_GATE_ENABLED and knife and pre_gate == "BUY":
+        targets.append("WATCH")
         result.gates_fired.append("RISK_KNIFE_GATE")
         result.gate_reasons.append(
-            "Risk agent flags a falling knife"
-            + (" and PM conviction is LOW" if low_conviction else "")
-            + " (knife-flagged buys averaged -2.48%)"
+            "Risk agent flags a falling knife (knife-flagged buys: 12% win at 14d, median -4.65%)"
         )
 
     if (news_sentiment or "").strip().upper() == "BEARISH" and not (news_named_catalyst or "").strip():
@@ -139,10 +151,10 @@ def apply_decision_gates(
     # An immediate BUY on an unexplained drop becomes a limit order; None
     # (unparsed verdict) never fires.
     if news_drop_reason_confirmed is False and pre_gate == "BUY":
-        targets.append("BUY_LIMIT")
+        targets.append("WATCH")
         result.gates_fired.append("UNCONFIRMED_DROP_GATE")
         result.gate_reasons.append(
-            "News agent could not confirm the drop reason — no immediate entry"
+            "News agent could not confirm the drop reason — no entry until confirmed"
         )
 
     if targets:
