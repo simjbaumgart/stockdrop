@@ -22,3 +22,26 @@ def test_pm_value_and_non_buys_pass_through():
     assert _reassess_in_days_with_default(None, "WATCH") is None
     assert _reassess_in_days_with_default(None, "AVOID") is None
     assert _reassess_in_days_with_default(7, "WATCH") == 7
+
+
+def test_is_due_uses_cadence_and_last_reassess():
+    import datetime
+    from scripts.reassess_positions import _is_due
+    today = datetime.date(2026, 7, 2)
+
+    # Decision 30 calendar days ago, default cadence (20td ≈ 28cd) -> due.
+    assert _is_due({"timestamp": "2026-06-02 10:00:00",
+                    "reassess_timestamp": None, "reassess_in_days": None}, today)
+    # Decision 10 days ago -> not due yet.
+    assert not _is_due({"timestamp": "2026-06-22 10:00:00",
+                        "reassess_timestamp": None, "reassess_in_days": None}, today)
+    # PM said 5 trading days (=> 7 calendar): 8 days ago -> due.
+    assert _is_due({"timestamp": "2026-06-24 10:00:00",
+                    "reassess_timestamp": None, "reassess_in_days": 5}, today)
+    # Reassessed yesterday resets the clock -> not due.
+    assert not _is_due({"timestamp": "2026-06-02 10:00:00",
+                        "reassess_timestamp": "2026-07-01 10:00:00",
+                        "reassess_in_days": None}, today)
+    # Unparseable timestamp -> due (surface it rather than silently skip).
+    assert _is_due({"timestamp": "garbage", "reassess_timestamp": None,
+                    "reassess_in_days": None}, today)

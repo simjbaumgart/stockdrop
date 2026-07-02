@@ -14,9 +14,10 @@ Results write to both the main sell columns and dedicated reassess_* columns.
 """
 
 import argparse
+import math
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from typing import Dict, List, Optional
 
 # Add project root to path
@@ -51,6 +52,23 @@ def _get_owned_positions() -> List[Dict]:
     """Get all decision points with status='Owned'."""
     all_points = get_decision_points()
     return [d for d in all_points if (d.get("status") or "").upper() == "OWNED"]
+
+
+# reassess_in_days is in TRADING days; convert to calendar for date math.
+TRADING_TO_CALENDAR = 7.0 / 5.0
+DEFAULT_REASSESS_TRADING_DAYS = 20  # 4 calendar weeks — the locked outcome horizon
+
+
+def _is_due(decision: Dict, today: date) -> bool:
+    """True when the position's reassess cadence has elapsed since the last
+    reassessment (or the original decision, if never reassessed)."""
+    base = str(decision.get("reassess_timestamp") or decision.get("timestamp") or "")[:10]
+    try:
+        base_date = datetime.strptime(base, "%Y-%m-%d").date()
+    except ValueError:
+        return True  # unknown age — surface it rather than silently skip
+    trading_days = decision.get("reassess_in_days") or DEFAULT_REASSESS_TRADING_DAYS
+    return today >= base_date + timedelta(days=math.ceil(trading_days * TRADING_TO_CALENDAR))
 
 
 def _get_decisions_by_symbols(symbols: List[str]) -> List[Dict]:
@@ -290,6 +308,12 @@ def main():
         nargs="*",
         help="Optional ticker symbols. If omitted, reassess all status='Owned' positions.",
     )
+    parser.add_argument(
+        "--due",
+        action="store_true",
+        help="Only reassess positions whose reassess_in_days cadence has elapsed "
+             "since the last reassessment (default cadence: 20 trading days).",
+    )
     args = parser.parse_args()
 
     if args.tickers:
@@ -302,6 +326,13 @@ def main():
         symbols = [d["symbol"] for d in decisions]
     else:
         decisions = _get_owned_positions()
+        if args.due:
+            today = datetime.now().date()
+            skipped = [d for d in decisions if not _is_due(d, today)]
+            decisions = [d for d in decisions if _is_due(d, today)]
+            if skipped:
+                print(f"--due: skipping {len(skipped)} not-yet-due position(s): "
+                      + ", ".join(d["symbol"] for d in skipped))
         symbols = [d["symbol"] for d in decisions]
         if not symbols:
             print("No owned positions found. Exiting.")
