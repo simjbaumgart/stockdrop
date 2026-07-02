@@ -85,12 +85,12 @@ def render_view(view: dict) -> str:
                 continue
             lines.append(f"{'verdict':<24}" + "".join(
                 f"{h+' n/win/mean':>22}" for h, _ in HORIZONS))
-            for verdict in sorted(groups, key=lambda v: -groups[v]["4w"]["n"]):
+            for verdict in sorted(groups, key=lambda v: -(groups[v].get("4w") or {}).get("n", 0)):
                 cells = []
                 for h, _ in HORIZONS:
                     s = groups[verdict][h]
                     cells.append(f"{s['n']:>5}/{s['win_rate']:>4.0%}/{s['mean']:>+7.1%}"
-                                 if s["n"] else f"{'—':>22}".strip().rjust(22))
+                                 if s["n"] else "—".rjust(22))
                 lines.append(f"{verdict:<24}" + "".join(f"{c:>22}" for c in cells))
     return "\n".join(lines)
 
