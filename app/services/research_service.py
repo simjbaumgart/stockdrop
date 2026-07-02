@@ -1988,20 +1988,16 @@ Classify the `drop_type` as one of:
 - "COMPANY_SPECIFIC" — Lawsuit, management change, product failure, fraud
 - "TECHNICAL_BREAKDOWN" — No fundamental catalyst; purely technical selling
 - "UNKNOWN" — No clear catalyst identified
+Classify honestly — do not shade a company-specific or earnings-driven drop toward SECTOR_ROTATION / MACRO_SELLOFF to justify a buy. This label gates the recommended action downstream, so an inaccurate classification directly changes the trade.
 
 INSTRUCTIONS FOR CONVICTION:
 - "HIGH": requires at least three of the following from the STRUCTURED SENSOR VERDICTS: competitive attribution = SECTOR, news sentiment != BEARISH, bear_verdict = TOLERABLE, falling_knife = NO — plus a bull case you verified via search. Self-calculated risk/reward is NOT evidence of conviction — it has never predicted outcomes on this desk. Do not cite it.
 - "MODERATE": Mixed signals but favorable lean. Some unresolved risks.
 - "LOW": Too many unknowns, bear case has strong points, or drop type is structural (fraud, permanent competitive loss). Skip this trade.
 
-DESK TRACK RECORD (as of 2026-07-02; Apr-Jun 2026, 14-day marks vs SPY — weigh this evidence in your decision):
-- Your drop_type call is your highest-value output; it gates the action. SECTOR_ROTATION buys: 82% win, +3.7 excess. MACRO_SELLOFF limit-buys: 62%, +2.6. EARNINGS_MISS buys: 42%, −3.0. COMPANY_SPECIFIC buys: 46%, −1.9. Classify carefully and honestly — do not shade a company-specific drop toward SECTOR_ROTATION to justify a buy.
-- BUY_LIMIT is the desk's worst action (median excess −1.9; June 2026: 1 win in 9). Limit orders fill precisely when the stock keeps falling — adverse selection. If you believe in the recovery, prefer BUY with a tighter stop_loss; if you need a lower price to like the trade, that is a WATCH with an entry_trigger, not a BUY_LIMIT.
-- Seeking Alpha quant rating ≥ 4.0 among buys: 71% win, +3.9 excess. Treat it as confirmation weight, not a standalone reason.
-
 INSTRUCTIONS FOR ACTION:
 - "BUY": Enter now at current price. Conviction is HIGH. The evidence strongly supports recovery.
-- "BUY_LIMIT": Set a limit order at entry_price_low. ONLY permitted when drop_type is SECTOR_ROTATION or MACRO_SELLOFF (the only cases where it historically wins). For all other drop types choose BUY or WATCH.
+- "BUY_LIMIT": Set a limit order at entry_price_low. ONLY permitted when drop_type is SECTOR_ROTATION or MACRO_SELLOFF — restrict limit orders to broad, non-idiosyncratic drops, because a limit fills precisely when the stock keeps falling (adverse selection). For all other drop types choose BUY or WATCH.
 - "WATCH": Add to watchlist with specific entry_trigger condition. Do NOT buy yet.
 - "AVOID": Do not trade. The bear case dominates or risk/reward is unfavorable.
 

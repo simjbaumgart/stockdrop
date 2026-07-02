@@ -1,34 +1,36 @@
 """Deterministic post-PM decision gates.
 
 Applied after the Fund Manager verdict is parsed and before persistence.
-Converts the statistically verified leaks from prompt_vs_outcome_analysis
-(2026-06-10, 681 decisions Apr 9 - Jun 10, 7-day marks) into hard rules
-instead of prompt instructions:
+Each gate encodes a finding promoted to the **gate tier** in
+docs/audits/FINDINGS_LEDGER.md. That ledger and the pinned calibration card
+are the single source of truth for the evidence and current base rates — do
+not restate decaying numbers here; keep this docstring qualitative. Gates turn
+those findings into hard post-PM rules instead of prompt instructions:
 
   * Gate 1 (DROP_TYPE_GATE): buys on EARNINGS_MISS / COMPANY_SPECIFIC /
-    ANALYST_DOWNGRADE drops won 37-39% vs 52% for SECTOR_ROTATION /
-    MACRO_SELLOFF. Downgrade those buys to WATCH. Deep Research can lift the
-    WATCH back to BUY_LIMIT, but only with a NAMED_EVENT positive catalyst.
-  * Gate 2 (SA_QUANT_GATE): SA quant rating < 2.5 decisions won 31% with a
-    median of -3.47%. Missing rating does NOT block (coverage ~39%).
-  * Gate 3 (RISK_KNIFE_GATE): explicit falling-knife verdicts from the Risk
-    agent were ignored by the PM; those buys averaged -2.48%. BUY downgrades
-    to WATCH. SUSPENDED as of 2026-07-02: the structured `falling_knife`
-    verdict collapsed to 97% YES (256/264 since Jun 11) — zero information —
-    and this gate downgraded ALL 17 June PM BUYs into BUY_LIMIT, the desk's
-    worst bucket (1/9 win at 14d). Re-enable via RISK_KNIFE_GATE_ENABLED once
-    the recalibrated Risk prompt (two-of-three conjunction test, 2026-07-02)
-    restores variance: trailing-50 YES-rate must fall below
-    KNIFE_YES_RATE_CEILING. Downgrade target changed BUY_LIMIT -> WATCH:
-    BUY_LIMIT is empirically the worst action (medExc -1.9), so downgrading
-    into it was anti-defensive.
-  * Gate 5 (NEWS_SENTIMENT_GATE): bearish-news buys won 39% vs 54% for
-    bullish-news buys. A buy on BEARISH news sentiment needs a named,
-    verifiable catalyst from the News agent; otherwise downgrade to WATCH.
-  * Gate 6 (UNCONFIRMED_DROP_GATE): BUY on a drop whose reason the News
-    agent explicitly could not confirm is demoted to WATCH (was BUY_LIMIT
-    until 2026-07-02 — see Gate 3 note on why BUY_LIMIT is not a safe
-    downgrade target).
+    ANALYST_DOWNGRADE drops have no historical edge; downgrade them to WATCH.
+    Deep Research can lift the WATCH back to BUY_LIMIT, but only with a
+    NAMED_EVENT positive catalyst.
+  * Gate 2 (SA_QUANT_GATE): a low SA quant rating (< SA_QUANT_FLOOR) marks
+    weak decisions; downgrade to WATCH. Missing rating does NOT block.
+  * Gate 3 (RISK_KNIFE_GATE): a Risk falling-knife verdict downgrades a BUY to
+    WATCH. SUSPENDED as of 2026-07-02 (RISK_KNIFE_GATE_ENABLED=False): the
+    structured `falling_knife` verdict mode-collapsed to near-all-YES and
+    stopped discriminating, converting the whole June buy book into downgrades.
+    Re-enabling is a deliberate MANUAL step (flip RISK_KNIFE_GATE_ENABLED to
+    True) after reviewing that the recalibrated Risk prompt (two-of-three
+    conjunction test) has restored variance — the nightly degeneracy monitor
+    does NOT flip this constant. Once re-enabled, that monitor auto-suspends /
+    un-suspends the gate via data/gate_suspensions.json whenever the trailing-50
+    knife YES-rate crosses KNIFE_YES_RATE_CEILING. Downgrade target is WATCH,
+    never BUY_LIMIT (the desk's worst action — downgrading into it is anti-
+    defensive).
+  * Gate 5 (NEWS_SENTIMENT_GATE): a buy on BEARISH news sentiment needs a
+    named, verifiable catalyst from the News agent; otherwise downgrade to
+    WATCH.
+  * Gate 6 (UNCONFIRMED_DROP_GATE): a BUY on a drop whose reason the News
+    agent explicitly could not confirm is demoted to WATCH (never BUY_LIMIT —
+    see Gate 3 on why BUY_LIMIT is not a safe downgrade target).
 
 The PM's original action is preserved (`pre_gate_action`) so gated-vs-kept
 performance is a free ongoing A/B — see scripts/analysis/gate_baseline_check.py.
@@ -63,10 +65,12 @@ GATED_DROP_TYPES = {"EARNINGS_MISS", "COMPANY_SPECIFIC", "ANALYST_DOWNGRADE"}
 
 SA_QUANT_FLOOR = 2.5
 
-# RISK_KNIFE_GATE kill switch — see module docstring. The structured
-# falling_knife verdict ran 97% YES since 2026-06-11 (no information); the
-# gate converted the entire June buy book into BUY_LIMIT (1/9 win at 14d).
-# Flip back to True only when the trailing-50 YES-rate is below the ceiling.
+# RISK_KNIFE_GATE manual master switch — see module docstring. The structured
+# falling_knife verdict mode-collapsed (near-all-YES) and stopped
+# discriminating, so the gate was turned off. Flip back to True only after
+# reviewing that the recalibrated Risk prompt has restored variance; once True,
+# the nightly degeneracy monitor manages auto-suspension via the trailing-50
+# YES-rate against KNIFE_YES_RATE_CEILING. The monitor never flips this constant.
 RISK_KNIFE_GATE_ENABLED = False
 KNIFE_YES_RATE_CEILING = 0.60
 
@@ -223,14 +227,14 @@ def apply_decision_gates(
         targets.append("WATCH")
         result.gates_fired.append("DROP_TYPE_GATE")
         result.gate_reasons.append(
-            f"{drop_type_norm} buys have no historical edge (37-39% win at 7d)"
+            f"{drop_type_norm} buys have no historical edge on this desk"
         )
 
     if sa_quant_rating is not None and sa_quant_rating < SA_QUANT_FLOOR and _active("SA_QUANT_GATE"):
         targets.append("WATCH")
         result.gates_fired.append("SA_QUANT_GATE")
         result.gate_reasons.append(
-            f"SA quant rating {sa_quant_rating:.2f} < {SA_QUANT_FLOOR} (31% win, median -3.47%)"
+            f"SA quant rating {sa_quant_rating:.2f} < {SA_QUANT_FLOOR} — weak historical outcomes"
         )
 
     knife = (
@@ -242,14 +246,14 @@ def apply_decision_gates(
         targets.append("WATCH")
         result.gates_fired.append("RISK_KNIFE_GATE")
         result.gate_reasons.append(
-            "Risk agent flags a falling knife (knife-flagged buys: 12% win at 14d, median -4.65%)"
+            "Risk agent flags a falling knife (historically underperforming buys)"
         )
 
     if (news_sentiment or "").strip().upper() == "BEARISH" and not (news_named_catalyst or "").strip() and _active("NEWS_SENTIMENT_GATE"):
         targets.append("WATCH")
         result.gates_fired.append("NEWS_SENTIMENT_GATE")
         result.gate_reasons.append(
-            "Bearish news flow with no named catalyst (bearish-news buys won 39% vs 54%)"
+            "Bearish news flow with no named catalyst — historically weaker buys"
         )
 
     # Gate 6: the News agent explicitly could NOT confirm why the stock
