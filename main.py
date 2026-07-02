@@ -307,6 +307,16 @@ async def run_outcome_marking():
                 except Exception as e:
                     print(f"Error in pinned-card staleness QC: {e}")
 
+                # Gate-input degeneracy check (Tier 1 guardrail): auto-suspend
+                # gates whose signal has mode-collapsed, falling-knife style.
+                try:
+                    from app.services.decision_gate_service import run_nightly_degeneracy_check
+                    newly = await asyncio.to_thread(run_nightly_degeneracy_check)
+                    if newly:
+                        print(f"[QC ALERT] gate inputs degenerate, auto-suspended: {', '.join(newly)}")
+                except Exception as e:
+                    print(f"Error in gate degeneracy check: {e}")
+
                 last_run_date = today_str
 
         except Exception as e:
