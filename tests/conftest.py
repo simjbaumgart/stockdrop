@@ -66,3 +66,16 @@ def _no_production_db(monkeypatch, tmp_path):
     elif os.getenv("DB_PATH", "subscribers.db") == "subscribers.db":
         # Module redirected DB_NAME but not the env var — align them.
         monkeypatch.setenv("DB_PATH", str(db.DB_NAME))
+
+
+@pytest.fixture(autouse=True)
+def _no_ambient_gate_suspensions(monkeypatch, tmp_path):
+    """apply_decision_gates reads data/gate_suspensions.json (machine-written
+    nightly). Point every test at a per-test empty path so ambient suspensions
+    on a dev/deploy machine can't flip gate assertions; degeneracy tests that
+    monkeypatch the path themselves simply override this."""
+    import app.services.decision_gate_service as dgs
+    monkeypatch.setattr(dgs, "_SUSPENSIONS_PATH", str(tmp_path / "gate_suspensions.json"))
+    dgs._suspensions_cache["mtime"] = None
+    dgs._suspensions_cache["suspended"] = frozenset()
+    yield

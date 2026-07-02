@@ -95,6 +95,10 @@ def calibration_block(drop_type: Optional[str] = None,
         return ""
     card = _load_card()
     if not card:
+        logging.getLogger(__name__).warning(
+            "[calibration] pinned card missing/unreadable — nothing to inject; "
+            "run pin_calibration_card --approve after an audit"
+        )
         return ""
 
     age = pinned_card_age_days()

@@ -294,8 +294,9 @@ async def run_outcome_marking():
                 # QC: injection enabled but pin missing or past its audit window.
                 try:
                     from app.services import calibration_service
-                    if calibration_service.is_enabled():
-                        age = calibration_service.pinned_card_age_days()
+                    shadow_on = os.getenv("CALIBRATION_SHADOW", "0") == "1"
+                    if calibration_service.is_enabled() or shadow_on:
+                        age = await asyncio.to_thread(calibration_service.pinned_card_age_days)
                         if age is None or age > calibration_service.STALE_PIN_MAX_DAYS:
                             desc = "missing/unstamped" if age is None else f"{age}d old"
                             logging.error(

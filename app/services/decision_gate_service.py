@@ -39,7 +39,10 @@ data/gate_suspensions.json when a gate's input signal exceeds its
 GATE_DEGENERACY_CEILINGS share over the trailing 50 decisions — the
 generalization of the falling-knife collapse. Suspension is fail-open
 (gate skipped, PM action kept) and reverses automatically once the
-signal regains variance.
+signal regains variance. data/gate_suspensions.json is MACHINE-OWNED: the
+nightly check rewrites it wholesale, so manual edits do not survive; suspend
+a gate manually via a code constant (RISK_KNIFE_GATE_ENABLED pattern), never
+by editing the file.
 """
 
 from __future__ import annotations
@@ -149,6 +152,7 @@ def run_nightly_degeneracy_check(limit: int = 50) -> List[str]:
     """Recompute trailing signal rates, persist the suspension set, and return
     the NEWLY suspended gates (for the caller's QC alert). Also logs the knife
     YES-rate every night — it is the re-enable condition for RISK_KNIFE_GATE."""
+    # Call-time import (not module-level): tests monkeypatch app.database.get_recent_signal_rates.
     from app.database import get_recent_signal_rates
 
     rates = get_recent_signal_rates(limit, tuple(sorted(GATED_DROP_TYPES)))
