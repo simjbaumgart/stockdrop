@@ -1,10 +1,11 @@
 """Build the calibration card from realized decision outcomes.
 
 Reads decision_points ⋈ decision_outcomes and computes per-bucket base rates,
-writing a machine-readable ``data/calibration_card.json`` and a human-readable
-``data/calibration_card.md``. Buckets with n < MIN_N are suppressed so the
+writing a machine-readable ``data/calibration_card_candidate.json`` and a human-readable
+``data/calibration_card_candidate.md``. Buckets with n < MIN_N are suppressed so the
 prompt never gets fed noise. This is Phase 1 of the calibration feedback loop
-(docs/proposals/PLAN_calibration_feedback_option1.md).
+(docs/proposals/PLAN_calibration_feedback_option1.md). Prompts never read this file
+— see pin_calibration_card.py.
 
 Primary label horizon is 4 weeks (locked with Simon); 1w is carried as context.
 
@@ -27,8 +28,10 @@ from app.database import get_outcomes_joined  # noqa: E402
 
 DEFAULT_MIN_N = 20
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data"))
-JSON_PATH = os.path.join(DATA_DIR, "calibration_card.json")
-MD_PATH = os.path.join(DATA_DIR, "calibration_card.md")
+# Candidate card — console-only (Tier 3). Prompts read the hand-pinned copy
+# written by scripts/analysis/pin_calibration_card.py, never this file.
+JSON_PATH = os.path.join(DATA_DIR, "calibration_card_candidate.json")
+MD_PATH = os.path.join(DATA_DIR, "calibration_card_candidate.md")
 
 
 def _mean(vals: List[float]) -> Optional[float]:
