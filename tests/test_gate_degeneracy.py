@@ -54,3 +54,53 @@ def test_recent_signal_rates_empty_db(fresh_db):
     rates = get_recent_signal_rates()
     assert rates == {"n": 0, "drop_type_gated_rate": 0.0,
                      "news_bearish_rate": 0.0, "knife_n": 0, "knife_yes_rate": 0.0}
+
+
+def test_check_degeneracy_flags_collapsed_knife():
+    """The June collapse (97% YES) must trip the knife ceiling (0.60)."""
+    from app.services.decision_gate_service import check_gate_degeneracy
+    rates = {"n": 50, "drop_type_gated_rate": 0.35, "news_bearish_rate": 0.2,
+             "knife_n": 50, "knife_yes_rate": 0.97}
+    assert check_gate_degeneracy(rates) == ["RISK_KNIFE_GATE"]
+
+
+def test_check_degeneracy_healthy_signals_pass():
+    from app.services.decision_gate_service import check_gate_degeneracy
+    rates = {"n": 50, "drop_type_gated_rate": 0.40, "news_bearish_rate": 0.25,
+             "knife_n": 50, "knife_yes_rate": 0.30}
+    assert check_gate_degeneracy(rates) == []
+
+
+def test_check_degeneracy_needs_minimum_sample():
+    from app.services.decision_gate_service import check_gate_degeneracy
+    rates = {"n": 10, "drop_type_gated_rate": 1.0, "news_bearish_rate": 1.0,
+             "knife_n": 10, "knife_yes_rate": 1.0}
+    assert check_gate_degeneracy(rates) == []
+
+
+def test_apply_gates_skips_suspended_gate(monkeypatch):
+    import app.services.decision_gate_service as dgs
+    monkeypatch.setattr(dgs, "_load_suspensions", lambda: frozenset({"DROP_TYPE_GATE"}))
+    result = dgs.apply_decision_gates(
+        action="BUY", drop_type="EARNINGS_MISS", conviction="HIGH",
+        sa_quant_rating=3.5,
+    )
+    assert result.final_action == "BUY"
+    assert result.gates_fired == []
+
+
+def test_nightly_check_writes_suspension_file(tmp_path, monkeypatch):
+    import app.services.decision_gate_service as dgs
+    import app.database as db
+    path = tmp_path / "gate_suspensions.json"
+    monkeypatch.setattr(dgs, "_SUSPENSIONS_PATH", str(path))
+    monkeypatch.setattr(db, "get_recent_signal_rates", lambda limit, gated_drop_types: {
+        "n": 50, "drop_type_gated_rate": 0.9, "news_bearish_rate": 0.1,
+        "knife_n": 50, "knife_yes_rate": 0.2,
+    })
+    newly = dgs.run_nightly_degeneracy_check()
+    assert newly == ["DROP_TYPE_GATE"]
+    assert json.loads(path.read_text())["suspended"] == ["DROP_TYPE_GATE"]
+    assert dgs._load_suspensions() == frozenset({"DROP_TYPE_GATE"})
+    # Second run: already suspended, so nothing is NEWLY suspended.
+    assert dgs.run_nightly_degeneracy_check() == []

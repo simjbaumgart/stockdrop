@@ -32,11 +32,22 @@ instead of prompt instructions:
 
 The PM's original action is preserved (`pre_gate_action`) so gated-vs-kept
 performance is a free ongoing A/B — see scripts/analysis/gate_baseline_check.py.
+
+Degeneracy monitoring: run_nightly_degeneracy_check (called from
+main.run_outcome_marking) persists auto-suspensions to
+data/gate_suspensions.json when a gate's input signal exceeds its
+GATE_DEGENERACY_CEILINGS share over the trailing 50 decisions — the
+generalization of the falling-knife collapse. Suspension is fail-open
+(gate skipped, PM action kept) and reverses automatically once the
+signal regains variance.
 """
 
 from __future__ import annotations
 
+import datetime
+import json
 import logging
+import os
 import re
 from dataclasses import dataclass, field
 from typing import List, Optional
@@ -55,6 +66,24 @@ SA_QUANT_FLOOR = 2.5
 # Flip back to True only when the trailing-50 YES-rate is below the ceiling.
 RISK_KNIFE_GATE_ENABLED = False
 KNIFE_YES_RATE_CEILING = 0.60
+
+# --- Degeneracy monitoring (THREE_TIER_FEEDBACK_PROPOSAL.md, Tier 1) ---
+# Trailing share of decisions carrying each gate's triggering signal. If a
+# signal stops discriminating (the falling-knife precedent: 97% YES), its
+# gate is auto-suspended via data/gate_suspensions.json rather than left to
+# downgrade the whole book. SA_QUANT_GATE has no ceiling: an external numeric
+# rating cannot mode-collapse; UNCONFIRMED_DROP_GATE's input is not persisted.
+GATE_DEGENERACY_CEILINGS = {
+    "DROP_TYPE_GATE": 0.80,       # share classified into GATED_DROP_TYPES
+    "NEWS_SENTIMENT_GATE": 0.80,  # share of BEARISH news sentiment
+    "RISK_KNIFE_GATE": KNIFE_YES_RATE_CEILING,
+}
+DEGENERACY_MIN_SIGNALS = 30  # below this trailing sample, never suspend
+
+_SUSPENSIONS_PATH = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "data", "gate_suspensions.json")
+)
+_suspensions_cache = {"mtime": None, "suspended": frozenset()}
 
 _BUY_ACTIONS = {"BUY", "BUY_LIMIT"}
 
@@ -84,6 +113,71 @@ def risk_report_flags_knife(risk_report: Optional[str]) -> bool:
     return bool(_KNIFE_RE.search(risk_report))
 
 
+def _load_suspensions() -> frozenset:
+    """Gates auto-suspended by the nightly degeneracy check (mtime-cached)."""
+    try:
+        mtime = os.path.getmtime(_SUSPENSIONS_PATH)
+    except OSError:
+        return frozenset()
+    if _suspensions_cache["mtime"] != mtime:
+        try:
+            with open(_SUSPENSIONS_PATH) as f:
+                _suspensions_cache["suspended"] = frozenset(json.load(f).get("suspended", []))
+        except (OSError, json.JSONDecodeError, AttributeError):
+            _suspensions_cache["suspended"] = frozenset()
+        _suspensions_cache["mtime"] = mtime
+    return _suspensions_cache["suspended"]
+
+
+def check_gate_degeneracy(rates: dict) -> List[str]:
+    """Gates whose input signal has stopped discriminating, given trailing rates
+    from app.database.get_recent_signal_rates. Pure — no I/O."""
+    out: List[str] = []
+    n = rates.get("n") or 0
+    if n >= DEGENERACY_MIN_SIGNALS:
+        if rates.get("drop_type_gated_rate", 0.0) > GATE_DEGENERACY_CEILINGS["DROP_TYPE_GATE"]:
+            out.append("DROP_TYPE_GATE")
+        if rates.get("news_bearish_rate", 0.0) > GATE_DEGENERACY_CEILINGS["NEWS_SENTIMENT_GATE"]:
+            out.append("NEWS_SENTIMENT_GATE")
+    if (rates.get("knife_n") or 0) >= DEGENERACY_MIN_SIGNALS:
+        if rates.get("knife_yes_rate", 0.0) > GATE_DEGENERACY_CEILINGS["RISK_KNIFE_GATE"]:
+            out.append("RISK_KNIFE_GATE")
+    return out
+
+
+def run_nightly_degeneracy_check(limit: int = 50) -> List[str]:
+    """Recompute trailing signal rates, persist the suspension set, and return
+    the NEWLY suspended gates (for the caller's QC alert). Also logs the knife
+    YES-rate every night — it is the re-enable condition for RISK_KNIFE_GATE."""
+    from app.database import get_recent_signal_rates
+
+    rates = get_recent_signal_rates(limit, tuple(sorted(GATED_DROP_TYPES)))
+    degenerate = check_gate_degeneracy(rates)
+    previously = set(_load_suspensions())
+
+    os.makedirs(os.path.dirname(_SUSPENSIONS_PATH), exist_ok=True)
+    with open(_SUSPENSIONS_PATH, "w") as f:
+        json.dump({
+            "suspended": sorted(degenerate),
+            "rates": rates,
+            "as_of": datetime.date.today().isoformat(),
+        }, f, indent=2)
+    _suspensions_cache["mtime"] = None  # force re-read
+
+    logger.info(
+        "[DecisionGate] degeneracy check: n=%s knife_yes=%.0f%% (ceiling %.0f%%) "
+        "drop_type=%.0f%% bearish=%.0f%% -> suspended=%s",
+        rates.get("n"), 100 * rates.get("knife_yes_rate", 0.0),
+        100 * KNIFE_YES_RATE_CEILING, 100 * rates.get("drop_type_gated_rate", 0.0),
+        100 * rates.get("news_bearish_rate", 0.0), sorted(degenerate) or "none",
+    )
+    newly = sorted(set(degenerate) - previously)
+    for gate in newly:
+        logger.error("[QC ALERT] %s input degenerate over trailing %s decisions — gate auto-suspended",
+                     gate, rates.get("n"))
+    return newly
+
+
 def apply_decision_gates(
     action: Optional[str],
     drop_type: Optional[str],
@@ -107,20 +201,28 @@ def apply_decision_gates(
     pre_gate = (action or "").strip().upper()
     result = GateResult(final_action=pre_gate, pre_gate_action=pre_gate)
 
+    suspended = _load_suspensions()
+
+    def _active(gate: str) -> bool:
+        if gate in suspended:
+            logger.warning("[DecisionGate] %s suspended (degenerate input) — skipping", gate)
+            return False
+        return True
+
     if pre_gate not in _BUY_ACTIONS:
         return result
 
     targets: List[str] = []
 
     drop_type_norm = (drop_type or "").strip().upper()
-    if drop_type_norm in GATED_DROP_TYPES:
+    if drop_type_norm in GATED_DROP_TYPES and _active("DROP_TYPE_GATE"):
         targets.append("WATCH")
         result.gates_fired.append("DROP_TYPE_GATE")
         result.gate_reasons.append(
             f"{drop_type_norm} buys have no historical edge (37-39% win at 7d)"
         )
 
-    if sa_quant_rating is not None and sa_quant_rating < SA_QUANT_FLOOR:
+    if sa_quant_rating is not None and sa_quant_rating < SA_QUANT_FLOOR and _active("SA_QUANT_GATE"):
         targets.append("WATCH")
         result.gates_fired.append("SA_QUANT_GATE")
         result.gate_reasons.append(
@@ -132,14 +234,14 @@ def apply_decision_gates(
         if risk_falling_knife is not None
         else risk_report_flags_knife(risk_report)
     )
-    if RISK_KNIFE_GATE_ENABLED and knife and pre_gate == "BUY":
+    if RISK_KNIFE_GATE_ENABLED and knife and pre_gate == "BUY" and _active("RISK_KNIFE_GATE"):
         targets.append("WATCH")
         result.gates_fired.append("RISK_KNIFE_GATE")
         result.gate_reasons.append(
             "Risk agent flags a falling knife (knife-flagged buys: 12% win at 14d, median -4.65%)"
         )
 
-    if (news_sentiment or "").strip().upper() == "BEARISH" and not (news_named_catalyst or "").strip():
+    if (news_sentiment or "").strip().upper() == "BEARISH" and not (news_named_catalyst or "").strip() and _active("NEWS_SENTIMENT_GATE"):
         targets.append("WATCH")
         result.gates_fired.append("NEWS_SENTIMENT_GATE")
         result.gate_reasons.append(
@@ -150,7 +252,7 @@ def apply_decision_gates(
     # dropped (drop_reason_confirmed=False, PTC 2026-06-11 went BUY anyway).
     # An immediate BUY on an unexplained drop becomes a limit order; None
     # (unparsed verdict) never fires.
-    if news_drop_reason_confirmed is False and pre_gate == "BUY":
+    if news_drop_reason_confirmed is False and pre_gate == "BUY" and _active("UNCONFIRMED_DROP_GATE"):
         targets.append("WATCH")
         result.gates_fired.append("UNCONFIRMED_DROP_GATE")
         result.gate_reasons.append(
