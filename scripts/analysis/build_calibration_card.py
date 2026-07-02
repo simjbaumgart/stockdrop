@@ -68,12 +68,15 @@ def build_card(rows: List[dict], min_n: int = DEFAULT_MIN_N) -> dict:
         "min_n": min_n,
         "primary_horizon": "4w",
         "total_labeled": sum(1 for r in rows if r.get("ret_4w") is not None),
-        "by_drop_type": bucketize(rows, lambda r: r.get("drop_type") or "unknown", min_n),
+        # Enum-valued keys are upper-cased so a NULL fallback ("UNKNOWN") and a
+        # stray-cased row ("unknown") collapse into one bucket instead of
+        # splitting n and emitting two inconsistent base rates for the prompts.
+        "by_drop_type": bucketize(rows, lambda r: (r.get("drop_type") or "UNKNOWN").upper(), min_n),
         "by_earnings": bucketize(
             rows, lambda r: "earnings" if r.get("is_earnings_drop") else "non_earnings", min_n),
-        "by_pm_verdict": bucketize(rows, lambda r: r.get("recommendation") or "unknown", min_n),
-        "by_dr_verdict": bucketize(rows, lambda r: r.get("deep_research_verdict") or "unknown", min_n),
-        "by_gatekeeper_tier": bucketize(rows, lambda r: r.get("gatekeeper_tier") or "unknown", min_n),
+        "by_pm_verdict": bucketize(rows, lambda r: (r.get("recommendation") or "UNKNOWN").upper(), min_n),
+        "by_dr_verdict": bucketize(rows, lambda r: (r.get("deep_research_verdict") or "UNKNOWN").upper(), min_n),
+        "by_gatekeeper_tier": bucketize(rows, lambda r: (r.get("gatekeeper_tier") or "UNKNOWN").upper(), min_n),
     }
 
 
