@@ -140,6 +140,10 @@ def test_block_serves_fresh_pin(tmp_path, monkeypatch):
     block = cs.calibration_block(is_earnings=True, force=True)
     assert "earnings drops overall" in block
     assert cs.pinned_card_age_days(today) == 2
+    # Tier 2 is data, not instructions: the block must end on a data line,
+    # with no trailing imperative (THREE_TIER_FEEDBACK_PROPOSAL.md rule 1).
+    assert "Weigh these base rates" not in block
+    assert block.rstrip().endswith(")")  # last char of "... (n=184)"
 
 
 def test_block_refuses_stale_pin(tmp_path, monkeypatch):

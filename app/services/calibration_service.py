@@ -130,7 +130,8 @@ def calibration_block(drop_type: Optional[str] = None,
     if not lines:
         return ""
 
+    # Data, not instructions (Tier 2 rule): header + base-rate lines only.
+    # Any change to this block's wording mid-shadow splits the A/B sample —
+    # record the deploy date and filter eval_calibration_ab accordingly.
     header = f"HISTORICAL BASE RATES (4-week, n>={card.get('min_n')}, as of {card.get('as_of')}):"
-    footer = ("Weigh these base rates; do not let a compelling narrative override "
-              "a poor base rate.")
-    return "\n".join([header, *lines, footer])
+    return "\n".join([header, *lines])
