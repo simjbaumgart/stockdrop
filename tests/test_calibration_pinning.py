@@ -100,7 +100,7 @@ def test_build_pinned_strips_verdict_sections_and_stamps_audit():
     assert pinned["by_earnings"]["non_earnings"]["n"] == 412
 
 
-def test_pin_run_requires_approve(tmp_path, monkeypatch):
+def test_pin_run_requires_approve(tmp_path, monkeypatch, capsys):
     import scripts.analysis.pin_calibration_card as pin
     candidate = tmp_path / "calibration_card_candidate.json"
     pinned = tmp_path / "calibration_card_pinned.json"
@@ -112,6 +112,10 @@ def test_pin_run_requires_approve(tmp_path, monkeypatch):
     assert not pinned.exists()
     assert pin.run(approve=True, audited_at="2026-06-30") == 0
     assert json.loads(pinned.read_text())["audited_at"] == "2026-06-30"
+    out = capsys.readouterr().out
+    # Prod reads the card from the repo (Render checkout is ephemeral):
+    # a pin that is not committed+pushed never reaches production.
+    assert "git add data/calibration_card_pinned.json" in out
 
 
 def _write_pinned(tmp_path, monkeypatch, audited_at):

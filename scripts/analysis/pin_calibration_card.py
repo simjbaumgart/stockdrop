@@ -14,6 +14,10 @@ Usage:
     python -m scripts.analysis.pin_calibration_card                # dry-run
     python -m scripts.analysis.pin_calibration_card --approve \
         [--audited-at 2026-06-30]
+
+After --approve: commit and push data/calibration_card_pinned.json — the file
+is git-tracked because Render's repo checkout is ephemeral; an uncommitted pin
+never reaches production.
 """
 import argparse
 import datetime
@@ -102,6 +106,10 @@ def run(approve: bool, audited_at: Optional[str] = None) -> int:
         json.dump(pinned, f, indent=2)
     print(f"[pin_calibration_card] pinned -> {PINNED_JSON} "
           f"(audited_at={pinned['audited_at']}, ref={pinned['pinned_git_ref']})")
+    print("[pin_calibration_card] NOW COMMIT IT — prod reads the card from the "
+          "repo (Render checkout is ephemeral):\n"
+          f"  git add data/calibration_card_pinned.json && "
+          f"git commit -m \"chore(calibration): pin card {pinned['audited_at']}\" && git push")
     return 0
 
 
