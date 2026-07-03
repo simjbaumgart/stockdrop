@@ -185,6 +185,10 @@ def init_db():
     except Exception as e:
         print(f"Error during database migration: {e}")
 
+    # DEPRECATED (2026-07-02): decision_tracking was a raw price log with no
+    # scheduled writer. Superseded by decision_outcomes (fixed-horizon forward
+    # returns, nightly marking). Kept for history — do not write new code
+    # against it; use decision_outcomes / get_outcomes_joined instead.
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS decision_tracking (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -364,7 +368,49 @@ def init_db():
             
     except Exception as e:
         print(f"Error during batch_winner migration: {e}")
-    
+
+    # Calibration feedback loop (Option 1) — fixed-horizon forward returns per decision.
+    # Purpose-built so the calibration card reads clean labels instead of the gappy
+    # decision_tracking price log. Backfilled from yfinance and forward-marked daily.
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS decision_outcomes (
+            decision_id   INTEGER PRIMARY KEY,
+            symbol        TEXT,
+            decision_date TEXT,
+            price_at_decision REAL,
+            baseline_price    REAL,
+            baseline_source   TEXT,
+            ret_1w  REAL, ret_2w  REAL, ret_4w  REAL, ret_8w  REAL,
+            recovered_1w INTEGER, recovered_2w INTEGER,
+            recovered_4w INTEGER, recovered_8w INTEGER,
+            last_filled_horizon TEXT,
+            source        TEXT DEFAULT 'yfinance_backfill',
+            updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (decision_id) REFERENCES decision_points (id)
+        )
+    ''')
+
+    # Phase 3 scaffold — paired control (card OFF) vs treatment (card ON) PM verdicts
+    # for the calibration A/B. Mirrors the news_shadow_runs pattern.
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS calibration_shadow_runs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            decision_id   INTEGER,
+            symbol        TEXT,
+            decision_date TEXT,
+            control_verdict     TEXT,
+            control_conviction  TEXT,
+            control_score       REAL,
+            treatment_verdict     TEXT,
+            treatment_conviction  TEXT,
+            treatment_score       REAL,
+            card_slice    TEXT,
+            verdict_flipped INTEGER,
+            timestamp     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (decision_id) REFERENCES decision_points (id)
+        )
+    ''')
+
     # Print single migration summary
     if migrations_applied:
         print(f"[DB Migration] Applied {len(migrations_applied)} column migrations.")
@@ -501,6 +547,225 @@ def get_decision_point(decision_id: int) -> dict:
     except Exception as e:
         print(f"Error fetching decision point {decision_id}: {e}")
         return None
+
+# ---------------------------------------------------------------------------
+# Calibration feedback loop (Option 1) — decision_outcomes helpers
+# ---------------------------------------------------------------------------
+
+def upsert_decision_outcome(decision_id: int, **fields) -> bool:
+    """Insert or update a decision_outcomes row. Idempotent.
+
+    Only the columns passed in **fields are written; updated_at is always
+    refreshed. Safe to call repeatedly as horizons mature.
+    """
+    if not fields:
+        return False
+    try:
+        cols = ["decision_id"] + list(fields.keys())
+        vals = [decision_id] + list(fields.values())
+        placeholders = ", ".join(["?"] * len(cols))
+        update_clause = ", ".join(f"{k}=excluded.{k}" for k in fields.keys())
+        sql = (
+            f"INSERT INTO decision_outcomes ({', '.join(cols)}) "
+            f"VALUES ({placeholders}) "
+            f"ON CONFLICT(decision_id) DO UPDATE SET {update_clause}, "
+            f"updated_at=CURRENT_TIMESTAMP"
+        )
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        cursor.execute(sql, vals)
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"Error upserting decision outcome {decision_id}: {e}")
+        return False
+
+
+def get_decisions_missing_outcomes(as_of_date: str, min_age_days: int = 7) -> List[dict]:
+    """Decisions needing (re)marking: no outcomes row yet, or not 'complete',
+    and old enough that at least the +1w horizon could have matured.
+
+    as_of_date: 'YYYY-MM-DD'. min_age_days defaults to 7 (one calendar week,
+    ~5 trading days for the first horizon).
+    """
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT dp.*
+            FROM decision_points dp
+            LEFT JOIN decision_outcomes o ON dp.id = o.decision_id
+            WHERE (o.decision_id IS NULL OR o.last_filled_horizon IS NULL
+                   OR o.last_filled_horizon != 'complete')
+              AND date(dp.timestamp) <= date(?, ?)
+            ORDER BY dp.timestamp ASC
+            """,
+            (as_of_date, f"-{int(min_age_days)} days"),
+        )
+        rows = cursor.fetchall()
+        conn.close()
+        return [dict(row) for row in rows]
+    except Exception as e:
+        print(f"Error fetching decisions missing outcomes: {e}")
+        return []
+
+
+def get_stale_unmarked_outcomes(as_of_date: str, max_age_days: int = 8) -> List[dict]:
+    """QC: decisions older than max_age_days that have NO outcome marks at all
+    (missing row or last_filled_horizon IS NULL). These should not exist once
+    the marking job is healthy — anything here is a delisting or a silent rot.
+    """
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT dp.id, dp.symbol, dp.timestamp
+            FROM decision_points dp
+            LEFT JOIN decision_outcomes o ON dp.id = o.decision_id
+            WHERE (o.decision_id IS NULL OR o.last_filled_horizon IS NULL)
+              AND date(dp.timestamp) <= date(?, ?)
+            ORDER BY dp.timestamp ASC
+            """,
+            (as_of_date, f"-{int(max_age_days)} days"),
+        )
+        rows = cursor.fetchall()
+        conn.close()
+        return [dict(row) for row in rows]
+    except Exception as e:
+        print(f"Error fetching stale unmarked outcomes: {e}")
+        return []
+
+
+def get_outcome_pipe_status() -> dict:
+    """Lightweight freshness snapshot for the /health endpoint so a stalled
+    outcome pipe (or a shadow A/B that has stopped logging) is externally
+    observable without a push channel. Cheap reads only — safe to poll.
+
+    latest_mark_date: newest decision_date in decision_outcomes (how current
+    the forward-marks are). shadow_runs: paired control/treatment rows logged so
+    far (should climb once CALIBRATION_SHADOW=1 is live).
+    """
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        latest = cursor.execute(
+            "SELECT MAX(decision_date) FROM decision_outcomes"
+        ).fetchone()[0]
+        try:
+            shadow = cursor.execute(
+                "SELECT COUNT(*) FROM calibration_shadow_runs"
+            ).fetchone()[0]
+        except Exception:
+            shadow = None  # table may not exist on an old DB
+        conn.close()
+        return {"latest_mark_date": latest, "shadow_runs": shadow}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def get_outcomes_joined() -> List[dict]:
+    """decision_points ⋈ decision_outcomes for the calibration card builder.
+
+    Returns one dict per decision that has an outcomes row, carrying every
+    decision_points column plus the forward-return / recovered labels.
+    """
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT dp.*,
+                   o.ret_1w, o.ret_2w, o.ret_4w, o.ret_8w,
+                   o.recovered_1w, o.recovered_2w, o.recovered_4w, o.recovered_8w
+            FROM decision_points dp
+            JOIN decision_outcomes o ON dp.id = o.decision_id
+            ORDER BY dp.timestamp DESC
+            """
+        )
+        rows = cursor.fetchall()
+        conn.close()
+        return [dict(row) for row in rows]
+    except Exception as e:
+        print(f"Error fetching joined outcomes: {e}")
+        return []
+
+
+def get_recent_signal_rates(
+    limit: int = 50,
+    gated_drop_types: tuple = ("EARNINGS_MISS", "COMPANY_SPECIFIC", "ANALYST_DOWNGRADE"),
+) -> dict:
+    """Trailing-N shares of gate-input signals across ALL decisions.
+
+    The denominator is every decision, not just buys — that is the base the
+    falling-knife collapse was measured on (256/264 YES since 2026-06-11).
+    Used by decision_gate_service.run_nightly_degeneracy_check.
+    """
+    empty = {"n": 0, "drop_type_gated_rate": 0.0, "news_bearish_rate": 0.0,
+             "knife_n": 0, "knife_yes_rate": 0.0}
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT drop_type, risk_falling_knife, news_sentiment
+            FROM decision_points
+            ORDER BY timestamp DESC, id DESC
+            LIMIT ?
+            """,
+            (int(limit),),
+        )
+        rows = [dict(r) for r in cursor.fetchall()]
+        conn.close()
+    except Exception as e:
+        print(f"Error fetching recent signal rates: {e}")
+        return empty
+
+    n = len(rows)
+    if n == 0:
+        return empty
+    gated = set(gated_drop_types)
+    knife_vals = [(r["risk_falling_knife"] or "").strip().upper()
+                  for r in rows if r["risk_falling_knife"] is not None]
+    return {
+        "n": n,
+        "drop_type_gated_rate": sum(
+            1 for r in rows if (r["drop_type"] or "").strip().upper() in gated) / n,
+        "news_bearish_rate": sum(
+            1 for r in rows if (r["news_sentiment"] or "").strip().upper() == "BEARISH") / n,
+        "knife_n": len(knife_vals),
+        "knife_yes_rate": (sum(1 for v in knife_vals if v == "YES") / len(knife_vals))
+        if knife_vals else 0.0,
+    }
+
+
+def insert_calibration_shadow_run(**fields) -> bool:
+    """Insert a paired control-vs-treatment PM verdict row (Phase 3 A/B)."""
+    if not fields:
+        return False
+    try:
+        cols = list(fields.keys())
+        placeholders = ", ".join(["?"] * len(cols))
+        sql = (
+            f"INSERT INTO calibration_shadow_runs ({', '.join(cols)}) "
+            f"VALUES ({placeholders})"
+        )
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        cursor.execute(sql, list(fields.values()))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"Error inserting calibration shadow run: {e}")
+        return False
+
 
 def add_tracking_point(decision_id: int, price: float) -> bool:
     """Add a new tracking point for a decision."""

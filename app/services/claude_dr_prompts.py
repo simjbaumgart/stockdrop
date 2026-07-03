@@ -396,6 +396,17 @@ actions confirm or deny the bull thesis?"""
         disagreement_section=disagreement_section,
     )
 
+    # Calibration card (Option 1, feature-flagged via CALIBRATION_ENABLED). The PM
+    # has already classified drop_type, so DR gets both the drop_type and earnings
+    # slices. Empty string when the flag is off keeps this prompt byte-identical.
+    from app.services.calibration_service import calibration_block, EARNINGS_DROP_TYPES
+    _dr_drop_type = pm_decision.get("drop_type") if isinstance(pm_decision, dict) else None
+    _cal_block = calibration_block(
+        drop_type=_dr_drop_type,
+        is_earnings=(_dr_drop_type in EARNINGS_DROP_TYPES) if _dr_drop_type else None,
+    )
+    _cal_section = f"\n\n{_cal_block}" if _cal_block else ""
+
     return f"""\
 You are a **Senior Investment Reviewer** at a hedge fund. An internal AI council
 has already analyzed stock {symbol}, which dropped {drop_percent:.2f}% today
@@ -414,7 +425,7 @@ You are the last line of defense before real money is deployed.
 ═══════════════════════════════════════════════════════
 COUNCIL DECISION (This is what you are reviewing):
 ═══════════════════════════════════════════════════════
-{pm_summary}
+{pm_summary}{_cal_section}
 
 ═══════════════════════════════════════════════════════
 BULL CASE (Constructed by Council's Bull Researcher):

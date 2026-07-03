@@ -83,8 +83,32 @@ app.include_router(api.router, prefix="/api")
 app.include_router(subscriptions.router, prefix="/api")
 
 @app.get("/health")
-def health_check():
-    return {"status": "ok", "version": VERSION}
+async def health_check():
+    """Liveness + outcome-pipe freshness. The `outcomes` block lets an external
+    uptime monitor alert on a stalled backfill (days_behind climbing), a stale
+    pinned card, or a shadow A/B that stopped logging — no push channel needed."""
+    from app.database import get_outcome_pipe_status
+    from app.services.calibration_service import pinned_card_age_days
+
+    status = await asyncio.to_thread(get_outcome_pipe_status)
+    latest = status.get("latest_mark_date")
+    days_behind = None
+    if latest:
+        try:
+            days_behind = (datetime.now().date()
+                           - datetime.strptime(latest, "%Y-%m-%d").date()).days
+        except (ValueError, TypeError):
+            days_behind = None
+    return {
+        "status": "ok",
+        "version": VERSION,
+        "outcomes": {
+            "latest_mark_date": latest,
+            "days_behind": days_behind,
+            "pinned_card_age_days": pinned_card_age_days(),
+            "shadow_runs": status.get("shadow_runs"),
+        },
+    }
 
 async def run_shutdown_timer(minutes: int):
     """Run for the specified duration, then gracefully shut down."""
@@ -121,6 +145,7 @@ async def startup_event_handler():
     asyncio.create_task(run_daily_summary())
     asyncio.create_task(run_performance_tracking())
     asyncio.create_task(run_trade_report_update())
+    asyncio.create_task(run_outcome_marking())
     if run_for_minutes:
         asyncio.create_task(run_shutdown_timer(run_for_minutes))
 
@@ -242,6 +267,89 @@ async def run_performance_tracking():
 
         if await _interruptible_sleep(3600):
             break
+
+async def run_outcome_marking():
+    """Forward-mark decision_outcomes as horizons mature (calibration Phase 0).
+
+    Runs once a day after market close. Reuses the yfinance backfill logic on
+    just the decisions with an unfilled-but-matured horizon, then a QC guard
+    alerts loudly if anything matured long ago and still has no marks.
+    """
+    from app.database import get_decisions_missing_outcomes, get_stale_unmarked_outcomes
+    from scripts.maintenance import backfill_outcomes
+    from scripts.analysis import build_calibration_card
+
+    last_run_date = None
+    while not shutdown_event.is_set():
+        try:
+            now = datetime.now()
+            today_str = now.strftime("%Y-%m-%d")
+
+            if now.hour >= 23 and last_run_date != today_str:
+                print("Running Outcome Marking (calibration)...")
+                missing = await asyncio.to_thread(get_decisions_missing_outcomes, today_str)
+                if missing:
+                    summary = await asyncio.to_thread(
+                        backfill_outcomes.run, False, None, missing
+                    )
+                    print(f"Outcome Marking completed. {summary}")
+                else:
+                    print("Outcome Marking: nothing matured to fill.")
+
+                # QC guard — fail loudly if matured decisions are still unmarked.
+                stale = await asyncio.to_thread(get_stale_unmarked_outcomes, today_str, 8)
+                if stale:
+                    syms = ", ".join(f"{s['symbol']}#{s['id']}" for s in stale[:15])
+                    logging.error(
+                        "[QC ALERT] %d decisions >8d old still have no outcome marks "
+                        "(first 15: %s). decision_outcomes may be rotting.",
+                        len(stale), syms,
+                    )
+                    print(f"[QC ALERT] {len(stale)} matured decisions unmarked: {syms}")
+
+                # Rebuild the CANDIDATE card (console-only, for the monthly
+                # audit). Prompts read only the hand-pinned card — nothing the
+                # nightly job writes may reach agents (three-tier feedback).
+                try:
+                    await asyncio.to_thread(build_calibration_card.run)
+                except Exception as e:
+                    print(f"Error rebuilding calibration card candidate: {e}")
+
+                # QC: injection enabled but pin missing or past its audit window.
+                try:
+                    from app.services import calibration_service
+                    shadow_on = os.getenv("CALIBRATION_SHADOW", "0") == "1"
+                    if calibration_service.is_enabled() or shadow_on:
+                        age = await asyncio.to_thread(calibration_service.pinned_card_age_days)
+                        if age is None or age > calibration_service.STALE_PIN_MAX_DAYS:
+                            desc = "missing/unstamped" if age is None else f"{age}d old"
+                            logging.error(
+                                "[QC ALERT] CALIBRATION_ENABLED=1 but pinned card is %s — "
+                                "run the monthly audit, then "
+                                "python -m scripts.analysis.pin_calibration_card --approve",
+                                desc,
+                            )
+                except Exception as e:
+                    print(f"Error in pinned-card staleness QC: {e}")
+
+                # Gate-input degeneracy check (Tier 1 guardrail): auto-suspend
+                # gates whose signal has mode-collapsed, falling-knife style.
+                try:
+                    from app.services.decision_gate_service import run_nightly_degeneracy_check
+                    newly = await asyncio.to_thread(run_nightly_degeneracy_check)
+                    if newly:
+                        print(f"[QC ALERT] gate inputs degenerate, auto-suspended: {', '.join(newly)}")
+                except Exception as e:
+                    print(f"Error in gate degeneracy check: {e}")
+
+                last_run_date = today_str
+
+        except Exception as e:
+            print(f"Error in outcome marking task: {e}")
+
+        if await _interruptible_sleep(3600):
+            break
+
 
 if __name__ == "__main__":
     import argparse

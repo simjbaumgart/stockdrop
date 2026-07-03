@@ -69,31 +69,49 @@ def test_gate2_missing_quant_does_not_block():
 
 # ---------------------------------------------------------------------------
 # Gate 3: risk knife (interim regex + structured field)
+# SUSPENDED 2026-07-02 (RISK_KNIFE_GATE_ENABLED=False): falling_knife verdict
+# ran 97% YES since Jun 11 — no information. Tests cover both states.
 # ---------------------------------------------------------------------------
 
-def test_gate3_knife_buy_downgrades_to_buy_limit():
+def test_gate3_suspended_does_not_fire():
     r = apply_decision_gates("BUY", "SECTOR_ROTATION", "HIGH", None,
                              risk_report=KNIFE_REPORT)
-    assert r.final_action == "BUY_LIMIT"
-    assert r.gates_fired == ["RISK_KNIFE_GATE"]
+    assert r.final_action == "BUY"
+    assert r.gates_fired == []
+    r = apply_decision_gates("BUY", "SECTOR_ROTATION", "HIGH", None,
+                             risk_falling_knife="YES")
+    assert r.final_action == "BUY"
+    assert r.gates_fired == []
 
 
-def test_gate3_knife_with_low_conviction_goes_to_watch():
-    r = apply_decision_gates("BUY", "SECTOR_ROTATION", "LOW", None,
+def test_gate3_when_enabled_knife_buy_downgrades_to_watch(monkeypatch):
+    # When re-enabled, the downgrade target is WATCH — never BUY_LIMIT
+    # (BUY_LIMIT is empirically the worst action bucket, medExc -1.9).
+    import app.services.decision_gate_service as dgs
+    monkeypatch.setattr(dgs, "RISK_KNIFE_GATE_ENABLED", True)
+    r = apply_decision_gates("BUY", "SECTOR_ROTATION", "HIGH", None,
                              risk_report=KNIFE_REPORT)
+    assert r.final_action == "WATCH"
+    assert r.gates_fired == ["RISK_KNIFE_GATE"]
+    r = apply_decision_gates("BUY", "SECTOR_ROTATION", "LOW", None,
+                             risk_falling_knife="YES")
     assert r.final_action == "WATCH"
     assert r.gates_fired == ["RISK_KNIFE_GATE"]
 
 
-def test_gate3_does_not_fire_on_buy_limit():
+def test_gate3_does_not_fire_on_buy_limit(monkeypatch):
     # Per plan: knife gate applies to outright BUY only.
+    import app.services.decision_gate_service as dgs
+    monkeypatch.setattr(dgs, "RISK_KNIFE_GATE_ENABLED", True)
     r = apply_decision_gates("BUY_LIMIT", "SECTOR_ROTATION", "HIGH", None,
                              risk_report=KNIFE_REPORT)
     assert r.final_action == "BUY_LIMIT"
     assert r.gates_fired == []
 
 
-def test_gate3_structured_field_takes_precedence_over_report():
+def test_gate3_structured_field_takes_precedence_over_report(monkeypatch):
+    import app.services.decision_gate_service as dgs
+    monkeypatch.setattr(dgs, "RISK_KNIFE_GATE_ENABLED", True)
     # Structured NO wins even when the free text would match.
     r = apply_decision_gates("BUY", "SECTOR_ROTATION", "HIGH", None,
                              risk_report=KNIFE_REPORT, risk_falling_knife="NO")
@@ -101,7 +119,7 @@ def test_gate3_structured_field_takes_precedence_over_report():
     # Structured YES fires without any report text.
     r = apply_decision_gates("BUY", "SECTOR_ROTATION", "HIGH", None,
                              risk_falling_knife="YES")
-    assert r.final_action == "BUY_LIMIT"
+    assert r.final_action == "WATCH"
     assert r.gates_fired == ["RISK_KNIFE_GATE"]
 
 
@@ -146,10 +164,12 @@ def test_gate5_non_bearish_sentiment_passes(sentiment):
 # Combinations + non-buy passthrough
 # ---------------------------------------------------------------------------
 
-def test_multiple_gates_record_all_and_take_most_restrictive():
+def test_multiple_gates_record_all_and_take_most_restrictive(monkeypatch):
+    import app.services.decision_gate_service as dgs
+    monkeypatch.setattr(dgs, "RISK_KNIFE_GATE_ENABLED", True)
     r = apply_decision_gates("BUY", "EARNINGS_MISS", "HIGH", 2.0,
                              risk_report=KNIFE_REPORT)
-    assert r.final_action == "WATCH"  # WATCH outranks BUY_LIMIT
+    assert r.final_action == "WATCH"
     assert r.gates_fired == ["DROP_TYPE_GATE", "SA_QUANT_GATE", "RISK_KNIFE_GATE"]
     assert len(r.gate_reasons) == 3
 
@@ -180,10 +200,12 @@ def test_result_preserves_pre_gate_action_for_ab():
 # Gate 6: unconfirmed drop reason
 # ---------------------------------------------------------------------------
 
-def test_gate6_unconfirmed_drop_demotes_buy_to_limit():
+def test_gate6_unconfirmed_drop_demotes_buy_to_watch():
+    # Target changed BUY_LIMIT -> WATCH 2026-07-02: BUY_LIMIT is the worst
+    # action bucket, so it is not a valid "safer" downgrade.
     r = apply_decision_gates("BUY", "SECTOR_ROTATION", "HIGH", None,
                              news_drop_reason_confirmed=False)
-    assert r.final_action == "BUY_LIMIT"
+    assert r.final_action == "WATCH"
     assert r.gates_fired == ["UNCONFIRMED_DROP_GATE"]
 
 

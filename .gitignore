@@ -21,8 +21,17 @@ reports/
 # notebooks/
 .ipynb_checkpoints/
 
-# Data (raw caches, fixtures, scratch)
-data/
+# Data (raw caches, fixtures, scratch). Anchored to the top-level dir (data/*,
+# not the old un-anchored data/) so git descends into it and the negation below
+# can re-include one curated file. Nested data/ dirs are re-listed afterward so
+# the anchor change does not silently start tracking them.
+/data/*
+# The hand-pinned calibration card is a deliberately-promoted, reviewable
+# artifact that must ship with each deploy (prod reads it repo-relative, and
+# data/ is not on the persistent disk). The candidate card stays ignored.
+!/data/calibration_card_pinned.json
+# Nested data/ dirs elsewhere (previously caught by the un-anchored 'data/').
+scripts/data/
 # Re-include the curated analysis-package data dirs so they ship with the report
 !docs/performance/**/data/
 !docs/performance/**/data/**
