@@ -83,8 +83,32 @@ app.include_router(api.router, prefix="/api")
 app.include_router(subscriptions.router, prefix="/api")
 
 @app.get("/health")
-def health_check():
-    return {"status": "ok", "version": VERSION}
+async def health_check():
+    """Liveness + outcome-pipe freshness. The `outcomes` block lets an external
+    uptime monitor alert on a stalled backfill (days_behind climbing), a stale
+    pinned card, or a shadow A/B that stopped logging — no push channel needed."""
+    from app.database import get_outcome_pipe_status
+    from app.services.calibration_service import pinned_card_age_days
+
+    status = await asyncio.to_thread(get_outcome_pipe_status)
+    latest = status.get("latest_mark_date")
+    days_behind = None
+    if latest:
+        try:
+            days_behind = (datetime.now().date()
+                           - datetime.strptime(latest, "%Y-%m-%d").date()).days
+        except (ValueError, TypeError):
+            days_behind = None
+    return {
+        "status": "ok",
+        "version": VERSION,
+        "outcomes": {
+            "latest_mark_date": latest,
+            "days_behind": days_behind,
+            "pinned_card_age_days": pinned_card_age_days(),
+            "shadow_runs": status.get("shadow_runs"),
+        },
+    }
 
 async def run_shutdown_timer(minutes: int):
     """Run for the specified duration, then gracefully shut down."""

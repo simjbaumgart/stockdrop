@@ -641,6 +641,33 @@ def get_stale_unmarked_outcomes(as_of_date: str, max_age_days: int = 8) -> List[
         return []
 
 
+def get_outcome_pipe_status() -> dict:
+    """Lightweight freshness snapshot for the /health endpoint so a stalled
+    outcome pipe (or a shadow A/B that has stopped logging) is externally
+    observable without a push channel. Cheap reads only — safe to poll.
+
+    latest_mark_date: newest decision_date in decision_outcomes (how current
+    the forward-marks are). shadow_runs: paired control/treatment rows logged so
+    far (should climb once CALIBRATION_SHADOW=1 is live).
+    """
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        latest = cursor.execute(
+            "SELECT MAX(decision_date) FROM decision_outcomes"
+        ).fetchone()[0]
+        try:
+            shadow = cursor.execute(
+                "SELECT COUNT(*) FROM calibration_shadow_runs"
+            ).fetchone()[0]
+        except Exception:
+            shadow = None  # table may not exist on an old DB
+        conn.close()
+        return {"latest_mark_date": latest, "shadow_runs": shadow}
+    except Exception as e:
+        return {"error": str(e)}
+
+
 def get_outcomes_joined() -> List[dict]:
     """decision_points ⋈ decision_outcomes for the calibration card builder.
 
