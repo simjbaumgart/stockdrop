@@ -17,6 +17,16 @@ services:
         value: /var/lib/data/subscribers.db
       - key: DATA_DIR
         value: /var/lib/data
+      # Calibration feedback loop (Option 1). Stage-1 shadow A/B ON: logs paired
+      # control (card-off) vs treatment (pinned-card) PM verdicts to
+      # calibration_shadow_runs; costs one extra PM call per decision, never
+      # changes the production verdict. CALIBRATION_ENABLED stays 0 so the
+      # control arm is genuinely card-off — do NOT flip it to 1 until the
+      # eval_calibration_ab readout justifies it.
+      - key: CALIBRATION_SHADOW
+        value: "1"
+      - key: CALIBRATION_ENABLED
+        value: "0"
       - key: GOOGLE_CREDENTIALS_JSON
         sync: false
       - key: GOOGLE_PROJECT_ID
