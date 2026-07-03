@@ -33,7 +33,7 @@ covers all live gates and prompt items):
 
 ## 3. Shadow A/B checkpoint (10 min)
 - `python3 -m scripts.analysis.eval_calibration_ab`
-- Filter to rows after the footer-removal deploy (see PLAN_three_tier_reconciliation Task 1).
+- Filter to rows after the footer-removal deploy (see docs/proposals/PLAN_three_tier_reconciliation.md Task 1).
 - Ship gate for flipping `CALIBRATION_ENABLED=1` (all three): treatment−control
   4w delta CI excludes 0; DR straight-BUY guardrail holds; conviction
   calibration flat-or-up. Until then ENABLED stays 0. Do not enable blind.

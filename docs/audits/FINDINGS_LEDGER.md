@@ -9,7 +9,7 @@ strictly **console → prompt → gate**; demotion may skip levels. Rules
   structured fields, escape hatch defined.
 - **Prompt** (pinned card via `scripts/analysis/pin_calibration_card.py`):
   ≥2 audits survived, n ≥ 20, expressed as base rates — never instructions,
-  never per-verdict lines, never mistake narratives.
+  never per-verdict lines, never mistake narratives. The Prompt tier also covers qualitative action-definition rules living in agent prompt text; such rows are explicitly marked PROVISIONAL or (qualitative) and carry their own promotion/demotion criteria.
 - **Console** (`scripts/analysis/verdict_alpha_rolling.py`, candidate card):
   everything else, including anything regime-dependent or small-n.
 

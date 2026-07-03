@@ -171,7 +171,7 @@ Phases are independent; A and B are the ones that prevent recurrence of the two 
 2. **The injection block is header + base-rate lines only.** The original
    sketch ended with an instruction ("Weigh these base rates…"); that
    violated this proposal's own rule 1 (data, not instructions) and was
-   removed before shadow A/B data accumulated.
+   removed within ~1 day of shadow go-live; the A/B eval filters to post-deploy rows (see MONTHLY_AUDIT_RUNBOOK.md §3).
 3. **Single source of numbers is enforced (§3.6, commit 06cc71d):** the PM
    prompt and gate reason-strings carry no hand-pasted statistics; numbers
    exist only in the pinned card injection and `FINDINGS_LEDGER.md`. The
