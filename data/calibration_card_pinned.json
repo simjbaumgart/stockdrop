@@ -1,0 +1,60 @@
+{
+  "as_of": "2026-07-02",
+  "min_n": 20,
+  "primary_horizon": "4w",
+  "total_labeled": 669,
+  "by_drop_type": {
+    "UNKNOWN": {
+      "n": 76,
+      "recovery_rate_4w": 0.645,
+      "mean_ret_4w": 0.1032,
+      "mean_ret_1w": 0.0247
+    },
+    "SECTOR_ROTATION": {
+      "n": 62,
+      "recovery_rate_4w": 0.565,
+      "mean_ret_4w": 0.0556,
+      "mean_ret_1w": 0.0208
+    },
+    "COMPANY_SPECIFIC": {
+      "n": 188,
+      "recovery_rate_4w": 0.447,
+      "mean_ret_4w": 0.0427,
+      "mean_ret_1w": 0.02
+    },
+    "EARNINGS_MISS": {
+      "n": 195,
+      "recovery_rate_4w": 0.462,
+      "mean_ret_4w": 0.0006,
+      "mean_ret_1w": -0.011
+    },
+    "ANALYST_DOWNGRADE": {
+      "n": 23,
+      "recovery_rate_4w": 0.522,
+      "mean_ret_4w": 0.0261,
+      "mean_ret_1w": -0.0104
+    },
+    "MACRO_SELLOFF": {
+      "n": 108,
+      "recovery_rate_4w": 0.491,
+      "mean_ret_4w": 0.0169,
+      "mean_ret_1w": 0.0225
+    }
+  },
+  "by_earnings": {
+    "earnings": {
+      "n": 177,
+      "recovery_rate_4w": 0.441,
+      "mean_ret_4w": -0.0021,
+      "mean_ret_1w": -0.0113
+    },
+    "non_earnings": {
+      "n": 492,
+      "recovery_rate_4w": 0.514,
+      "mean_ret_4w": 0.0518,
+      "mean_ret_1w": 0.0238
+    }
+  },
+  "audited_at": "2026-07-02",
+  "pinned_git_ref": "a492ec8"
+}
