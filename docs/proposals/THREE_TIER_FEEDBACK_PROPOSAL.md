@@ -1,6 +1,6 @@
 # Three-Tier Feedback Architecture: Code Gates, Static Base Rates, Console-Only Monitoring
 
-**Status:** Proposal (2026-07-02)
+**Status:** Implemented (PR #18, merged 2026-07-03) + amendments below
 **Supersedes / refines:** `PLAN_calibration_feedback_option1.md` (Option-1 card is implemented on `feat/calibration-feedback-option1`; this proposal changes its update policy and defines what may and may not flow into prompts)
 
 ## Overview
@@ -158,3 +158,21 @@ Phases are independent; A and B are the ones that prevent recurrence of the two 
 - **Pin discipline:** a hand-pinned card can silently go stale. Mitigation: the pin file carries `audited_at`; QC alerts if the pinned card is >45 days old while `CALIBRATION_ENABLED=1`.
 - **Ledger honesty:** "audits survived" only means something if each monthly audit actually re-tests prior findings rather than only hunting new ones. The ledger's "next review" column is the checklist for that.
 - **Degeneracy ceilings are guesses:** 0.80 for DROP_TYPE/NEWS gates should be sanity-checked against the trailing base rate of those classifications before Phase B ships.
+
+## Post-merge amendments (2026-07-03)
+
+1. **The pinned card is git-tracked** (`.gitignore`: `/data/*` +
+   `!/data/calibration_card_pinned.json`). Render's repo checkout is
+   ephemeral and the card paths are repo-relative, so a gitignored pin never
+   reached production. Consequence: "pin" = run the script **and commit+push
+   the file** — which also makes every pin a reviewable git commit,
+   strengthening the hand-updated-monthly policy rather than weakening it.
+   The candidate card remains ignored and ephemeral.
+2. **The injection block is header + base-rate lines only.** The original
+   sketch ended with an instruction ("Weigh these base rates…"); that
+   violated this proposal's own rule 1 (data, not instructions) and was
+   removed before shadow A/B data accumulated.
+3. **Single source of numbers is enforced (§3.6, commit 06cc71d):** the PM
+   prompt and gate reason-strings carry no hand-pasted statistics; numbers
+   exist only in the pinned card injection and `FINDINGS_LEDGER.md`. The
+   operational loop lives in `docs/audits/MONTHLY_AUDIT_RUNBOOK.md`.
