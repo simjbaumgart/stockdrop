@@ -187,6 +187,17 @@ Median cumulative return from the decision-day close, by trading day:
 ![Strategy vs SPY on matched holding windows](docs/images/strategy_vs_spy_matched.png)
 *Per-trade view: each closed trade is benchmarked against SPY's return over its **own entry→exit window** (avg hold ≈3 days) — not full-period buy-and-hold. The desk posts positive alpha in aggregate (+0.20 pts) and in both PM buckets (`BUY_LIMIT` +0.27); only the small DR-`BUY` group (n=8) lags SPY.*
 
+### The single strongest pattern: earnings drops don't recover, other drops do
+
+The most durable finding across three monthly audits (Apr, May, Jun) splits the universe by *why* the stock dropped (as of the 2026-06-25 calibration card, 4-week horizon):
+
+| Drop cohort | n | Mean 4-wk return | Recovery rate |
+|---|---|---|---|
+| **Earnings-driven** (miss/guidance cut) | 184 | **+0.25%** | 46% |
+| **Non-earnings** (macro, sector, narrative) | 412 | **+7.3%** | 55% |
+
+A -5% dip caused by an earnings miss is usually a legitimate repricing — the market got new fundamental information and buying it carries no edge (audit slices: −1.5 to −3.6 pts alpha vs SPY). The same-size dip on a sector selloff or narrative scare is where the dip-buying thesis actually works (+5.3 pts alpha @28d, 69% win in the latest audit). This finding is enforced in code as the Drop-Type Gate, with the NAMED_EVENT catalyst as the only way past it.
+
 ### What this tells us
 
 *   **The ladder is correctly ordered over two weeks:** `BUY` (+1.21%) > `BUY_LIMIT` (+0.67%) ≈ `WATCH` (+0.57%) > `AVOID` (−0.15%). `BUY` is the only bucket that recovers monotonically — the cohort actually catching the bounce.

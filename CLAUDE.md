@@ -102,7 +102,7 @@ Screener (>5% drop)
 
 ### Feedback loop (three-tier — see docs/proposals/THREE_TIER_FEEDBACK_PROPOSAL.md)
 
-- **Tier 1 — code gates:** findings confirmed in ≥3 audits become deterministic post-PM rules in `decision_gate_service.py`. Invisible to agents.
+- **Tier 1 — code gates:** findings confirmed in ≥3 audits become deterministic post-PM rules in `decision_gate_service.py`. Invisible to agents. Flagship finding: earnings-driven drops don't recover, non-earnings drops do (three audits) — enforced as DROP_TYPE_GATE; current numbers live in the pinned card and FINDINGS_LEDGER.md, not here.
 - **Tier 2 — pinned base rates:** `data/calibration_card_pinned.json`, injected into PM/DR prompts as data only (`CALIBRATION_ENABLED`). Written ONLY by `scripts/analysis/pin_calibration_card.py` after a monthly audit; 45-day staleness refusal. Nightly job builds a console-only candidate — it never auto-propagates.
 - **Tier 3 — console only:** rolling per-verdict alpha and everything regime-dependent or small-n. Never shown to agents.
 - **Anti-goal:** no "you were often wrong about X" narratives in any prompt — mistake-signals mode-collapse agents (falling-knife verdict hit 97% YES and was suspended).
