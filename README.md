@@ -189,12 +189,15 @@ Median cumulative return from the decision-day close, by trading day:
 
 ### The single strongest pattern: earnings drops don't recover, other drops do
 
-The most durable finding across three monthly audits (Apr, May, Jun) splits the universe by *why* the stock dropped (as of the 2026-06-25 calibration card, 4-week horizon):
+The most durable finding across three monthly audits (Apr, May, Jun) splits the universe by *why* the stock dropped (pinned calibration card as of 2026-07-02, 669 labeled decisions, 4-week horizon):
 
 | Drop cohort | n | Mean 4-wk return | Recovery rate |
 |---|---|---|---|
-| **Earnings-driven** (miss/guidance cut) | 184 | **+0.25%** | 46% |
-| **Non-earnings** (macro, sector, narrative) | 412 | **+7.3%** | 55% |
+| **Earnings-driven** (miss/guidance cut) | 195 | **+0.1%** | 46% |
+| **Non-earnings** (macro, sector, narrative) | 457 | **+4.8%** | 51% |
+
+![Earnings vs non-earnings drop recovery](docs/images/earnings_vs_nonearnings_4w.png)
+*Left: mean 4-week return by drop type — earnings misses (red) are the only cohort with essentially zero recovery. Right: the aggregate split. Generated from `data/calibration_card_pinned.json` (single source).*
 
 A -5% dip caused by an earnings miss is usually a legitimate repricing — the market got new fundamental information and buying it carries no edge (audit slices: −1.5 to −3.6 pts alpha vs SPY). The same-size dip on a sector selloff or narrative scare is where the dip-buying thesis actually works (+5.3 pts alpha @28d, 69% win in the latest audit). This finding is enforced in code as the Drop-Type Gate, with the NAMED_EVENT catalyst as the only way past it.
 
