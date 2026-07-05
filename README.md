@@ -39,6 +39,15 @@ Three distinct AI personas review the Phase 1 evidence independently:
     *   `WATCH` — thesis isn't ready; monitor.
     *   `AVOID` — pass.
 
+### Phase 3.5: The Decision Gates (Deterministic Guardrails)
+The PM's verdict doesn't go straight to the book. A set of **hard, code-level gates** (`app/services/decision_gate_service.py`) runs after the PM and before persistence — rules earned from monthly outcome audits, not vibes:
+*   **Drop-Type Gate:** buys on `EARNINGS_MISS` / `COMPANY_SPECIFIC` / `ANALYST_DOWNGRADE` drops have no historical edge (confirmed in three separate audits) — downgraded to `WATCH`.
+*   **SA Quant / News Sentiment / Unconfirmed-Drop Gates:** weak quant rating, bearish sentiment without a named catalyst, or a drop the News agent couldn't confirm all demote a buy.
+*   **The NAMED_EVENT escape hatch:** Deep Research can lift a gated `WATCH` back to `BUY_LIMIT` — but only by citing a specific, dated, verifiable catalyst through a structured field. This single rule added **+39.7 pts in June**.
+*   **Degeneracy monitors:** every agent signal feeding a gate carries a trailing firing-rate monitor. If a signal mode-collapses (the falling-knife verdict once hit 97% "YES"), the gate auto-suspends rather than firing on noise.
+
+The PM's original action is preserved (`pre_gate_action`), so gated-vs-kept performance is a free, ongoing A/B test.
+
 ### Phase 4: The Deep Research Validator (Senior Reviewer)
 Because true Deep Research is extremely token-heavy and time-consuming, the system does not deep-research every dropping stock. It acts as a senior reviewer with override authority.
 
@@ -48,6 +57,15 @@ Because true Deep Research is extremely token-heavy and time-consuming, the syst
     *   `BUY` / `BUY_LIMIT`: Confirmed at market or with an entry limit.
     *   `WAIT_FOR_STABILIZATION`: Fundamentals look good, but a falling-knife pattern is detected — wait.
     *   `AVOID` / `HARD_AVOID`: DR overrules the council, identifying a value trap or fundamental flaw.
+
+### The Feedback Loop: Three-Tier Learning Architecture
+StockDrop learns from its own track record — carefully. Every decision is outcome-labeled at fixed horizons (1/2/4 weeks) in a `decision_outcomes` table, and findings feed back through exactly one of three tiers (`docs/proposals/THREE_TIER_FEEDBACK_PROPOSAL.md`):
+
+1.  **Code gates** (invisible to agents) — findings confirmed in ≥3 audits become deterministic rules.
+2.  **Pinned base rates** (visible, advisory) — a hand-pinned calibration card injected into PM/DR prompts as *data only*, updated exclusively by a monthly audit + pin script, with a 45-day staleness refusal.
+3.  **Console-only monitoring** — everything regime-dependent or small-n stays on dashboards, never in prompts.
+
+The explicit anti-goal: no "you were often wrong about X" narratives in any prompt — agents fed mistake-signals overcorrect into mode collapse rather than calibrate. A monthly audit runbook (`docs/audits/MONTHLY_AUDIT_RUNBOOK.md`) re-earns every gate and every prompt line; the evidence behind each lives in `docs/audits/FINDINGS_LEDGER.md`.
 
 ---
 
@@ -73,8 +91,9 @@ StockDrop is a **FastAPI web service**. On startup it spins up several backgroun
 *   **GCS uploader** — periodic snapshots of decisions and reports.
 *   **Email summary generator** — daily digest to subscribers.
 *   **Performance & trade-report jobs** — track every decision's outcome and emit CSVs hourly.
+*   **Nightly outcome marking** — labels every decision's forward return in `decision_outcomes`, runs the gate degeneracy check, and QCs calibration-card freshness.
 
-The HTML dashboard surfaces live recommendations, decision history, and performance metrics. REST endpoints power both the dashboard and external integrations.
+The HTML dashboard surfaces live recommendations, decision history, and performance metrics. REST endpoints power both the dashboard and external integrations; `/health` reports outcome-pipe freshness and shadow-A/B progress.
 
 ---
 
@@ -107,6 +126,10 @@ POLYGON_API_KEY=your_key_here
 RAPIDAPI_KEY_SEEKING_ALPHA=your_key_here
 FRED_API_KEY=your_key_here
 # Plus Google Cloud credentials for GCS uploads
+
+# Feature flags (defaults shown)
+CALIBRATION_ENABLED=0     # inject pinned base-rate card into PM/DR prompts
+CALIBRATION_SHADOW=1      # Stage-1 shadow A/B (logs calibrated verdicts without acting)
 ```
 
 ### Running the App
@@ -174,11 +197,12 @@ Median cumulative return from the decision-day close, by trading day:
 ---
 
 ## 🔭 Active Workstreams
-Documented in `docs/proposals/`:
+Documented in `docs/proposals/` and `docs/audits/`:
+*   **Monthly audit loop** — `MONTHLY_AUDIT_RUNBOOK.md` + `FINDINGS_LEDGER.md`: every gate and prompt line gets re-earned monthly (next audit ~Aug 1).
+*   **Calibration shadow A/B (Stage 1, live)** — measuring whether pinned base rates in the PM/DR prompts actually improve verdicts before enabling them.
 *   **LOO (Limit Order Optimizer)** — capture the alpha currently lost when limit orders don't trigger.
 *   **Technical Dual-Track** — deterministic risk flags from raw TradingView data alongside LLM analysis.
-*   **Sell Council (Plan A)** — sensor + Deep Research re-runs with sell-focused prompts for owned positions.
-*   **Sell Price Extension (Plan B)** — emit `sell_price_low/high/ceiling_exit/exit_trigger` at initial analysis time.
+*   **Sell Council** — sensor + Deep Research re-runs with sell-focused prompts; buys carry a default 4-week reassess cadence (`--due` filter).
 *   **Tiered Bollinger Gate** — replace flat %B < 0.50 with graduated tiers.
 
 ---

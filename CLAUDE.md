@@ -26,6 +26,8 @@ Stock-Tracker/
 │   ├── services/              # All business logic
 │   │   ├── research_service.py       # Agent orchestration (Phase 1 + 2 + PM)
 │   │   ├── deep_research_service.py  # Senior reviewer with dual priority queues
+│   │   ├── decision_gate_service.py  # Post-PM deterministic gates + degeneracy monitors
+│   │   ├── calibration_service.py    # Pinned base-rate card injection (Tier 2)
 │   │   ├── gatekeeper_service.py     # Bollinger %B + market regime pre-filter
 │   │   ├── stock_service.py          # Stock screening + drop detection
 │   │   ├── tradingview_service.py    # TradingView data (no API key)
@@ -59,6 +61,7 @@ Stock-Tracker/
 ├── notebooks/                 # Jupyter notebooks
 ├── docs/
 │   ├── images/
+│   ├── audits/                # FINDINGS_LEDGER.md + MONTHLY_AUDIT_RUNBOOK.md (governance)
 │   └── proposals/             # Design docs and implementation plans
 ├── archive/                   # Historical/archived code
 ├── logs/                      # Log files
@@ -83,13 +86,27 @@ Screener (>5% drop)
           - Bear Researcher
           - Risk Management Agent
         -> Fund Manager (PM): synthesizes all reports
-            Verdict: BUY / BUY_LIMIT / WAIT_FOR_STAB / PASS
-          -> Deep Research: Senior Investment Reviewer
-              Can OVERRIDE the PM recommendation
-              Uses deep-research-pro model with Google Search grounding
-              Has its own two-queue worker thread (individual=high priority, batch=low)
-              Rate limited: 60s between requests
+            Verdict: BUY / BUY_LIMIT / WATCH / AVOID
+          -> Decision Gates (decision_gate_service.py): deterministic post-PM rules
+              Drop-type, SA-quant, news-sentiment, unconfirmed-drop (knife gate suspended)
+              Downgrade weak buys to WATCH; PM action preserved as pre_gate_action
+              Each gate input has a trailing-50 degeneracy monitor (auto-suspend)
+            -> Deep Research: Senior Investment Reviewer
+                Can OVERRIDE the PM recommendation
+                Can lift a gated WATCH back to BUY_LIMIT — only with a
+                structured NAMED_EVENT catalyst (specific, dated, verifiable)
+                Uses deep-research-pro model with Google Search grounding
+                Has its own two-queue worker thread (individual=high priority, batch=low)
+                Rate limited: 60s between requests
 ```
+
+### Feedback loop (three-tier — see docs/proposals/THREE_TIER_FEEDBACK_PROPOSAL.md)
+
+- **Tier 1 — code gates:** findings confirmed in ≥3 audits become deterministic post-PM rules in `decision_gate_service.py`. Invisible to agents.
+- **Tier 2 — pinned base rates:** `data/calibration_card_pinned.json`, injected into PM/DR prompts as data only (`CALIBRATION_ENABLED`). Written ONLY by `scripts/analysis/pin_calibration_card.py` after a monthly audit; 45-day staleness refusal. Nightly job builds a console-only candidate — it never auto-propagates.
+- **Tier 3 — console only:** rolling per-verdict alpha and everything regime-dependent or small-n. Never shown to agents.
+- **Anti-goal:** no "you were often wrong about X" narratives in any prompt — mistake-signals mode-collapse agents (falling-knife verdict hit 97% YES and was suspended).
+- Stage-1 shadow A/B runs in prod (`CALIBRATION_SHADOW=1`); `/health` surfaces outcome-pipe freshness and shadow progress.
 
 ### Background tasks (started at FastAPI startup)
 
@@ -98,6 +115,7 @@ Screener (>5% drop)
 - Daily email summary generation
 - Performance tracking metrics
 - Trade report CSV generation (60-minute interval)
+- Nightly outcome marking (`decision_outcomes` forward returns) + gate degeneracy check + calibration-card QC
 
 ### Threading model
 
@@ -109,12 +127,15 @@ Screener (>5% drop)
 
 ### Database
 
-SQLite (`subscribers.db`) with four tables:
+SQLite (`subscribers.db`) with these core tables:
 
 - **`decision_points`** — stores each analysis run (ticker, date, verdicts, agent reports, scores, entry/exit prices, deep research fields). 40+ columns with migration history.
-- **`decision_tracking`** — tracks price movement post-decision (foreign key to decision_points)
+- **`decision_outcomes`** — fixed-horizon forward returns per decision (1/2/4w), backfilled from yfinance and forward-marked nightly. Source of truth for all outcome analysis.
+- **`decision_tracking`** — DEPRECATED (2026-07-02): raw price log with no scheduled writer. Do not build against it; use `decision_outcomes` / `get_outcomes_joined`.
 - **`batch_comparisons`** — tracks batch comparison runs across candidates
 - **`subscribers`** — email subscription management
+
+Buys default to a 4-week reassess cadence (`reassess_in_days`); the Sell Council `--due` filter is driven by it.
 
 ### External data sources
 
@@ -142,6 +163,8 @@ Google Gemini models throughout. Prefer `gemini-3.1-pro-preview` for important a
 - **API keys:** loaded from environment variables. Never hardcode. Required keys: `GEMINI_API_KEY`, `ALPACA_API_KEY`, `ALPACA_SECRET_KEY`, `ALPHA_VANTAGE_API_KEY`, `BENZINGA_API_KEY`, `FINNHUB_API_KEY`, `POLYGON_API_KEY`, `RAPIDAPI_KEY_SEEKING_ALPHA`, `FRED_API_KEY`, plus Google Cloud credentials.
 - **SQLite writes:** the database is accessed from multiple threads. Ensure proper connection handling (one connection per thread).
 - **decision_points schema:** 40+ columns with extensive migration history. Check `app/database.py` before adding columns.
+- **Decision gates:** every gate encodes a finding from `docs/audits/FINDINGS_LEDGER.md`. Read the ledger before adding, removing, or re-enabling a gate. `RISK_KNIFE_GATE_ENABLED` is a deliberate manual switch — the degeneracy monitor never flips it.
+- **Calibration card:** `data/calibration_card_pinned.json` is written ONLY by `scripts/analysis/pin_calibration_card.py` (then committed — prod reads the repo). Never hand-edit it, and never paste base-rate numbers directly into prompts or gate docstrings (single-source rule).
 
 ### Testing
 
@@ -176,6 +199,9 @@ uvicorn main:app --host 0.0.0.0 --port $PORT
 
 These docs describe planned or in-progress features. Read them before implementing related changes:
 
+- **Three-Tier Feedback (IMPLEMENTED, PR #18):** `docs/proposals/THREE_TIER_FEEDBACK_PROPOSAL.md` — gates / pinned base rates / console-only; governs what may flow into prompts
+- **Findings Ledger:** `docs/audits/FINDINGS_LEDGER.md` — evidence tier per finding, promotion rules, review dates for every live gate
+- **Monthly Audit Runbook:** `docs/audits/MONTHLY_AUDIT_RUNBOOK.md` — the loop that re-earns every gate and prompt line (next: ~Aug 1)
 - **LOO (Limit Order Optimizer):** `docs/proposals/LOO_Implementation_Plan.docx` — 4-phase funnel (Scan -> Validate -> Score -> Present) for monitoring BUY_LIMIT recs approaching entry range
 - **Technical Dual-Track:** `docs/proposals/TECHNICAL_DUALTRACK_PROPOSAL.md` — deterministic risk flags from raw TradingView data alongside LLM analysis, replacing fragile string-matching
 - **Sell Council (Plan A):** `scripts/reassess_positions.py` — re-runs sensors + deep research with sell-focused prompts for owned positions
@@ -186,11 +212,11 @@ These docs describe planned or in-progress features. Read them before implementi
 Prioritized roughly by impact:
 
 1. **Build backtesting harness** — highest impact missing piece. Replay historical drops through the pipeline and measure recommendation accuracy.
-2. **Extend evaluation window** — currently 1 week. Add 2/4/8 week tracking to `decision_tracking`.
-3. **Feedback loop** — feed past accuracy data into the PM prompt so the model can calibrate.
-4. **Tiered Bollinger gate** — replace flat %B < 0.50 with graduated tiers.
-5. **Async rate limiting** — replace any remaining `time.sleep()` with proper async patterns.
-6. **Parallel data pre-fetch** — fetch data concurrently for screened candidates instead of sequentially.
-7. **Add volume profile analysis** — compare current volume to 20-day average.
-8. **Options market data** — IV, put/call ratios, unusual activity as additional signal.
-9. **Gradient market regime** — replace binary SPY/SMA200 check with continuous signal.
+2. **Tiered Bollinger gate** — replace flat %B < 0.50 with graduated tiers (`docs/proposals/PLAN_tiered_bollinger_gate.md`).
+3. **Async rate limiting** — replace any remaining `time.sleep()` with proper async patterns.
+4. **Parallel data pre-fetch** — fetch data concurrently for screened candidates instead of sequentially.
+5. **Add volume profile analysis** — compare current volume to 20-day average.
+6. **Options market data** — IV, put/call ratios, unusual activity as additional signal.
+7. **Gradient market regime** — replace binary SPY/SMA200 check with continuous signal (`docs/proposals/PLAN_volatility_regime_signal.md`).
+
+Done (removed from backlog): extended evaluation window (now 4w via `decision_outcomes`), feedback loop (three-tier architecture, PR #18).
