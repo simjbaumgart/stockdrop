@@ -28,3 +28,11 @@ def test_missing_company_name_is_noop():
 
 def test_none_report_is_noop():
     assert _entity_guard_report(None, "IAMGOLD Corporation", "X") is None
+
+
+def test_error_stub_passes_through_unguarded():
+    # A failed-agent stub must NOT be rewritten into the WRONG ENTITY marker,
+    # or the Phase 1 retry loop can no longer see the failure.
+    stub = "[Error in Competitive Landscape Agent: 503 UNAVAILABLE]"
+    out = _entity_guard_report(stub, "IAMGOLD Corporation", "Competitive Landscape Agent")
+    assert out == stub

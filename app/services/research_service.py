@@ -415,6 +415,12 @@ def _entity_guard_report(
     """
     if not report or not company_name:
         return report
+    if not _is_real_report(report):
+        # Error/failure stubs never mention the company by construction — do
+        # not rewrite them into a WRONG-ENTITY marker, or the Phase 1 retry
+        # loop (which checks _is_real_report against _FAILED_REPORT_MARKERS)
+        # loses visibility into the failure and skips the retry.
+        return report
     if text_matches_company(report[:2000], company_name):
         return report
     logger.warning(
@@ -787,6 +793,13 @@ class ResearchService:
             try:
                 retry_result = self._call_agent(prompt, agent_label, state)
                 if _is_real_report(retry_result):
+                    if key in ("competitive", "market_sentiment"):
+                        # These two are search-grounded and vulnerable to the
+                        # same ticker-collision risk as the first pass —
+                        # guard the retry result before it reaches the PM.
+                        retry_result = _entity_guard_report(
+                            retry_result, _company_name, agent_label
+                        )
                     state.reports[key] = retry_result
                     print(f"  > [Phase 1 Retry] {agent_label} succeeded on retry.")
                 else:
