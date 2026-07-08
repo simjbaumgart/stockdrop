@@ -866,7 +866,22 @@ class ResearchService:
             recompute_risk_metrics,
             evaluate_stop_acceptability,
             should_run_stop_guard,
+            repair_entry_band,
         )
+        _band_fix = repair_entry_band(
+            final_decision.get("entry_price_low"),
+            final_decision.get("entry_price_high"),
+        )
+        if _band_fix is not None:
+            logger.warning(
+                "[PM level-sanity] %s: degenerate entry band %s-%s repaired to %.2f-%.2f",
+                state.ticker,
+                final_decision.get("entry_price_low"),
+                final_decision.get("entry_price_high"),
+                _band_fix[0],
+                _band_fix[1],
+            )
+            final_decision["entry_price_low"], final_decision["entry_price_high"] = _band_fix
         _tv_inds = raw_data.get("indicators", {})
         _entry_low = final_decision.get("entry_price_low")
         if _entry_low is None or (isinstance(_entry_low, (int, float)) and _entry_low < 0):
