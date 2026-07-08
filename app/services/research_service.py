@@ -25,6 +25,7 @@ from app.utils.ticker_paths import safe_ticker_path
 from app.utils.agent_call_counter import counter as agent_call_counter
 from app.utils.earnings_consistency import check_narrative_consistency, downgrade_action
 from app.utils.json_repair import repair_json_via_flash
+from app.utils.company_match import text_matches_company
 
 # Citation strip — Gemini grounding injects footnote markers that corrupt JSON
 # AND mid-sentence text. Two known shapes:
@@ -400,6 +401,38 @@ from app.services.pm_verdict_formatters import format_rr_block, format_ratings_b
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
+def _entity_guard_report(
+    report: Optional[str], company_name: str, agent_label: str
+) -> Optional[str]:
+    """Discard a search-grounded agent report that analyzed the wrong company.
+
+    Ticker collisions across exchanges (IAG: IAMGOLD/NYSE vs International
+    Consolidated Airlines/LSE) can send a grounding agent to the wrong
+    entity entirely. Mirrors the DefeatBeta transcript guard: if the report
+    head never references the expected company, replace it with an explicit
+    unavailable-marker so the PM never consumes wrong-company analysis.
+    """
+    if not report or not company_name:
+        return report
+    if text_matches_company(report[:2000], company_name):
+        return report
+    logger.warning(
+        "[EntityGuard] %s report does not mention '%s' — discarding "
+        "(ticker collision suspected).", agent_label, company_name,
+    )
+    print(
+        f"  > [EntityGuard] {agent_label} report discarded: "
+        f"'{company_name}' not found in report head — ticker collision suspected."
+    )
+    return (
+        f"[REPORT DISCARDED — WRONG ENTITY] The {agent_label} analysis was "
+        f"auto-discarded because it never mentioned {company_name}; the agent "
+        f"most likely analyzed a different company sharing the ticker. "
+        f"Treat this input as unavailable."
+    )
+
+
 # Maps the human-readable agent_name used in _call_agent to the stable
 # (stage, tracker_agent_name) pair stored in agent_token_usage.
 # These tracker names are IMMUTABLE once shipped — renaming silently
@@ -523,7 +556,9 @@ class ResearchService:
         # Prepare Prompts
         tech_prompt = self._create_technical_agent_prompt(state, raw_data, drop_str)
         news_prompt = self._create_news_agent_prompt(state, raw_data, drop_str)
-        comp_prompt = self._create_competitive_agent_prompt(state, drop_str)
+        comp_prompt = self._create_competitive_agent_prompt(
+            state, drop_str, raw_data.get("company_name") or ""
+        )
         sentiment_prompt = self._create_market_sentiment_prompt(state, raw_data)
         
         # Define wrapper for safe execution and result collection
@@ -599,6 +634,22 @@ class ResearchService:
                     comp_report = result
                 elif agent_name == "Seeking Alpha Agent":
                     sa_report = result
+
+        # --- Council Entity Guard ---
+        # Competitive + Market Sentiment are search-grounded (open Google
+        # Search), unlike Technical/News/SA which consume curated per-ticker
+        # feeds — so only these two are vulnerable to ticker collisions
+        # across exchanges (e.g. IAG: IAMGOLD/NYSE vs International
+        # Consolidated Airlines/LSE). Guard both before they reach any
+        # console summary or state.reports so downstream consumers never
+        # see wrong-entity analysis.
+        _company_name = raw_data.get("company_name") or ""
+        comp_report = _entity_guard_report(
+            comp_report, _company_name, "Competitive Landscape Agent"
+        )
+        sentiment_report = _entity_guard_report(
+            sentiment_report, _company_name, "Market Sentiment Agent"
+        )
 
         # Collect the shadow result. Any failure here is non-fatal — the live
         # News Agent output (news_report) is already final and unaffected.
@@ -1703,12 +1754,22 @@ Be thorough but information-dense. Maximum ~600 words before the structured verd
 Headers: "Macro Environment", "Impact on {state.ticker}", "Risk Level".
 """
 
-    def _create_competitive_agent_prompt(self, state: MarketState, drop_str: str) -> str:
+    def _create_competitive_agent_prompt(
+        self, state: MarketState, drop_str: str, company_name: str = ""
+    ) -> str:
+        company_line = (
+            f"VERIFIED COMPANY: Ticker {state.ticker} refers to **{company_name}**. "
+            f"Analyze ONLY this company. Ticker symbols collide across exchanges "
+            f"(e.g. IAG is both IAMGOLD (NYSE) and International Consolidated "
+            f"Airlines (LSE)) — if search results describe a different company "
+            f"than {company_name}, discard them.\n\n"
+            if company_name else ""
+        )
         return f"""
 You are the **Competitive Landscape Agent**.
 Your goal is to create a detailed competitive landscape analysis for {state.ticker} using Google Search.
 
-IMPORTANT: Before starting your analysis, verify the correct company name and sector for ticker {state.ticker} via Google Search. Do NOT guess — foreign tickers (e.g., OTC, ADRs) are easily confused with similarly-named companies. Base your entire analysis on the verified company.
+{company_line}IMPORTANT: Before starting your analysis, verify the correct company name and sector for ticker {state.ticker} via Google Search. Do NOT guess — foreign tickers (e.g., OTC, ADRs) are easily confused with similarly-named companies. Base your entire analysis on the verified company.
 
 CONTEXT: The stock has dropped {drop_str}. We need to know if this is a company-specific issue or a sector-wide issue.
 
@@ -2738,11 +2799,21 @@ Be thorough but information-dense. Maximum ~400 words.
                 f"        {vol.get('summary')}\n"
             )
 
+        _company_name = raw_data.get("company_name") or "" if raw_data else ""
+        company_line = (
+            f"VERIFIED COMPANY: Ticker {ticker} refers to **{_company_name}**. "
+            f"Analyze ONLY this company. Ticker symbols collide across exchanges "
+            f"(e.g. IAG is both IAMGOLD (NYSE) and International Consolidated "
+            f"Airlines (LSE)) — if search results describe a different company "
+            f"than {_company_name}, discard them.\n\n"
+            if _company_name else ""
+        )
+
         return f"""
         You are the **Market Sentiment Agent**.
         Your goal is to analyze the general market sentiment and specifically the markets relevant to {ticker}.
 
-        IMPORTANT: Before starting your analysis, verify the correct company name and sector for ticker {ticker} via Google Search. Do NOT guess — foreign tickers (e.g., OTC, ADRs) are easily confused with similarly-named companies. Base your entire analysis on the verified company.
+        {company_line}IMPORTANT: Before starting your analysis, verify the correct company name and sector for ticker {ticker} via Google Search. Do NOT guess — foreign tickers (e.g., OTC, ADRs) are easily confused with similarly-named companies. Base your entire analysis on the verified company.
 
         CONTEXT:
         - Date: {state.date}
