@@ -801,7 +801,10 @@ class ResearchService:
                             retry_result, _company_name, agent_label
                         )
                     state.reports[key] = retry_result
-                    print(f"  > [Phase 1 Retry] {agent_label} succeeded on retry.")
+                    if retry_result.startswith("[REPORT DISCARDED"):
+                        print(f"  > [Phase 1 Retry] {agent_label} retry result discarded by entity guard.")
+                    else:
+                        print(f"  > [Phase 1 Retry] {agent_label} succeeded on retry.")
                 else:
                     print(f"  > [Phase 1 Retry] {agent_label} still failing after retry.")
             except Exception as e:

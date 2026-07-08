@@ -14,7 +14,7 @@ def text_matches_company(text: str, expected_company: str) -> bool:
 
     DefeatBeta's HuggingFace dataset has known ticker-collision bugs (e.g.
     'L' returns Loblaw instead of Loews). We verify the first 1500 chars
-    of the transcript mention either the full expected name or its first
+    of the text mention either the full expected name or its first
     significant token (modulo case, common corporate suffixes, and
     trailing punctuation/parentheticals).
 
