@@ -620,7 +620,7 @@ class DeepResearchService:
         (e.g. OVERRIDDEN AVOID). When called for a verdict that should have
         levels, the rules are:
           - entry_price_low, entry_price_high, stop_loss are numeric > 0
-          - entry_price_high >= entry_price_low
+          - entry_price_high > entry_price_low (zero-width bands are LLM/parse artifacts)
           - stop_loss < entry_price_low (stop is strictly below entry for a long;
             stop == entry is rejected because there is no risk buffer)
         """
@@ -638,8 +638,8 @@ class DeepResearchService:
 
             if entry_low <= 0 or entry_high <= 0 or stop <= 0:
                 return False, f"non-positive level (entry={entry_low}-{entry_high}, stop={stop})"
-            if entry_high < entry_low:
-                return False, f"entry_high {entry_high} < entry_low {entry_low}"
+            if entry_high <= entry_low:
+                return False, f"zero-width or inverted entry band ({entry_low}-{entry_high})"
             if stop >= entry_low:
                 return False, f"stop {stop} >= entry_low {entry_low} (wrong direction for long)"
             return True, "ok"

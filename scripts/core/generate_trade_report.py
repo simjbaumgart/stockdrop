@@ -35,6 +35,23 @@ def _finite_or_none(val):
         return None
     return None if math.isnan(f) else f
 
+def _build_limit_str(recommendation, deep_research_verdict, entry_low, entry_high):
+    """Limit column: only show a live limit while the effective decision is
+    still a BUY_LIMIT. When DR overrode to a no-position action, the stored
+    entry levels are informational (DR's re-entry zone), and rendering them
+    beside the council's BUY_LIMIT reads as an actionable order.
+    """
+    dr_no_position = (deep_research_verdict or "").strip().upper() in (
+        "AVOID", "SELL", "STRONG_SELL",
+    )
+    if recommendation != "BUY_LIMIT" or dr_no_position or not (entry_low or entry_high):
+        return "-"
+    if entry_low and entry_high:
+        return f"{float(entry_low):.2f}-{float(entry_high):.2f}"
+    if entry_low:
+        return f"{float(entry_low):.2f}"
+    return f"{float(entry_high):.2f}"
+
 def _resolve_horizon_price(decision_dt, target_dt, now, exact_lookup, latest_price):
     """Resolve the price for a horizon column (+7d/+14d/+28d).
 
@@ -341,15 +358,9 @@ def main():
         # Build Limit price string for BUY_LIMIT recommendations
         entry_low = d.get('entry_price_low')
         entry_high = d.get('entry_price_high')
-        if recommendation == "BUY_LIMIT" and (entry_low or entry_high):
-            if entry_low and entry_high:
-                limit_str = f"{float(entry_low):.2f}-{float(entry_high):.2f}"
-            elif entry_low:
-                limit_str = f"{float(entry_low):.2f}"
-            else:
-                limit_str = f"{float(entry_high):.2f}"
-        else:
-            limit_str = "-"
+        limit_str = _build_limit_str(
+            recommendation, deep_research_verdict, entry_low, entry_high
+        )
 
         # Risk/Reward ratio at decision time (PM's planned R/R)
         rr_val = d.get('risk_reward_ratio')

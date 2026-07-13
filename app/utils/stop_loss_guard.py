@@ -16,7 +16,7 @@ Rule:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 
 @dataclass
@@ -218,3 +218,28 @@ def recompute_risk_metrics(
 
     rr = round(float(upside_percent) / downside, 1)
     return {"downside_risk_percent": downside, "risk_reward_ratio": rr}
+
+
+def repair_entry_band(
+    entry_low: Any, entry_high: Any
+) -> Optional[Tuple[float, float]]:
+    """Repair a degenerate (zero-width or inverted) PM entry band.
+
+    The PM prompt's own rule for immediate BUYs is close +/- 1%; a band with
+    entry_high <= entry_low is an LLM/parse artifact (ESAB 87.7-87.7), so we
+    rebuild a +/-1% band around the midpoint instead of trusting it.
+
+    Returns (new_low, new_high) rounded to cents, or None when the inputs
+    are missing, non-numeric, non-positive, or already a valid band.
+    """
+    try:
+        low = float(entry_low)
+        high = float(entry_high)
+    except (TypeError, ValueError):
+        return None
+    if low <= 0 or high <= 0:
+        return None
+    if high > low:
+        return None
+    mid = (low + high) / 2.0
+    return (round(mid * 0.99, 2), round(mid * 1.01, 2))
