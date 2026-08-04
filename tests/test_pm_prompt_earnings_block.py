@@ -57,13 +57,15 @@ def test_prompt_with_none_surprise_does_not_crash():
     assert "Surprise: N/A" in out
 
 
-def test_prompt_with_no_earnings_facts():
+def test_prompt_with_no_earnings_facts_forbids_specific_figures():
     state = _make_state(None)
     out = _build_prompt(state)
-    assert "no recent reported quarter available" in out
+    assert "no canonical earnings data" in out
+    assert "MUST NOT cite any specific" in out
+    assert "QUALITATIVELY" in out
 
 
-def test_prompt_with_missing_reported_eps():
+def test_prompt_with_missing_reported_eps_forbids_specific_figures():
     state = _make_state({"reported_eps": None})
     out = _build_prompt(state)
-    assert "no recent reported quarter available" in out
+    assert "MUST NOT cite any specific" in out
