@@ -6,17 +6,23 @@ council agents analyzing the wrong entity (IAG -> International Consolidated
 Airlines instead of IAMGOLD). One matcher, one set of normalization rules.
 """
 import re
+from typing import Optional
 
 
-def text_matches_company(text: str, expected_company: str) -> bool:
+def text_matches_company(
+    text: str, expected_company: str, head_chars: Optional[int] = 1500
+) -> bool:
     """
     Defensive match: does the text reference the expected company?
 
     DefeatBeta's HuggingFace dataset has known ticker-collision bugs (e.g.
-    'L' returns Loblaw instead of Loews). We verify the first 1500 chars
-    of the text mention either the full expected name or its first
-    significant token (modulo case, common corporate suffixes, and
-    trailing punctuation/parentheticals).
+    'L' returns Loblaw instead of Loews). We verify the first ``head_chars``
+    chars of the text (default 1500; ``None`` = the whole text) mention
+    either the full expected name or its first significant token (modulo
+    case, common corporate suffixes, and trailing punctuation/parentheticals).
+    Transcripts open with the legal company name, so a head window is right
+    for them; LLM prose reports may name the company late, so callers
+    guarding those should pass ``head_chars=None``.
 
     Real-world failures this normalization addresses:
     - 'MP Materials Corp.'  (trailing dot defeated endswith ' corp')
@@ -30,7 +36,7 @@ def text_matches_company(text: str, expected_company: str) -> bool:
     if not text:
         return False
 
-    head = text[:1500].lower()
+    head = (text if head_chars is None else text[:head_chars]).lower()
     expected_lower = expected_company.lower().strip()
 
     # Strip a trailing parenthetical like "(the)" or "(holdings)" first.

@@ -24,3 +24,10 @@ def test_empty_expected_is_permissive():
 
 def test_empty_text_rejected():
     assert not text_matches_company("", "IAMGOLD Corporation")
+
+
+def test_head_window_vs_full_text():
+    # Default transcript window is 1500 chars; head_chars=None searches all.
+    text = ("x" * 1600) + " IAMGOLD Corporation"
+    assert not text_matches_company(text, "IAMGOLD Corporation")
+    assert text_matches_company(text, "IAMGOLD Corporation", head_chars=None)

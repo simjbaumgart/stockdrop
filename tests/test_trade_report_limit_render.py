@@ -27,3 +27,11 @@ def test_non_buy_limit_rec_is_blank():
 def test_single_sided_levels():
     assert _build_limit_str("BUY_LIMIT", "", 7.40, None) == "7.40"
     assert _build_limit_str("BUY_LIMIT", "", None, 11.53) == "11.53"
+
+
+def test_dr_watch_hold_downgrade_overrides_blank_limit():
+    # WATCH/HOLD/DOWNGRADE are no-position DR actions too — the same
+    # UMC/KXIAY hole via a different verdict.
+    assert _build_limit_str("BUY_LIMIT", "WATCH", 40.18, 42.21) == "-"
+    assert _build_limit_str("BUY_LIMIT", "HOLD", 40.18, 42.21) == "-"
+    assert _build_limit_str("BUY_LIMIT", "DOWNGRADE", 40.18, 42.21) == "-"

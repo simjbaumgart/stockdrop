@@ -221,6 +221,11 @@ _FAILED_REPORT_MARKERS = (
     "[SHORT INPUT DETECTED:",
     "Market Sentiment Analysis Failed",
     "[Grounding Error",
+    # Entity-guard discard marker: an agent that analyzed the wrong company
+    # produced no usable input. Counting it as failed makes the Phase-1
+    # retry loop re-attempt it once and keeps _count_real_phase1_reports
+    # honest about how many usable inputs the PM actually has.
+    "[REPORT DISCARDED",
 )
 
 
@@ -409,19 +414,24 @@ def _entity_guard_report(
 
     Ticker collisions across exchanges (IAG: IAMGOLD/NYSE vs International
     Consolidated Airlines/LSE) can send a grounding agent to the wrong
-    entity entirely. Mirrors the DefeatBeta transcript guard: if the report
-    head never references the expected company, replace it with an explicit
-    unavailable-marker so the PM never consumes wrong-company analysis.
+    entity entirely. Mirrors the DefeatBeta transcript guard, but matches
+    against the ENTIRE report (not just the head): LLM prose may name the
+    company late, and a wrong-entity report never names it at all — so
+    full-text matching removes false discards at zero false-negative cost.
+    Known residual risk: a report that refers to the company exclusively by
+    a brand alias (e.g. "Google" for Alphabet Inc.) can still false-discard;
+    the VERIFIED COMPANY prompt line makes that rare, and the [EntityGuard]
+    log line makes it visible.
     """
     if not report or not company_name:
         return report
     if not _is_real_report(report):
         # Error/failure stubs never mention the company by construction — do
-        # not rewrite them into a WRONG-ENTITY marker, or the Phase 1 retry
-        # loop (which checks _is_real_report against _FAILED_REPORT_MARKERS)
-        # loses visibility into the failure and skips the retry.
+        # not rewrite them into a WRONG-ENTITY marker (which is itself a
+        # failed-report marker, but replacing a stub would erase the real
+        # error message operators need).
         return report
-    if text_matches_company(report[:2000], company_name):
+    if text_matches_company(report, company_name, head_chars=None):
         return report
     logger.warning(
         "[EntityGuard] %s report does not mention '%s' — discarding "
@@ -429,7 +439,7 @@ def _entity_guard_report(
     )
     print(
         f"  > [EntityGuard] {agent_label} report discarded: "
-        f"'{company_name}' not found in report head — ticker collision suspected."
+        f"'{company_name}' not found anywhere in report — ticker collision suspected."
     )
     return (
         f"[REPORT DISCARDED — WRONG ENTITY] The {agent_label} analysis was "
@@ -642,19 +652,23 @@ class ResearchService:
                     sa_report = result
 
         # --- Council Entity Guard ---
-        # Competitive + Market Sentiment are search-grounded (open Google
-        # Search), unlike Technical/News/SA which consume curated per-ticker
-        # feeds — so only these two are vulnerable to ticker collisions
-        # across exchanges (e.g. IAG: IAMGOLD/NYSE vs International
-        # Consolidated Airlines/LSE). Guard both before they reach any
-        # console summary or state.reports so downstream consumers never
-        # see wrong-entity analysis.
+        # The Competitive agent is search-grounded (open Google Search),
+        # unlike Technical/News/SA which consume curated per-ticker feeds —
+        # so it is vulnerable to ticker collisions across exchanges (e.g.
+        # IAG: IAMGOLD/NYSE vs International Consolidated Airlines/LSE).
+        # Guard it before it reaches any console summary or state.reports.
+        #
+        # Market Sentiment is deliberately NOT output-guarded: its default
+        # path (_run_market_sentiment_cached) opens with the shared Daily
+        # Macro Snapshot — which its own prompt forbids from naming any
+        # individual company — and the per-stock assessment references the
+        # ticker, not the legal name, so the company-name check would
+        # false-discard essentially every valid sentiment report. The
+        # VERIFIED COMPANY line in its (fallback) prompt remains the
+        # collision defense for that agent.
         _company_name = raw_data.get("company_name") or ""
         comp_report = _entity_guard_report(
             comp_report, _company_name, "Competitive Landscape Agent"
-        )
-        sentiment_report = _entity_guard_report(
-            sentiment_report, _company_name, "Market Sentiment Agent"
         )
 
         # Collect the shadow result. Any failure here is non-fatal — the live
@@ -793,10 +807,12 @@ class ResearchService:
             try:
                 retry_result = self._call_agent(prompt, agent_label, state)
                 if _is_real_report(retry_result):
-                    if key in ("competitive", "market_sentiment"):
-                        # These two are search-grounded and vulnerable to the
-                        # same ticker-collision risk as the first pass —
-                        # guard the retry result before it reaches the PM.
+                    if key == "competitive":
+                        # Search-grounded and vulnerable to the same
+                        # ticker-collision risk as the first pass — guard the
+                        # retry result before it reaches the PM. (Sentiment is
+                        # exempt for the same structural reason as the
+                        # first-pass guard above.)
                         retry_result = _entity_guard_report(
                             retry_result, _company_name, agent_label
                         )

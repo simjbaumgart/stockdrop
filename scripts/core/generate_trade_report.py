@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import math
+from typing import Optional
 import logging
 import warnings
 import sqlite3
@@ -35,14 +36,20 @@ def _finite_or_none(val):
         return None
     return None if math.isnan(f) else f
 
-def _build_limit_str(recommendation, deep_research_verdict, entry_low, entry_high):
+def _build_limit_str(
+    recommendation: Optional[str],
+    deep_research_verdict: Optional[str],
+    entry_low: Optional[float],
+    entry_high: Optional[float],
+) -> str:
     """Limit column: only show a live limit while the effective decision is
     still a BUY_LIMIT. When DR overrode to a no-position action, the stored
     entry levels are informational (DR's re-entry zone), and rendering them
-    beside the council's BUY_LIMIT reads as an actionable order.
+    beside the council's BUY_LIMIT reads as an actionable order. WATCH/HOLD/
+    DOWNGRADE are no-position too — same taxonomy the DR verdict icons use.
     """
     dr_no_position = (deep_research_verdict or "").strip().upper() in (
-        "AVOID", "SELL", "STRONG_SELL",
+        "AVOID", "SELL", "STRONG_SELL", "WATCH", "HOLD", "DOWNGRADE",
     )
     if recommendation != "BUY_LIMIT" or dr_no_position or not (entry_low or entry_high):
         return "-"

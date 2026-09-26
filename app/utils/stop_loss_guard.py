@@ -15,6 +15,7 @@ Rule:
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import Any, Dict, Optional, Tuple
 
@@ -236,6 +237,11 @@ def repair_entry_band(
         low = float(entry_low)
         high = float(entry_high)
     except (TypeError, ValueError):
+        return None
+    # NaN slips through every comparison below (NaN <= 0 and NaN > low are
+    # both False), and json.loads happily produces it — reject non-finite
+    # values outright rather than "repairing" to (nan, nan).
+    if not (math.isfinite(low) and math.isfinite(high)):
         return None
     if low <= 0 or high <= 0:
         return None

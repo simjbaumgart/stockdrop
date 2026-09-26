@@ -741,6 +741,22 @@ class DeepResearchService:
         # verdict as INCOMPLETE_TRADING_LEVELS so dashboards/queries can
         # surface the rejected DR rather than silently believing it.
         if review_verdict in ("CONFIRMED", "UPGRADED", "ADJUSTED"):
+            # A zero-width/inverted entry band is the same LLM artifact the
+            # PM path repairs (repair_entry_band) — repair it here too before
+            # validating, so a band-only defect doesn't null an otherwise
+            # valid DR result (stop, TPs, sell range) via
+            # INCOMPLETE_TRADING_LEVELS. Any other defect still rejects.
+            from app.utils.stop_loss_guard import repair_entry_band
+            _band_fix = repair_entry_band(
+                result.get("entry_price_low"), result.get("entry_price_high")
+            )
+            if _band_fix is not None:
+                logger.warning(
+                    f"[Deep Research] {symbol}: degenerate entry band "
+                    f"{result.get('entry_price_low')}-{result.get('entry_price_high')} "
+                    f"repaired to {_band_fix[0]}-{_band_fix[1]} before validation."
+                )
+                result["entry_price_low"], result["entry_price_high"] = _band_fix
             levels_ok, levels_reason = self._validate_trading_levels(result)
             if not levels_ok:
                 logger.warning(

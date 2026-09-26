@@ -25,3 +25,12 @@ def test_non_numeric_and_missing_are_noop():
 def test_non_positive_levels_are_noop():
     # zero/negative levels are handled by the existing zero-level guards
     assert repair_entry_band(0.0, 0.0) is None
+
+
+def test_nan_and_inf_are_noop():
+    # NaN passes float() and every ordering comparison below is False, so
+    # without an isfinite guard the function returns a (nan, nan) "repair".
+    assert repair_entry_band(float("nan"), float("nan")) is None
+    assert repair_entry_band(float("nan"), 88.0) is None
+    assert repair_entry_band(88.0, float("nan")) is None
+    assert repair_entry_band(float("inf"), float("inf")) is None

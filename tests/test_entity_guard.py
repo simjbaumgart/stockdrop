@@ -36,3 +36,23 @@ def test_error_stub_passes_through_unguarded():
     stub = "[Error in Competitive Landscape Agent: 503 UNAVAILABLE]"
     out = _entity_guard_report(stub, "IAMGOLD Corporation", "Competitive Landscape Agent")
     assert out == stub
+
+
+def test_late_company_mention_passes_full_text_match():
+    # LLM prose may name the company late (e.g. after a long market-context
+    # or competitor-table section) — the guard matches the whole report.
+    report = ("Market backdrop paragraph. " * 80) + "IAMGOLD Corporation remains the focus."
+    out = _entity_guard_report(report, "IAMGOLD Corporation", "Competitive Landscape Agent")
+    assert out == report
+
+
+def test_discard_marker_counts_as_failed_report():
+    # The marker must register as failed so the Phase-1 retry loop
+    # re-attempts the agent and the liveness count excludes the discard.
+    from app.services.research_service import _is_real_report
+
+    marker = _entity_guard_report(
+        AIRLINE_REPORT, "IAMGOLD Corporation", "Competitive Landscape Agent"
+    )
+    assert marker.startswith("[REPORT DISCARDED")
+    assert _is_real_report(marker) is False
