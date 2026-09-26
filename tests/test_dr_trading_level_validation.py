@@ -93,3 +93,16 @@ def test_validator_unaffected_by_sell_range_fields():
     }
     ok, _ = DeepResearchService.__new__(DeepResearchService)._validate_trading_levels(result)
     assert ok is True, "validator must only check entry/stop fields"
+
+
+def test_validates_zero_width_entry_band_as_invalid():
+    # MRAAY regression: 26.10-26.10 zero-width band passed validation and
+    # polluted the trade report's Limit column.
+    result = {
+        "entry_price_low": 26.10,
+        "entry_price_high": 26.10,
+        "stop_loss": 24.00,
+    }
+    ok, reason = _svc()._validate_trading_levels(result)
+    assert ok is False
+    assert "zero-width" in reason
